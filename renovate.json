@@ -1,0 +1,18 @@
+{
+  "extends": ["config:base", "schedule:nonOfficeHours"],
+  "enabledManagers": ["terraform", "github-actions"],
+  "updateNotScheduled": false,
+  "commitBodyTable": true,
+  "dependencyDashboard": true,
+  "ignoreDeprecated": true,
+  "ignoreUnstable": true,
+  "reviewersFromCodeOwners": true,
+  "prCreation": "immediate",
+  "rebaseWhen": "conflicted",
+  "packageRules": [
+      {
+        "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
+        "automerge": false
+      }
+  ]
+}
