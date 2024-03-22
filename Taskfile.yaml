@@ -1,0 +1,33 @@
+version: "3"
+
+# Hacky task file for testing example
+tasks:
+  init:
+    dir: examples/complete
+    cmds:
+      - terraform init
+        -backend-config="bucket=tf-state-911453050078"
+        -backend-config="key=terraform-aws-kubernetes-platform/complete.tfstate"
+        -reconfigure
+  plan:
+    dir: examples/complete
+    cmds:
+      - terraform plan
+  apply:
+    dir: examples/complete
+    cmds:
+      - terraform apply -auto-approve
+  destroy:
+    dir: examples/complete
+    cmds:
+      - terraform apply -destroy
+
+  kubeconfig:
+    dir: examples/complete
+    cmds:
+      - aws eks update-kubeconfig --name foo --alias dai-sandbox-foo
+
+
+###
+# terraform apply -refresh-only
+# aws eks --region us-east-1 update-kubeconfig --name setcluster name based on team-env-cluster-name
