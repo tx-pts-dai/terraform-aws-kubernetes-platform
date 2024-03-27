@@ -3,7 +3,7 @@ version: "3"
 # Hacky task file for testing example
 tasks:
   init:
-    dir: examples/complete
+    # dir: examples/complete
     cmds:
       - terraform init
         -backend-config="bucket=tf-state-911453050078"

@@ -3,7 +3,7 @@ terraform {
 
   backend "s3" {
     bucket = "tf-state-911453050078"
-    key = "terraform-aws-kubernetes-platform/complete.tfstate"
+    key = "terraform-aws-kubernetes-platform/eks.tfstate"
     region = "eu-central-1"
   }
 
@@ -11,7 +11,6 @@ terraform {
     aws = {
       source  = "hashicorp/aws"
       version = "~> 5.0"
-      # configuration_aliases = [ aws.virginia ]
     }
     helm = {
       source  = "hashicorp/helm"
@@ -19,7 +18,7 @@ terraform {
     }
     kubectl = {
       source  = "alekc/kubectl"
-      version = ">= 2.0"
+      version = "~= 2.0"
     }
   }
 }
