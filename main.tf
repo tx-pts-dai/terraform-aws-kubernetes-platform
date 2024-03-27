@@ -45,6 +45,7 @@ module "eks" {
   cluster_endpoint_public_access = true
 
   kms_key_administrators = [
+    # fetch these with data structure
     "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/aws-reserved/sso.amazonaws.com/eu-west-1/AWSReservedSSO_AWSAdministratorAccess_${var.sso_role_id}",
     "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/cicd-iac"
   ]

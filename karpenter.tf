@@ -7,6 +7,9 @@ resource "aws_iam_service_linked_role" "spot" {
   aws_service_name = "spot.amazonaws.com"
 }
 
+# possible benefit of using this module is that it can be done in one step
+# with the blueprint module this needs to be done in two steps because karpenter needs to wait
+# for addons like coredns
 module "karpenter" {
   source = "terraform-aws-modules/eks/aws//modules/karpenter"
 
@@ -33,6 +36,7 @@ resource "helm_release" "karpenter" {
 
   values = [
     <<-EOT
+    dnsPolicy: Default
     settings:
       clusterName: ${module.eks.cluster_name}
       clusterEndpoint: ${module.eks.cluster_endpoint}
