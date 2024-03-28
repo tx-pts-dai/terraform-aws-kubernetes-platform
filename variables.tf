@@ -1,45 +1,59 @@
-variable "environment" {
-  description = "The environment this resource will be deployed in."
+variable "region" {
+  description = "The AWS region used for the default aws provider"
   type        = string
 }
 
-variable "cluster_name" {
-  description = "Name of the EKS cluster to deploy"
+variable "name" {
+  description = "The name of the platform"
   type        = string
 }
 
-variable "aws_ecrpublic_authorization_token" {
-  description = "ECR public auth token"
-  type = object({
-    user_name = string
-    password  = string
-  })
+variable "tags" {
+  description = "Default tags to apply to all resources"
+  type        = map(string)
+  default     = {}
 }
 
-variable "github_repo" {
-  description = "Git repository name"
+variable "vpc" {
+  description = "Map of VPC configurations"
+  type        = any
+  default     = {}
+}
+
+variable "eks" {
+  description = "Map of EKS configurations"
+  type        = any
+  default     = {}
+}
+
+variable "karpenter" {
+  description = "Map of Karpenter configurations"
+  type        = any
+  default     = {}
+}
+
+variable "addons" {
+  description = "Map of addon configurations"
+  type        = any
+  default = {
+    metrics_server               = { enabled = true }
+    aws_load_balancer_controller = { enabled = true }
+    aws_ebs_csi_driver           = { enabled = true }
+    external_dns                 = { enabled = true }
+    external_secrets             = { enabled = true }
+    datadog                      = { enabled = true }
+    kube_prometheus_stack        = { enabled = true }
+  }
+}
+
+variable "base_domain" {
+  description = "The base domain for the platform"
   type        = string
+  default     = "tamedia.net"
 }
 
 variable "sso_role_id" {
-  description = "The id of the SSO role that will be allowed to run kubectl commands"
+  description = "The SSO role ID to give access to EKS"
   type        = string
-}
-
-variable "cidr" {
-  description = "cidr for VPC"
-  type        = string
-  default     = "10.0.0.0/16"
-}
-
-variable "private_subnets" {
-  description = "Private subnets IP Ranges"
-  type        = list(string)
-  default     = ["10.0.16.0/20", "10.0.32.0/20", "10.0.48.0/20"]
-}
-
-variable "public_subnets" {
-  description = "Public_Subnet IP Ranges"
-  type        = list(string)
-  default     = ["10.0.112.0/20", "10.0.128.0/20", "10.0.144.0/20"]
+  default     = "3cb2c900c0e65cd2"
 }
