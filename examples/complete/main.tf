@@ -27,11 +27,8 @@ terraform {
   }
 }
 
-locals {
-  region = "eu-central-1"
-}
 provider "aws" {
-  region = local.region
+  region = var.region
 }
 
 provider "kubernetes" {
@@ -72,8 +69,7 @@ provider "kubectl" {
 module "k8s_platform" {
   source = "../../"
 
-  region = local.region
-  name   = "complete"
+  name = "complete"
 
   tags = {
     Environment = "sandbox"
