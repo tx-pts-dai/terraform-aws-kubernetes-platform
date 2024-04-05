@@ -44,7 +44,7 @@ module "addons" {
     }
   }
 
-  enable_aws_load_balancer_controller = true
+  enable_aws_load_balancer_controller = try(var.addons.aws_load_balancer_controller.enabled, true)
   aws_load_balancer_controller = {
     role_name        = "aws-load-balancer-controller-${local.id}"
     role_name_prefix = false
@@ -60,7 +60,7 @@ module "addons" {
     }]
   }
 
-  enable_external_dns = true
+  enable_external_dns = try(var.addons.external_dns.enabled, true)
   external_dns_route53_zone_arns = [
     "arn:aws:route53:::hostedzone/*",
   ]
@@ -73,26 +73,26 @@ module "addons" {
     }]
   }
 
-  enable_external_secrets = true
+  enable_external_secrets = try(var.addons.external_secrets.enabled, true)
   external_secrets = {
     role_name        = "external-secrets-${local.id}"
     role_name_prefix = false
   }
 
-  enable_fargate_fluentbit = true
+  enable_fargate_fluentbit = try(var.addons.fargate_fluentbit.enabled, true)
   fargate_fluentbit = {
     role_name        = "fargate-fluentbit-${local.id}"
     role_name_prefix = false
   }
 
-  enable_metrics_server = true
+  enable_metrics_server = try(var.addons.metrics_server.enabled, true)
 
   # Monitoring
-  enable_kube_prometheus_stack = false # disable if using datadog
+  enable_kube_prometheus_stack = try(var.addons.kube_prometheus_stack.enabled, false)
 
   # Alternative Ingress
-  enable_cert_manager  = false
-  enable_ingress_nginx = false
+  enable_cert_manager  = try(var.addons.cert_manager.enabled, false)
+  enable_ingress_nginx = try(var.addons.ingress_nginx.enabled, false)
 
   # Additional Helm Releases
   # helm_releases = {

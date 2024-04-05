@@ -50,6 +50,7 @@ as described in the `.pre-commit-config.yaml` file
 | <a name="requirement_helm"></a> [helm](#requirement\_helm) | >= 2.12 |
 | <a name="requirement_kubectl"></a> [kubectl](#requirement\_kubectl) | >= 2.0.2 |
 | <a name="requirement_random"></a> [random](#requirement\_random) | >= 3.0 |
+| <a name="requirement_time"></a> [time](#requirement\_time) | >= 0.11 |
 
 ## Providers
 
@@ -59,7 +60,7 @@ as described in the `.pre-commit-config.yaml` file
 | <a name="provider_helm"></a> [helm](#provider\_helm) | >= 2.12 |
 | <a name="provider_kubectl"></a> [kubectl](#provider\_kubectl) | >= 2.0.2 |
 | <a name="provider_random"></a> [random](#provider\_random) | >= 3.0 |
-| <a name="provider_time"></a> [time](#provider\_time) | n/a |
+| <a name="provider_time"></a> [time](#provider\_time) | >= 0.11 |
 
 ## Modules
 
@@ -93,13 +94,11 @@ as described in the `.pre-commit-config.yaml` file
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_addons"></a> [addons](#input\_addons) | Map of addon configurations | `any` | <pre>{<br>  "aws_ebs_csi_driver": {<br>    "enabled": true<br>  },<br>  "aws_load_balancer_controller": {<br>    "enabled": true<br>  },<br>  "datadog": {<br>    "enabled": true<br>  },<br>  "external_dns": {<br>    "enabled": true<br>  },<br>  "external_secrets": {<br>    "enabled": true<br>  },<br>  "kube_prometheus_stack": {<br>    "enabled": true<br>  },<br>  "metrics_server": {<br>    "enabled": true<br>  }<br>}</pre> | no |
+| <a name="input_addons"></a> [addons](#input\_addons) | Map of addon configurations | `any` | <pre>{<br>  "aws_load_balancer_controller": {<br>    "enabled": true<br>  },<br>  "cert_manager": {<br>    "enabled": false<br>  },<br>  "external_dns": {<br>    "enabled": true<br>  },<br>  "external_secrets": {<br>    "enabled": true<br>  },<br>  "fargate_fluentbit": {<br>    "enabled": true<br>  },<br>  "ingress_nginx": {<br>    "enabled": false<br>  },<br>  "kube_prometheus_stack": {<br>    "enabled": false<br>  },<br>  "metrics_server": {<br>    "enabled": true<br>  }<br>}</pre> | no |
 | <a name="input_base_domain"></a> [base\_domain](#input\_base\_domain) | The base domain for the platform | `string` | `"tamedia.net"` | no |
 | <a name="input_eks"></a> [eks](#input\_eks) | Map of EKS configurations | `any` | `{}` | no |
 | <a name="input_karpenter"></a> [karpenter](#input\_karpenter) | Map of Karpenter configurations | `any` | `{}` | no |
 | <a name="input_name"></a> [name](#input\_name) | The name of the platform | `string` | n/a | yes |
-| <a name="input_region"></a> [region](#input\_region) | The AWS region used for the default aws provider | `string` | n/a | yes |
-| <a name="input_sso_role_id"></a> [sso\_role\_id](#input\_sso\_role\_id) | The SSO role ID to give access to EKS | `string` | `"3cb2c900c0e65cd2"` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | Default tags to apply to all resources | `map(string)` | `{}` | no |
 | <a name="input_vpc"></a> [vpc](#input\_vpc) | Map of VPC configurations | `any` | `{}` | no |
 

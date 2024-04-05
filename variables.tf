@@ -1,8 +1,3 @@
-variable "region" {
-  description = "The AWS region used for the default aws provider"
-  type        = string
-}
-
 variable "name" {
   description = "The name of the platform"
   type        = string
@@ -36,13 +31,15 @@ variable "addons" {
   description = "Map of addon configurations"
   type        = any
   default = {
-    metrics_server               = { enabled = true }
     aws_load_balancer_controller = { enabled = true }
-    aws_ebs_csi_driver           = { enabled = true }
     external_dns                 = { enabled = true }
     external_secrets             = { enabled = true }
-    datadog                      = { enabled = true }
-    kube_prometheus_stack        = { enabled = true }
+    fargate_fluentbit            = { enabled = true }
+    metrics_server               = { enabled = true }
+
+    kube_prometheus_stack = { enabled = false }
+    cert_manager          = { enabled = false }
+    ingress_nginx         = { enabled = false }
   }
 }
 
@@ -52,8 +49,8 @@ variable "base_domain" {
   default     = "tamedia.net"
 }
 
-variable "sso_role_id" {
-  description = "The SSO role ID to give access to EKS"
-  type        = string
-  default     = "3cb2c900c0e65cd2"
-}
+# variable "sso_role_id" {
+#   description = "The SSO role ID to give access to EKS"
+#   type        = string
+#   default     = "3cb2c900c0e65cd2"
+# }

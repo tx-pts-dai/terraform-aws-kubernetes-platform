@@ -58,7 +58,7 @@ module "network" {
 
   create_vpc = try(var.vpc.create, false)
 
-  cidr       = var.vpc.cidr
+  cidr       = try(var.vpc.cidr, "10.0.0.0/16")
   stack_name = local.stack_name
 
   tags = local.tags
