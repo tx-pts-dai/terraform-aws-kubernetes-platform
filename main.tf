@@ -103,20 +103,8 @@ module "eks" {
   # TODO: remove duplicates in case of local deployment. If you are deploying from local
   # there will be a conflict with the sso role.
   access_entries = {
-    # sso = {
-    #   principal_arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/aws-reserved/sso.amazonaws.com/eu-west-1/AWSReservedSSO_AWSAdministratorAccess_${var.sso_role_id}"
-    #   policy_associations = {
-    #     single = {
-    #       policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
-    #       access_scope = {
-    #         type = "cluster"
-    #       }
-    #     }
-    #   }
-    # }
-    cicd = {
-      kubernetes_groups = ["masters"]
-      principal_arn     = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/cicd-iac"
+    sso = {
+      principal_arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/aws-reserved/sso.amazonaws.com/eu-west-1/AWSReservedSSO_AWSAdministratorAccess_${var.sso_role_id}"
       policy_associations = {
         single = {
           policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
@@ -126,6 +114,18 @@ module "eks" {
         }
       }
     }
+    # cicd = {
+    #   kubernetes_groups = ["masters"]
+    #   principal_arn     = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/cicd-iac"
+    #   policy_associations = {
+    #     single = {
+    #       policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+    #       access_scope = {
+    #         type = "cluster"
+    #       }
+    #     }
+    #   }
+    # }
   }
 
   tags = merge(local.tags, {

@@ -99,6 +99,7 @@ as described in the `.pre-commit-config.yaml` file
 | <a name="input_eks"></a> [eks](#input\_eks) | Map of EKS configurations | `any` | `{}` | no |
 | <a name="input_karpenter"></a> [karpenter](#input\_karpenter) | Map of Karpenter configurations | `any` | `{}` | no |
 | <a name="input_name"></a> [name](#input\_name) | The name of the platform | `string` | n/a | yes |
+| <a name="input_sso_role_id"></a> [sso\_role\_id](#input\_sso\_role\_id) | The SSO role ID to give access to EKS | `string` | `"3cb2c900c0e65cd2"` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | Default tags to apply to all resources | `map(string)` | `{}` | no |
 | <a name="input_vpc"></a> [vpc](#input\_vpc) | Map of VPC configurations | `any` | `{}` | no |
 

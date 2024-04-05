@@ -49,8 +49,8 @@ variable "base_domain" {
   default     = "tamedia.net"
 }
 
-# variable "sso_role_id" {
-#   description = "The SSO role ID to give access to EKS"
-#   type        = string
-#   default     = "3cb2c900c0e65cd2"
-# }
+variable "sso_role_id" {
+  description = "The SSO role ID to give access to EKS"
+  type        = string
+  default     = "3cb2c900c0e65cd2"
+}
