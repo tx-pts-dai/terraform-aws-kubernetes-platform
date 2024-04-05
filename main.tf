@@ -66,6 +66,28 @@ module "network" {
 
 ################################################################################
 # EKS Cluster
+data "aws_iam_session_context" "current" {
+  arn = data.aws_caller_identity.current.arn
+}
+
+locals {
+
+  access_entries = { for k, v in var.cluster_admins : k => {
+    principal_arn     = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${v.role_name}"
+    type              = "STANDARD"
+    kubernetes_groups = try(v.kubernetes_groups, null)
+
+    policy_associations = {
+      admin = {
+        policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+        access_scope = {
+          type = "cluster"
+        }
+      }
+    }
+  } if "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${v.role_name}" != data.aws_iam_session_context.current.issuer_arn }
+}
+
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
   version = "20.8.3"
@@ -101,32 +123,8 @@ module "eks" {
   }
 
   # TODO: remove duplicates in case of local deployment. If you are deploying from local
-  # there will be a conflict with the sso role.
-  access_entries = {
-    sso = {
-      principal_arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/aws-reserved/sso.amazonaws.com/eu-west-1/AWSReservedSSO_AWSAdministratorAccess_${var.sso_role_id}"
-      policy_associations = {
-        single = {
-          policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
-          access_scope = {
-            type = "cluster"
-          }
-        }
-      }
-    }
-    # cicd = {
-    #   kubernetes_groups = ["masters"]
-    #   principal_arn     = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/cicd-iac"
-    #   policy_associations = {
-    #     single = {
-    #       policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
-    #       access_scope = {
-    #         type = "cluster"
-    #       }
-    #     }
-    #   }
-    # }
-  }
+  access_entries = local.access_entries
+
 
   tags = merge(local.tags, {
     # NOTE - if creating multiple security groups with this module, only tag the

@@ -49,8 +49,18 @@ variable "base_domain" {
   default     = "tamedia.net"
 }
 
-variable "sso_role_id" {
-  description = "The SSO role ID to give access to EKS"
-  type        = string
-  default     = "3cb2c900c0e65cd2"
+variable "cluster_admins" {
+  description = "Map of IAM roles to add as cluster admins"
+  type = map(object({
+    role_name         = string
+    kubernetes_groups = optional(list(string))
+  }))
+  default = {
+    sso = {
+      role_name = "aws-reserved/sso.amazonaws.com/eu-west-1/AWSReservedSSO_AWSAdministratorAccess_3cb2c900c0e65cd2"
+    }
+    cicd = {
+      role_name = "cicd-iac"
+    }
+  }
 }
