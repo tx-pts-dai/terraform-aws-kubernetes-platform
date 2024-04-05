@@ -1,0 +1,16 @@
+name: Destroy testing workspace
+
+on:
+  pull_request:
+    types: [closed]
+
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
+
+jobs:
+  test:
+    uses: tx-pts-dai/github-workflows/.github/workflows/tf-dflook-cleanup.yaml@v0.8.0
+    with:
+      environment: sandbox
