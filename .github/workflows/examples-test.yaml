@@ -3,7 +3,7 @@ name: Deploy Module Example
 on:
   pull_request:
     paths:
-      - examples/complete
+      - 'examples/complete/**'
 
 permissions:
   id-token: write
@@ -15,7 +15,6 @@ jobs:
     uses: tx-pts-dai/github-workflows/.github/workflows/tf-dflook-feature.yaml@v0.8.0
     with:
       environment: examples
-      aws_oidc_role_arn: arn:aws:iam::911453050078:role/terraform
       tf_backend_configs: |
         bucket=tf-state-911453050078
         key=example/complete.tfstate
