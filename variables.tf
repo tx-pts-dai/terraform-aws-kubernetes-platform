@@ -1,45 +1,66 @@
-variable "environment" {
-  description = "The environment this resource will be deployed in."
+variable "name" {
+  description = "The name of the platform"
   type        = string
 }
 
-variable "cluster_name" {
-  description = "Name of the EKS cluster to deploy"
+variable "tags" {
+  description = "Default tags to apply to all resources"
+  type        = map(string)
+  default     = {}
+}
+
+variable "vpc" {
+  description = "Map of VPC configurations"
+  type        = any
+  default     = {}
+}
+
+variable "eks" {
+  description = "Map of EKS configurations"
+  type        = any
+  default     = {}
+}
+
+variable "karpenter" {
+  description = "Map of Karpenter configurations"
+  type        = any
+  default     = {}
+}
+
+variable "addons" {
+  description = "Map of addon configurations"
+  type        = any
+  default = {
+    aws_load_balancer_controller = { enabled = true }
+    external_dns                 = { enabled = true }
+    external_secrets             = { enabled = true }
+    fargate_fluentbit            = { enabled = true }
+    metrics_server               = { enabled = true }
+
+    kube_prometheus_stack = { enabled = false }
+    cert_manager          = { enabled = false }
+    ingress_nginx         = { enabled = false }
+  }
+}
+
+variable "base_domain" {
+  description = "The base domain for the platform"
   type        = string
+  default     = "tamedia.net"
 }
 
-variable "aws_ecrpublic_authorization_token" {
-  description = "ECR public auth token"
-  type = object({
-    user_name = string
-    password  = string
-  })
-}
-
-variable "github_repo" {
-  description = "Git repository name"
-  type        = string
-}
-
-variable "sso_role_id" {
-  description = "The id of the SSO role that will be allowed to run kubectl commands"
-  type        = string
-}
-
-variable "cidr" {
-  description = "cidr for VPC"
-  type        = string
-  default     = "10.0.0.0/16"
-}
-
-variable "private_subnets" {
-  description = "Private subnets IP Ranges"
-  type        = list(string)
-  default     = ["10.0.16.0/20", "10.0.32.0/20", "10.0.48.0/20"]
-}
-
-variable "public_subnets" {
-  description = "Public_Subnet IP Ranges"
-  type        = list(string)
-  default     = ["10.0.112.0/20", "10.0.128.0/20", "10.0.144.0/20"]
+variable "cluster_admins" {
+  description = "Map of IAM roles to add as cluster admins"
+  type = map(object({
+    role_name         = string
+    kubernetes_groups = optional(list(string))
+  }))
+  default = {
+    sso = {
+      role_name = "aws-reserved/sso.amazonaws.com/eu-west-1/AWSReservedSSO_AWSAdministratorAccess_3cb2c900c0e65cd2"
+    }
+    cicd = {
+      role_name = "cicd-iac"
+    }
+  }
 }

@@ -1,24 +1,45 @@
-locals {
-  github_repo  = "test"
-  cluster_name = "test"
-}
+terraform {
+  required_version = ">= 1.3.2"
 
-provider "aws" {
-  default_tags {
-    tags = {
-      Github-Repo = local.github_repo
+  backend "s3" {
+    bucket = "tf-state-911453050078"
+    # key    = "terraform-aws-kubernetes-platform/complete.tfstate"
+    key                  = "example/complete.tfstate"
+    region               = "eu-central-1"
+    workspace_key_prefix = "terraform-aws-kubernetes-platform"
+  }
+
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+    kubernetes = {
+      source  = "hashicorp/kubernetes"
+      version = "~> 2.27"
+    }
+    helm = {
+      source  = "hashicorp/helm"
+      version = "~> 2.6"
+    }
+    kubectl = {
+      source  = "alekc/kubectl"
+      version = "~> 2.0"
     }
   }
 }
 
 provider "aws" {
-  region = "us-east-1"
-  alias  = "us"
+  region = var.region
+}
 
-  default_tags {
-    tags = {
-      Github-Repo = local.github_repo
-    }
+provider "kubernetes" {
+  host                   = module.k8s_platform.eks.cluster_endpoint
+  cluster_ca_certificate = base64decode(module.k8s_platform.eks.cluster_certificate_authority_data)
+  exec {
+    api_version = "client.authentication.k8s.io/v1beta1"
+    command     = "aws"
+    args        = ["eks", "get-token", "--cluster-name", module.k8s_platform.eks.cluster_name]
   }
 }
 
@@ -26,12 +47,10 @@ provider "helm" {
   kubernetes {
     host                   = module.k8s_platform.eks.cluster_endpoint
     cluster_ca_certificate = base64decode(module.k8s_platform.eks.cluster_certificate_authority_data)
-
     exec {
       api_version = "client.authentication.k8s.io/v1beta1"
       command     = "aws"
-      # This requires the awscli to be installed locally where Terraform is executed
-      args = ["eks", "get-token", "--cluster-name", local.cluster_name]
+      args        = ["eks", "get-token", "--cluster-name", module.k8s_platform.eks.cluster_name]
     }
   }
 }
@@ -45,33 +64,27 @@ provider "kubectl" {
   exec {
     api_version = "client.authentication.k8s.io/v1beta1"
     command     = "aws"
-    # This requires the awscli to be installed locally where Terraform is executed
-    args = ["eks", "get-token", "--cluster-name", local.cluster_name]
+    args        = ["eks", "get-token", "--cluster-name", module.k8s_platform.eks.cluster_name]
   }
-}
-
-provider "kubernetes" {
-  host                   = module.k8s_platform.eks.cluster_endpoint
-  cluster_ca_certificate = base64decode(module.k8s_platform.eks.cluster_certificate_authority_data)
-  exec {
-    api_version = "client.authentication.k8s.io/v1beta1"
-    command     = "aws"
-    args        = ["eks", "get-token", "--cluster-name", local.cluster_name]
-  }
-}
-
-data "aws_ecrpublic_authorization_token" "this" {
-  provider = aws.us
 }
 
 module "k8s_platform" {
-  source       = "../../"
-  environment  = "test"
-  cluster_name = local.cluster_name
-  aws_ecrpublic_authorization_token = {
-    user_name = data.aws_ecrpublic_authorization_token.this.user_name
-    password  = data.aws_ecrpublic_authorization_token.this.password
+  source = "../../"
+
+  name = "complete"
+
+  tags = {
+    Environment = "sandbox"
+    GithubRepo  = "terraform-aws-kubernetes-platform"
+    GithubOrg   = "tx-pts-dai"
   }
-  github_repo = local.github_repo
-  sso_role_id = "test"
+
+  vpc = {
+    create = true
+    cidr   = "10.0.0.0/16"
+  }
+
+  karpenter = {
+    subnet_cidrs = ["10.0.64.0/22", "10.0.68.0/22", "10.0.72.0/22"]
+  }
 }
