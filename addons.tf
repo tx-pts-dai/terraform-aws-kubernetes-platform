@@ -22,6 +22,7 @@ module "addons" {
   eks_addons = {
     coredns = {
       most_recent = true
+      preserve    = false
 
       timeouts = {
         create = "10m"
@@ -35,7 +36,9 @@ module "addons" {
       most_recent = true
     }
     aws-ebs-csi-driver = {
-      most_recent              = true
+      most_recent = true
+      preserve    = false
+
       service_account_role_arn = module.ebs_csi_driver_irsa.iam_role_arn
 
       configurations = {

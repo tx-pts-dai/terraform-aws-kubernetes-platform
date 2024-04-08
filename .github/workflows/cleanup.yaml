@@ -1,4 +1,4 @@
-name: Destroy testing workspace
+name: Destroy Pull Request Deployments
 
 on:
   pull_request:
@@ -10,7 +10,12 @@ permissions:
   pull-requests: write
 
 jobs:
-  test:
+  example_complete:
     uses: tx-pts-dai/github-workflows/.github/workflows/tf-dflook-cleanup.yaml@v0.8.0
     with:
-      environment: sandbox
+      environment: examples
+      tf_backend_configs: |
+        bucket=tf-state-911453050078
+        key=example/complete.tfstate
+        workspace_key_prefix=terraform-aws-kubernetes-platform
+      tf_dir: examples/complete

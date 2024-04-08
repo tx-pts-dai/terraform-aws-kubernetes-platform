@@ -1,4 +1,4 @@
-name: Deploy Module Example
+name: Deploy Module Examples
 
 on:
   pull_request:
@@ -11,7 +11,7 @@ permissions:
   pull-requests: write
 
 jobs:
-  integration:
+  example_complete:
     uses: tx-pts-dai/github-workflows/.github/workflows/tf-dflook-feature.yaml@v0.8.0
     with:
       environment: examples

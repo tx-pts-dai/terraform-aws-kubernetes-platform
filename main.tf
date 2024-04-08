@@ -158,7 +158,7 @@ resource "aws_subnet" "karpenter" {
   cidr_block        = var.karpenter.subnet_cidrs[count.index]
   availability_zone = element(local.azs, count.index)
   tags = merge(local.tags, {
-    Name                     = "${var.name}-karpenter-${element(local.azs, count.index)}"
+    Name                     = "${module.eks.cluster_name}-karpenter-${element(local.azs, count.index)}"
     "karpenter.sh/discovery" = module.eks.cluster_name
   })
 }
@@ -298,7 +298,7 @@ resource "kubectl_manifest" "karpenter_node_pool" {
   ]
 }
 
-resource "time_sleep" "wait_5_minutes" {
+resource "time_sleep" "wait_on_destroy" {
   depends_on = [
     module.eks,
     module.karpenter,
@@ -309,5 +309,5 @@ resource "time_sleep" "wait_5_minutes" {
     kubectl_manifest.karpenter_node_pool,
   ]
 
-  destroy_duration = "5m"
+  destroy_duration = "2m"
 }
