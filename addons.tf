@@ -9,6 +9,11 @@ module "addons" {
   source  = "aws-ia/eks-blueprints-addons/aws"
   version = "1.16.1"
 
+  create_delay_dependencies = [
+    helm_release.karpenter.status
+  ]
+  create_delay_duration = "1m"
+
   cluster_name      = module.eks.cluster_name
   cluster_endpoint  = module.eks.cluster_endpoint
   cluster_version   = module.eks.cluster_version

@@ -4,7 +4,9 @@ terraform {
   backend "s3" {
     bucket = "tf-state-911453050078"
     key    = "terraform-aws-kubernetes-platform/complete.tfstate"
+    # key = "example/complete.tfstate"
     region = "eu-central-1"
+    # workspace_key_prefix = "terraform-aws-kubernetes-platform"
   }
 
   required_providers {
