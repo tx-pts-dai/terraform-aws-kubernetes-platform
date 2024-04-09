@@ -309,5 +309,6 @@ resource "time_sleep" "wait_on_destroy" {
     kubectl_manifest.karpenter_node_pool,
   ]
 
-  destroy_duration = "2m"
+  # Sleep for 5 minutes to allow Karpenter to clean up resources
+  destroy_duration = "5m"
 }
