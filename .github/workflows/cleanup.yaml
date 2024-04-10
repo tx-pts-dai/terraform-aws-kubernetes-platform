@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   example_complete:
-    uses: tx-pts-dai/github-workflows/.github/workflows/tf-dflook-cleanup.yaml@add-aws-cli
+    uses: tx-pts-dai/github-workflows/.github/workflows/tf-dflook-cleanup.yaml@v0.10.0
     with:
       environment: examples
       tf_backend_configs: |

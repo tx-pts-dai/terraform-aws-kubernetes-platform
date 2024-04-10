@@ -2,9 +2,10 @@ terraform {
   required_version = ">= 1.3.2"
 
   backend "s3" {
-    bucket = "tf-state-911453050078"
-    key    = "terraform-aws-kubernetes-platform/example/complete.tfstate"
-    region = "eu-central-1"
+    bucket               = "tf-state-911453050078"
+    key                  = "examples/complete.tfstate"
+    workspace_key_prefix = "terraform-aws-kubernetes-platform"
+    region               = "eu-central-1"
   }
 
   required_providers {
