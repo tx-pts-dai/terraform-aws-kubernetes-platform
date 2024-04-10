@@ -32,6 +32,15 @@ module "addons" {
     }
     vpc-cni = {
       most_recent = true
+      preserve    = true
+
+      service_account_role_arn = module.vpc_cni_irsa.iam_role_arn
+
+      configurations = {
+        env = {
+          ENABLE_PREFIX_DELEGATION = "true"
+        }
+      }
     }
     kube-proxy = {
       most_recent = true
@@ -125,6 +134,28 @@ module "addons" {
     helm_release.karpenter,
     kubectl_manifest.karpenter_node_pool
   ]
+}
+
+################################################################################
+# VPC CNI
+
+module "vpc_cni_irsa" {
+  source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
+  version = "5.37.2"
+
+  role_name = "vpc-cni-${local.id}"
+
+  attach_vpc_cni_policy = true
+  vpc_cni_enable_ipv4   = true
+
+  oidc_providers = {
+    main = {
+      provider_arn               = module.eks.oidc_provider_arn
+      namespace_service_accounts = ["kube-system:aws-node"]
+    }
+  }
+
+  tags = local.tags
 }
 
 ################################################################################
