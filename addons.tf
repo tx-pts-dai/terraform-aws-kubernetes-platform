@@ -84,6 +84,7 @@ module "addons" {
 
   enable_external_secrets = try(var.addons.external_secrets.enabled, true)
   external_secrets = {
+    wait             = true
     role_name        = "external-secrets-${local.id}"
     role_name_prefix = false
   }
