@@ -12,7 +12,8 @@ module "addons" {
   create_delay_dependencies = [
     helm_release.karpenter.status
   ]
-  create_delay_duration = "1m"
+  # Wait for karpenter node to start so when the managed addons are applied they already have running pods, otherwise they will fail to update.
+  create_delay_duration = "2m"
 
   cluster_name      = module.eks.cluster_name
   cluster_endpoint  = module.eks.cluster_endpoint
@@ -83,6 +84,7 @@ module "addons" {
 
   enable_external_secrets = try(var.addons.external_secrets.enabled, true)
   external_secrets = {
+    wait             = true
     role_name        = "external-secrets-${local.id}"
     role_name_prefix = false
   }
