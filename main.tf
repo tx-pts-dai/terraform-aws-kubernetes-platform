@@ -283,6 +283,12 @@ resource "kubectl_manifest" "karpenter_node_pool" {
             - key: "karpenter.k8s.aws/instance-hypervisor"
               operator: In
               values: ["nitro"]
+            - key: "karpenter.k8s.aws/instance-memory"
+              operator: Gt
+              values: ["1024"]
+            - key: "karpenter.sh/capacity-type"
+              operator: In
+              values: ["spot", "on-demand"]
             - key: "karpenter.k8s.aws/instance-generation"
               operator: Gt
               values: ["2"]
