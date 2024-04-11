@@ -138,6 +138,8 @@ module "eks" {
 # Karpenter
 #
 # Track notes here for future reference e.g. reasons for certain decisions
+# - PROPOSAL: Karpenter NodePool and EC2NodeClass management: default resources are deployed with the module. 
+#   Users can create additional resources by providing their own ones outside the module.
 
 data "aws_availability_zones" "available" {}
 
@@ -236,7 +238,6 @@ resource "helm_release" "karpenter" {
   ]
 }
 
-# # TODO: Come up with a better method for managing karpenter custom resources
 resource "kubectl_manifest" "karpenter_node_class" {
   yaml_body = <<-YAML
     apiVersion: karpenter.k8s.aws/v1beta1
@@ -261,7 +262,6 @@ resource "kubectl_manifest" "karpenter_node_class" {
   ]
 }
 
-# # TODO: Come up with a better method for managing karpenter custom resources
 resource "kubectl_manifest" "karpenter_node_pool" {
   yaml_body = <<-YAML
     apiVersion: karpenter.sh/v1beta1
@@ -276,10 +276,10 @@ resource "kubectl_manifest" "karpenter_node_pool" {
           requirements:
             - key: "karpenter.k8s.aws/instance-category"
               operator: In
-              values: ["c", "m", "r"]
+              values: ["c", "m", "r", "t"]
             - key: "karpenter.k8s.aws/instance-cpu"
               operator: In
-              values: ["4", "8", "16", "32"]
+              values: ["2", "4", "8", "16", "32"]
             - key: "karpenter.k8s.aws/instance-hypervisor"
               operator: In
               values: ["nitro"]
