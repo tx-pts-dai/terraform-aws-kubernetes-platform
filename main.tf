@@ -184,12 +184,15 @@ resource "aws_route_table_association" "karpenter" {
 module "karpenter" {
   source = "terraform-aws-modules/eks/aws//modules/karpenter"
 
+  version = "20.8.5"
+
   cluster_name                    = module.eks.cluster_name
   enable_irsa                     = true
   irsa_oidc_provider_arn          = module.eks.oidc_provider_arn
   irsa_namespace_service_accounts = ["kube-system:karpenter"]
   iam_role_name                   = "karpenter-${local.id}"
   iam_role_use_name_prefix        = false
+  create_instance_profile         = true
 
   node_iam_role_name              = "karpenter-node-${local.id}"
   node_iam_role_use_name_prefix   = false
