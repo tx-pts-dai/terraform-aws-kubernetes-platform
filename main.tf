@@ -204,6 +204,11 @@ module "karpenter" {
   tags = local.tags
 }
 
+# Needed to create SPOT instances
+resource "aws_iam_service_linked_role" "spot" {
+  aws_service_name = "spot.amazonaws.com"
+}
+
 resource "helm_release" "karpenter" {
   name             = "karpenter"
   namespace        = "kube-system"
