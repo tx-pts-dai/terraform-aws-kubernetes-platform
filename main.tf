@@ -204,7 +204,7 @@ module "karpenter" {
   tags = local.tags
 }
 
-# Needed to create SPOT instances
+# Allow creation of SPOT instances
 resource "aws_iam_service_linked_role" "spot" {
   aws_service_name = "spot.amazonaws.com"
 }
