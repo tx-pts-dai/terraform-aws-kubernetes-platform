@@ -209,6 +209,10 @@ resource "aws_iam_service_linked_role" "spot" {
   aws_service_name = "spot.amazonaws.com"
 }
 
+resource "aws_iam_service_linked_role" "spot_fleet" {
+  aws_service_name = "spotfleet.amazonaws.com"
+}
+
 resource "helm_release" "karpenter" {
   name             = "karpenter"
   namespace        = "kube-system"
@@ -244,7 +248,8 @@ resource "helm_release" "karpenter" {
 
   depends_on = [
     module.karpenter,
-    aws_iam_service_linked_role.spot
+    aws_iam_service_linked_role.spot,
+    aws_iam_service_linked_role.spot_fleet,
   ]
 }
 
