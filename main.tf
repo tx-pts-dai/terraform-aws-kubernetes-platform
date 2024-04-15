@@ -243,7 +243,8 @@ resource "helm_release" "karpenter" {
   ]
 
   depends_on = [
-    module.karpenter
+    module.karpenter,
+    aws_iam_service_linked_role.spot
   ]
 }
 
