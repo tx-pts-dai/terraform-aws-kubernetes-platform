@@ -18,7 +18,8 @@ The module needs some resources to be deployed in order to operate correctly:
 
 ```tf
 module "k8s_platform" {
-  source = "../../"
+  source  = "tx-pts-dai/kubernetes-platform/aws"
+  version = "0.0.1"
 
   name = "example-platform"
 
