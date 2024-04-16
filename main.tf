@@ -190,7 +190,6 @@ module "karpenter" {
   irsa_namespace_service_accounts = ["kube-system:karpenter"]
   iam_role_name                   = "karpenter-${local.id}"
   iam_role_use_name_prefix        = false
-  create_instance_profile         = true
 
   node_iam_role_name              = "karpenter-node-${local.id}"
   node_iam_role_use_name_prefix   = false
