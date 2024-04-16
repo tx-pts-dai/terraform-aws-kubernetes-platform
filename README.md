@@ -1,23 +1,54 @@
 # Tamedia Kubernetes as a Service (KaaS) Module
 
-Batteries included module to deploy a Kubernetes cluster on AWS.
+Batteries included module to deploy a Kubernetes cluster on AWS. Includes:
+
+- Metrics server
+- AWS Load Balancer Controller
+- Karpenter
+- External DNS
+- External secrets
+
+## Requirements
+
+The module needs some resources to be deployed in order to operate correctly:
+
+- IAM Service-linked roles (`AWSServiceRoleForEC2Spot` and `AWSServiceRoleForEC2SpotFleet`) - [docs](https://docs.aws.amazon.com/batch/latest/userguide/spot_fleet_IAM_role.html)
 
 ## Usage
 
-< describe the module minimal code required for a deployment >
+```tf
+module "k8s_platform" {
+  source = "../../"
 
-```hcl
-module "my_module_example" {
+  name = "example-platform"
+
+  vpc = {
+    create = true
+    cidr   = "10.0.0.0/16"
+  }
+
+  karpenter = {
+    subnet_cidrs = ["10.0.64.0/22", "10.0.68.0/22", "10.0.72.0/22"]
+  }
+
+  tags = {
+    Environment = "sandbox"
+    GithubRepo  = "terraform-aws-kubernetes-platform"
+  }
 }
 ```
 
 ## Explanation and description of interesting use-cases
 
-< create a h2 chapter for each section explaining special module concepts >
+Why this module?
+
+- To provide an AWS account with a K8s cluster with batteries included so that you can start deploying your workloads on a well-built foundation
+- To encourage standardization and common practices
+- To ease maintenance
 
 ## Examples
 
-< if the folder `examples/` exists, put here the link to the examples subfolders with their descriptions >
+- [Complete](./examples/complete/) - Includes creation of VPC, k8s cluster, addons and all the optional features.
 
 ## Contributing
 
