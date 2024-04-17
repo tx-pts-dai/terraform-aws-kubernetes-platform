@@ -4,6 +4,8 @@ on:
   pull_request:
     paths:
       - 'examples/complete/**'
+      - '.github/workflows/examples.yaml'
+  workflow_dispatch:
 
 permissions:
   id-token: write

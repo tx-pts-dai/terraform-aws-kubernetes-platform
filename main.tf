@@ -138,7 +138,7 @@ module "eks" {
 # Karpenter
 #
 # Track notes here for future reference e.g. reasons for certain decisions
-# - PROPOSAL: Karpenter NodePool and EC2NodeClass management: default resources are deployed with the module. 
+# - PROPOSAL: Karpenter NodePool and EC2NodeClass management: default resources are deployed with the module.
 #   Users can create additional resources by providing their own ones outside the module.
 
 data "aws_availability_zones" "available" {}
@@ -285,8 +285,8 @@ resource "kubectl_manifest" "karpenter_node_pool" {
               operator: In
               values: ["nitro"]
             - key: "karpenter.k8s.aws/instance-memory"
-              operator: Gt
-              values: ["1024"]
+              operator: In
+              values: ["2048"]
             - key: "karpenter.sh/capacity-type"
               operator: In
               values: ["spot", "on-demand"]
