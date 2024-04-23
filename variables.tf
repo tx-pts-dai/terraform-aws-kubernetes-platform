@@ -51,7 +51,7 @@ variable "addons" {
 variable "base_domain" {
   description = "The base domain for the platform"
   type        = string
-  default     = "tamedia.net"
+  default     = ""
 }
 
 variable "cluster_admins" {
@@ -60,12 +60,5 @@ variable "cluster_admins" {
     role_name         = string
     kubernetes_groups = optional(list(string))
   }))
-  default = {
-    sso = {
-      role_name = "aws-reserved/sso.amazonaws.com/eu-west-1/AWSReservedSSO_AWSAdministratorAccess_3cb2c900c0e65cd2"
-    }
-    cicd = {
-      role_name = "cicd-iac"
-    }
-  }
+  default = {}
 }

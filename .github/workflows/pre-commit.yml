@@ -7,7 +7,7 @@ name: verify-pre-commit
 #   - Terraform validate with tflint
 #   - check for merge conflicts
 #   - fix end of files
-# 
+#
 # The preCommitMinVersions job will check that terraform validates with the minimum
 # allowed version of the module.
 # The preCommitMaxVersion job will check that terraform validates with the maximum
