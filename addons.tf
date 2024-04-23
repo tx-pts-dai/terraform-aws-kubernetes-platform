@@ -71,10 +71,12 @@ module "addons" {
     set = [{
       name  = "enableServiceMutatorWebhook"
       value = "false"
-      },
-      {
-        name  = "replicaCount"
-        value = 1
+      }, {
+      name  = "replicaCount"
+      value = 1
+      }, {
+      name  = "clusterSecretsPermissions.allowAllSecrets"
+      value = "true" # enables Okta integration by reading secrets from K8s secrets
     }]
   }
 
