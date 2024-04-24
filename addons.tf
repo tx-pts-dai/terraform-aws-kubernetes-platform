@@ -92,7 +92,7 @@ module "addons" {
       value = "sync" # allows deletion of dns records
       }, {
       name  = "txtOwnerId"
-      value = "external-dns-${local.id}" # allows multiple clusters to share the same hosted zone
+      value = "external-dns-${local.id}" # avoid conflicts on the same hosted zone
     }]
   }
 
