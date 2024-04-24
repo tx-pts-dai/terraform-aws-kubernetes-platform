@@ -76,7 +76,7 @@ module "addons" {
       value = 1
       }, {
       name  = "clusterSecretsPermissions.allowAllSecrets"
-      value = "true" # enables Okta integration by reading secrets from K8s secrets
+      value = "true" # enables Okta integration by reading client id and secret from K8s secrets
     }]
   }
 
@@ -90,6 +90,9 @@ module "addons" {
     set = [{
       name  = "policy"
       value = "sync" # allows deletion of dns records
+      }, {
+      name  = "txtOwnerId"
+      value = "external-dns-${local.id}" # allows multiple clusters to share the same hosted zone
     }]
   }
 
