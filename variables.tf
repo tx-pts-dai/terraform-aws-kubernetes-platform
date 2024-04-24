@@ -27,6 +27,20 @@ variable "karpenter" {
   default     = {}
 }
 
+variable "enable_datadog" {
+  description = "Enable Datadog integration"
+  type        = bool
+  default     = false
+}
+
+variable "datadog" {
+  description = "Map of Datadog configurations"
+  type        = any
+  default = {
+    site = "datadoghq.eu"
+  }
+}
+
 variable "addons" {
   description = "Map of addon configurations"
   type        = any

@@ -1,0 +1,18 @@
+name: Deploy Module Examples - Datadog
+
+on:
+  pull_request:
+    paths:
+      - 'examples/datadog/**'
+
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
+
+jobs:
+  example_complete:
+    uses: tx-pts-dai/github-workflows/.github/workflows/tf-dflook-feature.yaml@v0.10.0
+    with:
+      environment: examples
+      tf_dir: examples/datadog
