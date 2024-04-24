@@ -71,10 +71,12 @@ module "addons" {
     set = [{
       name  = "enableServiceMutatorWebhook"
       value = "false"
-      },
-      {
-        name  = "replicaCount"
-        value = 1
+      }, {
+      name  = "replicaCount"
+      value = 1
+      }, {
+      name  = "clusterSecretsPermissions.allowAllSecrets"
+      value = "true" # enables Okta integration by reading client id and secret from K8s secrets
     }]
   }
 
@@ -88,6 +90,9 @@ module "addons" {
     set = [{
       name  = "policy"
       value = "sync" # allows deletion of dns records
+      }, {
+      name  = "txtOwnerId"
+      value = local.stack_name # avoid conflicts on the same hosted zone
     }]
   }
 
