@@ -92,7 +92,7 @@ module "addons" {
       value = "sync" # allows deletion of dns records
       }, {
       name  = "txtOwnerId"
-      value = "external-dns-${local.id}" # avoid conflicts on the same hosted zone
+      value = local.stack_name # avoid conflicts on the same hosted zone
     }]
   }
 
