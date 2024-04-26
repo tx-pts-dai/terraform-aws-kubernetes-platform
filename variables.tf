@@ -25,6 +25,11 @@ variable "karpenter" {
   description = "Map of Karpenter configurations"
   type        = any
   default     = {}
+
+  validation {
+    condition     = try(var.karpenter.subnet_cidrs != null, false)
+    error_message = "subnet_cidrs must be set when karpenter is enabled"
+  }
 }
 
 variable "addons" {
