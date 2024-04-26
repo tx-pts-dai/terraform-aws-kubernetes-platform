@@ -1,8 +1,7 @@
 name: Destroy Pull Request Deployments
 
 on:
-  pull_request:
-    types: [closed]
+  workflow_dispatch:
 
 permissions:
   id-token: write
@@ -11,11 +10,14 @@ permissions:
 
 jobs:
   example_complete:
+    strategy:
+      fail-fast: false
+      matrix:
+        directory:
+          - examples/lacework
+          - examples/complete
+
     uses: tx-pts-dai/github-workflows/.github/workflows/tf-dflook-cleanup.yaml@v0.10.0
     with:
       environment: examples
-      tf_backend_configs: |
-        bucket=tf-state-911453050078
-        key=examples/complete.tfstate
-        workspace_key_prefix=terraform-aws-kubernetes-platform
-      tf_dir: examples/complete
+      tf_dir: ${{ matrix.directory }}
