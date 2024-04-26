@@ -78,11 +78,11 @@ data "aws_iam_roles" "sso" {
 
 locals {
   sso_path_prefix = "/aws-reserved/sso.amazonaws.com/"
-  cluster_admins = merge(var.cluster_admins, {
+  cluster_admins = merge({
     sso = {
-      role_name = "${local.sso_path_prefix}${data.aws_iam_roles.sso.roles[0].name}"
+      role_name = "${local.sso_path_prefix}${data.aws_iam_roles.sso.names[0].name}"
     }
-  })
+  }, var.cluster_admins)
 
   access_entries = { for k, v in local.cluster_admins : k => {
     principal_arn     = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${v.role_name}"
