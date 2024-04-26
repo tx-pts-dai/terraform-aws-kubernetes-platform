@@ -70,9 +70,17 @@ data "aws_iam_session_context" "current" {
   arn = data.aws_caller_identity.current.arn
 }
 
-locals {
+data "aws_iam_roles" "sso" {
+  name_regex  = "AWSReservedSSO_AWSAdministratorAccess_.*"
+  path_prefix = local.sso_path_prefix
+}
 
-  access_entries = { for k, v in var.cluster_admins : k => {
+locals {
+  sso_path_prefix   = "/aws-reserved/sso.amazonaws.com/"
+  sso_cluster_admin = { for name in data.aws_iam_roles.sso.names : "sso" => { role_name = name.name } }
+  cluster_admins    = merge(local.sso_cluster_admin, var.cluster_admins)
+
+  access_entries = { for k, v in local.cluster_admins : k => {
     principal_arn     = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${v.role_name}"
     type              = "STANDARD"
     kubernetes_groups = try(v.kubernetes_groups, null)
