@@ -1,0 +1,26 @@
+name: Deploy Module Examples - Lacework
+
+on:
+  pull_request:
+    paths:
+      - 'examples/lacework/**'
+
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
+
+jobs:
+  example_lacework_deploy:
+    if: github.event_name == 'pull_request' && github.event.action != 'closed'
+    uses: tx-pts-dai/github-workflows/.github/workflows/tf-dflook-feature.yaml@v0.10.0
+    with:
+      environment: examples
+      tf_dir: examples/lacework
+
+  example_lacework_destroy:
+    if: github.event_name == 'pull_request' && github.event.action != 'closed'
+    uses: tx-pts-dai/github-workflows/.github/workflows/tf-dflook-feature.yaml@v0.10.0
+    with:
+      environment: examples
+      tf_dir: examples/lacework

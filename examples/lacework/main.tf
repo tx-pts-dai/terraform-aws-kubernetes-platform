@@ -3,7 +3,7 @@ terraform {
 
   backend "s3" {
     bucket               = "tf-state-911453050078"
-    key                  = "examples/complete.tfstate"
+    key                  = "examples/lacework.tfstate"
     workspace_key_prefix = "terraform-aws-kubernetes-platform"
     dynamodb_table       = "terraform-lock"
     region               = "eu-central-1"
@@ -25,6 +25,10 @@ terraform {
     kubectl = {
       source  = "alekc/kubectl"
       version = "~> 2.0"
+    }
+    lacework = {
+      source  = "lacework/lacework"
+      version = "~> 1.8"
     }
   }
 }
@@ -68,10 +72,25 @@ provider "kubectl" {
   }
 }
 
+data "aws_secretsmanager_secret" "lacework" {
+  name = "dai-lacework/tamedia/apiKey"
+}
+
+data "aws_secretsmanager_secret_version" "lacework" {
+  secret_id = data.aws_secretsmanager_secret.lacework.id
+}
+
+provider "lacework" {
+  account    = jsondecode(data.aws_secretsmanager_secret_version.lacework.secret_string)["account"]
+  subaccount = jsondecode(data.aws_secretsmanager_secret_version.lacework.secret_string)["subAccount"]
+  api_key    = jsondecode(data.aws_secretsmanager_secret_version.lacework.secret_string)["keyId"]
+  api_secret = jsondecode(data.aws_secretsmanager_secret_version.lacework.secret_string)["secret"]
+}
+
 module "k8s_platform" {
   source = "../../"
 
-  name = "complete"
+  name = "lacework"
 
   cluster_admins = var.cluster_admins
 
@@ -84,18 +103,15 @@ module "k8s_platform" {
   vpc = {
     create = true
     cidr   = "10.0.0.0/16"
-    max_az = 3
-    subnet_configs = [
-      { public = 24 },
-      { private = 24 },
-      { intra = 26 },
-      { database = 26 },
-      { redshift = 26 },
-      { karpetner = 22 }
-    ]
   }
 
   karpenter = {
-    subnet_cidrs = module.k8s_platform.network.grouped_networks["karpenter"]
+    subnet_cidrs = ["10.0.64.0/22", "10.0.68.0/22", "10.0.72.0/22"]
   }
+}
+
+module "lacework" {
+  source = "../../modules/lacework"
+
+  cluster_name = module.k8s_platform.eks.cluster_name
 }
