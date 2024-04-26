@@ -6,6 +6,8 @@ locals {
 }
 
 resource "aws_route53_zone" "private" {
+  count = var.base_domain != "" ? 1 : 0
+
   name = local.zone_name
 
   vpc {
