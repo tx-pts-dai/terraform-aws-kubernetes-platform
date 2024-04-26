@@ -16,3 +16,12 @@ jobs:
     with:
       environment: examples
       tf_dir: examples/lacework
+      tf_vars: |
+        cluster_admins = {
+          sso = {
+            role_name = "aws-reserved/sso.amazonaws.com/eu-west-1/AWSReservedSSO_AWSAdministratorAccess_3cb2c900c0e65cd2"
+          }
+          cicd = {
+            role_name = "cicd-iac"
+          }
+        }

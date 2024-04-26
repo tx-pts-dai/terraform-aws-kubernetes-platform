@@ -92,6 +92,8 @@ module "k8s_platform" {
 
   name = "lacework"
 
+  cluster_admins = var.cluster_admins
+
   tags = {
     Environment = "sandbox"
     GithubRepo  = "terraform-aws-kubernetes-platform"

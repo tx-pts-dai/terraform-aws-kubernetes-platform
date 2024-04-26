@@ -73,6 +73,8 @@ module "k8s_platform" {
 
   name = "complete"
 
+  cluster_admins = var.cluster_admins
+
   tags = {
     Environment = "sandbox"
     GithubRepo  = "terraform-aws-kubernetes-platform"
