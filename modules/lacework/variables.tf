@@ -30,21 +30,6 @@ variable "node_affinity" {
   }))
   default = [
     {
-      key      = "kubernetes.io/arch"
-      operator = "In"
-      values = [
-        "amd64",
-        "arm64"
-      ]
-    },
-    {
-      key      = "kubernetes.io/os"
-      operator = "In"
-      values = [
-        "linux"
-      ]
-    },
-    {
       key      = "eks.amazonaws.com/compute-type"
       operator = "NotIn"
       values = [
