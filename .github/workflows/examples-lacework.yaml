@@ -11,17 +11,16 @@ permissions:
   pull-requests: write
 
 jobs:
-  example_lacework:
+  example_lacework_deploy:
+    if: github.event_name == 'pull_request' && github.event.action != 'closed'
     uses: tx-pts-dai/github-workflows/.github/workflows/tf-dflook-feature.yaml@v0.10.0
     with:
       environment: examples
       tf_dir: examples/lacework
-      tf_vars: |
-        cluster_admins = {
-          sso = {
-            role_name = "aws-reserved/sso.amazonaws.com/eu-west-1/AWSReservedSSO_AWSAdministratorAccess_3cb2c900c0e65cd2"
-          }
-          cicd = {
-            role_name = "cicd-iac"
-          }
-        }
+
+  example_lacework_destroy:
+    if: github.event_name == 'pull_request' && github.event.action != 'closed'
+    uses: tx-pts-dai/github-workflows/.github/workflows/tf-dflook-feature.yaml@v0.10.0
+    with:
+      environment: examples
+      tf_dir: examples/lacework

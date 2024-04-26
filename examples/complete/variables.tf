@@ -10,5 +10,9 @@ variable "cluster_admins" {
     role_name         = string
     kubernetes_groups = optional(list(string))
   }))
-  default = {}
+  default = {
+    cicd = {
+      role_name = "cicd-iac"
+    }
+  }
 }
