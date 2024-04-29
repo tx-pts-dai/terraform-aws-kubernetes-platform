@@ -75,13 +75,30 @@ data "aws_iam_roles" "sso" {
   path_prefix = local.sso_path_prefix
 }
 
+data "aws_iam_roles" "iam_cluster_admins" {
+  for_each = var.cluster_admins
+
+  name_regex = each.value.role_name
+}
+
 locals {
-  sso_path_prefix   = "/aws-reserved/sso.amazonaws.com/"
-  sso_cluster_admin = { for name in data.aws_iam_roles.sso.names : "sso" => { role_name = name.name } }
-  cluster_admins    = merge(local.sso_cluster_admin, var.cluster_admins)
+  sso_path_prefix = "/aws-reserved/sso.amazonaws.com/"
+  sso_cluster_admin = length(data.aws_iam_roles.sso.arns) == 1 ? {
+    sso = {
+      role_arn = tolist(data.aws_iam_roles.sso.arns)[0]
+    }
+  } : {}
+
+  iam_cluster_admins = { for k, v in var.cluster_admins : k => {
+    role_arn          = tolist(data.aws_iam_roles.iam_cluster_admins[k].arns)[0]
+    kubernetes_groups = try(v.kubernetes_groups, null)
+    }
+  }
+
+  cluster_admins = merge(local.sso_cluster_admin, local.iam_cluster_admins)
 
   access_entries = { for k, v in local.cluster_admins : k => {
-    principal_arn     = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${v.role_name}"
+    principal_arn     = v.role_arn
     type              = "STANDARD"
     kubernetes_groups = try(v.kubernetes_groups, null)
 
@@ -93,7 +110,7 @@ locals {
         }
       }
     }
-  } if "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${v.role_name}" != data.aws_iam_session_context.current.issuer_arn }
+  } if v.role_arn != data.aws_iam_session_context.current.issuer_arn }
 }
 
 module "eks" {
