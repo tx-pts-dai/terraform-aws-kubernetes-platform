@@ -55,7 +55,7 @@ variable "base_domain" {
 }
 
 variable "cluster_admins" {
-  description = "Map of IAM roles to add as cluster admins"
+  description = "Map of IAM roles to add as cluster admins. Role name is looked up and converted to ARN"
   type = map(object({
     role_name         = string
     kubernetes_groups = optional(list(string))
