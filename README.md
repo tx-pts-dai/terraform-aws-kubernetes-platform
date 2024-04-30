@@ -156,8 +156,12 @@ as described in the `.pre-commit-config.yaml` file
 | <a name="input_addons"></a> [addons](#input\_addons) | Map of addon configurations | `any` | <pre>{<br>  "aws_load_balancer_controller": {<br>    "enabled": true<br>  },<br>  "cert_manager": {<br>    "enabled": false<br>  },<br>  "downscaler": {<br>    "enabled": false<br>  },<br>  "external_dns": {<br>    "enabled": true<br>  },<br>  "external_secrets": {<br>    "enabled": true<br>  },<br>  "fargate_fluentbit": {<br>    "enabled": true<br>  },<br>  "ingress_nginx": {<br>    "enabled": false<br>  },<br>  "kube_prometheus_stack": {<br>    "enabled": false<br>  },<br>  "metrics_server": {<br>    "enabled": true<br>  }<br>}</pre> | no |
 | <a name="input_base_domain"></a> [base\_domain](#input\_base\_domain) | The base domain for the platform | `string` | `""` | no |
 | <a name="input_cluster_admins"></a> [cluster\_admins](#input\_cluster\_admins) | Map of IAM roles to add as cluster admins. Role name is looked up and converted to ARN | <pre>map(object({<br>    role_name         = string<br>    kubernetes_groups = optional(list(string))<br>  }))</pre> | `{}` | no |
+<<<<<<< HEAD
 | <a name="input_datadog"></a> [datadog](#input\_datadog) | Map of Datadog configurations | `any` | <pre>{<br>  "agent_api_key_name": "kubernetes-platform-example",<br>  "agent_app_key_name": "kubernetes-platform-example",<br>  "site": "datadoghq.eu"<br>}</pre> | no |
 >>>>>>> 97cc9f3 (fum-3140-fmt-readme)
+=======
+| <a name="input_datadog"></a> [datadog](#input\_datadog) | Map of Datadog configurations | `any` | <pre>{<br>  "site": "datadoghq.eu"<br>}</pre> | no |
+>>>>>>> cc4f983 (fum-3140-cleanup)
 | <a name="input_eks"></a> [eks](#input\_eks) | Map of EKS configurations | `any` | `{}` | no |
 | <a name="input_enable_datadog"></a> [enable\_datadog](#input\_enable\_datadog) | Enable Datadog integration | `bool` | `false` | no |
 | <a name="input_karpenter"></a> [karpenter](#input\_karpenter) | Map of Karpenter configurations | `any` | `{}` | no |

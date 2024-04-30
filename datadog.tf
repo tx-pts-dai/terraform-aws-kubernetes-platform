@@ -1,12 +1,12 @@
 # Datadog Operator
 resource "datadog_api_key" "datadog_agent" {
   count = var.enable_datadog ? 1 : 0
-  name  = var.datadog.agent_api_key_name
+  name  = try(var.datadog.agent_api_key_name, local.stack_name)
 }
 
 resource "datadog_application_key" "datadog_agent" {
   count = var.enable_datadog ? 1 : 0
-  name  = var.datadog.agent_app_key_name
+  name  = try(var.datadog.agent_app_key_name, local.stack_name)
 }
 
 module "datadog" {
@@ -68,15 +68,16 @@ resource "kubectl_manifest" "datadog_agent" {
     apiVersion: datadoghq.com/v2alpha1
     kind: DatadogAgent
     metadata:
-      name: datadog
+      name: datadog-agent
+      namespace: monitoring
     spec:
       global:
         credentials:
           apiSecret:
-            secretName: datadog-secret
+            secretName: datadog-keys
             keyName: api-key
           appSecret:
-            secretName: datadog-secret
+            secretName: datadog-keys
             keyName: app-key
       features:
         apm:
