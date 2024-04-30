@@ -37,9 +37,7 @@ variable "datadog" {
   description = "Map of Datadog configurations"
   type        = any
   default = {
-    site               = "datadoghq.eu"
-    agent_api_key_name = "kubernetes-platform-example"
-    agent_app_key_name = "kubernetes-platform-example"
+    site = "datadoghq.eu"
   }
 }
 
