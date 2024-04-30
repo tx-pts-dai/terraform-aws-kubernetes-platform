@@ -121,4 +121,8 @@ module "lacework" {
   source = "../../modules/lacework"
 
   cluster_name = module.k8s_platform.eks.cluster_name
+
+  agent_tags = {
+    KubernetesCluster = module.k8s_platform.eks.cluster_name
+  }
 }
