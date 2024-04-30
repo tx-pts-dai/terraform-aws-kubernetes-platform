@@ -40,6 +40,7 @@ provider "datadog" {
   api_url = "https://api.${var.datadog_site}/"
   api_key = var.datadog_api_key
   app_key = var.datadog_app_key
+  validate = true
 }
 
 provider "kubernetes" {
@@ -85,9 +86,6 @@ module "k8s_platform" {
   name = "datadog"
 
   enable_datadog = true
-  datadog = {
-    site = var.datadog_site
-  }
 
   tags = {
     Environment = "sandbox"
