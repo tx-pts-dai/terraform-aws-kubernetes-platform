@@ -10,7 +10,7 @@ resource "datadog_application_key" "datadog_agent" {
 }
 
 module "datadog" {
-  count = var.enable_datadog ? 1 : 0 # required to avoid error on datadog_api_key.datadog_agent[0].key reference
+  count   = var.enable_datadog ? 1 : 0 # required to avoid error on datadog_api_key.datadog_agent[0].key reference
   source  = "aws-ia/eks-blueprints-addon/aws"
   version = "~> 1.0"
 
@@ -45,7 +45,7 @@ module "datadog" {
 }
 
 resource "kubernetes_secret" "datadog_keys" { # TODO: do we need this also in AWS secretsmanager?
-  count = var.enable_datadog ? 1 : 0
+  count      = var.enable_datadog ? 1 : 0
   depends_on = [module.datadog]
   metadata {
     name      = "datadog-keys"
@@ -62,7 +62,7 @@ resource "kubernetes_secret" "datadog_keys" { # TODO: do we need this also in AW
 # Datadog Agent
 
 resource "kubectl_manifest" "datadog_agent" {
-  count = var.enable_datadog ? 1 : 0
+  count      = var.enable_datadog ? 1 : 0
   depends_on = [module.datadog]
   yaml_body  = <<-YAML
     apiVersion: datadoghq.com/v2alpha1
@@ -83,5 +83,5 @@ resource "kubectl_manifest" "datadog_agent" {
           enabled: true
         logCollection:
           enabled: true
-  YAML 
+  YAML
 }
