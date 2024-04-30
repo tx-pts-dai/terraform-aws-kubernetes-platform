@@ -4,6 +4,11 @@ on:
   pull_request:
     paths:
       - 'examples/lacework/**'
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - closed
 
 permissions:
   id-token: write
@@ -13,14 +18,14 @@ permissions:
 jobs:
   example_lacework_deploy:
     if: github.event_name == 'pull_request' && github.event.action != 'closed'
-    uses: tx-pts-dai/github-workflows/.github/workflows/tf-dflook-feature.yaml@v0.10.0
+    uses: tx-pts-dai/github-workflows/.github/workflows/tf-feature.yaml@v0.16.0
     with:
       environment: examples
       tf_dir: examples/lacework
 
   example_lacework_destroy:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
-    uses: tx-pts-dai/github-workflows/.github/workflows/tf-dflook-feature.yaml@v0.10.0
+    uses: tx-pts-dai/github-workflows/.github/workflows/tf-feature.yaml@v0.16.0
     with:
       environment: examples
       tf_dir: examples/lacework

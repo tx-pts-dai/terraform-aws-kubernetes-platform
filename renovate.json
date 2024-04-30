@@ -1,0 +1,18 @@
+{
+  "baseBranches": ["main"],
+  "branchPrefix": "renovate_",
+  "rebaseWhen": "conflicted",
+  "extends": [
+    "config:recommended"
+  ],
+  "reviewers": ["team:DAI-Team"],
+  "enabledManagers": ["github-actions"],
+  "packageRules": [
+    {
+      "matchManagers": ["github-actions"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "automerge": false,
+      "pinDigests": true
+    }
+  ]
+}

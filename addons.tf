@@ -205,12 +205,19 @@ resource "kubectl_manifest" "secretsmanager_auth" {
 ################################################################################
 # Kube Downscaler (placeholder)
 
-# module "downscaler" {
-#   source  = "terraform-aws-modules/eks/aws//modules/downscaler"
-#   version = "12.0.0"
+module "downscaler" {
+  source  = "tx-pts-dai/downscaler/kubernetes"
+  version = "0.3.0"
 
-#   cluster_name = module.eks.cluster_name
-#   namespace    = "kube-system"
+  count = var.addons.downscaler.enabled ? 1 : 0
 
-#   tags = local.tags
-# }
+  image_version = try(var.addons.downscaler.image_version, "23.2.0")
+  dry_run       = try(var.addons.downscaler.dry_run, false)
+  custom_args   = try(var.addons.downscaler.custom_args, [])
+  node_selector = try(var.addons.downscaler.node_selector, {})
+  tolerations   = try(var.addons.downscaler.tolerations, [])
+
+  depends_on = [
+    module.addons
+  ]
+}

@@ -1,5 +1,5 @@
 terraform {
-  required_version = ">= 1.3.2"
+  required_version = ">= 1.5.0"
 
   backend "s3" {
     bucket               = "tf-state-911453050078"
@@ -90,7 +90,7 @@ provider "lacework" {
 module "k8s_platform" {
   source = "../../"
 
-  name = "lacework"
+  name = "ex-lacework"
 
   cluster_admins = var.cluster_admins
 
@@ -108,8 +108,6 @@ module "k8s_platform" {
       { public = 24 },
       { private = 24 },
       { intra = 26 },
-      { database = 26 },
-      { redshift = 26 },
       { karpetner = 22 }
     ]
   }

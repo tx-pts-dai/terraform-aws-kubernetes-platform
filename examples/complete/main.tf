@@ -1,5 +1,5 @@
 terraform {
-  required_version = ">= 1.3.2"
+  required_version = ">= 1.5.0"
 
   backend "s3" {
     bucket               = "tf-state-911453050078"
@@ -71,7 +71,7 @@ provider "kubectl" {
 module "k8s_platform" {
   source = "../../"
 
-  name = "complete"
+  name = "ex-complete"
 
   cluster_admins = var.cluster_admins
 
@@ -97,5 +97,17 @@ module "k8s_platform" {
 
   karpenter = {
     subnet_cidrs = module.k8s_platform.network.grouped_networks["karpenter"]
+  }
+
+  addons = {
+    # Core addons
+    aws_load_balancer_controller = { enabled = true }
+    external_dns                 = { enabled = true }
+    external_secrets             = { enabled = true }
+    fargate_fluentbit            = { enabled = true }
+    metrics_server               = { enabled = true }
+
+    # Optional addons
+    downscaler = { enabled = true }
   }
 }
