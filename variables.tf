@@ -45,6 +45,7 @@ variable "addons" {
     kube_prometheus_stack = { enabled = false }
     cert_manager          = { enabled = false }
     ingress_nginx         = { enabled = false }
+    downscaler            = { enabled = false }
   }
 }
 
