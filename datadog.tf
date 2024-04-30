@@ -10,12 +10,13 @@ resource "datadog_application_key" "datadog_agent" {
 }
 
 module "datadog" {
+  count = var.enable_datadog ? 1 : 0 # required to avoid error on datadog_api_key.datadog_agent[0].key reference
   source  = "aws-ia/eks-blueprints-addon/aws"
   version = "~> 1.0"
 
   max_history      = 10
-  create           = var.enable_datadog
-  chart            = "datadog/datadog-operator"
+  create           = var.enable_datadog # this is not enough to avoid error on datadog_api_key.datadog_agent[0].key reference
+  chart            = "datadog-operator"
   repository       = "https://helm.datadoghq.com"
   chart_version    = try(var.datadog.operator_chart_version, "1.6.0")
   description      = "Open source Kubernetes Operator that enables you to deploy and configure the Datadog Agent in a Kubernetes environment"
@@ -24,10 +25,10 @@ module "datadog" {
 
   values = try(var.datadog.values, [])
 
-  set = {
+  set = [{
     name  = "site"
     value = var.datadog.site
-  }
+  }]
 
   set_sensitive = [
     {
@@ -45,9 +46,10 @@ module "datadog" {
 
 resource "kubernetes_secret" "datadog_keys" { # TODO: do we need this also in AWS secretsmanager?
   count = var.enable_datadog ? 1 : 0
+  depends_on = [module.datadog]
   metadata {
     name      = "datadog-keys"
-    namespace = "datadog"
+    namespace = "monitoring"
   }
 
   data = {
@@ -60,6 +62,7 @@ resource "kubernetes_secret" "datadog_keys" { # TODO: do we need this also in AW
 # Datadog Agent
 
 resource "kubectl_manifest" "datadog_agent" {
+  count = var.enable_datadog ? 1 : 0
   depends_on = [module.datadog]
   yaml_body  = <<-YAML
     apiVersion: datadoghq.com/v2alpha1
