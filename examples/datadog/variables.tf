@@ -8,7 +8,12 @@ variable "datadog_site" {
   description = "The Datadog site to use"
   type        = string
   default     = "datadoghq.eu"
+}
 
+variable "enable_dd_integration" {
+  description = "Enable Datadog integration"
+  type        = bool
+  default     = true
 }
 
 variable "datadog_api_key" {
