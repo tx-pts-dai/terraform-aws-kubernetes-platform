@@ -36,9 +36,7 @@ variable "enable_datadog" {
 variable "datadog" {
   description = "Map of Datadog configurations"
   type        = any
-  default = {
-    site = "datadoghq.eu"
-  }
+  default     = {}
 }
 
 variable "addons" {

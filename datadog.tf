@@ -1,3 +1,7 @@
+locals {
+  datadog_site = try(var.datadog.site, "datadoghq.eu")
+}
+
 # Datadog Operator
 resource "datadog_api_key" "datadog_agent" {
   count = var.enable_datadog ? 1 : 0
@@ -27,19 +31,19 @@ module "datadog" {
 
   set = [{
     name  = "site"
-    value = var.datadog.site
+    value = local.datadog_site
   }]
 
-  set_sensitive = [
-    {
-      name  = "apiKey"
-      value = datadog_api_key.datadog_agent[0].key
-    },
-    {
-      name  = "appKey"
-      value = datadog_application_key.datadog_agent[0].key
-    },
-  ]
+  # set_sensitive = [
+  #   {
+  #     name  = "apiKey"
+  #     value = var.datadog.api_key
+  #   },
+  #   {
+  #     name  = "appKey"
+  #     value = var.datadog.app_key
+  #   },
+  # ]
 
   tags = local.tags
 }
@@ -71,7 +75,9 @@ resource "kubectl_manifest" "datadog_agent" {
       name: datadog-agent
       namespace: monitoring
     spec:
+      clusterName: ${local.stack_name}
       global:
+        site: ${local.datadog_site}
         credentials:
           apiSecret:
             secretName: datadog-keys

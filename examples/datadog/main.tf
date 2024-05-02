@@ -78,14 +78,23 @@ provider "kubectl" {
   }
 }
 
-
-
 module "k8s_platform" {
   source = "../../"
 
   name = "datadog"
 
-  enable_datadog = true
+  enable_dd_integration = true
+
+  cluster_admins = {
+    cicd = {
+      role_name = "cicd-iac"
+    }
+  }
+
+  datadog = {
+    api_key = var.datadog_api_key
+    app_key = var.datadog_app_key
+  }
 
   tags = {
     Environment = "sandbox"
