@@ -16,7 +16,7 @@ terraform {
     }
     datadog = {
       source  = "DataDog/datadog"
-      version = ">= 3.0.0"
+      version = "~> 3.39"
     }
     kubernetes = {
       source  = "hashicorp/kubernetes"
@@ -37,7 +37,7 @@ provider "aws" {
   region = local.region
 }
 
-provider "datadog" {
+provider "datadog" { # required even if datadog is not used
   validate = false
 }
 
