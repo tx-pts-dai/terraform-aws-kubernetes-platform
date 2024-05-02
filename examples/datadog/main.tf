@@ -83,7 +83,7 @@ module "k8s_platform" {
 
   name = "datadog"
 
-  enable_dd_integration = true
+  enable_datadog = true
 
   cluster_admins = {
     cicd = {
