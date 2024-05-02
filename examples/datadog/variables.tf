@@ -10,12 +10,6 @@ variable "datadog_site" {
   default     = "datadoghq.eu"
 }
 
-variable "enable_dd_integration" {
-  description = "Enable Datadog integration"
-  type        = bool
-  default     = true
-}
-
 variable "datadog_api_key" {
   description = "The Datadog API key"
   type        = string
