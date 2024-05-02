@@ -10,6 +10,9 @@ on:
       - synchronize
       - reopened
       - closed
+    branches-ignore:    
+      - 'renovate_**'
+
 
 permissions:
   id-token: write
