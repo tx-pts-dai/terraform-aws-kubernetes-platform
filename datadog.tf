@@ -75,8 +75,8 @@ resource "kubectl_manifest" "datadog_agent" {
       name: datadog-agent
       namespace: monitoring
     spec:
-      clusterName: ${local.stack_name}
       global:
+        clusterName: ${local.stack_name}
         site: ${local.datadog_site}
         credentials:
           apiSecret:
