@@ -21,3 +21,4 @@ jobs:
     with:
       environment: examples
       tf_dir: ${{ matrix.directory }}
+      tf_workspace: ${{ github.ref_name }}
