@@ -36,7 +36,11 @@ variable "enable_datadog" {
 variable "datadog" {
   description = "Map of Datadog configurations"
   type        = any
-  default     = {}
+  default = {
+    # set the datadog site here and not in the operator_values as this is used for both the operator and agent
+    site            = "datadoghq.eu"
+    operator_values = []
+  }
 }
 
 variable "addons" {

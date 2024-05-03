@@ -1,7 +1,3 @@
-locals {
-  datadog_site = try(var.datadog.site, "datadoghq.eu")
-}
-
 # Datadog Operator
 resource "datadog_api_key" "datadog_agent" {
   count = var.enable_datadog ? 1 : 0
@@ -13,33 +9,30 @@ resource "datadog_application_key" "datadog_agent" {
   name  = try(var.datadog.agent_app_key_name, local.stack_name)
 }
 
-module "datadog" {
-  count      = var.enable_datadog ? 1 : 0 # required to avoid error on datadog_api_key.datadog_agent[0].key reference
+resource "helm_release" "datadog" {
+  count      = var.enable_datadog ? 1 : 0
   depends_on = [kubectl_manifest.karpenter_node_pool]
-  source     = "aws-ia/eks-blueprints-addon/aws"
-  version    = "~> 1.0"
 
-  max_history      = 10
-  create           = var.enable_datadog # this is not enough to avoid error on datadog_api_key.datadog_agent[0].key reference
-  chart            = "datadog-operator"
+  name             = "datadog-operator"
   repository       = "https://helm.datadoghq.com"
-  chart_version    = try(var.datadog.operator_chart_version, "1.6.0")
   description      = "Open source Kubernetes Operator that enables you to deploy and configure the Datadog Agent in a Kubernetes environment"
+  chart            = "datadog-operator"
   namespace        = "monitoring"
+  version          = try(var.datadog.operator_chart_version, "1.6.0")
+  max_history      = 10
   create_namespace = true
 
-  values = try(var.datadog.values, [])
+  values = []
 
-  set = [{
+  set {
     name  = "site"
-    value = local.datadog_site
-  }]
-  tags = local.tags
+    value = var.datadog.site
+  }
 }
 
 resource "kubernetes_secret" "datadog_keys" { # TODO: do we need this also in AWS secretsmanager?
   count      = var.enable_datadog ? 1 : 0
-  depends_on = [module.datadog]
+  depends_on = [helm_release.datadog]
   metadata {
     name      = "datadog-keys"
     namespace = "monitoring"
@@ -56,9 +49,10 @@ resource "kubernetes_secret" "datadog_keys" { # TODO: do we need this also in AW
 
 resource "kubectl_manifest" "datadog_agent" {
   count      = var.enable_datadog ? 1 : 0
-  depends_on = [module.datadog, kubernetes_secret.datadog_keys, kubectl_manifest.karpenter_node_pool]
+  depends_on = [helm_release.datadog, kubernetes_secret.datadog_keys, kubectl_manifest.karpenter_node_pool]
   # full list of features available https://github.com/DataDog/datadog-operator/blob/main/examples/datadogagent/v2alpha1/datadog-agent-all.yaml
   # TODO: decide if we want to pass the whole yaml or single variables
+  # TODO: if kept like this, double check default features and add anything that is missing for stronger defaults
   yaml_body = try(var.datadog.agent_manifest, <<-YAML
     apiVersion: datadoghq.com/v2alpha1
     kind: DatadogAgent
@@ -68,7 +62,7 @@ resource "kubectl_manifest" "datadog_agent" {
     spec:
       global:
         clusterName: ${local.stack_name}
-        site: ${local.datadog_site}
+        site: ${var.datadog.site}
         credentials:
           apiSecret:
             secretName: datadog-keys

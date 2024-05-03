@@ -103,7 +103,6 @@ as described in the `.pre-commit-config.yaml` file
 | Name | Source | Version |
 |------|--------|---------|
 | <a name="module_addons"></a> [addons](#module\_addons) | aws-ia/eks-blueprints-addons/aws | 1.16.1 |
-| <a name="module_datadog"></a> [datadog](#module\_datadog) | aws-ia/eks-blueprints-addon/aws | ~> 1.0 |
 | <a name="module_downscaler"></a> [downscaler](#module\_downscaler) | tx-pts-dai/downscaler/kubernetes | 0.3.0 |
 | <a name="module_ebs_csi_driver_irsa"></a> [ebs\_csi\_driver\_irsa](#module\_ebs\_csi\_driver\_irsa) | terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks | 5.37.2 |
 | <a name="module_eks"></a> [eks](#module\_eks) | terraform-aws-modules/eks/aws | 20.8.3 |
@@ -121,6 +120,7 @@ as described in the `.pre-commit-config.yaml` file
 | [aws_subnet.karpenter](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/subnet) | resource |
 | [datadog_api_key.datadog_agent](https://registry.terraform.io/providers/DataDog/datadog/latest/docs/resources/api_key) | resource |
 | [datadog_application_key.datadog_agent](https://registry.terraform.io/providers/DataDog/datadog/latest/docs/resources/application_key) | resource |
+| [helm_release.datadog](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
 | [helm_release.karpenter](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
 | [kubectl_manifest.datadog_agent](https://registry.terraform.io/providers/alekc/kubectl/latest/docs/resources/manifest) | resource |
 | [kubectl_manifest.karpenter_node_class](https://registry.terraform.io/providers/alekc/kubectl/latest/docs/resources/manifest) | resource |
@@ -158,6 +158,7 @@ as described in the `.pre-commit-config.yaml` file
 | <a name="input_cluster_admins"></a> [cluster\_admins](#input\_cluster\_admins) | Map of IAM roles to add as cluster admins. Role name is looked up and converted to ARN | <pre>map(object({<br>    role_name         = string<br>    kubernetes_groups = optional(list(string))<br>  }))</pre> | `{}` | no |
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 | <a name="input_datadog"></a> [datadog](#input\_datadog) | Map of Datadog configurations | `any` | <pre>{<br>  "agent_api_key_name": "kubernetes-platform-example",<br>  "agent_app_key_name": "kubernetes-platform-example",<br>  "site": "datadoghq.eu"<br>}</pre> | no |
 >>>>>>> 97cc9f3 (fum-3140-fmt-readme)
 =======
@@ -166,6 +167,9 @@ as described in the `.pre-commit-config.yaml` file
 =======
 | <a name="input_datadog"></a> [datadog](#input\_datadog) | Map of Datadog configurations | `any` | `{}` | no |
 >>>>>>> 9562c3f (fum-3140-example-add-dd-integration)
+=======
+| <a name="input_datadog"></a> [datadog](#input\_datadog) | Map of Datadog configurations | `any` | <pre>{<br>  "operator_values": [],<br>  "site": "datadoghq.eu"<br>}</pre> | no |
+>>>>>>> 38542d6 (datadog-convert-to-helm-release)
 | <a name="input_eks"></a> [eks](#input\_eks) | Map of EKS configurations | `any` | `{}` | no |
 | <a name="input_enable_datadog"></a> [enable\_datadog](#input\_enable\_datadog) | Enable Datadog integration | `bool` | `false` | no |
 | <a name="input_karpenter"></a> [karpenter](#input\_karpenter) | Map of Karpenter configurations | `any` | `{}` | no |

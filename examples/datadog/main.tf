@@ -1,5 +1,5 @@
 terraform {
-  required_version = ">= 1.3.2"
+  required_version = ">= 1.5.2"
 
   backend "s3" {
     bucket               = "tf-state-911453050078"
@@ -92,6 +92,9 @@ module "k8s_platform" {
   }
 
   datadog = {
+    # set the datadog site here and not in the operator_values as this is used for both the operator and agent
+    site            = "datadoghq.eu"
+    operator_values = []
     api_key = var.datadog_api_key
     app_key = var.datadog_app_key
   }
