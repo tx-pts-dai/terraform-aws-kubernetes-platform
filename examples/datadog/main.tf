@@ -83,7 +83,6 @@ module "k8s_platform" {
 
   name = "datadog"
 
-  enable_datadog = true
 
   cluster_admins = {
     cicd = {
@@ -91,12 +90,9 @@ module "k8s_platform" {
     }
   }
 
-  datadog = {
-    # set the datadog site here and not in the operator_values as this is used for both the operator and agent
-    site            = "datadoghq.eu"
-    operator_values = []
-    api_key = var.datadog_api_key
-    app_key = var.datadog_app_key
+  enable_datadog = true
+  datadog_operator_values = {
+    "resources.limits.memory" = "256Mi"
   }
 
   tags = {

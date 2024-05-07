@@ -159,6 +159,7 @@ as described in the `.pre-commit-config.yaml` file
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 | <a name="input_datadog"></a> [datadog](#input\_datadog) | Map of Datadog configurations | `any` | <pre>{<br>  "agent_api_key_name": "kubernetes-platform-example",<br>  "agent_app_key_name": "kubernetes-platform-example",<br>  "site": "datadoghq.eu"<br>}</pre> | no |
 >>>>>>> 97cc9f3 (fum-3140-fmt-readme)
 =======
@@ -170,6 +171,11 @@ as described in the `.pre-commit-config.yaml` file
 =======
 | <a name="input_datadog"></a> [datadog](#input\_datadog) | Map of Datadog configurations | `any` | <pre>{<br>  "operator_values": [],<br>  "site": "datadoghq.eu"<br>}</pre> | no |
 >>>>>>> 38542d6 (datadog-convert-to-helm-release)
+=======
+| <a name="input_datadog"></a> [datadog](#input\_datadog) | Map of Datadog configurations | `any` | `{}` | no |
+| <a name="input_datadog_operator_sensitive_values"></a> [datadog\_operator\_sensitive\_values](#input\_datadog\_operator\_sensitive\_values) | Map of Datadog Operator sensitive values | `map(string)` | `{}` | no |
+| <a name="input_datadog_operator_values"></a> [datadog\_operator\_values](#input\_datadog\_operator\_values) | Map of Datadog Operator values | `map(string)` | `{}` | no |
+>>>>>>> 606ad56 (fum-3140 parametrize values and manifest)
 | <a name="input_eks"></a> [eks](#input\_eks) | Map of EKS configurations | `any` | `{}` | no |
 | <a name="input_enable_datadog"></a> [enable\_datadog](#input\_enable\_datadog) | Enable Datadog integration | `bool` | `false` | no |
 | <a name="input_karpenter"></a> [karpenter](#input\_karpenter) | Map of Karpenter configurations | `any` | `{}` | no |

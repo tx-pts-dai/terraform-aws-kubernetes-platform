@@ -1,3 +1,66 @@
+locals {
+  datadog_operator_set = merge({
+    "site"                      = "datadoghq.eu",
+    "resources.requests.cpu"    = "10m",
+    "resources.requests.memory" = "50Mi",
+  }, var.datadog_operator_values)
+
+  datadog_agent_manifest_features = try(indent(2, join("", ["\n", var.datadog.agent_manifest_features])), indent(2, <<-YAML
+
+    features:
+      apm:
+        enabled: true
+      logCollection:
+        enabled: true
+  YAML
+  ))
+
+  datadog_agent_manifest_override = try(indent(2, join("", ["\n", var.datadog.agent_manifest_override])), indent(2, <<-YAML
+
+    override:
+      clusterAgent:
+        containers:
+          cluster-agent:
+            resources:
+              requests:
+                cpu: 30m
+                memory: 200Mi
+              limits:
+                memory: 300Mi
+      nodeAgent:
+        containers:
+          process-agent:
+            resources:
+              requests:
+                cpu: 10m
+                memory: 64Mi
+              limits:
+                memory: 128Mi
+          trace-agent:
+            resources:
+              requests:
+                cpu: 35m
+                memory: 56Mi
+              limits:
+                memory: 100Mi
+  YAML
+  ))
+}
+
+
+resource "kubernetes_secret" "datadog_keys" { # TODO: do we need this also in AWS secretsmanager?
+  count      = var.enable_datadog ? 1 : 0
+  depends_on = [helm_release.datadog]
+  metadata {
+    name      = "datadog-keys"
+    namespace = "monitoring"
+  }
+
+  data = {
+    api-key = datadog_api_key.datadog_agent[0].key
+    app-key = datadog_application_key.datadog_agent[0].key
+  }
+}
 # Datadog Operator
 resource "datadog_api_key" "datadog_agent" {
   count = var.enable_datadog ? 1 : 0
@@ -22,25 +85,20 @@ resource "helm_release" "datadog" {
   max_history      = 10
   create_namespace = true
 
-  values = []
-
-  set {
-    name  = "site"
-    value = var.datadog.site
-  }
-}
-
-resource "kubernetes_secret" "datadog_keys" { # TODO: do we need this also in AWS secretsmanager?
-  count      = var.enable_datadog ? 1 : 0
-  depends_on = [helm_release.datadog]
-  metadata {
-    name      = "datadog-keys"
-    namespace = "monitoring"
+  dynamic "set" {
+    for_each = local.datadog_operator_set
+    content {
+      name  = set.key
+      value = set.value
+    }
   }
 
-  data = {
-    api-key = datadog_api_key.datadog_agent[0].key
-    app-key = datadog_application_key.datadog_agent[0].key
+  dynamic "set_sensitive" {
+    for_each = var.datadog_operator_sensitive_values
+    content {
+      name  = set_sensitive.key
+      value = set_sensitive.value
+    }
   }
 }
 
@@ -53,7 +111,7 @@ resource "kubectl_manifest" "datadog_agent" {
   # full list of features available https://github.com/DataDog/datadog-operator/blob/main/examples/datadogagent/v2alpha1/datadog-agent-all.yaml
   # TODO: decide if we want to pass the whole yaml or single variables
   # TODO: if kept like this, double check default features and add anything that is missing for stronger defaults
-  yaml_body = try(var.datadog.agent_manifest, <<-YAML
+  yaml_body = join("\n", [<<-YAML
     apiVersion: datadoghq.com/v2alpha1
     kind: DatadogAgent
     metadata:
@@ -62,7 +120,7 @@ resource "kubectl_manifest" "datadog_agent" {
     spec:
       global:
         clusterName: ${local.stack_name}
-        site: ${var.datadog.site}
+        site: ${local.datadog_operator_set.site}
         credentials:
           apiSecret:
             secretName: datadog-keys
@@ -70,11 +128,6 @@ resource "kubectl_manifest" "datadog_agent" {
           appSecret:
             secretName: datadog-keys
             keyName: app-key
-      features:
-        apm:
-          enabled: true
-        logCollection:
-          enabled: true
   YAML
-  )
+  , local.datadog_agent_manifest_override, local.datadog_agent_manifest_features])
 }
