@@ -36,11 +36,26 @@ variable "enable_datadog" {
 variable "datadog" {
   description = "Map of Datadog configurations"
   type        = any
-  default = {
-    # set the datadog site here and not in the operator_values as this is used for both the operator and agent
-    site            = "datadoghq.eu"
-    operator_values = []
-  }
+  default     = {}
+  # TODO: currently possible values. How to document them?
+  # agent_manifest_override
+  # agent_manifest_features
+  # agent_api_key_name
+  # agent_app_key_name
+  # operator_chart_version
+}
+
+variable "datadog_operator_values" {
+  description = "Map of Datadog Operator values"
+  type        = map(string)
+  default     = {}
+  # This needs to be a separated variable with type map(string) otherwise I could not do the merge in datadog.tf
+}
+
+variable "datadog_operator_sensitive_values" {
+  description = "Map of Datadog Operator sensitive values"
+  type        = map(string)
+  default     = {}
 }
 
 variable "addons" {
