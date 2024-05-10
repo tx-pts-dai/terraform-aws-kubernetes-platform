@@ -1,0 +1,45 @@
+name:  Deploy Module Examples - Simple
+# Deploy Examples code
+# Uses the "examples/simple/sandbox" github environment
+# Get it's content with "gh variable list --repo tx-pts-dai/terraform-aws-kubernetes-platform --env examples%2Fsimple%2Fsandbox" command
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/examples-simple.yaml'
+      - 'examples/simple/**'
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - closed
+    branches-ignore:
+      - 'renovate_*'
+
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
+jobs:
+  plan:
+    if: github.event_name == 'pull_request'
+    strategy:
+      fail-fast: false
+      matrix:
+        directory: [examples/simple]
+        environment: [sandbox]
+    uses: tx-pts-dai/github-workflows/.github/workflows/tf-plan.yaml@v0.18.0
+    with:
+      environment: ${{ matrix.directory }}/${{ matrix.environment }}
+      tf_dir: ${{ matrix.directory }}
+  apply:
+    if: github.ref_name || github.event.repository.default_branch && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    strategy:
+      fail-fast: false
+      matrix:
+        directory: [examples/simple]
+        environment: [sandbox]
+    uses: tx-pts-dai/github-workflows/.github/workflows/tf-apply.yaml@v0.18.0
+    with:
+      environment: ${{ matrix.directory }}/${{ matrix.environment }}
+      tf_dir: ${{ matrix.directory }}
