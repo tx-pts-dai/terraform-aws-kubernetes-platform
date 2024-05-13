@@ -45,7 +45,9 @@ module "lacework" {
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| <a name="input_agent_tags"></a> [agent\_tags](#input\_agent\_tags) | A map/dictionary of Tags to be assigned to the Lacework datacollector | `map(string)` | `{}` | no |
 | <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | Name of the cluster | `string` | n/a | yes |
+| <a name="input_enable_cluster_agent"></a> [enable\_cluster\_agent](#input\_enable\_cluster\_agent) | A boolean representing whether the Lacework cluster agent should be deployed | `bool` | `true` | no |
 | <a name="input_namespace"></a> [namespace](#input\_namespace) | Namespace for Lacework resources | `string` | `"lacework"` | no |
 | <a name="input_node_affinity"></a> [node\_affinity](#input\_node\_affinity) | Node affinity settings | <pre>list(object({<br>    key      = string<br>    operator = string<br>    values   = list(string)<br>  }))</pre> | <pre>[<br>  {<br>    "key": "eks.amazonaws.com/compute-type",<br>    "operator": "NotIn",<br>    "values": [<br>      "fargate"<br>    ]<br>  }<br>]</pre> | no |
 | <a name="input_pod_priority_class_name"></a> [pod\_priority\_class\_name](#input\_pod\_priority\_class\_name) | Name of the pod priority class | `string` | `"system-node-critical"` | no |

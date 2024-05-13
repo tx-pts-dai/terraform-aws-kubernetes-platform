@@ -17,7 +17,8 @@ jobs:
           - examples/lacework
           - examples/complete
 
-    uses: tx-pts-dai/github-workflows/.github/workflows/tf-cleanup.yaml@v0.16.0
+    uses: tx-pts-dai/github-workflows/.github/workflows/tf-cleanup.yaml@v0.18.0
     with:
       environment: examples
       tf_dir: ${{ matrix.directory }}
+      tf_workspace: ${{ github.ref_name }}
