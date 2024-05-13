@@ -15,11 +15,14 @@ module "lacework_k8s_datacollector" {
   source  = "lacework/agent/kubernetes"
   version = "2.5.1"
 
+  enable_cluster_agent = var.enable_cluster_agent
+
   namespace = kubernetes_namespace_v1.lacework.metadata[0].name
 
   lacework_access_token = lacework_agent_access_token.kubernetes.token
   lacework_server_url   = var.server_url
   lacework_cluster_name = var.cluster_name
+  lacework_agent_tags   = var.agent_tags
 
   pod_cpu_request         = var.resources.cpu_request
   pod_mem_request         = var.resources.mem_request

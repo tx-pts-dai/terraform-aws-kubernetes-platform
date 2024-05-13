@@ -10,6 +10,18 @@ variable "namespace" {
   default     = "lacework"
 }
 
+variable "enable_cluster_agent" {
+  description = "A boolean representing whether the Lacework cluster agent should be deployed"
+  type        = bool
+  default     = true
+}
+
+variable "agent_tags" {
+  type        = map(string)
+  description = "A map/dictionary of Tags to be assigned to the Lacework datacollector"
+  default     = {}
+}
+
 variable "cluster_name" {
   description = "Name of the cluster"
   type        = string
