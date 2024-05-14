@@ -41,8 +41,6 @@ locals {
 # Notes
 # The module should support passing in a vpc or creating one.
 # If passing in a vpc, the module should support creating subnets.
-# To start off with, lets not do too much magic and pass in subnet masks for the
-# karpenter managed subnets.
 
 # VPC  Resources
 locals {
@@ -56,9 +54,7 @@ locals {
 module "network" {
   source = "./modules/network"
 
-  create_vpc = try(var.vpc.create, false)
-
-  cidr       = try(var.vpc.cidr, "10.0.0.0/16")
+  create_vpc = try(var.vpc.enabled, false)
   stack_name = local.stack_name
 
   tags = local.tags
@@ -78,7 +74,7 @@ data "aws_iam_roles" "sso" {
 data "aws_iam_roles" "iam_cluster_admins" {
   for_each = var.cluster_admins
 
-  name_regex = each.value.role_name
+  name_regex = "\\b${each.value.role_name}\\b"
 }
 
 locals {
@@ -170,6 +166,8 @@ data "aws_availability_zones" "available" {}
 
 locals {
   karpenter = {
+    subnet_cidrs = try(var.karpenter.subnet_cidrs, module.network.grouped_networks.karpenter)
+
     chart_version           = try(var.karpenter.chart_version, "0.35.2")
     replicas                = try(var.karpenter.replicas, 1)
     service_monitor_enabled = try(var.karpenter.service_monitor_enabled, false)
@@ -179,11 +177,12 @@ locals {
 }
 
 resource "aws_subnet" "karpenter" {
-  count = length(var.karpenter.subnet_cidrs)
+  count = length(local.karpenter.subnet_cidrs)
 
   vpc_id            = local.vpc.vpc_id
-  cidr_block        = var.karpenter.subnet_cidrs[count.index]
+  cidr_block        = local.karpenter.subnet_cidrs[count.index]
   availability_zone = element(local.azs, count.index)
+
   tags = merge(local.tags, {
     Name                     = "${module.eks.cluster_name}-karpenter-${element(local.azs, count.index)}"
     "karpenter.sh/discovery" = module.eks.cluster_name
@@ -200,7 +199,7 @@ data "aws_route_tables" "private_route_tables" {
 }
 
 resource "aws_route_table_association" "karpenter" {
-  count = length(var.karpenter.subnet_cidrs)
+  count = length(local.karpenter.subnet_cidrs)
 
   subnet_id      = aws_subnet.karpenter[count.index].id
   route_table_id = try(data.aws_route_tables.private_route_tables.ids[count.index], data.aws_route_tables.private_route_tables.ids[0], "") # Depends on the number of Nat Gateways
