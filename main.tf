@@ -346,7 +346,7 @@ resource "time_sleep" "wait_on_destroy" {
 
 # Store cluster name info for app deployment
 resource "aws_ssm_parameter" "cluster_name" {
-  name  = "/platform/${local.stack_name}/name"
+  name  = "/platform/${module.eks.cluster_name}/name"
   type  = "String"
-  value = local.stack_name
+  value = module.eks.cluster_name
 }
