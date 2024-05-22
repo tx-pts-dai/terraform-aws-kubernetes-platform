@@ -34,7 +34,7 @@ terraform {
 }
 
 provider "aws" {
-  region = var.region
+  region = local.region
 }
 
 provider "kubernetes" {
@@ -87,12 +87,20 @@ provider "lacework" {
   api_secret = jsondecode(data.aws_secretsmanager_secret_version.lacework.secret_string)["secret"]
 }
 
+locals {
+  region = "eu-central-1"
+}
+
 module "k8s_platform" {
   source = "../../"
 
   name = "ex-lacework"
 
-  cluster_admins = var.cluster_admins
+  cluster_admins = {
+    cicd = {
+      role_name = "cicd-iac"
+    }
+  }
 
   tags = {
     Environment = "sandbox"
@@ -101,19 +109,15 @@ module "k8s_platform" {
   }
 
   vpc = {
-    create = true
-    cidr   = "10.0.0.0/16"
-    max_az = 3
+    enabled = true
+    cidr    = "10.0.0.0/16"
+    max_az  = 3
     subnet_configs = [
       { public = 24 },
       { private = 24 },
       { intra = 26 },
-      { karpetner = 22 }
+      { karpenter = 22 }
     ]
-  }
-
-  karpenter = {
-    subnet_cidrs = module.k8s_platform.network.grouped_networks["karpenter"]
   }
 }
 

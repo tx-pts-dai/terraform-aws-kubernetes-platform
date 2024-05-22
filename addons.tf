@@ -1,4 +1,3 @@
-
 ################################################################################
 # EKS Addons
 #
@@ -118,26 +117,8 @@ module "addons" {
   enable_cert_manager  = try(var.addons.cert_manager.enabled, false)
   enable_ingress_nginx = try(var.addons.ingress_nginx.enabled, false)
 
-  # Additional Helm Releases
-  # helm_releases = {
-  #   fluent_operator = {
-  #     chart = "fluent-operator"
-  #     repository = "https://fluentbit.github.io/helm-charts"
-  #     version = "0.9.0"
-  #     namespace = "kube-system"
-  #     set = [
-  #       {
-  #         name  = "foo"
-  #         value = "bar"
-  #       }
-  #     ]
-  #   }
-  # }
-
   depends_on = [
-    module.karpenter,
     helm_release.karpenter,
-    kubectl_manifest.karpenter_node_pool
   ]
 }
 
@@ -188,7 +169,7 @@ module "ebs_csi_driver_irsa" {
 # External Secrets
 
 resource "kubectl_manifest" "secretsmanager_auth" {
-  yaml_body  = <<-YAML
+  yaml_body = <<-YAML
     apiVersion: external-secrets.io/v1beta1
     kind: ClusterSecretStore
     metadata:
@@ -199,11 +180,13 @@ resource "kubectl_manifest" "secretsmanager_auth" {
           service: SecretsManager
           region: ${data.aws_region.current.name}
   YAML
-  depends_on = [module.addons]
+  depends_on = [
+    module.addons
+  ]
 }
 
 ################################################################################
-# Kube Downscaler (placeholder)
+# Kube Downscaler
 
 module "downscaler" {
   source  = "tx-pts-dai/downscaler/kubernetes"

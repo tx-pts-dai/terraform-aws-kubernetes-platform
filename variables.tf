@@ -25,11 +25,6 @@ variable "karpenter" {
   description = "Map of Karpenter configurations"
   type        = any
   default     = {}
-
-  validation {
-    condition     = try(var.karpenter.subnet_cidrs != null, false)
-    error_message = "subnet_cidrs must be set when karpenter is enabled"
-  }
 }
 
 variable "addons" {
@@ -56,7 +51,7 @@ variable "base_domain" {
 }
 
 variable "cluster_admins" {
-  description = "Map of IAM roles to add as cluster admins. Role name is looked up and converted to ARN"
+  description = "Map of IAM roles to add as cluster admins. Only exact matching role names are returned"
   type = map(object({
     role_name         = string
     kubernetes_groups = optional(list(string))
