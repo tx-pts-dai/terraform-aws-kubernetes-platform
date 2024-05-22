@@ -3,16 +3,14 @@ name: Deploy Module Examples - Complete
 on:
   pull_request:
     paths:
-      - '.github/workflows/examples-complete.yaml'
-      - 'examples/complete/**'
+      - examples/complete/**
     types:
       - opened
       - synchronize
       - reopened
       - closed
     branches-ignore:
-      - 'renovate_*'
-
+      - renovate*
 
 permissions:
   id-token: write
