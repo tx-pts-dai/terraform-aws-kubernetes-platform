@@ -343,3 +343,10 @@ resource "time_sleep" "wait_on_destroy" {
   # Sleep for 5 minutes to allow Karpenter to clean up resources
   destroy_duration = "5m"
 }
+
+# Store cluster name info for app deployment
+resource "aws_ssm_parameter" "cluster_name" {
+  name  = "/platform/${local.stack_name}/cluster_name"
+  type  = "String"
+  value = module.eks.cluster_name
+}
