@@ -90,11 +90,6 @@ module "k8s_platform" {
     }
   }
 
-  enable_datadog = true
-  datadog_operator_values = {
-    "resources.limits.memory" = "256Mi"
-  }
-
   tags = {
     Environment = "sandbox"
     GithubRepo  = "terraform-aws-kubernetes-platform"
@@ -108,5 +103,15 @@ module "k8s_platform" {
 
   karpenter = {
     subnet_cidrs = ["10.0.64.0/22", "10.0.68.0/22", "10.0.72.0/22"]
+  }
+}
+
+module "datadog" {
+  source = "../../modules/datadog"
+
+  cluster_name = module.k8s_platform.eks.cluster_name
+  datadog_operator_values = {
+    "site"                    = var.datadog_site,
+    "resources.limits.memory" = "256Mi"
   }
 }
