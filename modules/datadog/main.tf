@@ -1,14 +1,5 @@
-locals {
-  datadog_operator_set = merge({
-    "site"                      = "datadoghq.eu",
-    "resources.requests.cpu"    = "10m",
-    "resources.requests.memory" = "50Mi",
-  }, var.datadog_operator_values)
-}
-
-
 resource "kubernetes_secret" "datadog_keys" { # TODO: do we need this also in AWS secretsmanager?
-  depends_on = [helm_release.datadog_operator]
+  depends_on = [module.datadog_operator]
   metadata {
     name      = "datadog-keys"
     namespace = var.namespace
@@ -28,67 +19,36 @@ resource "datadog_application_key" "datadog_agent" {
   name = try(var.datadog.agent_app_key_name, var.cluster_name)
 }
 
-resource "helm_release" "datadog_operator" {
+module "datadog_operator" {
+  source  = "aws-ia/eks-blueprints-addon/aws"
+  version = "~> 1.0"
 
   name             = "datadog-operator"
   repository       = "https://helm.datadoghq.com"
   description      = "Open source Kubernetes Operator that enables you to deploy and configure the Datadog Agent in a Kubernetes environment"
   chart            = "datadog-operator"
   namespace        = var.namespace
-  version          = try(var.datadog.operator_chart_version, "1.6.0")
   max_history      = 10
+  chart_version    = try(var.datadog.operator_chart_version, "1.6.0")
   atomic           = true
   create_namespace = true
 
-  dynamic "set" {
-    for_each = local.datadog_operator_set
-    content {
-      name  = set.key
-      value = set.value
+  set = [
+    for pair in var.datadog_operator_values :
+    {
+      name  = pair.key
+      value = pair.value
     }
-  }
+  ]
 
-  dynamic "set_sensitive" {
-    for_each = var.datadog_operator_sensitive_values
-    content {
-      name  = set_sensitive.key
-      value = set_sensitive.value
+  set_sensitive = [
+    for pair in var.datadog_operator_sensitive_values :
+    {
+      name  = pair.key
+      value = pair.value
     }
-  }
+  ]
 }
-
-# example with eks-blueprints-addon
-# module "datadog_operator" {
-#   source  = "aws-ia/eks-blueprints-addon/aws"
-#   version = "~> 1.0"
-#   create  = var.enable_datadog
-
-#   name             = "datadog-operator"
-#   repository       = "https://helm.datadoghq.com"
-#   description      = "Open source Kubernetes Operator that enables you to deploy and configure the Datadog Agent in a Kubernetes environment"
-#   chart            = "datadog-operator"
-#   namespace        = var.namespace
-#   max_history      = 10
-#   chart_version    = try(var.datadog.operator_chart_version, "1.6.0")
-#   atomic           = true
-#   create_namespace = true
-
-#   set = [
-#     for pair in local.datadog_operator_set :
-#     {
-#       name  = pair.key
-#       value = pair.value
-#     }
-#   ]
-
-#   set_sensitive = [
-#     for pair in var.datadog_operator_sensitive_values :
-#     {
-#       name  = pair.key
-#       value = pair.value
-#     }
-#   ]
-# }
 
 ################################################################################
 # Datadog Agent
@@ -108,7 +68,7 @@ resource "helm_release" "datadog_agent" {
     spec:
       global:
         clusterName: ${var.cluster_name}
-        site: ${local.datadog_operator_set.site}
+        site: ${var.datadog_agent_values.site}
         credentials:
           apiSecret:
             secretName: datadog-keys
@@ -158,5 +118,5 @@ resource "helm_release" "datadog_agent" {
     }
   }
 
-  depends_on = [helm_release.datadog_operator, kubernetes_secret.datadog_keys]
+  depends_on = [module.datadog_operator, kubernetes_secret.datadog_keys]
 }

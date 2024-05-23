@@ -23,7 +23,11 @@ variable "datadog" {
 variable "datadog_agent_values" {
   description = "Map of Datadog Agent values"
   type        = map(string)
-  default     = {}
+  default = {
+    "site"                      = "datadoghq.eu",
+    "resources.requests.cpu"    = "10m",
+    "resources.requests.memory" = "50Mi",
+  }
 }
 
 variable "datadog_operator_values" {

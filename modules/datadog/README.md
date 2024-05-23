@@ -1,12 +1,14 @@
-# Lacework
+# Datadog
 
-Deploy Lacework Agents
+Deploy the Datadog Operator and the Datadog Agent
 
 ```hcl
-module "lacework" {
-  source = "./modules/lacework"
+module "datadog" {
+  source = "../../modules/datadog"
 
-  cluster_name = module.eks.cluster_name
+  cluster_name = module.k8s_platform.eks.cluster_name
+
+  depends_on = [module.k8s_platform]
 }
 ```
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
@@ -30,7 +32,9 @@ module "lacework" {
 
 ## Modules
 
-No modules.
+| Name | Source | Version |
+|------|--------|---------|
+| <a name="module_datadog_operator"></a> [datadog\_operator](#module\_datadog\_operator) | aws-ia/eks-blueprints-addon/aws | ~> 1.0 |
 
 ## Resources
 
@@ -39,7 +43,6 @@ No modules.
 | [datadog_api_key.datadog_agent](https://registry.terraform.io/providers/DataDog/datadog/latest/docs/resources/api_key) | resource |
 | [datadog_application_key.datadog_agent](https://registry.terraform.io/providers/DataDog/datadog/latest/docs/resources/application_key) | resource |
 | [helm_release.datadog_agent](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
-| [helm_release.datadog_operator](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
 | [kubernetes_secret.datadog_keys](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/secret) | resource |
 
 ## Inputs
@@ -48,7 +51,7 @@ No modules.
 |------|-------------|------|---------|:--------:|
 | <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | Name of the cluster | `string` | n/a | yes |
 | <a name="input_datadog"></a> [datadog](#input\_datadog) | Map of Datadog configurations | `any` | `{}` | no |
-| <a name="input_datadog_agent_values"></a> [datadog\_agent\_values](#input\_datadog\_agent\_values) | Map of Datadog Agent values | `map(string)` | `{}` | no |
+| <a name="input_datadog_agent_values"></a> [datadog\_agent\_values](#input\_datadog\_agent\_values) | Map of Datadog Agent values | `map(string)` | <pre>{<br>  "resources.requests.cpu": "10m",<br>  "resources.requests.memory": "50Mi",<br>  "site": "datadoghq.eu"<br>}</pre> | no |
 | <a name="input_datadog_operator_sensitive_values"></a> [datadog\_operator\_sensitive\_values](#input\_datadog\_operator\_sensitive\_values) | Map of Datadog Operator sensitive values | `map(string)` | `{}` | no |
 | <a name="input_datadog_operator_values"></a> [datadog\_operator\_values](#input\_datadog\_operator\_values) | Map of Datadog Operator values | `map(string)` | `{}` | no |
 | <a name="input_namespace"></a> [namespace](#input\_namespace) | Namespace for Datadog resources | `string` | `"monitoring"` | no |

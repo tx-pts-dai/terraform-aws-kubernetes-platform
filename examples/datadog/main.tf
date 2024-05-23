@@ -115,10 +115,6 @@ module "datadog" {
   source = "../../modules/datadog"
 
   cluster_name = module.k8s_platform.eks.cluster_name
-  datadog_operator_values = {
-    "site"                    = var.datadog_site,
-    "resources.limits.memory" = "256Mi"
-  }
 
   depends_on = [module.k8s_platform]
 }
