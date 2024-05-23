@@ -1,12 +1,14 @@
-# Lacework
+# Datadog
 
-Deploy Lacework Agents
+Deploy the Datadog Operator and the Datadog Agent
 
 ```hcl
-module "lacework" {
-  source = "./modules/lacework"
+module "datadog" {
+  source = "../../modules/datadog"
 
-  cluster_name = module.eks.cluster_name
+  cluster_name = module.k8s_platform.eks.cluster_name
+
+  depends_on = [module.k8s_platform]
 }
 ```
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
