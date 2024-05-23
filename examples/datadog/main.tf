@@ -97,12 +97,17 @@ module "k8s_platform" {
   }
 
   vpc = {
-    create = true
-    cidr   = "10.0.0.0/16"
-  }
-
-  karpenter = {
-    subnet_cidrs = ["10.0.64.0/22", "10.0.68.0/22", "10.0.72.0/22"]
+    enabled = true
+    cidr    = "10.0.0.0/16"
+    max_az  = 3
+    subnet_configs = [
+      { public = 24 },
+      { private = 24 },
+      { intra = 26 },
+      { database = 26 },
+      { redshift = 26 },
+      { karpenter = 22 }
+    ]
   }
 }
 
@@ -114,4 +119,6 @@ module "datadog" {
     "site"                    = var.datadog_site,
     "resources.limits.memory" = "256Mi"
   }
+
+  depends_on = [module.k8s_platform]
 }
