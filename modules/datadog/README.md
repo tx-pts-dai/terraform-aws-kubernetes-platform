@@ -50,10 +50,9 @@ module "datadog" {
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | Name of the cluster | `string` | n/a | yes |
-| <a name="input_datadog"></a> [datadog](#input\_datadog) | Map of Datadog configurations | `any` | `{}` | no |
-| <a name="input_datadog_agent_values"></a> [datadog\_agent\_values](#input\_datadog\_agent\_values) | Map of Datadog Agent values | `map(string)` | <pre>{<br>  "resources.requests.cpu": "10m",<br>  "resources.requests.memory": "50Mi",<br>  "site": "datadoghq.eu"<br>}</pre> | no |
-| <a name="input_datadog_operator_sensitive_values"></a> [datadog\_operator\_sensitive\_values](#input\_datadog\_operator\_sensitive\_values) | Map of Datadog Operator sensitive values | `map(string)` | `{}` | no |
-| <a name="input_datadog_operator_values"></a> [datadog\_operator\_values](#input\_datadog\_operator\_values) | Map of Datadog Operator values | `map(string)` | `{}` | no |
+| <a name="input_datadog"></a> [datadog](#input\_datadog) | Object of Datadog configurations | <pre>object({<br>    agent_api_key_name            = optional(string)<br>    agent_app_key_name            = optional(string)<br>    operator_chart_version        = optional(string)<br>    custom_resource_chart_version = optional(string)<br>  })</pre> | `{}` | no |
+| <a name="input_datadog_agent_helm_values"></a> [datadog\_agent\_helm\_values](#input\_datadog\_agent\_helm\_values) | List of Datadog Agent custom resource values. https://github.com/DataDog/datadog-operator/blob/main/docs/configuration.v2alpha1.md | <pre>list(object({<br>    name  = string<br>    value = string<br>  }))</pre> | <pre>[<br>  {<br>    "name": "features.logs.enabled",<br>    "value": "true"<br>  }<br>]</pre> | no |
+| <a name="input_datadog_operator_helm_values"></a> [datadog\_operator\_helm\_values](#input\_datadog\_operator\_helm\_values) | List of Datadog Operator values | <pre>list(object({<br>    name  = string<br>    value = string<br>  }))</pre> | <pre>[<br>  {<br>    "name": "resources.requests.cpu",<br>    "value": "10m"<br>  },<br>  {<br>    "name": "resources.requests.memory",<br>    "value": "50Mi"<br>  }<br>]</pre> | no |
 | <a name="input_namespace"></a> [namespace](#input\_namespace) | Namespace for Datadog resources | `string` | `"monitoring"` | no |
 
 ## Outputs

@@ -1,5 +1,4 @@
-resource "kubernetes_secret" "datadog_keys" { # TODO: do we need this also in AWS secretsmanager?
-  depends_on = [module.datadog_operator]
+resource "kubernetes_secret" "datadog_keys" {
   metadata {
     name      = "datadog-keys"
     namespace = var.namespace
@@ -9,16 +8,24 @@ resource "kubernetes_secret" "datadog_keys" { # TODO: do we need this also in AW
     api-key = datadog_api_key.datadog_agent.key
     app-key = datadog_application_key.datadog_agent.key
   }
+
+  depends_on = [module.datadog_operator]
 }
 # Datadog Operator
 resource "datadog_api_key" "datadog_agent" {
-  name = try(var.datadog.agent_api_key_name, var.cluster_name)
+  name = coalesce(var.datadog.agent_api_key_name, var.cluster_name)
 }
 
 resource "datadog_application_key" "datadog_agent" {
-  name = try(var.datadog.agent_app_key_name, var.cluster_name)
+  name = coalesce(var.datadog.agent_app_key_name, var.cluster_name)
 }
 
+locals {
+  datadog_site = "datadoghq.eu"
+  datadog_operator_helm_values = concat(
+    [{ name = "site", value = local.datadog_site }],
+  var.datadog_operator_helm_values)
+}
 module "datadog_operator" {
   source  = "aws-ia/eks-blueprints-addon/aws"
   version = "~> 1.0"
@@ -33,30 +40,17 @@ module "datadog_operator" {
   atomic           = true
   create_namespace = true
 
-  set = [
-    for pair in var.datadog_operator_values :
-    {
-      name  = pair.key
-      value = pair.value
-    }
-  ]
-
-  set_sensitive = [
-    for pair in var.datadog_operator_sensitive_values :
-    {
-      name  = pair.key
-      value = pair.value
-    }
-  ]
+  set = local.datadog_operator_helm_values
 }
 
 ################################################################################
 # Datadog Agent
 
 resource "helm_release" "datadog_agent" {
-  name    = "datadog-agent"
-  chart   = "https://dnd-it.github.io/helm-charts/custom-resources"
-  version = try(var.datadog.custom_resource_chart_version, "0.1.2")
+  name       = "datadog-agent"
+  repository = "https://dnd-it.github.io/helm-charts"
+  chart      = "custom-resources"
+  version    = try(var.datadog.custom_resource_chart_version, "0.1.0")
 
   values = [
     <<-YAML
@@ -68,7 +62,7 @@ resource "helm_release" "datadog_agent" {
     spec:
       global:
         clusterName: ${var.cluster_name}
-        site: ${var.datadog_agent_values.site}
+        site: ${local.datadog_site}
         credentials:
           apiSecret:
             secretName: datadog-keys
@@ -76,45 +70,49 @@ resource "helm_release" "datadog_agent" {
           appSecret:
             secretName: datadog-keys
             keyName: app-key
-    features:
-      apm:
-        enabled: true
-      logCollection:
-        enabled: true
-    override:
-      clusterAgent:
-        containers:
-          cluster-agent:
-            resources:
-              requests:
-                cpu: 30m
-                memory: 200Mi
-              limits:
-                memory: 300Mi
-      nodeAgent:
-        containers:
-          process-agent:
-            resources:
-              requests:
-                cpu: 10m
-                memory: 64Mi
-              limits:
-                memory: 128Mi
-          trace-agent:
-            resources:
-              requests:
-                cpu: 35m
-                memory: 56Mi
-              limits:
-                memory: 100Mi
+      agent:
+        properties:
+      features:
+        apm:
+          enabled: true
+        logCollection:
+          enabled: true
+      override:
+        clusterAgent:
+          containers:
+            cluster-agent:
+              resources:
+                requests:
+                  cpu: 30m
+                  memory: 200Mi
+                limits:
+                  memory: 300Mi
+        nodeAgent:
+          priorityClassName: system-node-critical
+          containers:
+            process-agent:
+              resources:
+                requests:
+                  cpu: 10m
+                  memory: 64Mi
+                limits:
+                  memory: 128Mi
+            trace-agent:
+              resources:
+                requests:
+                  cpu: 35m
+                  memory: 56Mi
+                limits:
+                  memory: 100Mi
   YAML
   ]
 
   dynamic "set" {
-    for_each = var.datadog_agent_values
+    for_each = var.datadog_agent_helm_values
     content {
-      name  = set.key
-      value = set.value
+      name  = set.value.name
+      value = set.value.value
+      type  = try(set.value.type, null)
     }
   }
 
