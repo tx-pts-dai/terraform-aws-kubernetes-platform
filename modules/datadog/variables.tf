@@ -12,8 +12,8 @@ variable "cluster_name" {
 variable "datadog" {
   description = "Object of Datadog configurations"
   type = object({
-    agent_api_key_name            = optional(string)
-    agent_app_key_name            = optional(string)
+    agent_api_key_name            = optional(string) # by default it uses the cluster name
+    agent_app_key_name            = optional(string) # by default it uses the cluster name
     operator_chart_version        = optional(string)
     custom_resource_chart_version = optional(string)
   })
@@ -26,12 +26,7 @@ variable "datadog_agent_helm_values" {
     name  = string
     value = string
   }))
-  default = [
-    {
-      name  = "features.logs.enabled"
-      value = "true"
-    },
-  ]
+  default = []
 }
 
 variable "datadog_operator_helm_values" {

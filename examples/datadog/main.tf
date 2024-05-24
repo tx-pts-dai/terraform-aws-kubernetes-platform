@@ -36,10 +36,14 @@ provider "aws" {
   region = var.region
 }
 
+data "aws_secretsmanager_secret_version" "datadog" {
+  secret_id = "dai-datadog/tamedia/keys"
+}
+
 provider "datadog" {
   api_url  = "https://api.${var.datadog_site}/"
-  api_key  = var.datadog_api_key
-  app_key  = var.datadog_app_key
+  api_key  = jsondecode(data.aws_secretsmanager_secret_version.datadog.secret_string)["api_key"]
+  app_key  = jsondecode(data.aws_secretsmanager_secret_version.datadog.secret_string)["app_key"]
   validate = true
 }
 
