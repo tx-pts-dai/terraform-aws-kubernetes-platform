@@ -50,7 +50,7 @@ resource "helm_release" "datadog_agent" {
   name       = "datadog-agent"
   repository = "https://dnd-it.github.io/helm-charts"
   chart      = "custom-resources"
-  version    = try(var.datadog.custom_resource_chart_version, "0.1.0")
+  version    = try(var.datadog.custom_resource_chart_version, null)
 
   values = [
     <<-YAML

@@ -4,7 +4,8 @@ Deploy the Datadog Operator and the Datadog Agent
 
 ```hcl
 module "datadog" {
-  source = "../../modules/datadog"
+  source = "tx-pts-dai/kubernetes-platform/aws//modules/lacework"
+  version = ...
 
   cluster_name = module.k8s_platform.eks.cluster_name
 

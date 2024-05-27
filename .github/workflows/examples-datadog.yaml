@@ -1,8 +1,16 @@
 name: Deploy Module Examples - datadog
 
-# since is not needed every time and requires the datadog api and app keys this workflow is on dispatch
 on:
-  workflow_dispatch:
+  pull_request:
+    paths:
+      - examples/datadog/**
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - closed
+    branches-ignore:
+      - renovate*
 
 permissions:
   id-token: write
@@ -11,7 +19,14 @@ permissions:
 
 jobs:
   example_datadog_deploy:
-    uses: tx-pts-dai/github-workflows/.github/workflows/tf-feature.yaml@v0.16.0
+    uses: tx-pts-dai/github-workflows/.github/workflows/tf-feature.yaml@v0.20.0
+    with:
+      environment: examples
+      tf_dir: examples/datadog
+
+  example_datadog_destroy:
+    if: github.event_name == 'pull_request' && github.event.action == 'closed'
+    uses: tx-pts-dai/github-workflows/.github/workflows/tf-cleanup.yaml@v0.20.0
     with:
       environment: examples
       tf_dir: examples/datadog
