@@ -1,9 +1,9 @@
-name: Deploy Module Examples - Lacework
+name: Deploy Module Examples - datadog
 
 on:
   pull_request:
     paths:
-      - examples/lacework/**
+      - examples/datadog/**
     types:
       - opened
       - synchronize
@@ -18,16 +18,15 @@ permissions:
   pull-requests: write
 
 jobs:
-  example_lacework_deploy:
-    if: github.event_name == 'pull_request' && github.event.action != 'closed'
+  example_datadog_deploy:
     uses: tx-pts-dai/github-workflows/.github/workflows/tf-feature.yaml@v0.20.0
     with:
       environment: examples
-      tf_dir: examples/lacework
+      tf_dir: examples/datadog
 
-  example_lacework_destroy:
+  example_datadog_destroy:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
     uses: tx-pts-dai/github-workflows/.github/workflows/tf-cleanup.yaml@v0.20.0
     with:
       environment: examples
-      tf_dir: examples/lacework
+      tf_dir: examples/datadog

@@ -6,9 +6,17 @@ terraform {
       source  = "hashicorp/aws"
       version = ">= 5.42.0"
     }
+    datadog = {
+      source  = "DataDog/datadog"
+      version = ">= 3.0.0"
+    }
     kubectl = {
       source  = "alekc/kubectl"
       version = ">= 2.0.2"
+    }
+    kubernetes = {
+      source  = "hashicorp/kubernetes"
+      version = "~> 2.27"
     }
     helm = {
       source  = "hashicorp/helm"
