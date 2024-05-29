@@ -2,7 +2,7 @@ terraform {
   required_version = ">= 1.5.0"
 
   backend "s3" {
-    # Defined in "examples/simple" github environment
+    # Defined in "examples-simple-sandbox" github environment
   }
 
   required_providers {
