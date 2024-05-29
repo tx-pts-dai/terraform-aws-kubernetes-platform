@@ -70,16 +70,7 @@ module "k8s_platform" {
   name = var.cluster_name
 
   vpc = {
-    create = true
-    cidr   = "10.0.0.0/16"
-    subnet_configs = [
-      { public = 24 },
-      { private = 24 },
-      { intra = 26 },
-      { database = 26 },
-      { redshift = 26 },
-      { karpenter = 22 }
-    ]
+    enabled = true
   }
 
   cluster_admins = var.cluster_admins
