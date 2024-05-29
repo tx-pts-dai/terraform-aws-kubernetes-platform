@@ -71,11 +71,6 @@ module "k8s_platform" {
 
   vpc = {
     create = true
-    cidr   = "10.0.0.0/16" # Should we not set this as default for the simple usecase ?
-  }
-
-  karpenter = { # Could we have some default for karpenter too in case we only plan to deploy a simple eks ?
-    subnet_cidrs = ["10.0.64.0/22", "10.0.68.0/22", "10.0.72.0/22"]
   }
 
   cluster_admins = var.cluster_admins
