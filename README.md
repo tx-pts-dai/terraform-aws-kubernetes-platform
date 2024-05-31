@@ -24,12 +24,7 @@ module "k8s_platform" {
   name = "example-platform"
 
   vpc = {
-    create = true
-    cidr   = "10.0.0.0/16"
-  }
-
-  karpenter = {
-    subnet_cidrs = ["10.0.64.0/22", "10.0.68.0/22", "10.0.72.0/22"]
+    enabled = true
   }
 
   tags = {
@@ -38,6 +33,8 @@ module "k8s_platform" {
   }
 }
 ```
+
+See the [Examples below](#Examples) for more use cases
 
 ## Explanation and description of interesting use-cases
 
@@ -50,6 +47,7 @@ Why this module?
 ## Examples
 
 - [Complete](./examples/complete/) - Includes creation of VPC, k8s cluster, addons and all the optional features.
+- [Simple](./examples/simple/) - Simplest EKS deployment with default VPC, addons, ... creation
 
 ## Contributing
 
@@ -85,6 +83,7 @@ as described in the `.pre-commit-config.yaml` file
 | <a name="requirement_kubernetes"></a> [kubernetes](#requirement\_kubernetes) | ~> 2.27 |
 | <a name="requirement_random"></a> [random](#requirement\_random) | >= 3.0 |
 | <a name="requirement_time"></a> [time](#requirement\_time) | >= 0.11 |
+| <a name="requirement_tls"></a> [tls](#requirement\_tls) | >= 4.0 |
 
 ## Providers
 

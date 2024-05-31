@@ -1,0 +1,34 @@
+name:  Deploy Module Examples - Simple
+# Deploy Examples code
+# Uses the "examples-simple-sandbox" github environment
+# Get it's content with "gh variable list --repo tx-pts-dai/terraform-aws-kubernetes-platform --env examples-simple-sandbox" command
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/examples-simple.yaml'
+      - 'examples/simple/**'
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - closed
+    branches-ignore:
+      - 'renovate_*'
+
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
+
+jobs:
+  deploy:
+    if: github.event_name == 'pull_request' && github.event.action != 'closed'
+    uses: tx-pts-dai/github-workflows/.github/workflows/tf-feature.yaml@v0.20.0
+    with:
+      environment: examples-simple-sandbox
+  destroy:
+    if: github.event_name == 'pull_request' && github.event.action == 'closed'
+    uses: tx-pts-dai/github-workflows/.github/workflows/tf-cleanup.yaml@v0.20.0
+    with:
+      environment: examples-simple-sandbox
