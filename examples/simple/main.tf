@@ -2,11 +2,7 @@ terraform {
   required_version = ">= 1.5.0"
 
   backend "s3" {
-    bucket               = "tf-state-911453050078"
-    key                  = "examples/complete.tfstate"
-    workspace_key_prefix = "terraform-aws-kubernetes-platform"
-    dynamodb_table       = "terraform-lock"
-    region               = "eu-central-1"
+    # Defined in "examples-simple-sandbox" github environment
   }
 
   required_providers {
@@ -46,7 +42,7 @@ terraform {
 }
 
 provider "aws" {
-  region = local.region
+  region = var.region
 }
 
 provider "kubernetes" {
@@ -84,50 +80,16 @@ provider "kubectl" {
   }
 }
 
-locals {
-  region = "eu-central-1"
-}
-
 module "k8s_platform" {
   source = "../../"
 
-  name = "ex-complete"
-
-  cluster_admins = {
-    cicd = {
-      role_name = "cicd-iac"
-    }
-  }
-
-  tags = {
-    Environment = "sandbox"
-    GithubRepo  = "terraform-aws-kubernetes-platform"
-    GithubOrg   = "tx-pts-dai"
-  }
+  name = var.cluster_name
 
   vpc = {
     enabled = true
-    cidr    = "10.0.0.0/16"
-    max_az  = 3
-    subnet_configs = [
-      { public = 24 },
-      { private = 24 },
-      { intra = 26 },
-      { database = 26 },
-      { redshift = 26 },
-      { karpenter = 22 }
-    ]
   }
 
-  addons = {
-    # Core addons
-    aws_load_balancer_controller = { enabled = true }
-    external_dns                 = { enabled = true }
-    external_secrets             = { enabled = true }
-    fargate_fluentbit            = { enabled = true }
-    metrics_server               = { enabled = true }
+  cluster_admins = var.cluster_admins
 
-    # Optional addons
-    downscaler = { enabled = true }
-  }
+  tags = var.cluster_tags
 }
