@@ -1,4 +1,4 @@
-name: Deploy Module Examples - datadog
+name: Deploy Module Examples - Datadog
 
 on:
   pull_request:
@@ -10,7 +10,7 @@ on:
       - reopened
       - closed
     branches-ignore:
-      - renovate*
+      - renovate**
 
 permissions:
   id-token: write
@@ -19,6 +19,7 @@ permissions:
 
 jobs:
   example_datadog_deploy:
+    if: github.event_name == 'pull_request' && github.event.action != 'closed'
     uses: tx-pts-dai/github-workflows/.github/workflows/tf-feature.yaml@v0.22.0
     with:
       environment: examples

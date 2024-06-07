@@ -2,9 +2,9 @@
 name: Renovate branch pre-commit
 
 on:
-  pull_request:
+  push:
     branches:
-      - renovate_*
+      - renovate**
 
 jobs:
   pre_commit:

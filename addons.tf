@@ -12,7 +12,7 @@ module "addons" {
     helm_release.karpenter.status
   ]
   # Wait for karpenter node to start so when the managed addons are applied they already have running pods, otherwise they will fail to update.
-  create_delay_duration = "2m"
+  create_delay_duration = "3m"
 
   cluster_name      = module.eks.cluster_name
   cluster_endpoint  = module.eks.cluster_endpoint

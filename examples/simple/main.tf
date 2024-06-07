@@ -2,17 +2,17 @@ terraform {
   required_version = ">= 1.5.0"
 
   backend "s3" {
-    # Defined in "examples-simple-sandbox" github environment
+    bucket               = "tf-state-911453050078"
+    key                  = "examples/simple.tfstate"
+    workspace_key_prefix = "terraform-aws-kubernetes-platform"
+    dynamodb_table       = "terraform-lock"
+    region               = "eu-central-1"
   }
 
   required_providers {
     aws = {
       source  = "hashicorp/aws"
       version = "~> 5.0"
-    }
-    datadog = {
-      source  = "DataDog/datadog"
-      version = "~> 3.39"
     }
     helm = {
       source  = "hashicorp/helm"
@@ -26,23 +26,11 @@ terraform {
       source  = "hashicorp/kubernetes"
       version = "~> 2.27"
     }
-    random = {
-      source  = "hashicorp/random"
-      version = "~> 3.6"
-    }
-    time = {
-      source  = "hashicorp/time"
-      version = "~> 0.11"
-    }
-    tls = {
-      source  = "hashicorp/tls"
-      version = "~> 4.0"
-    }
   }
 }
 
 provider "aws" {
-  region = var.region
+  region = local.region
 }
 
 provider "kubernetes" {
@@ -80,16 +68,28 @@ provider "kubectl" {
   }
 }
 
+locals {
+  region = "eu-central-1"
+}
+
 module "k8s_platform" {
   source = "../../"
 
-  name = var.cluster_name
+  name = "ex-simple"
 
   vpc = {
     enabled = true
   }
 
-  cluster_admins = var.cluster_admins
+  cluster_admins = {
+    cicd = {
+      role_name = "cicd-iac"
+    }
+  }
 
-  tags = var.cluster_tags
+  tags = {
+    Environment = "sandbox"
+    GithubRepo  = "terraform-aws-kubernetes-platform"
+    GithubOrg   = "tx-pts-dai"
+  }
 }

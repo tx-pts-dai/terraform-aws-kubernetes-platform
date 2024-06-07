@@ -48,6 +48,12 @@ Why this module?
 
 - [Complete](./examples/complete/) - Includes creation of VPC, k8s cluster, addons and all the optional features.
 - [Simple](./examples/simple/) - Simplest EKS deployment with default VPC, addons, ... creation
+- [Lacework](./examples/lacework/) - EKS deployment with Lacework integration
+- [Datadog](./examples/datadog/) - EKS deployment with Datadog Operator integration
+
+### Cleanup example deployments
+
+[Destroy Workflow](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/actions/workflows/cleanup.yaml) - This workflow will destroy the provided example deployments
 
 ## Contributing
 

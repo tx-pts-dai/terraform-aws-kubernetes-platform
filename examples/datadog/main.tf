@@ -6,6 +6,7 @@ terraform {
     key                  = "examples/datadog.tfstate"
     workspace_key_prefix = "terraform-aws-kubernetes-platform"
     region               = "eu-central-1"
+    dynamodb_table       = "terraform-lock"
   }
 
   required_providers {
@@ -33,7 +34,7 @@ terraform {
 }
 
 provider "aws" {
-  region = var.region
+  region = local.region
 }
 
 data "aws_secretsmanager_secret_version" "datadog" {
@@ -41,7 +42,7 @@ data "aws_secretsmanager_secret_version" "datadog" {
 }
 
 provider "datadog" {
-  api_url  = "https://api.${var.datadog_site}/"
+  api_url  = "https://api.${local.datadog_site}/"
   api_key  = jsondecode(data.aws_secretsmanager_secret_version.datadog.secret_string)["api_key"]
   app_key  = jsondecode(data.aws_secretsmanager_secret_version.datadog.secret_string)["app_key"]
   validate = true
@@ -82,11 +83,15 @@ provider "kubectl" {
   }
 }
 
+locals {
+  region       = "eu-central-1"
+  datadog_site = "datadoghq.eu"
+}
+
 module "k8s_platform" {
   source = "../../"
 
-  name = "datadog"
-
+  name = "ex-datadog"
 
   cluster_admins = {
     cicd = {
