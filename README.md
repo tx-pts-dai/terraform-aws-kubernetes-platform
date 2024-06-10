@@ -48,6 +48,12 @@ Why this module?
 
 - [Complete](./examples/complete/) - Includes creation of VPC, k8s cluster, addons and all the optional features.
 - [Simple](./examples/simple/) - Simplest EKS deployment with default VPC, addons, ... creation
+- [Lacework](./examples/lacework/) - EKS deployment with Lacework integration
+- [Datadog](./examples/datadog/) - EKS deployment with Datadog Operator integration
+
+### Cleanup example deployments
+
+[Destroy Workflow](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/actions/workflows/cleanup.yaml) - This workflow will destroy the provided example deployments
 
 ## Contributing
 
@@ -77,7 +83,6 @@ as described in the `.pre-commit-config.yaml` file
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.5.0 |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 5.42.0 |
-| <a name="requirement_datadog"></a> [datadog](#requirement\_datadog) | >= 3.0.0 |
 | <a name="requirement_helm"></a> [helm](#requirement\_helm) | >= 2.12 |
 | <a name="requirement_kubectl"></a> [kubectl](#requirement\_kubectl) | >= 2.0.2 |
 | <a name="requirement_kubernetes"></a> [kubernetes](#requirement\_kubernetes) | ~> 2.27 |

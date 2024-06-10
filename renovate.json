@@ -3,7 +3,8 @@
   "branchPrefix": "renovate_",
   "rebaseWhen": "conflicted",
   "extends": [
-    "config:recommended"
+    "config:recommended",
+    ":enablePreCommit"
   ],
   "reviewers": ["team:DAI-Team"],
   "enabledManagers": ["github-actions", "terraform"],

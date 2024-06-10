@@ -1,0 +1,36 @@
+# This is a test workflow to run pre-commit hooks on a branch created by renovate
+name: Renovate branch pre-commit
+
+on:
+  push:
+    branches:
+      - renovate**
+
+jobs:
+  pre_commit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+      - uses: pre-commit/action@v3.0.1
+        with:
+          extra_args: terraform_tflint
+      - uses: pre-commit/action@v3.0.1
+        with:
+          extra_args: terraform_docs
+
+      # There is a github action that supports git commit and push
+      - name: Set up Git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Commit changes
+        run: |
+          git commit -am "fix: terraform docs and linting"
+
+      - name: Push changes
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git push

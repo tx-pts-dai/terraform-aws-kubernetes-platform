@@ -2,6 +2,17 @@ name: Destroy Pull Request Deployments
 
 on:
   workflow_dispatch:
+    inputs:
+      tf_dir:
+        description: 'Example directory'
+        required: true
+        default: 'examples/complete'
+        type: choice
+        options:
+          - examples/complete
+          - examples/simple
+          - examples/lacework
+          - examples/datadog
 
 permissions:
   id-token: write
@@ -10,15 +21,8 @@ permissions:
 
 jobs:
   example_complete:
-    strategy:
-      fail-fast: false
-      matrix:
-        directory:
-          - examples/lacework
-          - examples/complete
-
     uses: tx-pts-dai/github-workflows/.github/workflows/tf-cleanup.yaml@v0.22.0
     with:
       environment: examples
-      tf_dir: ${{ matrix.directory }}
+      tf_dir: ${{ inputs.tf_dir }}
       tf_workspace: ${{ github.ref_name }}

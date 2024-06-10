@@ -1,3 +1,0 @@
-bucket = "tf-state-911453050078"
-key    = "examples/simple/sandbox.tfstate"
-region = "eu-central-1"
