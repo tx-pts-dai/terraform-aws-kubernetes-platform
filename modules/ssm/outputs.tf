@@ -12,3 +12,8 @@ output "filtered_parameters" {
   description = "List of parameters filtered by stack name prefix"
   value       = local.filtered_parameters
 }
+
+output "latest_parameters" {
+  description = "Latest stack parameters"
+  value       = local.latest_parameters
+}

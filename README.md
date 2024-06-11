@@ -144,7 +144,7 @@ as described in the `.pre-commit-config.yaml` file
 | <a name="input_eks"></a> [eks](#input\_eks) | Map of EKS configurations | `any` | `{}` | no |
 | <a name="input_karpenter"></a> [karpenter](#input\_karpenter) | Map of Karpenter configurations | `any` | `{}` | no |
 | <a name="input_name"></a> [name](#input\_name) | The name of the platform | `string` | n/a | yes |
-| <a name="input_ssm_latest"></a> [ssm\_latest](#input\_ssm\_latest) | Set | `bool` | `false` | no |
+| <a name="input_ssm_latest"></a> [ssm\_latest](#input\_ssm\_latest) | If true, stack parameters will be set in SSM /<base>/<stack-type>/latest/* namespace | `bool` | `false` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | Default tags to apply to all resources | `map(string)` | `{}` | no |
 | <a name="input_vpc"></a> [vpc](#input\_vpc) | Map of VPC configurations | `any` | `{}` | no |
 

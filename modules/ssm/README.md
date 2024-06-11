@@ -46,5 +46,6 @@ No modules.
 |------|-------------|
 | <a name="output_clusters"></a> [clusters](#output\_clusters) | List of clusters defined in SSM |
 | <a name="output_filtered_parameters"></a> [filtered\_parameters](#output\_filtered\_parameters) | List of parameters filtered by stack name prefix |
+| <a name="output_latest_parameters"></a> [latest\_parameters](#output\_latest\_parameters) | Latest stack parameters |
 | <a name="output_stacks"></a> [stacks](#output\_stacks) | List of stacks defined in SSM |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->

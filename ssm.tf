@@ -19,7 +19,7 @@ module "ssm_platform" {
       value = module.eks.cluster_arn
     },
     cluster_certificate_authority_data = {
-      name  = "cluster-certificate-authority-data"
+      name  = "cluster_certificate_authority_data"
       value = base64encode(module.eks.cluster_certificate_authority_data)
     },
   }

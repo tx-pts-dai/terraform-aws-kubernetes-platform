@@ -4,7 +4,7 @@ variable "name" {
 }
 
 variable "ssm_latest" {
-  description = "Set "
+  description = "If true, stack parameters will be set in SSM /<base>/<stack-type>/latest/* namespace"
   type        = bool
   default     = false
 }

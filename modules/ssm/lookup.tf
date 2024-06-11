@@ -16,4 +16,7 @@ locals {
   clusters = [
     for key, value in local.parameters : value if contains(split("/", key), "cluster_name")
   ]
+  latest_parameters = {
+    for key, value in local.parameters : key => value if strcontains(key, "latest")
+  }
 }
