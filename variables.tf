@@ -27,6 +27,12 @@ variable "karpenter" {
   default     = {}
 }
 
+variable "enable_karpenter_crds" {
+  description = "Enable Karpenter CRDs chart"
+  type        = bool
+  default     = true
+}
+
 variable "addons" {
   description = "Map of addon configurations"
   type        = any
@@ -42,12 +48,6 @@ variable "addons" {
     ingress_nginx         = { enabled = false }
     downscaler            = { enabled = false }
   }
-}
-
-variable "base_domain" {
-  description = "The base domain for the platform"
-  type        = string
-  default     = ""
 }
 
 variable "cluster_admins" {

@@ -10,6 +10,7 @@
 
 data "aws_region" "current" {}
 data "aws_caller_identity" "current" {}
+data "aws_availability_zones" "available" {}
 
 # Random ID for creating unique resources instead of using a timestamp which is
 # different accross resources. Note: This is only generated on apply and is
@@ -162,13 +163,14 @@ module "eks" {
 # - PROPOSAL: Karpenter NodePool and EC2NodeClass management: default resources are deployed with the module.
 #   Users can create additional resources by providing their own ones outside the module.
 
-data "aws_availability_zones" "available" {}
+
 
 locals {
   karpenter = {
     subnet_cidrs = try(var.karpenter.subnet_cidrs, module.network.grouped_networks.karpenter)
 
-    chart_version           = try(var.karpenter.chart_version, "0.35.2")
+    namespace               = try(var.karpenter.namespace, "kube-system")
+    chart_version           = try(var.karpenter.chart_version, "0.37.0")
     replicas                = try(var.karpenter.replicas, 1)
     service_monitor_enabled = try(var.karpenter.service_monitor_enabled, false)
   }
@@ -211,7 +213,7 @@ module "karpenter" {
   cluster_name                    = module.eks.cluster_name
   enable_irsa                     = true
   irsa_oidc_provider_arn          = module.eks.oidc_provider_arn
-  irsa_namespace_service_accounts = ["kube-system:karpenter"]
+  irsa_namespace_service_accounts = ["${local.karpenter.namespace}:karpenter"]
   iam_role_name                   = "karpenter-${local.id}"
   iam_role_use_name_prefix        = false
 
@@ -225,17 +227,33 @@ module "karpenter" {
   tags = local.tags
 }
 
-resource "helm_release" "karpenter" {
-  name             = "karpenter"
-  namespace        = "kube-system"
+module "karpenter_crds" {
+  source  = "aws-ia/eks-blueprints-addon/aws"
+  version = "1.1.1"
+
+  create = var.enable_karpenter_crds
+
+  name             = "karpenter-crd"
+  namespace        = local.karpenter.namespace
   create_namespace = true
   repository       = "oci://public.ecr.aws/karpenter"
-  # rate limit is 1 pull per second
-  # repository_username = data.aws_ecrpublic_authorization_token.token.user_name
-  # repository_password = data.aws_ecrpublic_authorization_token.token.password
-  chart   = "karpenter"
-  version = local.karpenter.chart_version
-  wait    = true
+  chart            = "karpenter-crd"
+  chart_version    = local.karpenter.chart_version
+
+  depends_on = [
+    module.eks
+  ]
+}
+
+resource "helm_release" "karpenter" {
+  name             = "karpenter"
+  namespace        = local.karpenter.namespace
+  create_namespace = true
+  repository       = "oci://public.ecr.aws/karpenter"
+  chart            = "karpenter"
+  version          = local.karpenter.chart_version
+  skip_crds        = var.enable_karpenter_crds
+  wait             = true
 
   values = [
     <<-EOT
@@ -333,6 +351,7 @@ resource "time_sleep" "wait_on_destroy" {
   depends_on = [
     module.eks,
     module.karpenter,
+    module.karpenter_crds,
     aws_subnet.karpenter,
     aws_route_table_association.karpenter,
     helm_release.karpenter,
@@ -340,8 +359,8 @@ resource "time_sleep" "wait_on_destroy" {
     kubectl_manifest.karpenter_node_pool,
   ]
 
-  # Sleep for 5 minutes to allow Karpenter to clean up resources
-  destroy_duration = "5m"
+  # Sleep for 10 minutes to allow Karpenter to clean up resources
+  destroy_duration = "10m"
 }
 
 # Store cluster name info for app deployment
