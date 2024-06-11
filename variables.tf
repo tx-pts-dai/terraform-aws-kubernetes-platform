@@ -3,6 +3,12 @@ variable "name" {
   type        = string
 }
 
+variable "ssm_latest" {
+  description = "Set "
+  type        = bool
+  default     = false
+}
+
 variable "tags" {
   description = "Default tags to apply to all resources"
   type        = map(string)
