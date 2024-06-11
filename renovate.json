@@ -14,6 +14,12 @@
       "matchUpdateTypes": ["minor", "patch"],
       "automerge": false,
       "pinDigests": true
+    },
+    {
+      "matchManagers": ["terraform"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "terraform non-major updates",
+      "groupSlug": "all-minor-patch"
     }
   ]
 }
