@@ -190,7 +190,7 @@ resource "kubectl_manifest" "secretsmanager_auth" {
 
 module "downscaler" {
   source  = "tx-pts-dai/downscaler/kubernetes"
-  version = "0.3.0"
+  version = "0.3.1"
 
   count = var.addons.downscaler.enabled ? 1 : 0
 
