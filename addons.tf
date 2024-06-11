@@ -6,7 +6,7 @@
 
 module "addons" {
   source  = "aws-ia/eks-blueprints-addons/aws"
-  version = "1.16.1"
+  version = "1.16.3"
 
   create_delay_dependencies = [
     helm_release.karpenter.status
