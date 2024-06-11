@@ -175,7 +175,6 @@ Apache 2 Licensed. See [LICENSE](< link to license file >) for full details.
 | <a name="requirement_kubernetes"></a> [kubernetes](#requirement\_kubernetes) | ~> 2.27 |
 | <a name="requirement_random"></a> [random](#requirement\_random) | >= 3.0 |
 | <a name="requirement_time"></a> [time](#requirement\_time) | >= 0.11 |
-| <a name="requirement_tls"></a> [tls](#requirement\_tls) | >= 4.0 |
 
 ## Providers
 
