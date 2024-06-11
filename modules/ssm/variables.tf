@@ -37,3 +37,9 @@ variable "latest" {
   type        = bool
   default     = false
 }
+
+variable "stack_name_prefix" {
+  description = "The prefix for the stack name"
+  type        = string
+  default     = ""
+}
