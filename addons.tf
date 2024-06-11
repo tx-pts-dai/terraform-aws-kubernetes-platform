@@ -6,7 +6,7 @@
 
 module "addons" {
   source  = "aws-ia/eks-blueprints-addons/aws"
-  version = "1.16.1"
+  version = "1.16.3"
 
   create_delay_dependencies = [
     helm_release.karpenter.status
@@ -190,7 +190,7 @@ resource "kubectl_manifest" "secretsmanager_auth" {
 
 module "downscaler" {
   source  = "tx-pts-dai/downscaler/kubernetes"
-  version = "0.3.0"
+  version = "0.3.1"
 
   count = var.addons.downscaler.enabled ? 1 : 0
 
