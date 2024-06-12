@@ -12,12 +12,9 @@ data "aws_region" "current" {}
 data "aws_caller_identity" "current" {}
 data "aws_availability_zones" "available" {}
 
-# Random ID for creating unique resources instead of using a timestamp which is
-# different accross resources. Note: This is only generated on apply and is
-# static for the life of the stack.
-resource "random_id" "random_id" {
-  byte_length = 4
-}
+# ID based on epoch timestamp for creating unique resources. Note: This is only
+# generated on apply and is static for the life of the stack.
+resource "time_static" "timestamp_id" {}
 
 ################################################################################
 # Common locals
@@ -28,11 +25,12 @@ resource "random_id" "random_id" {
 # and this create a tags merge issue,
 
 locals {
-  id         = random_id.random_id.hex
+  id         = format("%08x", time_static.timestamp_id.unix)
   name       = coalesce(var.name, replace(basename(path.root), "_", "-"))
   stack_name = "${local.name}-${local.id}"
 
   tags = merge(var.tags, {
+    StackName = local.stack_name
   })
 }
 
