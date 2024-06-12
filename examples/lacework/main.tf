@@ -73,7 +73,7 @@ provider "kubectl" {
 }
 
 data "aws_secretsmanager_secret" "lacework" {
-  name = "dai-lacework/tamedia/apiKey"
+  name = "dai/lacework/tamedia/apiKey"
 }
 
 data "aws_secretsmanager_secret_version" "lacework" {
