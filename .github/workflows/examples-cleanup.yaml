@@ -1,4 +1,4 @@
-name: Destroy Pull Request Deployments
+name: Manual Destroy Pull Request Deployments
 
 on:
   workflow_dispatch:
