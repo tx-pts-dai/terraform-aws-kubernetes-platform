@@ -1,9 +1,9 @@
-name: Deploy Module Examples - Simple
+name: Module Example - Simple
 
 on:
   pull_request:
     paths:
-      - examples/simple/**
+      - examples/simple/*.tf
     types:
       - opened
       - synchronize

@@ -1,5 +1,5 @@
 terraform {
-  required_version = ">= 1.5.0"
+  required_version = ">= 1.6.0"
 
   backend "s3" {
     bucket               = "tf-state-911453050078"
@@ -73,7 +73,7 @@ provider "kubectl" {
 }
 
 data "aws_secretsmanager_secret" "lacework" {
-  name = "dai-lacework/tamedia/apiKey"
+  name = "dai/lacework/tamedia/apiKey"
 }
 
 data "aws_secretsmanager_secret_version" "lacework" {

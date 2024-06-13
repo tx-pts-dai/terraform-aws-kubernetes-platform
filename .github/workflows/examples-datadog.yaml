@@ -1,9 +1,9 @@
-name: Deploy Module Examples - Datadog
+name: Module Example - Datadog
 
 on:
   pull_request:
     paths:
-      - examples/datadog/**
+      - examples/datadog/*.tf
     types:
       - opened
       - synchronize
