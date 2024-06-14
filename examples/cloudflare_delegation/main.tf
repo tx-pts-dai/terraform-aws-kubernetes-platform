@@ -32,7 +32,7 @@ provider "cloudflare" {
 module "cloudflare_delegation" {
   source       = "../../modules/cloudflare_delegation"
   for_each     = var.zones
-  domain_name  = module.route53_zones[each.key].route53_zone_name[each.key]
+  zone_name    = module.route53_zones[each.key].route53_zone_name[each.key]
   name_servers = module.route53_zones[each.key].route53_zone_name_servers[each.key]
   account_id   = jsondecode(data.aws_secretsmanager_secret_version.cloudflare.secret_string)["accountId"]
 }

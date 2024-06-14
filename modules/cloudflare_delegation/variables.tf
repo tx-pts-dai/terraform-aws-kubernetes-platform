@@ -1,4 +1,4 @@
-variable "domain_name" {
+variable "zone_name" {
   description = "The domain name to delegate in Cloudflare"
   type        = string
 }
