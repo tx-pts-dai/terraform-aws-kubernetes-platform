@@ -21,12 +21,8 @@ terraform {
   }
 }
 
-data "aws_secretsmanager_secret" "cloudflare" {
-  name = "dai/cloudflare/tamedia/apiToken"
-}
-
 data "aws_secretsmanager_secret_version" "cloudflare" {
-  secret_id = data.aws_secretsmanager_secret.cloudflare.id
+  secret_id = "dai/cloudflare/tamedia/apiToken"
 }
 
 provider "cloudflare" {
