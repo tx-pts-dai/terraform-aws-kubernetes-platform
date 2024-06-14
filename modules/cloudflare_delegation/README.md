@@ -1,16 +1,14 @@
-# Datadog
+# Cloudflare zone delegation
 
 Deploy the Cloudflare delegation
 
 ```hcl
 module "cloudflare_delegation" {
-  source = "tx-pts-dai/kubernetes-platform/aws//modules/cloudflare_delegation"
-  version = ...
+  source                   = "../../modules/cloudflare_delegation"
   for_each                 = var.zones
-  domain_name              = module.route53_zones[each.key].name
-  aws_route53_name_servers = module.route53_zones[each.key].name_servers
-  account_id               = var.cloudflare_account_id
-  secret_name              = var.cloudflare_secret_name
+  domain_name              = module.route53_zones[each.key].route53_zone_name[each.key]
+  aws_route53_name_servers = module.route53_zones[each.key].route53_zone_name_servers[each.key]
+  account_id               = jsondecode(data.aws_secretsmanager_secret_version.cloudflare.secret_string)["accountId"]
 }
 ```
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
