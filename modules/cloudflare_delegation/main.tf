@@ -1,6 +1,7 @@
 locals {
   domain_split     = split(".", var.domain_name)
-  top_level_domain = join(".", slice(local.domain_split, length(local.domain_split) - 2, length(local.domain_split)))
+  remaining_parts  = slice(local.domain_split, 1, length(local.domain_split))
+  top_level_domain = join(".", local.remaining_parts)
 }
 
 data "cloudflare_zone" "this" {
