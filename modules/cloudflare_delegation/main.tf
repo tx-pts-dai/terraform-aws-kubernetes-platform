@@ -1,6 +1,11 @@
+locals {
+  # Split the domain name into parts
+  domain_split = split(".", var.domain_name)
+}
+
 data "cloudflare_zone" "this" {
   account_id = var.account_id
-  name       = "${split(".", var.domain_name)[1]}.${split(".", var.domain_name)[2]}" # Taking the TLD
+  name       = "${local.domain_split[1]}.${local.domain_split[2]}" # Taking the TLD
 }
 
 resource "cloudflare_record" "ns" {
