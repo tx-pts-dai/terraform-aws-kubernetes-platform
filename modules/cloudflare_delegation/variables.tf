@@ -3,8 +3,8 @@ variable "domain_name" {
   type        = string
 }
 
-variable "aws_route53_name_servers" {
-  description = "Route53 name servers"
+variable "name_servers" {
+  description = "Name servers to delegate to"
   type        = list(string)
 }
 

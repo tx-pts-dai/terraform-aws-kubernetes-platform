@@ -2,6 +2,7 @@
 
 Deploy the Cloudflare delegation
 
+
 ```hcl
 module "cloudflare_delegation" {
   source                   = "../../modules/cloudflare_delegation"
@@ -35,15 +36,15 @@ No modules.
 | Name | Type |
 |------|------|
 | [cloudflare_record.ns](https://registry.terraform.io/providers/cloudflare/cloudflare/latest/docs/resources/record) | resource |
-| [cloudflare_zone.this](https://registry.terraform.io/providers/cloudflare/cloudflare/latest/docs/resources/zone) | resource |
+| [cloudflare_zone.this](https://registry.terraform.io/providers/cloudflare/cloudflare/latest/docs/data-sources/zone) | data source |
 
 ## Inputs
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_account_id"></a> [account\_id](#input\_account\_id) | Cloudflare account id | `string` | n/a | yes |
-| <a name="input_aws_route53_name_servers"></a> [aws\_route53\_name\_servers](#input\_aws\_route53\_name\_servers) | Route53 name servers | `list(string)` | n/a | yes |
 | <a name="input_domain_name"></a> [domain\_name](#input\_domain\_name) | The domain name to delegate in Cloudflare | `string` | n/a | yes |
+| <a name="input_name_servers"></a> [name\_servers](#input\_name\_servers) | Name servers to delegate to | `list(string)` | n/a | yes |
 
 ## Outputs
 
