@@ -27,7 +27,6 @@ module "datadog" {
 
 | Name | Version |
 |------|---------|
-| <a name="provider_datadog"></a> [datadog](#provider\_datadog) | ~> 3.39 |
 | <a name="provider_helm"></a> [helm](#provider\_helm) | ~> 2.6 |
 | <a name="provider_kubernetes"></a> [kubernetes](#provider\_kubernetes) | >= 2.0.0 |
 
@@ -41,10 +40,8 @@ module "datadog" {
 
 | Name | Type |
 |------|------|
-| [datadog_api_key.datadog_agent](https://registry.terraform.io/providers/DataDog/datadog/latest/docs/resources/api_key) | resource |
-| [datadog_application_key.datadog_agent](https://registry.terraform.io/providers/DataDog/datadog/latest/docs/resources/application_key) | resource |
 | [helm_release.datadog_agent](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
-| [kubernetes_secret.datadog_keys](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/secret) | resource |
+| [kubernetes_manifest.external_secret](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/manifest) | resource |
 
 ## Inputs
 
