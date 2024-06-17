@@ -9,7 +9,6 @@ repos:
         args:
           - --tf-init-args=-upgrade
           - --tf-init-args=-lockfile=false
-          - --hook-config=--retry-once-with-cleanup=true
       - id: terraform_docs
         args:
           - '--args=--lockfile=false'

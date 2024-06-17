@@ -45,6 +45,7 @@ locals {
 locals {
   vpc = {
     vpc_id          = try(var.vpc.vpc_id, module.network.vpc.vpc_id)
+    vpc_cidr        = try(var.vpc.vpc_cidr, module.network.cidr)
     private_subnets = try(var.vpc.private_subnets, module.network.vpc.private_subnets)
     intra_subnets   = try(var.vpc.intra_subnets, module.network.vpc.intra_subnets)
   }
@@ -54,6 +55,7 @@ module "network" {
   source = "./modules/network"
 
   create_vpc = try(var.vpc.enabled, false)
+
   stack_name = local.stack_name
 
   tags = local.tags
@@ -73,7 +75,7 @@ data "aws_iam_roles" "sso" {
 data "aws_iam_roles" "iam_cluster_admins" {
   for_each = var.cluster_admins
 
-  name_regex = "\\b${each.value.role_name}\\b"
+  name_regex = "^${each.value.role_name}$"
 }
 
 locals {
@@ -115,7 +117,7 @@ module "eks" {
   cluster_name                    = local.stack_name
   cluster_version                 = try(var.eks.kubernetes_version, "1.29")
   cluster_endpoint_public_access  = try(var.eks.cluster_endpoint_public_access, true)
-  cluster_endpoint_private_access = try(var.eks.cluster_endpoint_private_access, false)
+  cluster_endpoint_private_access = try(var.eks.cluster_endpoint_private_access, true)
 
   iam_role_name            = local.stack_name
   iam_role_use_name_prefix = false
@@ -127,7 +129,7 @@ module "eks" {
   create_cluster_security_group = false
   create_node_security_group    = false
 
-  enable_cluster_creator_admin_permissions = true
+  enable_cluster_creator_admin_permissions = false
 
   fargate_profiles = {
     karpenter = {
@@ -150,8 +152,58 @@ module "eks" {
     # NOTE - if creating multiple security groups with this module, only tag the
     # security group that Karpenter should utilize with the following tag
     # (i.e. - at most, only one security group should have this tag in your account)
-    "karpenter.sh/discovery" = local.stack_name # TODO: Move to security group module when added
+    # "karpenter.sh/discovery" = local.stack_name # TODO: Move to security group module when added
   })
+}
+
+# Allow all traffic from the VPC to the EKS control plane
+# Its either this or adding a custom security group to Fargate pods
+
+# apiVersion: vpcresources.k8s.aws/v1beta1
+# kind: SecurityGroupPolicy
+# metadata:
+#   name: karpenter
+#   namespace: kube-system
+# spec:
+#   podSelector:
+#     matchLabels:
+#       role: karpenter
+#   securityGroups:
+#     groupIds:
+#       - ${module.eks.cluster_primary_security_group_id}
+#       - ${custom_security_group_id}
+
+locals {
+  ingress_rules = {
+    vpc_control_plane = {
+      description = "Allow all traffic from the VPC to EKS managed workfloads over HTTPS"
+      type        = "ingress"
+      protocol    = "tcp"
+      from_port   = 443
+      to_port     = 443
+      cidr_blocks = [local.vpc.vpc_cidr]
+    }
+    vpc_other = {
+      description = "Allow all traffic from the VPC to EKS managed workloads 1025-65535"
+      type        = "ingress"
+      protocol    = "-1"
+      from_port   = 1025
+      to_port     = 65535
+      cidr_blocks = [local.vpc.vpc_cidr]
+    }
+  }
+}
+
+resource "aws_security_group_rule" "eks_control_plan_ingress" {
+  for_each = local.ingress_rules
+
+  security_group_id = module.eks.cluster_primary_security_group_id
+  description       = each.value.description
+  type              = each.value.type
+  protocol          = each.value.protocol
+  from_port         = each.value.from_port
+  to_port           = each.value.to_port
+  cidr_blocks       = each.value.cidr_blocks
 }
 
 ################################################################################
@@ -160,8 +212,6 @@ module "eks" {
 # Track notes here for future reference e.g. reasons for certain decisions
 # - PROPOSAL: Karpenter NodePool and EC2NodeClass management: default resources are deployed with the module.
 #   Users can create additional resources by providing their own ones outside the module.
-
-
 
 locals {
   karpenter = {
@@ -205,8 +255,57 @@ resource "aws_route_table_association" "karpenter" {
   route_table_id = try(data.aws_route_tables.private_route_tables.ids[count.index], data.aws_route_tables.private_route_tables.ids[0], "") # Depends on the number of Nat Gateways
 }
 
+module "karpenter_security_group" {
+  source = "./modules/security-group"
+
+  name        = "karpenter-default-${local.stack_name}"
+  description = "Karpenter default security group"
+
+  vpc_id = local.vpc.vpc_id
+
+  ingress_rules = {
+    self_all = {
+      type      = "ingress"
+      protocol  = "-1"
+      from_port = 0
+      to_port   = 65535
+      self      = true
+    }
+    control_plane_other = {
+      type                     = "ingress"
+      protocol                 = "TCP"
+      from_port                = 1025
+      to_port                  = 65535
+      source_security_group_id = module.eks.cluster_primary_security_group_id
+    }
+    vpc_all = {
+      type        = "ingress"
+      protocol    = "-1"
+      from_port   = 0
+      to_port     = 65535
+      cidr_blocks = [local.vpc.vpc_cidr]
+    }
+  }
+  egress_rules = {
+    all = {
+      type        = "egress"
+      protocol    = "-1"
+      from_port   = 0
+      to_port     = 0
+      cidr_blocks = ["0.0.0.0/0"]
+    }
+  }
+
+  tags = merge(local.tags, {
+    # Is this needed? AWS LB Controller uses this to add itself to the node security groups
+    "kubernetes.io/cluster/${local.stack_name}" = "owned"
+    "karpenter.sh/discovery"                    = local.stack_name
+  })
+}
+
 module "karpenter" {
-  source = "terraform-aws-modules/eks/aws//modules/karpenter"
+  source  = "terraform-aws-modules/eks/aws//modules/karpenter"
+  version = "20.12.0"
 
   cluster_name                    = module.eks.cluster_name
   enable_irsa                     = true
@@ -237,10 +336,6 @@ module "karpenter_crds" {
   repository       = "oci://public.ecr.aws/karpenter"
   chart            = "karpenter-crd"
   chart_version    = local.karpenter.chart_version
-
-  depends_on = [
-    module.eks
-  ]
 }
 
 resource "helm_release" "karpenter" {
@@ -273,10 +368,6 @@ resource "helm_release" "karpenter" {
         eks.amazonaws.com/role-arn: ${module.karpenter.iam_role_arn}
     EOT
   ]
-
-  depends_on = [
-    module.karpenter
-  ]
 }
 
 resource "kubectl_manifest" "karpenter_node_class" {
@@ -299,7 +390,7 @@ resource "kubectl_manifest" "karpenter_node_class" {
   YAML
 
   depends_on = [
-    helm_release.karpenter
+    module.karpenter_crds
   ]
 }
 
@@ -341,7 +432,7 @@ resource "kubectl_manifest" "karpenter_node_pool" {
   YAML
 
   depends_on = [
-    kubectl_manifest.karpenter_node_class
+    module.karpenter_crds
   ]
 }
 

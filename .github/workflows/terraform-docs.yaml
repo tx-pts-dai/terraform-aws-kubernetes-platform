@@ -4,7 +4,7 @@ name: Generate terraform docs
 on:
   push:
     branches:
-      - renovate**
+      - disable
     paths:
       - "**.tf"
 
