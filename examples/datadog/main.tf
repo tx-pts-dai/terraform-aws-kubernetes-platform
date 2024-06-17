@@ -125,7 +125,5 @@ module "datadog" {
 
   cluster_name = module.k8s_platform.eks.cluster_name
 
-  datadog_secret = "dai-datadog/tamedia/keys"
-
   depends_on = [module.k8s_platform]
 }

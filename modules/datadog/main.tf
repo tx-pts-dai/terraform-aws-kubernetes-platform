@@ -1,44 +1,3 @@
-# Datadog kubernetes secret
-# Created through external_secret operator
-
-resource "kubernetes_manifest" "external_secret" {
-  manifest = {
-    apiVersion = "external-secrets.io/v1beta1"
-    kind       = "ExternalSecret"
-    metadata = {
-      name      = "datadog-keys"
-      namespace = var.namespace
-    }
-    spec = {
-      refreshInterval = "1m0s"
-      secretStoreRef = {
-        name = "aws-secretsmanager"
-        kind = "ClusterSecretStore"
-      }
-      target = {
-        name           = "datadog-keys"
-        creationPolicy = "Owner"
-      }
-      data = [
-        {
-          secretKey = "api-key"
-          remoteRef = {
-            key      = var.datadog_secret
-            property = "api_key"
-          }
-        },
-        {
-          secretKey = "app-key"
-          remoteRef = {
-            key      = var.datadog_secret
-            property = "app_key"
-          }
-        }
-      ]
-    }
-  }
-}
-
 # Datadog Operator
 
 locals {
@@ -62,6 +21,43 @@ module "datadog_operator" {
   create_namespace = true
 
   set = local.datadog_operator_helm_values
+}
+
+################################################################################
+# Datadog Secret - ExternalSecret
+
+resource "helm_release" "datadog_secrets" {
+  name       = "datadog-secrets"
+  repository = "https://dnd-it.github.io/helm-charts"
+  chart      = "custom-resources"
+  version    = try(var.datadog.custom_resource_chart_version, null)
+
+  values = [
+    <<-YAML
+    apiVersion: external-secrets.io/v1beta1
+    kind: ExternalSecret
+    metadata:
+      name: datadog-keys
+      namespace: ${var.namespace}
+    spec:
+      refreshInterval: 1m0s
+      secretStoreRef:
+        name: aws-secretsmanager
+        kind: ClusterSecretStore
+      target:
+        name: datadog-keys
+        creationPolicy: Owner
+      data:
+      - secretKey: api-key
+        remoteRef:
+          key: ${var.datadog_secret}
+          property: api_key
+      - secretKey: app-key
+        remoteRef:
+          key: ${var.datadog_secret}
+          property: app_key
+  YAML
+  ]
 }
 
 ################################################################################
@@ -137,5 +133,5 @@ resource "helm_release" "datadog_agent" {
     }
   }
 
-  depends_on = [module.datadog_operator, kubernetes_manifest.external_secret]
+  depends_on = [module.datadog_operator, helm_release.datadog_secrets]
 }
