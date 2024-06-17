@@ -3,7 +3,7 @@ terraform {
 
   backend "s3" {
     bucket               = "tf-state-911453050078"
-    key                  = "examples/cloudflare.tfstate"
+    key                  = "modules/cloudflare/examples/simple.tfstate"
     workspace_key_prefix = "terraform-aws-kubernetes-platform"
     dynamodb_table       = "terraform-lock"
     region               = "eu-central-1"
@@ -30,8 +30,10 @@ provider "cloudflare" {
 }
 
 module "cloudflare" {
-  source       = "../../cloudflare"
-  for_each     = var.zones
+  source = "../../cloudflare"
+
+  for_each = var.zones
+
   zone_name    = module.route53_zones[each.key].route53_zone_name[each.key]
   comment      = "Managed by KAAS examples"
   name_servers = module.route53_zones[each.key].route53_zone_name_servers[each.key]
