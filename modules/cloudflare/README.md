@@ -4,8 +4,8 @@ Deploy the Cloudflare delegation
 
 
 ```hcl
-module "cloudflare_delegation" {
-  source                   = "../../modules/cloudflare_delegation"
+module "cloudflare" {
+  source                   = "../../modules/cloudflare"
   for_each                 = var.zones
   domain_name              = module.route53_zones[each.key].route53_zone_name[each.key]
   aws_route53_name_servers = module.route53_zones[each.key].route53_zone_name_servers[each.key]

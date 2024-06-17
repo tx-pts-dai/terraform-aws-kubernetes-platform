@@ -3,7 +3,7 @@ terraform {
 
   backend "s3" {
     bucket               = "tf-state-911453050078"
-    key                  = "examples/cloudflare_delegation.tfstate"
+    key                  = "examples/cloudflare.tfstate"
     workspace_key_prefix = "terraform-aws-kubernetes-platform"
     dynamodb_table       = "terraform-lock"
     region               = "eu-central-1"
@@ -29,8 +29,8 @@ provider "cloudflare" {
   api_token = jsondecode(data.aws_secretsmanager_secret_version.cloudflare.secret_string)["apiToken"]
 }
 
-module "cloudflare_delegation" {
-  source       = "../../modules/cloudflare_delegation"
+module "cloudflare" {
+  source       = "../../cloudflare"
   for_each     = var.zones
   zone_name    = module.route53_zones[each.key].route53_zone_name[each.key]
   name_servers = module.route53_zones[each.key].route53_zone_name_servers[each.key]
