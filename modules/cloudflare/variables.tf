@@ -12,3 +12,9 @@ variable "account_id" {
   description = "Cloudflare account id"
   type        = string
 }
+
+variable "comment" {
+  description = "Record comment"
+  type        = string
+  default     = "Managed by Terraform"
+}
