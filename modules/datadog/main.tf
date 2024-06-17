@@ -23,14 +23,14 @@ resource "kubernetes_manifest" "external_secret" {
         {
           secretKey = "api-key"
           remoteRef = {
-            key      = "dai-datadog/tamedia/keys"
+            key      = var.datadog_secret
             property = "api_key"
           }
         },
         {
           secretKey = "app-key"
           remoteRef = {
-            key      = "dai-datadog/tamedia/keys"
+            key      = var.datadog_secret
             property = "app_key"
           }
         }

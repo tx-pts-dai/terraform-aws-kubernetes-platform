@@ -51,6 +51,7 @@ module "datadog" {
 | <a name="input_datadog"></a> [datadog](#input\_datadog) | Object of Datadog configurations | <pre>object({<br>    agent_api_key_name            = optional(string) # by default it uses the cluster name<br>    agent_app_key_name            = optional(string) # by default it uses the cluster name<br>    operator_chart_version        = optional(string)<br>    custom_resource_chart_version = optional(string)<br>  })</pre> | `{}` | no |
 | <a name="input_datadog_agent_helm_values"></a> [datadog\_agent\_helm\_values](#input\_datadog\_agent\_helm\_values) | List of Datadog Agent custom resource values. https://github.com/DataDog/datadog-operator/blob/main/docs/configuration.v2alpha1.md | <pre>list(object({<br>    name  = string<br>    value = string<br>  }))</pre> | `[]` | no |
 | <a name="input_datadog_operator_helm_values"></a> [datadog\_operator\_helm\_values](#input\_datadog\_operator\_helm\_values) | List of Datadog Operator values | <pre>list(object({<br>    name  = string<br>    value = string<br>  }))</pre> | <pre>[<br>  {<br>    "name": "resources.requests.cpu",<br>    "value": "10m"<br>  },<br>  {<br>    "name": "resources.requests.memory",<br>    "value": "50Mi"<br>  }<br>]</pre> | no |
+| <a name="input_datadog_secret"></a> [datadog\_secret](#input\_datadog\_secret) | Name of the datadog secret in Secrets Manager | `string` | `"dai-datadog/tamedia/keys"` | no |
 | <a name="input_namespace"></a> [namespace](#input\_namespace) | Namespace for Datadog resources | `string` | `"monitoring"` | no |
 
 ## Outputs
