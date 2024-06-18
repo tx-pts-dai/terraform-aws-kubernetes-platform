@@ -14,10 +14,6 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 5.0"
     }
-    datadog = {
-      source  = "DataDog/datadog"
-      version = "~> 3.39"
-    }
     kubernetes = {
       source  = "hashicorp/kubernetes"
       version = "~> 2.27"
@@ -35,17 +31,6 @@ terraform {
 
 provider "aws" {
   region = local.region
-}
-
-data "aws_secretsmanager_secret_version" "datadog" {
-  secret_id = "dai-datadog/tamedia/keys"
-}
-
-provider "datadog" {
-  api_url  = "https://api.${local.datadog_site}/"
-  api_key  = jsondecode(data.aws_secretsmanager_secret_version.datadog.secret_string)["api_key"]
-  app_key  = jsondecode(data.aws_secretsmanager_secret_version.datadog.secret_string)["app_key"]
-  validate = true
 }
 
 provider "kubernetes" {
@@ -84,8 +69,7 @@ provider "kubectl" {
 }
 
 locals {
-  region       = "eu-central-1"
-  datadog_site = "datadoghq.eu"
+  region = "eu-central-1"
 }
 
 module "k8s_platform" {
@@ -125,7 +109,7 @@ module "datadog" {
 
   cluster_name = module.k8s_platform.eks.cluster_name
 
-  datadog_secret = "dai-datadog/tamedia/keys"
+  datadog_secret = "dai/datadog/tamedia/keys"
 
   depends_on = [module.k8s_platform]
 }
