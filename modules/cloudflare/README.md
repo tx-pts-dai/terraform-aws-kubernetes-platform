@@ -42,6 +42,7 @@ No modules.
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_account_id"></a> [account\_id](#input\_account\_id) | Cloudflare account id | `string` | n/a | yes |
+| <a name="input_comment"></a> [comment](#input\_comment) | Record comment | `string` | `"Managed by Terraform"` | no |
 | <a name="input_name_servers"></a> [name\_servers](#input\_name\_servers) | Name servers to delegate to | `list(string)` | n/a | yes |
 | <a name="input_zone_name"></a> [zone\_name](#input\_zone\_name) | The domain name to delegate in Cloudflare | `string` | n/a | yes |
 
