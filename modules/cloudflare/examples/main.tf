@@ -33,6 +33,7 @@ module "cloudflare" {
   source       = "../../cloudflare"
   for_each     = var.zones
   zone_name    = module.route53_zones[each.key].route53_zone_name[each.key]
+  comment      = "Managed by KAAS examples"
   name_servers = module.route53_zones[each.key].route53_zone_name_servers[each.key]
   account_id   = jsondecode(data.aws_secretsmanager_secret_version.cloudflare.secret_string)["accountId"]
 }
