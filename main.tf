@@ -9,7 +9,6 @@
 ################################################################################
 
 data "aws_region" "current" {}
-data "aws_caller_identity" "current" {}
 data "aws_availability_zones" "available" {}
 
 # ID based on epoch timestamp for creating unique resources. Note: This is only
@@ -63,10 +62,6 @@ module "network" {
 
 ################################################################################
 # EKS Cluster
-data "aws_iam_session_context" "current" {
-  arn = data.aws_caller_identity.current.arn
-}
-
 data "aws_iam_roles" "sso" {
   name_regex  = "AWSReservedSSO_AWSAdministratorAccess_.*"
   path_prefix = local.sso_path_prefix
@@ -107,7 +102,7 @@ locals {
         }
       }
     }
-  } if v.role_arn != data.aws_iam_session_context.current.issuer_arn }
+  } }
 }
 
 module "eks" {
@@ -129,7 +124,7 @@ module "eks" {
   create_cluster_security_group = false
   create_node_security_group    = false
 
-  enable_cluster_creator_admin_permissions = false
+  enable_cluster_creator_admin_permissions = try(var.eks.enable_cluster_creator_admin_permissions, false)
 
   fargate_profiles = {
     karpenter = {
@@ -157,21 +152,6 @@ module "eks" {
 }
 
 # Allow all traffic from the VPC to the EKS control plane
-# Its either this or adding a custom security group to Fargate pods
-
-# apiVersion: vpcresources.k8s.aws/v1beta1
-# kind: SecurityGroupPolicy
-# metadata:
-#   name: karpenter
-#   namespace: kube-system
-# spec:
-#   podSelector:
-#     matchLabels:
-#       role: karpenter
-#   securityGroups:
-#     groupIds:
-#       - ${module.eks.cluster_primary_security_group_id}
-#       - ${custom_security_group_id}
 
 locals {
   ingress_rules = {
