@@ -84,8 +84,7 @@ locals {
   iam_cluster_admins = { for k, v in var.cluster_admins : k => {
     role_arn          = tolist(data.aws_iam_roles.iam_cluster_admins[k].arns)[0]
     kubernetes_groups = try(v.kubernetes_groups, null)
-    }
-  }
+  } }
 
   cluster_admins = merge(local.sso_cluster_admin, local.iam_cluster_admins)
 
@@ -130,7 +129,7 @@ module "eks" {
     karpenter = {
       selectors = [
         {
-          namespace = "kube-system"
+          namespace = local.karpenter.namespace
           labels    = { "app.kubernetes.io/name" = "karpenter" }
         },
       ]
@@ -139,20 +138,12 @@ module "eks" {
     }
   }
 
-  # TODO: remove duplicates in case of local deployment. If you are deploying from local
   access_entries = local.access_entries
 
-
-  tags = merge(local.tags, {
-    # NOTE - if creating multiple security groups with this module, only tag the
-    # security group that Karpenter should utilize with the following tag
-    # (i.e. - at most, only one security group should have this tag in your account)
-    # "karpenter.sh/discovery" = local.stack_name # TODO: Move to security group module when added
-  })
+  tags = local.tags
 }
 
 # Allow all traffic from the VPC to the EKS control plane
-
 locals {
   ingress_rules = {
     vpc_control_plane = {
