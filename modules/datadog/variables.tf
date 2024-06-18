@@ -46,3 +46,8 @@ variable "datadog_operator_helm_values" {
     },
   ]
 }
+
+variable "datadog_secret" {
+  description = "Name of the datadog secret in Secrets Manager"
+  type        = string
+}

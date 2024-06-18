@@ -1,24 +1,4 @@
-resource "kubernetes_secret" "datadog_keys" {
-  metadata {
-    name      = "datadog-keys"
-    namespace = var.namespace
-  }
-
-  data = {
-    api-key = datadog_api_key.datadog_agent.key
-    app-key = datadog_application_key.datadog_agent.key
-  }
-
-  depends_on = [module.datadog_operator]
-}
 # Datadog Operator
-resource "datadog_api_key" "datadog_agent" {
-  name = coalesce(var.datadog.agent_api_key_name, var.cluster_name)
-}
-
-resource "datadog_application_key" "datadog_agent" {
-  name = coalesce(var.datadog.agent_app_key_name, var.cluster_name)
-}
 
 locals {
   datadog_site = "datadoghq.eu"
@@ -41,6 +21,43 @@ module "datadog_operator" {
   create_namespace = true
 
   set = local.datadog_operator_helm_values
+}
+
+################################################################################
+# Datadog Secret - ExternalSecret
+
+resource "helm_release" "datadog_secrets" {
+  name       = "datadog-secrets"
+  repository = "https://dnd-it.github.io/helm-charts"
+  chart      = "custom-resources"
+  version    = try(var.datadog.custom_resource_chart_version, null)
+
+  values = [
+    <<-YAML
+    apiVersion: external-secrets.io/v1beta1
+    kind: ExternalSecret
+    metadata:
+      name: datadog-keys
+      namespace: ${var.namespace}
+    spec:
+      refreshInterval: 1m0s
+      secretStoreRef:
+        name: aws-secretsmanager
+        kind: ClusterSecretStore
+      target:
+        name: datadog-keys
+        creationPolicy: Owner
+      data:
+      - secretKey: api-key
+        remoteRef:
+          key: ${var.datadog_secret}
+          property: api_key
+      - secretKey: app-key
+        remoteRef:
+          key: ${var.datadog_secret}
+          property: app_key
+  YAML
+  ]
 }
 
 ################################################################################
@@ -116,5 +133,5 @@ resource "helm_release" "datadog_agent" {
     }
   }
 
-  depends_on = [module.datadog_operator, kubernetes_secret.datadog_keys]
+  depends_on = [module.datadog_operator, helm_release.datadog_secrets]
 }
