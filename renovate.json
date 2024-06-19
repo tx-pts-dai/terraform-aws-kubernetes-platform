@@ -1,25 +1,7 @@
 {
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "baseBranches": ["main"],
-  "branchPrefix": "renovate_",
-  "rebaseWhen": "conflicted",
   "extends": [
-    "config:recommended",
-    ":enablePreCommit"
-  ],
-  "reviewers": ["team:DAI-Team"],
-  "enabledManagers": ["github-actions", "terraform"],
-  "packageRules": [
-    {
-      "matchManagers": ["github-actions"],
-      "matchUpdateTypes": ["minor", "patch"],
-      "automerge": false,
-      "pinDigests": true
-    },
-    {
-      "matchManagers": ["terraform"],
-      "matchUpdateTypes": ["minor", "patch"],
-      "groupName": "terraform non-major updates",
-      "groupSlug": "all-minor-patch"
-    }
+    "github>tx-pts-dai/renovate-config"
   ]
 }
