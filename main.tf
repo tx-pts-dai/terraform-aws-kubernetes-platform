@@ -106,7 +106,7 @@ locals {
 
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
-  version = "20.12.0"
+  version = "20.14.0"
 
   cluster_name                    = local.stack_name
   cluster_version                 = try(var.eks.kubernetes_version, "1.29")
@@ -276,7 +276,7 @@ module "karpenter_security_group" {
 
 module "karpenter" {
   source  = "terraform-aws-modules/eks/aws//modules/karpenter"
-  version = "20.12.0"
+  version = "20.14.0"
 
   cluster_name                    = module.eks.cluster_name
   enable_irsa                     = true
