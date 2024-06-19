@@ -6,6 +6,9 @@ repos:
         args:
           - '--args=-recursive'
       - id: terraform_validate
+        args:
+          - --tf-init-args=-upgrade
+          - --tf-init-args=-lockfile=false
       - id: terraform_docs
         args:
           - '--args=--lockfile=false'

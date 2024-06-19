@@ -1,0 +1,28 @@
+name: Feature Branch
+
+on:
+  pull_request:
+    paths:
+      - "*.tf"
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - closed
+    branches:
+      - main
+
+jobs:
+  feature_deploy:
+    if: github.event_name == 'pull_request' && github.event.action != 'closed'
+    uses: tx-pts-dai/github-workflows/.github/workflows/tf-feature.yaml@v0.24.0
+    with:
+      environment: examples
+      tf_dir: examples/complete
+
+  feature_destroy:
+    if: github.event_name == 'pull_request' && github.event.action == 'closed'
+    uses: tx-pts-dai/github-workflows/.github/workflows/tf-cleanup.yaml@v0.24.0
+    with:
+      environment: examples
+      tf_dir: examples/complete
