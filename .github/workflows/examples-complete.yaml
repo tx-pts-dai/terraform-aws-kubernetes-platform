@@ -20,14 +20,14 @@ permissions:
 jobs:
   example_complete_deploy:
     if: github.event_name == 'pull_request' && github.event.action != 'closed'
-    uses: tx-pts-dai/github-workflows/.github/workflows/tf-feature.yaml@v0.24.0
+    uses: tx-pts-dai/github-workflows/.github/workflows/tf-feature.yaml@v0.37.0
     with:
       environment: examples
       tf_dir: examples/complete
 
   example_complete_destroy:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
-    uses: tx-pts-dai/github-workflows/.github/workflows/tf-cleanup.yaml@v0.24.0
+    uses: tx-pts-dai/github-workflows/.github/workflows/tf-cleanup.yaml@v0.37.0
     with:
       environment: examples
       tf_dir: examples/complete
