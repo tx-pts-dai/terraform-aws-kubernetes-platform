@@ -1,19 +1,15 @@
 name: Release
 
 on:
+  workflow_dispatch:
   push:
-    tags:
-      - "v*.*.*"
-
+    branches:
+      - main
+    paths:
+      - "**/*.tf"
 permissions:
   contents: write
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Release
-        uses: softprops/action-gh-release@v2
+  release:
+    uses: tx-pts-dai/github-workflows/.github/workflows/gh-release-on-main.yaml@v1

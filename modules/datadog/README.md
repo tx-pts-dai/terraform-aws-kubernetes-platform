@@ -20,12 +20,16 @@ module "datadog" {
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.3.2 |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 5.0.0 |
 | <a name="requirement_helm"></a> [helm](#requirement\_helm) | ~> 2.6 |
+| <a name="requirement_kubectl"></a> [kubectl](#requirement\_kubectl) | >= 2.0.2 |
+| <a name="requirement_kubernetes"></a> [kubernetes](#requirement\_kubernetes) | >= 2.27 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
 | <a name="provider_helm"></a> [helm](#provider\_helm) | ~> 2.6 |
+| <a name="provider_kubectl"></a> [kubectl](#provider\_kubectl) | >= 2.0.2 |
+| <a name="provider_kubernetes"></a> [kubernetes](#provider\_kubernetes) | >= 2.27 |
 
 ## Modules
 
@@ -39,6 +43,10 @@ module "datadog" {
 |------|------|
 | [helm_release.datadog_agent](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
 | [helm_release.datadog_secrets](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
+| [helm_release.datadog_secrets_fargate](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
+| [kubectl_manifest.fargate_cluster_role](https://registry.terraform.io/providers/alekc/kubectl/latest/docs/resources/manifest) | resource |
+| [kubectl_manifest.fargate_role_binding](https://registry.terraform.io/providers/alekc/kubectl/latest/docs/resources/manifest) | resource |
+| [kubernetes_annotations.this](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/annotations) | resource |
 
 ## Inputs
 
@@ -47,8 +55,10 @@ module "datadog" {
 | <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | Name of the cluster | `string` | n/a | yes |
 | <a name="input_datadog"></a> [datadog](#input\_datadog) | Object of Datadog configurations | <pre>object({<br>    agent_api_key_name            = optional(string) # by default it uses the cluster name<br>    agent_app_key_name            = optional(string) # by default it uses the cluster name<br>    operator_chart_version        = optional(string)<br>    custom_resource_chart_version = optional(string)<br>  })</pre> | `{}` | no |
 | <a name="input_datadog_agent_helm_values"></a> [datadog\_agent\_helm\_values](#input\_datadog\_agent\_helm\_values) | List of Datadog Agent custom resource values. https://github.com/DataDog/datadog-operator/blob/main/docs/configuration.v2alpha1.md | <pre>list(object({<br>    name  = string<br>    value = string<br>  }))</pre> | `[]` | no |
+| <a name="input_datadog_agent_version_fargate"></a> [datadog\_agent\_version\_fargate](#input\_datadog\_agent\_version\_fargate) | Version of the datadog agent injected in Fargate | `string` | `"7.54.0"` | no |
 | <a name="input_datadog_operator_helm_values"></a> [datadog\_operator\_helm\_values](#input\_datadog\_operator\_helm\_values) | List of Datadog Operator values | <pre>list(object({<br>    name  = string<br>    value = string<br>  }))</pre> | <pre>[<br>  {<br>    "name": "resources.requests.cpu",<br>    "value": "10m"<br>  },<br>  {<br>    "name": "resources.requests.memory",<br>    "value": "50Mi"<br>  }<br>]</pre> | no |
 | <a name="input_datadog_secret"></a> [datadog\_secret](#input\_datadog\_secret) | Name of the datadog secret in Secrets Manager | `string` | n/a | yes |
+| <a name="input_environment"></a> [environment](#input\_environment) | Name of the environment | `string` | n/a | yes |
 | <a name="input_namespace"></a> [namespace](#input\_namespace) | Namespace for Datadog resources | `string` | `"monitoring"` | no |
 
 ## Outputs

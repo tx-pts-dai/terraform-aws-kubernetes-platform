@@ -16,7 +16,7 @@ module "datadog_operator" {
   chart            = "datadog-operator"
   namespace        = var.namespace
   max_history      = 10
-  chart_version    = try(var.datadog.operator_chart_version, "1.6.0")
+  chart_version    = try(var.datadog.operator_chart_version, "1.8.1")
   atomic           = true
   create_namespace = true
 
@@ -24,7 +24,7 @@ module "datadog_operator" {
 }
 
 ################################################################################
-# Datadog Secret - ExternalSecret
+# Datadog Secret - ExternalSecrets for both monitoring and kube-system NS
 
 resource "helm_release" "datadog_secrets" {
   name       = "datadog-secrets"
@@ -58,6 +58,42 @@ resource "helm_release" "datadog_secrets" {
           property: app_key
   YAML
   ]
+  depends_on = [module.datadog_operator]
+}
+
+resource "helm_release" "datadog_secrets_fargate" {
+  name       = "datadog-secrets-fargate"
+  repository = "https://dnd-it.github.io/helm-charts"
+  chart      = "custom-resources"
+  version    = try(var.datadog.custom_resource_chart_version, null)
+
+  values = [
+    <<-YAML
+    apiVersion: external-secrets.io/v1beta1
+    kind: ExternalSecret
+    metadata:
+      name: datadog-keys
+      namespace: kube-system
+    spec:
+      refreshInterval: 1m0s
+      secretStoreRef:
+        name: aws-secretsmanager
+        kind: ClusterSecretStore
+      target:
+        name: datadog-keys
+        creationPolicy: Owner
+      data:
+      - secretKey: api-key
+        remoteRef:
+          key: ${var.datadog_secret}
+          property: api_key
+      - secretKey: app-key
+        remoteRef:
+          key: ${var.datadog_secret}
+          property: app_key
+  YAML
+  ]
+  depends_on = [module.datadog_operator]
 }
 
 ################################################################################
@@ -94,13 +130,49 @@ resource "helm_release" "datadog_agent" {
           enabled: true
         logCollection:
           enabled: true
+        admissionController:
+            enabled: true
+            mutateUnlabelled: true
+            agentCommunicationMode: service
+            agentSidecarInjection:
+              enabled: true
+              clusterAgentCommunicationEnabled: false
+              registry: public.ecr.aws/datadog
+              image:
+                name: agent
+                tag: ${var.datadog_agent_version_fargate}
+              provider: fargate
+              profiles:
+                - env:
+                  - name: DD_APM_ENABLED
+                    value: "false"
+                  - name: DD_API_KEY
+                    valueFrom:
+                      secretKeyRef:
+                        name: datadog-keys
+                        key: api-key
+                  - name: DD_APP_KEY
+                    valueFrom:
+                      secretKeyRef:
+                        name: datadog-keys
+                        key: app-key
+                  - name: DD_LOGS_ENABLED
+                    value: "false"
+                  - name: DD_ENV
+                    value: "${var.environment}"
+                  - name: DD_CLUSTER_NAME
+                    value: "${var.cluster_name}"
+              selectors:
+              - objectSelector:
+                  matchLabels:
+                    "app.kubernetes.io/name": karpenter
       override:
         clusterAgent:
           containers:
             cluster-agent:
               resources:
                 requests:
-                  cpu: 30m
+                  cpu: 40m
                   memory: 200Mi
                 limits:
                   memory: 300Mi
@@ -133,5 +205,30 @@ resource "helm_release" "datadog_agent" {
     }
   }
 
-  depends_on = [module.datadog_operator, helm_release.datadog_secrets]
+  depends_on = [module.datadog_operator, helm_release.datadog_secrets, helm_release.datadog_secrets_fargate]
+}
+
+resource "kubernetes_annotations" "this" {
+  api_version = "apps/v1"
+  kind        = "Deployment"
+  metadata {
+    name      = "karpenter"
+    namespace = "kube-system"
+  }
+  # These annotations will be applied to the Deployment resource itself
+  annotations = {
+    "sha" = sha256(join("", helm_release.datadog_agent.values))
+  }
+  template_annotations = {
+    # These annotations will be applied to the Pods created by the Deployment
+    "sha" = sha256(join("", helm_release.datadog_agent.values))
+  }
+}
+
+resource "kubectl_manifest" "fargate_cluster_role" {
+  yaml_body = file("${path.module}/templates/cluster_role.yaml")
+}
+
+resource "kubectl_manifest" "fargate_role_binding" {
+  yaml_body = file("${path.module}/templates/role_binding.yaml")
 }

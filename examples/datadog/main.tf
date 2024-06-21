@@ -89,6 +89,20 @@ module "k8s_platform" {
     GithubOrg   = "tx-pts-dai"
   }
 
+  karpenter = {
+    pod_annotations = {
+      "ad.datadoghq.com/controller.checks" = jsonencode(
+        {
+          "karpenter" : {
+            "init_config" : {},
+            "instances" : [{ "openmetrics_endpoint" : "http://%%host%%:8000/metrics" }]
+          }
+        }
+      )
+    }
+    memory_request = "768Mi"
+  }
+
   vpc = {
     enabled = true
     cidr    = "10.0.0.0/16"
@@ -108,6 +122,8 @@ module "datadog" {
   source = "../../modules/datadog"
 
   cluster_name = module.k8s_platform.eks.cluster_name
+
+  environment = "sandbox"
 
   datadog_secret = "dai/datadog/tamedia/keys"
 

@@ -192,6 +192,9 @@ locals {
     chart_version           = try(var.karpenter.chart_version, "0.37.0")
     replicas                = try(var.karpenter.replicas, 1)
     service_monitor_enabled = try(var.karpenter.service_monitor_enabled, false)
+    pod_annotations         = try(var.karpenter.pod_annotations, {})
+    cpu_request             = try(var.karpenter.cpu_request, 0.25)
+    memory_request          = try(var.karpenter.memory_request, "256Mi")
   }
 
   azs = slice(data.aws_availability_zones.available.names, 0, 3)
@@ -324,10 +327,12 @@ resource "helm_release" "karpenter" {
     logLevel: info
     dnsPolicy: Default
     replicas: "${local.karpenter.replicas}"
-    resources:
-      requests:
-        cpu: "0.25"
-        memory: 256Mi
+    podAnnotations: ${jsonencode(local.karpenter.pod_annotations)}
+    controller:
+      resources:
+        requests:
+          cpu: ${local.karpenter.cpu_request}
+          memory: ${local.karpenter.memory_request}
     serviceMonitor:
       enabled: ${local.karpenter.service_monitor_enabled}
     settings:
