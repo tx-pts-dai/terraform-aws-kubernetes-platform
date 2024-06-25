@@ -223,6 +223,7 @@ resource "kubernetes_annotations" "this" {
     # These annotations will be applied to the Pods created by the Deployment
     "datadog-values-sha" = sha256(join("", helm_release.datadog_agent.values))
   }
+  depends_on = [helm_release.datadog_agent]
 }
 
 resource "kubectl_manifest" "fargate_cluster_role" {
