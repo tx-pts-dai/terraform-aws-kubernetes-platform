@@ -26,12 +26,17 @@ terraform {
       source  = "alekc/kubectl"
       version = "~> 2.0"
     }
+    time = {
+      source  = "hashicorp/time"
+      version = "0.11.2"
+    }
   }
 }
 
 provider "aws" {
   region = local.region
 }
+
 
 provider "kubernetes" {
   host                   = module.k8s_platform.eks.cluster_endpoint

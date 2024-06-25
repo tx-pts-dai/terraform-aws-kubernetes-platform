@@ -208,6 +208,11 @@ resource "helm_release" "datadog_agent" {
   depends_on = [module.datadog_operator, helm_release.datadog_secrets, helm_release.datadog_secrets_fargate]
 }
 
+resource "time_sleep" "this" {
+  depends_on = [helm_release.datadog_agent]
+
+  create_duration = "120s"
+}
 resource "kubernetes_annotations" "this" {
   api_version = "apps/v1"
   kind        = "Deployment"
@@ -223,7 +228,7 @@ resource "kubernetes_annotations" "this" {
     # These annotations will be applied to the Pods created by the Deployment
     "datadog-values-sha" = sha256(join("", helm_release.datadog_agent.values))
   }
-  depends_on = [helm_release.datadog_agent]
+  depends_on = [time_sleep.this]
 }
 
 resource "kubectl_manifest" "fargate_cluster_role" {
