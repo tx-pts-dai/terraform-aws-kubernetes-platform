@@ -91,14 +91,12 @@ module "k8s_platform" {
 
   karpenter = {
     pod_annotations = {
-      "ad.datadoghq.com/controller.checks" = jsonencode(
-        {
-          "karpenter" : {
-            "init_config" : {},
-            "instances" : [{ "openmetrics_endpoint" : "http://%%host%%:8000/metrics" }]
-          }
+      "ad.datadoghq.com/controller.checks" = {
+        "karpenter" : {
+          "init_config" : {},
+          "instances" : [{ "openmetrics_endpoint" : "http://%%host%%:8000/metrics" }]
         }
-      )
+      }
     }
     memory_request = "768Mi"
   }

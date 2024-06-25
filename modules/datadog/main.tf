@@ -204,7 +204,7 @@ resource "helm_release" "datadog_agent" {
       type  = try(set.value.type, null)
     }
   }
-
+  # Dependency on the eternal secrets, otherwise it will fail
   depends_on = [module.datadog_operator, helm_release.datadog_secrets, helm_release.datadog_secrets_fargate]
 }
 
@@ -217,18 +217,18 @@ resource "kubernetes_annotations" "this" {
   }
   # These annotations will be applied to the Deployment resource itself
   annotations = {
-    "sha" = sha256(join("", helm_release.datadog_agent.values))
+    "datadog-values-sha" = sha256(join("", helm_release.datadog_agent.values))
   }
   template_annotations = {
     # These annotations will be applied to the Pods created by the Deployment
-    "sha" = sha256(join("", helm_release.datadog_agent.values))
+    "datadog-values-sha" = sha256(join("", helm_release.datadog_agent.values))
   }
 }
 
 resource "kubectl_manifest" "fargate_cluster_role" {
-  yaml_body = file("${path.module}/templates/cluster_role.yaml")
+  yaml_body = file("${path.module}/manifests/cluster_role.yaml")
 }
 
 resource "kubectl_manifest" "fargate_role_binding" {
-  yaml_body = file("${path.module}/templates/role_binding.yaml")
+  yaml_body = file("${path.module}/manifests/role_binding.yaml")
 }
