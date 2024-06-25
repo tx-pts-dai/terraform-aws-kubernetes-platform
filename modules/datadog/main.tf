@@ -208,6 +208,7 @@ resource "helm_release" "datadog_agent" {
   depends_on = [module.datadog_operator, helm_release.datadog_secrets, helm_release.datadog_secrets_fargate]
 }
 
+# Delays the annotations until the Datadog Agent is ready
 resource "time_sleep" "this" {
   depends_on = [helm_release.datadog_agent]
 
