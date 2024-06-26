@@ -9,6 +9,12 @@ variable "cluster_name" {
   type        = string
 }
 
+
+variable "environment" {
+  description = "Name of the environment"
+  type        = string
+}
+
 variable "datadog" {
   description = "Object of Datadog configurations"
   type = object({
@@ -50,4 +56,10 @@ variable "datadog_operator_helm_values" {
 variable "datadog_secret" {
   description = "Name of the datadog secret in Secrets Manager"
   type        = string
+}
+
+variable "datadog_agent_version_fargate" {
+  description = "Version of the datadog agent injected in Fargate"
+  type        = string
+  default     = "7.54.0"
 }
