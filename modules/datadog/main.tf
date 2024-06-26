@@ -51,11 +51,11 @@ resource "helm_release" "datadog_secrets" {
       - secretKey: api-key
         remoteRef:
           key: ${var.datadog_secret}
-          property: api_key
+          property: DD_API_KEY
       - secretKey: app-key
         remoteRef:
           key: ${var.datadog_secret}
-          property: app_key
+          property: DD_APP_KEY
   YAML
   ]
   depends_on = [module.datadog_operator]
@@ -86,11 +86,11 @@ resource "helm_release" "datadog_secrets_fargate" {
       - secretKey: api-key
         remoteRef:
           key: ${var.datadog_secret}
-          property: api_key
+          property: DD_API_KEY
       - secretKey: app-key
         remoteRef:
           key: ${var.datadog_secret}
-          property: app_key
+          property: DD_APP_KEY
   YAML
   ]
   depends_on = [module.datadog_operator]
