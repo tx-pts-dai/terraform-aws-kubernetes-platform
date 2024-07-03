@@ -116,6 +116,10 @@ resource "helm_release" "datadog_agent" {
       global:
         clusterName: ${var.cluster_name}
         site: ${local.datadog_site}
+        tags:
+          - cluster: ${var.cluster_name}
+          - env: ${var.environment}-${var.product_name}
+          - product: ${var.product_name}
         credentials:
           apiSecret:
             secretName: datadog-keys
@@ -130,22 +134,23 @@ resource "helm_release" "datadog_agent" {
           enabled: true
         logCollection:
           enabled: true
+          containerCollectAll: true
         admissionController:
+          enabled: true
+          mutateUnlabelled: true
+          agentCommunicationMode: service
+          agentSidecarInjection:
             enabled: true
-            mutateUnlabelled: true
-            agentCommunicationMode: service
-            agentSidecarInjection:
-              enabled: true
-              clusterAgentCommunicationEnabled: false
-              registry: public.ecr.aws/datadog
-              image:
-                name: agent
-                tag: ${var.datadog_agent_version_fargate}
-              provider: fargate
-              profiles:
-                - env:
+            clusterAgentCommunicationEnabled: false
+            registry: public.ecr.aws/datadog
+            image:
+              name: agent
+              tag: ${var.datadog_agent_version_fargate}
+            provider: fargate
+            profiles:
+              - env:
                   - name: DD_APM_ENABLED
-                    value: "false"
+                    value: false
                   - name: DD_API_KEY
                     valueFrom:
                       secretKeyRef:
@@ -157,15 +162,11 @@ resource "helm_release" "datadog_agent" {
                         name: datadog-keys
                         key: app-key
                   - name: DD_LOGS_ENABLED
-                    value: "false"
-                  - name: DD_ENV
-                    value: "${var.environment}"
-                  - name: DD_CLUSTER_NAME
-                    value: "${var.cluster_name}"
-              selectors:
+                    value: false
+            selectors:
               - objectSelector:
                   matchLabels:
-                    "app.kubernetes.io/name": karpenter
+                    app.kubernetes.io/name: karpenter
       override:
         clusterAgent:
           containers:
@@ -193,6 +194,7 @@ resource "helm_release" "datadog_agent" {
                   memory: 56Mi
                 limits:
                   memory: 100Mi
+
   YAML
   ]
 
