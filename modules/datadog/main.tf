@@ -163,6 +163,8 @@ resource "helm_release" "datadog_agent" {
                         key: app-key
                   - name: DD_LOGS_ENABLED
                     value: "false"
+                  - name: DD_ENV
+                    value: "${var.environment}-${var.product_name}"
             selectors:
               - objectSelector:
                   matchLabels:
