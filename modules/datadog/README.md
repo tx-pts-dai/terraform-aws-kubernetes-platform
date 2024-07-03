@@ -37,7 +37,7 @@ module "datadog" {
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_datadog_operator"></a> [datadog\_operator](#module\_datadog\_operator) | aws-ia/eks-blueprints-addon/aws | ~> 1.0 |
+| <a name="module_datadog_operator"></a> [datadog\_operator](#module\_datadog\_operator) | aws-ia/eks-blueprints-addon/aws | >= 1.0 |
 
 ## Resources
 

@@ -8,7 +8,7 @@ locals {
 }
 module "datadog_operator" {
   source  = "aws-ia/eks-blueprints-addon/aws"
-  version = "~> 1.0"
+  version = ">= 1.0"
 
   name             = "datadog-operator"
   repository       = "https://helm.datadoghq.com"
