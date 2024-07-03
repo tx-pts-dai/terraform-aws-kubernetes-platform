@@ -216,9 +216,12 @@ resource "helm_release" "datadog_agent" {
 
 # Delays the annotations until the Datadog Agent is ready
 resource "time_sleep" "this" {
-  depends_on = [helm_release.datadog_agent]
-
   create_duration = "120s"
+  triggers = {
+    helm_values = helm_release.datadog_agent.values
+  }
+
+  depends_on = [helm_release.datadog_agent]
 }
 resource "kubernetes_annotations" "this" {
   api_version = "apps/v1"
