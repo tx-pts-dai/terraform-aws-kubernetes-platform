@@ -117,9 +117,9 @@ resource "helm_release" "datadog_agent" {
         clusterName: ${var.cluster_name}
         site: ${local.datadog_site}
         tags:
-          - cluster: ${var.cluster_name}
-          - env: ${var.environment}-${var.product_name}
-          - product: ${var.product_name}
+          - "cluster:${var.cluster_name}"
+          - "env:${var.environment}-${var.product_name}"
+          - "product:${var.product_name}"
         credentials:
           apiSecret:
             secretName: datadog-keys
@@ -150,7 +150,7 @@ resource "helm_release" "datadog_agent" {
             profiles:
               - env:
                   - name: DD_APM_ENABLED
-                    value: false
+                    value: "false"
                   - name: DD_API_KEY
                     valueFrom:
                       secretKeyRef:
@@ -162,7 +162,7 @@ resource "helm_release" "datadog_agent" {
                         name: datadog-keys
                         key: app-key
                   - name: DD_LOGS_ENABLED
-                    value: false
+                    value: "false"
             selectors:
               - objectSelector:
                   matchLabels:
