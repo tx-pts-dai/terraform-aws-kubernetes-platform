@@ -165,6 +165,8 @@ resource "helm_release" "datadog_agent" {
                     value: "false"
                   - name: DD_ENV
                     value: "${var.environment}-${var.product_name}"
+                  - name: DD_TAGS
+                    value: "env:${var.environment}-${var.product_name} product:${var.product_name}"
             selectors:
               - objectSelector:
                   matchLabels:
