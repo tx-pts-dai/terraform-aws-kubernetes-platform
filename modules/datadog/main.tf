@@ -164,9 +164,7 @@ resource "helm_release" "datadog_agent" {
                   - name: DD_LOGS_ENABLED
                     value: "false"
                   - name: DD_TAGS
-                    value:
-                      - "env:${var.environment}-${var.product_name}"
-                      - "product:${var.product_name}"
+                    value: "env:${var.environment}-${var.product_name}"
             selectors:
               - objectSelector:
                   matchLabels:
@@ -198,7 +196,6 @@ resource "helm_release" "datadog_agent" {
                   memory: 56Mi
                 limits:
                   memory: 100Mi
-
   YAML
   ]
 
@@ -216,9 +213,9 @@ resource "helm_release" "datadog_agent" {
 
 # Delays the annotations until the Datadog Agent is ready
 resource "time_sleep" "this" {
-  create_duration = "120s"
+  create_duration = "60s"
   triggers = {
-    helm_values = helm_release.datadog_agent.values
+    helm_values = sha256(join("", helm_release.datadog_agent.values))
   }
 
   depends_on = [helm_release.datadog_agent]
