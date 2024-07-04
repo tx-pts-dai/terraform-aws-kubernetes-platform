@@ -5,6 +5,7 @@ Deploy the Cloudflare delegation
 ```hcl
 module "cloudflare" {
   source   = "tx-pts-dai/kubernetes-platform/aws//modules/cloudflare"
+  version  = ...
   for_each = var.zones
 
   account_id   = jsondecode(data.aws_secretsmanager_secret_version.cloudflare.secret_string)["accountId"]
