@@ -126,11 +126,10 @@ module "k8s_platform" {
 module "datadog" {
   source = "../../modules/datadog"
 
-  cluster_name = module.k8s_platform.eks.cluster_name
-
-  environment = "sandbox"
-
+  cluster_name   = module.k8s_platform.eks.cluster_name
   datadog_secret = "dai/datadog/tamedia/keys"
+  environment    = "sandbox"
+  product_name   = "dai"
 
   depends_on = [module.k8s_platform]
 }

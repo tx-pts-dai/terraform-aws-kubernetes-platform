@@ -37,7 +37,7 @@ module "datadog" {
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_datadog_operator"></a> [datadog\_operator](#module\_datadog\_operator) | aws-ia/eks-blueprints-addon/aws | ~> 1.0 |
+| <a name="module_datadog_operator"></a> [datadog\_operator](#module\_datadog\_operator) | aws-ia/eks-blueprints-addon/aws | >= 1.0 |
 
 ## Resources
 
@@ -63,6 +63,7 @@ module "datadog" {
 | <a name="input_datadog_secret"></a> [datadog\_secret](#input\_datadog\_secret) | Name of the datadog secret in Secrets Manager | `string` | n/a | yes |
 | <a name="input_environment"></a> [environment](#input\_environment) | Name of the environment | `string` | n/a | yes |
 | <a name="input_namespace"></a> [namespace](#input\_namespace) | Namespace for Datadog resources | `string` | `"monitoring"` | no |
+| <a name="input_product_name"></a> [product\_name](#input\_product\_name) | Value of the product tag added to all metrics and logs sent to datadog | `string` | n/a | yes |
 
 ## Outputs
 

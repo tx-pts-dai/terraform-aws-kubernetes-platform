@@ -8,7 +8,7 @@ locals {
 }
 module "datadog_operator" {
   source  = "aws-ia/eks-blueprints-addon/aws"
-  version = "~> 1.0"
+  version = ">= 1.0"
 
   name             = "datadog-operator"
   repository       = "https://helm.datadoghq.com"
@@ -116,6 +116,10 @@ resource "helm_release" "datadog_agent" {
       global:
         clusterName: ${var.cluster_name}
         site: ${local.datadog_site}
+        tags:
+          - "cluster:${var.cluster_name}"
+          - "env:${var.environment}-${var.product_name}"
+          - "product:${var.product_name}"
         credentials:
           apiSecret:
             secretName: datadog-keys
@@ -130,20 +134,21 @@ resource "helm_release" "datadog_agent" {
           enabled: true
         logCollection:
           enabled: true
+          containerCollectAll: true
         admissionController:
+          enabled: true
+          mutateUnlabelled: true
+          agentCommunicationMode: service
+          agentSidecarInjection:
             enabled: true
-            mutateUnlabelled: true
-            agentCommunicationMode: service
-            agentSidecarInjection:
-              enabled: true
-              clusterAgentCommunicationEnabled: false
-              registry: public.ecr.aws/datadog
-              image:
-                name: agent
-                tag: ${var.datadog_agent_version_fargate}
-              provider: fargate
-              profiles:
-                - env:
+            clusterAgentCommunicationEnabled: false
+            registry: public.ecr.aws/datadog
+            image:
+              name: agent
+              tag: ${var.datadog_agent_version_fargate}
+            provider: fargate
+            profiles:
+              - env:
                   - name: DD_APM_ENABLED
                     value: "false"
                   - name: DD_API_KEY
@@ -158,14 +163,12 @@ resource "helm_release" "datadog_agent" {
                         key: app-key
                   - name: DD_LOGS_ENABLED
                     value: "false"
-                  - name: DD_ENV
-                    value: "${var.environment}"
-                  - name: DD_CLUSTER_NAME
-                    value: "${var.cluster_name}"
-              selectors:
+                  - name: DD_TAGS
+                    value: "env:${var.environment}-${var.product_name}"
+            selectors:
               - objectSelector:
                   matchLabels:
-                    "app.kubernetes.io/name": karpenter
+                    app.kubernetes.io/name: karpenter
       override:
         clusterAgent:
           containers:
@@ -210,9 +213,10 @@ resource "helm_release" "datadog_agent" {
 
 # Delays the annotations until the Datadog Agent is ready
 resource "time_sleep" "this" {
-  depends_on = [helm_release.datadog_agent]
-
-  create_duration = "120s"
+  create_duration = "60s"
+  triggers = {
+    helm_values = sha256(join("", helm_release.datadog_agent.values))
+  }
 }
 resource "kubernetes_annotations" "this" {
   api_version = "apps/v1"
