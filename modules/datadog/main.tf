@@ -217,8 +217,6 @@ resource "time_sleep" "this" {
   triggers = {
     helm_values = sha256(join("", helm_release.datadog_agent.values))
   }
-
-  depends_on = [helm_release.datadog_agent]
 }
 resource "kubernetes_annotations" "this" {
   api_version = "apps/v1"
