@@ -4,7 +4,7 @@ variable "zone_name" {
 }
 
 variable "name_servers" {
-  description = "Name servers to delegate to"
+  description = "List of name servers to delegate to Cloudflare"
   type        = list(string)
 }
 
