@@ -63,3 +63,8 @@ variable "datadog_agent_version_fargate" {
   type        = string
   default     = "7.54.0"
 }
+
+variable "product_name" {
+  description = "Value of the product tag added to all metrics and logs sent to datadog"
+  type        = string
+}
