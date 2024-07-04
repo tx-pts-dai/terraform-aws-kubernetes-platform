@@ -6,20 +6,16 @@ module "ssm" {
 
   parameters = {
     cluster_name = {
-      name  = "cluster_name"
-      value = module.eks.cluster_name
+      insecure_value = module.eks.cluster_name
     },
     cluster_endpoint = {
-      name  = "cluster_endpoint"
-      value = module.eks.cluster_endpoint
+      insecure_value = module.eks.cluster_endpoint
     },
     cluster_arn = {
-      name  = "cluster_arn"
-      value = module.eks.cluster_arn
+      insecure_value = module.eks.cluster_arn
     },
     cluster_certificate_authority_data = {
-      name  = "cluster_certificate_authority_data"
-      value = base64encode(module.eks.cluster_certificate_authority_data)
+      insecure_value = base64encode(module.eks.cluster_certificate_authority_data)
     },
   }
 
