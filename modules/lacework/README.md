@@ -4,7 +4,8 @@ Deploy Lacework Agents
 
 ```hcl
 module "lacework" {
-  source = "./modules/lacework"
+  source  = "tx-pts-dai/kubernetes-platform/aws//modules/datadog"
+  version = ...
 
   cluster_name = module.eks.cluster_name
 }
