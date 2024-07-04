@@ -65,6 +65,6 @@ variable "datadog_agent_version_fargate" {
 }
 
 variable "product_name" {
-  description = "Name of the product"
+  description = "Value of the product tag added to all metrics and logs sent to datadog"
   type        = string
 }
