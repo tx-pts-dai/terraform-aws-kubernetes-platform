@@ -21,7 +21,7 @@ This module is a wrapper around the public VPC module with some additional confi
 | Name | Source | Version |
 |------|--------|---------|
 | <a name="module_ssm"></a> [ssm](#module\_ssm) | ./../ssm | n/a |
-| <a name="module_vpc"></a> [vpc](#module\_vpc) | terraform-aws-modules/vpc/aws | 5.8.1 |
+| <a name="module_vpc"></a> [vpc](#module\_vpc) | terraform-aws-modules/vpc/aws | 5.9.0 |
 
 ## Resources
 
