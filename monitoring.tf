@@ -1,7 +1,6 @@
 # Base infra logging
 locals {
-  fluent_operator_namespace              = "fluent" # should we put it as a fluent_namespace variable ?
-  fluent_operator_helm_chart_version     = "v3.0.0" # variable ? and if "v3.0", then every terraform apply will update, even if there is no change
+  fluent_operator_namespace              = "monitoring"
   fluent_operator_cloudwatch_log_group   = "/${local.stack_name}-fluent-operator"
   fluentbit_cloudwatch_log_stream_prefix = "fluentbit-"
 }
@@ -11,7 +10,7 @@ resource "helm_release" "fluent_operator" {
   chart      = "fluent-operator"
   name       = "fluent-operator"
   repository = "https://fluent.github.io/helm-charts"
-  version    = local.fluent_operator_helm_chart_version
+  version    = "v3.0.0" # Note: using "v3.0" will issue in resource update on each terraform plan/apply
 
   create_namespace = true
   namespace        = local.fluent_operator_namespace
@@ -19,6 +18,10 @@ resource "helm_release" "fluent_operator" {
   values = [
     <<-YAML
     containerRuntime: containerd
+    operator:
+      fluentd:
+        crdsEnable: false
+        enable: false
     fluentbit:
       affinity:
         nodeAffinity:
@@ -55,31 +58,30 @@ resource "kubectl_manifest" "fluentbit_output_cloudwatch_logs" {
       customPlugin:
         config: |
           Name cloudwatch_logs
-          Match *
+          Match_Regexp namespace_name[":]*(kube-system|rba-test)
           region eu-central-1
           log_group_name ${local.fluent_operator_cloudwatch_log_group}
           log_stream_prefix ${local.fluentbit_cloudwatch_log_stream_prefix}
-          auto_create_group On
+          auto_create_group On # Has to be set to On: https://github.com/fluent/fluent-bit/issues/8949
     YAML
 
   depends_on = [helm_release.fluent_operator]
 }
 
+data "aws_iam_policy_document" "fluentbit" {
+  statement {
+    sid       = ""
+    effect    = "Allow"
+    resources = ["${aws_cloudwatch_log_group.fluent_operator.arn}:*"]
+
+    actions = [
+      "logs:CreateLogStream",
+      "logs:PutLogEvents",
+    ]
+  }
+}
+
 resource "aws_iam_policy" "fluentbit" {
   name   = "${local.stack_name}-fluentbit"
-  policy = <<-JSON
-    {
-      "Version": "2012-10-17",
-      "Statement": [{
-        "Effect": "Allow",
-        "Action": [
-          "logs:CreateLogStream",
-          "logs:PutLogEvents"
-        ],
-        "Resource": [
-          "${aws_cloudwatch_log_group.fluent_operator.arn}:*"
-        ]
-      }]
-    }
-    JSON
+  policy = data.aws_iam_policy_document.fluentbit.json
 }
