@@ -25,7 +25,7 @@ module "datadog" {
 | <a name="requirement_helm"></a> [helm](#requirement\_helm) | ~> 2.6 |
 | <a name="requirement_kubectl"></a> [kubectl](#requirement\_kubectl) | >= 2.0.2 |
 | <a name="requirement_kubernetes"></a> [kubernetes](#requirement\_kubernetes) | >= 2.27 |
-| <a name="requirement_time"></a> [time](#requirement\_time) | 0.11.2 |
+| <a name="requirement_time"></a> [time](#requirement\_time) | >= 0.11.0 |
 
 ## Providers
 
@@ -34,7 +34,7 @@ module "datadog" {
 | <a name="provider_helm"></a> [helm](#provider\_helm) | ~> 2.6 |
 | <a name="provider_kubectl"></a> [kubectl](#provider\_kubectl) | >= 2.0.2 |
 | <a name="provider_kubernetes"></a> [kubernetes](#provider\_kubernetes) | >= 2.27 |
-| <a name="provider_time"></a> [time](#provider\_time) | 0.11.2 |
+| <a name="provider_time"></a> [time](#provider\_time) | >= 0.11.0 |
 
 ## Modules
 
@@ -52,7 +52,7 @@ module "datadog" {
 | [kubectl_manifest.fargate_cluster_role](https://registry.terraform.io/providers/alekc/kubectl/latest/docs/resources/manifest) | resource |
 | [kubectl_manifest.fargate_role_binding](https://registry.terraform.io/providers/alekc/kubectl/latest/docs/resources/manifest) | resource |
 | [kubernetes_annotations.this](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/annotations) | resource |
-| [time_sleep.this](https://registry.terraform.io/providers/hashicorp/time/0.11.2/docs/resources/sleep) | resource |
+| [time_sleep.this](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/sleep) | resource |
 
 ## Inputs
 
