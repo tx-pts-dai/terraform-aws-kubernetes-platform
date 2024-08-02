@@ -293,6 +293,7 @@ module "karpenter" {
   node_iam_role_attach_cni_policy = false
   node_iam_role_additional_policies = {
     AmazonSSMManagedInstanceCore = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+    fluentbit                    = aws_iam_policy.fluentbit.arn
   }
 
   tags = local.tags
@@ -417,6 +418,7 @@ resource "time_sleep" "wait_on_destroy" {
     module.eks,
     module.karpenter,
     module.karpenter_crds,
+    module.karpenter_security_group,
     aws_subnet.karpenter,
     aws_route_table_association.karpenter,
     helm_release.karpenter,
