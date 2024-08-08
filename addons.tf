@@ -127,7 +127,7 @@ module "addons" {
 
 module "vpc_cni_irsa" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
-  version = "5.42.0"
+  version = "5.44.0"
 
   role_name = "vpc-cni-${local.id}"
 
@@ -149,7 +149,7 @@ module "vpc_cni_irsa" {
 
 module "ebs_csi_driver_irsa" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
-  version = "5.42.0"
+  version = "5.44.0"
 
   role_name = "ebs-csi-driver-${local.id}"
 
