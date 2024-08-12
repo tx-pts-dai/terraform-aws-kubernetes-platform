@@ -29,7 +29,7 @@ resource "helm_release" "fluent_operator" {
     fluentbit:
       affinity:
         nodeAffinity:
-          # Need to be modified because by default fluent-bit will try to start on faregate nodes and it's not working
+          # Do not start fluent-bit on Fargate node
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
               - matchExpressions:
@@ -47,7 +47,7 @@ resource "helm_release" "fluent_operator" {
           enable: false # true = default
           annotations: true
         containerd:
-          enable: true # If disabled, fluent-operator has reconilier error
+          enable: true # If disabled, fluent-operator has reconiler error
       input:
         tail:
           enable: false # true = default
