@@ -1,13 +1,13 @@
 # Base infra logging
-# Deploy fluentbit with the fluent-operator and configure it so that pods with the `dai/logging: enable` annotation have
+# Deploy fluentbit with the fluent-operator and configure it so that pods with the ${var.logging_annontation} annotation have
 # they logs pushed to CloudWatch.
 # By default (hardcoded), fluent-operator and fluent-bit will have this annotation set
 locals {
   # Namespace for the resources deployed by the fluent-operator (fluent-bit will be here too)
   fluent_namespace                       = "monitoring"
-  fluentbit_cloudwatch_log_group         = "/${local.stack_name}-fluentbit-operator"
-  fluentbit_cloudwatch_log_stream_prefix = "fluentbit-"
-  fluentbit_dai_tag                      = "dai"
+  fluentbit_cloudwatch_log_group         = "/${local.stack_name}/fluentbit-logs"
+  fluentbit_cloudwatch_log_stream_prefix = "."
+  fluentbit_tag                          = "kaas"
 }
 
 # Fluent-operator (https://github.com/fluent/fluent-operator operator)
@@ -25,7 +25,7 @@ resource "helm_release" "fluent_operator" {
     containerRuntime: containerd
     operator:
       annotations:
-        dai/logging: enable
+        ${var.logging_annotation.name}: "${var.logging_annotation.value}"
     fluentbit:
       affinity:
         nodeAffinity:
@@ -40,7 +40,7 @@ resource "helm_release" "fluent_operator" {
                     values:
                       - fargate
       annotations:
-        dai/logging: enable
+        ${var.logging_annotation.name}: "${var.logging_annotation.value}"
       # Because we deploy our own pipeline, disable the default one
       filter:
         kubernetes:
@@ -57,23 +57,23 @@ resource "helm_release" "fluent_operator" {
 
 resource "aws_cloudwatch_log_group" "fluentbit" {
   name              = local.fluentbit_cloudwatch_log_group
-  retention_in_days = 7
+  retention_in_days = var.logging_retention_in_days
 }
 
-# DAI pipeline
-# Idea is to have a INPUT-FILTERS-OUTPUT pipeline
-# To differenciate with other pipelines we tag the log entries with local.fluentbit_dai_tag
-resource "kubectl_manifest" "fluentbit_cluster_input_dai_pipeline" {
+# KaaS pipeline
+# Idea is to have an INPUT-FILTERS-OUTPUT pipeline
+# To differenciate with other pipelines we tag the log entries with local.fluentbit_tag
+resource "kubectl_manifest" "fluentbit_cluster_input_pipeline" {
   yaml_body = <<-YAML
     apiVersion: fluentbit.fluent.io/v1alpha2
     kind: ClusterInput
     metadata:
-      name: dai-pipeline
+      name: kaas-pipeline
       labels:
         fluentbit.fluent.io/enabled: "true"
     spec:
       tail:
-        db: /fluent-bit/tail/pos-${local.fluentbit_dai_tag}.db # Not sure it's required to have a different db for different input
+        db: /fluent-bit/tail/pos-${local.fluentbit_tag}.db # Not sure it's required to have a different db for different input
         dbSync: Normal
         memBufLimit: 100MB
         parser: cri
@@ -82,22 +82,22 @@ resource "kubectl_manifest" "fluentbit_cluster_input_dai_pipeline" {
         refreshIntervalSeconds: 10
         skipLongLines: true
         storageType: memory
-        tag: ${local.fluentbit_dai_tag}.*
+        tag: ${local.fluentbit_tag}.*
   YAML
 }
 
-# Fluentbit filters to log DAI pods to cloudwatch
+# Fluentbit filters to log KaaS pods to cloudwatch
 #
-resource "kubectl_manifest" "fluentbit_cluster_filter_dai_pipeline" {
+resource "kubectl_manifest" "fluentbit_cluster_filter_pipeline" {
   yaml_body = <<-YAML
     apiVersion: fluentbit.fluent.io/v1alpha2
     kind: ClusterFilter
     metadata:
-      name: dai-pipeline
+      name: kaas-pipeline
       labels:
         fluentbit.fluent.io/enabled: "true"
     spec:
-      match: ${local.fluentbit_dai_tag}.*
+      match: ${local.fluentbit_tag}.*
       filters:
       - lua:
           script:
@@ -109,8 +109,8 @@ resource "kubectl_manifest" "fluentbit_cluster_filter_dai_pipeline" {
           kubeURL: https://kubernetes.default.svc:443
           kubeCAFile: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
           kubeTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
-          kubeTagPrefix:  ${local.fluentbit_dai_tag}.var.log.containers
-          labels: false
+          kubeTagPrefix: ${local.fluentbit_tag}.var.log.containers
+          labels: true
           annotations: true
       - nest:
           operation: lift
@@ -129,26 +129,27 @@ resource "kubectl_manifest" "fluentbit_cluster_filter_dai_pipeline" {
           nestUnder: kubernetes
           removePrefix: kubernetes_
       - grep:
-          regex: $kubernetes['annotations']['dai/logging'] ^enable$
+          regex: $kubernetes['annotations']['${var.logging_annotation.name}'] ^${var.logging_annotation.value}$
   YAML
 }
 
-resource "kubectl_manifest" "fluentbit_cluster_output_dai_pipeline" {
+resource "kubectl_manifest" "fluentbit_cluster_output_pipeline" {
   yaml_body = <<-YAML
     apiVersion: fluentbit.fluent.io/v1alpha2
     kind: ClusterOutput
     metadata:
-      name: dai-pipeline
+      name: kaas-pipeline
       labels:
         fluentbit.fluent.io/enabled: "true"
     spec:
       customPlugin:
         config: |
           Name cloudwatch_logs
-          Match ${local.fluentbit_dai_tag}.*
+          Match ${local.fluentbit_tag}.*
           region ${data.aws_region.current.name}
           log_group_name ${local.fluentbit_cloudwatch_log_group}
           log_stream_prefix ${local.fluentbit_cloudwatch_log_stream_prefix}
+          log_stream_template $kubernetes['namespace_name'].$kubernetes['pod_name'].$kubernetes['container_name'].$kubernetes['docker_id']
           auto_create_group On # Has to be set to On: https://github.com/fluent/fluent-bit/issues/8949
     YAML
 
