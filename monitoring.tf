@@ -45,19 +45,15 @@ resource "helm_release" "fluent_operator" {
       filter:
         kubernetes:
           enable: false # true = default
-          annotations: true
         containerd:
-          enable: true # If disabled, fluent-operator has reconiler error
+          enable: true # If disabled, fluent-operator has reconciler error
       input:
         tail:
           enable: false # true = default
+      serviceAccountAnnotations:
+        eks.amazonaws.com/role-arn: ${module.fluentbit_irsa.iam_role_arn}
     YAML
   ]
-}
-
-resource "aws_cloudwatch_log_group" "fluentbit" {
-  name              = local.fluentbit_cloudwatch_log_group
-  retention_in_days = var.logging_retention_in_days
 }
 
 # KaaS pipeline
@@ -87,7 +83,6 @@ resource "kubectl_manifest" "fluentbit_cluster_input_pipeline" {
 }
 
 # Fluentbit filters to log KaaS pods to cloudwatch
-#
 resource "kubectl_manifest" "fluentbit_cluster_filter_pipeline" {
   yaml_body = <<-YAML
     apiVersion: fluentbit.fluent.io/v1alpha2
@@ -156,6 +151,12 @@ resource "kubectl_manifest" "fluentbit_cluster_output_pipeline" {
   depends_on = [helm_release.fluent_operator]
 }
 
+# CloudWatch log group and permission to allow fluent-bit to write log stream
+resource "aws_cloudwatch_log_group" "fluentbit" {
+  name              = local.fluentbit_cloudwatch_log_group
+  retention_in_days = var.logging_retention_in_days
+}
+
 data "aws_iam_policy_document" "fluentbit" {
   statement {
     sid       = ""
@@ -172,4 +173,24 @@ data "aws_iam_policy_document" "fluentbit" {
 resource "aws_iam_policy" "fluentbit" {
   name   = "${local.stack_name}-fluentbit"
   policy = data.aws_iam_policy_document.fluentbit.json
+  tags   = local.tags
+}
+
+# k8s Service account AWS iam role to allow fluent-bit writing log streams
+module "fluentbit_irsa" {
+  source = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
+
+  role_name = "${local.stack_name}-fluentbit"
+
+  role_policy_arns = {
+    policy = aws_iam_policy.fluentbit.arn
+  }
+
+  oidc_providers = {
+    main = {
+      provider_arn               = module.eks.oidc_provider_arn
+      namespace_service_accounts = ["${local.fluent_namespace}:fluent-bit"] # Don't know how to get the name...
+    }
+  }
+  tags = local.tags
 }

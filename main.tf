@@ -293,7 +293,6 @@ module "karpenter" {
   node_iam_role_attach_cni_policy = false
   node_iam_role_additional_policies = {
     AmazonSSMManagedInstanceCore = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
-    fluentbit                    = aws_iam_policy.fluentbit.arn
   }
 
   tags = local.tags
