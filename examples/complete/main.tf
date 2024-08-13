@@ -114,4 +114,16 @@ module "k8s_platform" {
     # Optional addons
     downscaler = { enabled = true }
   }
+
+  base_domain = "dai.tx.group"
+
+  acm_certificate = {
+    enabled = true
+    subject_alternative_names = [
+      "prometheus",
+      "alertmanager",
+      "grafana",
+    ]
+    wildcard_certificates = true
+  }
 }

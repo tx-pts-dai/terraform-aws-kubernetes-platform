@@ -4,7 +4,7 @@
 # By default (hardcoded), fluent-operator and fluent-bit will have this annotation set
 locals {
   # Namespace for the resources deployed by the fluent-operator (fluent-bit will be here too)
-  fluent_namespace                         = "monitoring"
+  monitoring_namespace                     = "monitoring"
   fluentbit_cloudwatch_log_group           = "/${local.stack_name}/fluentbit-logs"
   fluentbit_cloudwatch_log_stream_prefix   = "."
   fluentbit_cloudwatch_log_stream_template = "$kubernetes['namespace_name'].$kubernetes['pod_name'].$kubernetes['container_name'].$kubernetes['docker_id']"
@@ -19,7 +19,7 @@ resource "helm_release" "fluent_operator" {
   version    = "v3.0.0" # Note: using "v3.0" will issue in resource update on each terraform plan/apply
 
   create_namespace = true
-  namespace        = local.fluent_namespace
+  namespace        = local.monitoring_namespace
 
   values = [
     <<-YAML
@@ -36,10 +36,6 @@ resource "helm_release" "fluent_operator" {
               - matchExpressions:
                   - key: node-role.kubernetes.io/edge # This expression is here by default
                     operator: DoesNotExist
-                  - key: eks.amazonaws.com/compute-type
-                    operator: NotIn
-                    values:
-                      - fargate
       annotations:
         ${var.logging_annotation.name}: "${var.logging_annotation.value}"
       # Because we deploy our own pipeline, disable the default one
@@ -191,8 +187,146 @@ module "fluentbit_irsa" {
   oidc_providers = {
     main = {
       provider_arn               = module.eks.oidc_provider_arn
-      namespace_service_accounts = ["${local.fluent_namespace}:fluent-bit"] # Don't know how to get the name...
+      namespace_service_accounts = ["${local.monitoring_namespace}:fluent-bit"] # Don't know how to get the name...
     }
   }
   tags = local.tags
 }
+
+
+###############################################################################
+# Kubernetes Platform Monitoring Stack
+
+locals {
+  monitoring_namespace = "monitoring"
+}
+
+###############################################################################
+# Prometheus Operator
+
+resource "helm_release" "prometheus_operator_crds" {
+  name             = "prometheus-operator-crds"
+  namespace        = local.monitoring_namespace
+  create_namespace = true
+  repository       = "https://prometheus-community.github.io/helm-charts"
+  chart            = "prometheus-operator-crds"
+  version          = try(var.prometheus_stack.crd_chart_version, "13.0.2")
+  wait             = true
+}
+
+resource "helm_release" "prometheus_stack" {
+  name             = "prometheus-stack"
+  namespace        = local.monitoring_namespace
+  create_namespace = true
+  repository       = "https://prometheus-community.github.io/helm-charts"
+  chart            = "kube-prometheus-stack"
+  version          = try(var.prometheus_stack.chart_version, "61.8.0")
+  skip_crds        = true
+  wait             = true
+
+  values = [
+    <<-EOT
+    cleanPrometheusOperatorObjectNames: true
+    prometheus:
+      ingress:
+        enabled: true
+        ingressClassName: alb
+        hosts:
+        - ${local.id}.prometheus.${local.primary_acm_domain}
+        paths:
+          - /*
+        annotations:
+          alb.ingress.kubernetes.io/scheme: internet-facing
+          alb.ingress.kubernetes.io/target-type: ip
+          alb.ingress.kubernetes.io/group.name: ${local.stack_name}
+          alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80,"HTTPS":443}]'
+          alb.ingress.kubernetes.io/ssl-redirect: '443'
+          alb.ingress.kubernetes.io/healthcheck-path: /-/healthy
+    alertmanager:
+      ingress:
+        enabled: true
+        ingressClassName: alb
+        hosts:
+        - ${local.id}.alertmanager.${local.primary_acm_domain}
+        paths:
+          - /*
+        annotations:
+          alb.ingress.kubernetes.io/scheme: internet-facing
+          alb.ingress.kubernetes.io/target-type: ip
+          alb.ingress.kubernetes.io/group.name: ${local.stack_name}
+          alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80,"HTTPS":443}]'
+          alb.ingress.kubernetes.io/ssl-redirect: '443'
+          alb.ingress.kubernetes.io/healthcheck-path: /-/healthy
+    prometheus-node-exporter:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+              nodeSelectorTerms:
+                - matchExpressions:
+                  - key: kubernetes.io/os
+                    operator: In
+                    values:
+                      - linux
+                  - key: kubernetes.io/arch
+                    operator: In
+                    values:
+                      - amd64
+                      - arm64
+                  - key: eks.amazonaws.com/compute-type
+                    operator: NotIn
+                    values:
+                      - fargate
+
+      resources:
+        requests:
+          cpu: 10m
+          memory: 32Mi
+    grafana:
+      enabled: false
+    kubeControllerManager:
+      enabled: false
+    kubeScheduler:
+      enabled: false
+    EOT
+  ]
+
+  depends_on = [
+    helm_release.prometheus_operator_crds,
+  ]
+}
+
+###############################################################################
+# Grafana
+
+resource "helm_release" "grafana" {
+  name             = "grafana"
+  namespace        = local.monitoring_namespace
+  create_namespace = true
+  repository       = "https://grafana.github.io/helm-charts"
+  chart            = "grafana"
+  wait             = true
+  version          = try(var.grafana.chart_version, "8.4.4")
+
+  values = [
+    <<-EOT
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+    ingress:
+      enabled: true
+      ingressClassName: alb
+      hosts:
+        - ${local.id}.grafana.${local.primary_acm_domain}
+      annotations:
+        alb.ingress.kubernetes.io/scheme: internet-facing
+        alb.ingress.kubernetes.io/target-type: ip
+        alb.ingress.kubernetes.io/group.name: ${local.stack_name}
+        alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80,"HTTPS":443}]'
+        alb.ingress.kubernetes.io/ssl-redirect: '443'
+        # okta auth
+    EOT
+  ]
+}
+
+###############################################################################

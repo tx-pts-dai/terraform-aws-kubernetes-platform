@@ -110,9 +110,6 @@ module "addons" {
 
   enable_metrics_server = try(var.addons.metrics_server.enabled, true)
 
-  # Monitoring
-  enable_kube_prometheus_stack = try(var.addons.kube_prometheus_stack.enabled, false)
-
   # Alternative Ingress
   enable_cert_manager  = try(var.addons.cert_manager.enabled, false)
   enable_ingress_nginx = try(var.addons.ingress_nginx.enabled, false)

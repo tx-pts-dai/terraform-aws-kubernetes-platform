@@ -191,7 +191,7 @@ locals {
     namespace               = try(var.karpenter.namespace, "kube-system")
     chart_version           = try(var.karpenter.chart_version, "0.37.0")
     replicas                = try(var.karpenter.replicas, 1)
-    service_monitor_enabled = try(var.karpenter.service_monitor_enabled, false)
+    service_monitor_enabled = try(var.karpenter.service_monitor_enabled, true)
     pod_annotations         = try(var.karpenter.pod_annotations, {})
     cpu_request             = try(var.karpenter.cpu_request, 0.25)
     memory_request          = try(var.karpenter.memory_request, "256Mi")

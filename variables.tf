@@ -43,10 +43,9 @@ variable "addons" {
     fargate_fluentbit            = { enabled = true }
     metrics_server               = { enabled = true }
 
-    kube_prometheus_stack = { enabled = false }
-    cert_manager          = { enabled = false }
-    ingress_nginx         = { enabled = false }
-    downscaler            = { enabled = false }
+    cert_manager  = { enabled = false }
+    ingress_nginx = { enabled = false }
+    downscaler    = { enabled = false }
   }
 }
 
@@ -75,4 +74,34 @@ variable "logging_retention_in_days" {
   description = "How log to keep kaas logs in cloudwatch"
   type        = string
   default     = 7
+}
+
+variable "prometheus_stack" {
+  description = "Map of Prometheus stack configurations"
+  type        = any
+  default     = {}
+}
+
+variable "grafana" {
+  description = "Map of Grafana configurations"
+  type        = any
+  default     = {}
+}
+
+variable "base_domain" {
+  description = "Base domain for the platform"
+  type        = string
+  default     = "test"
+}
+
+variable "acm_certificate" {
+  description = "ACM certificate configuration. If wildcard_certificates is true, all domains will include a wildcard prefix."
+  type = object({
+    enabled                   = optional(bool, false)
+    domain_name               = optional(string)
+    subject_alternative_names = optional(list(string), [])
+    wildcard_certificates     = optional(bool, false)
+    wait_for_validation       = optional(bool, false)
+  })
+  default = {}
 }
