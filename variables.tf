@@ -58,3 +58,21 @@ variable "cluster_admins" {
   }))
   default = {}
 }
+
+variable "logging_annotation" {
+  description = "Annotation kaas pods should have to get they logs stored in cloudwatch"
+  type = object({
+    name  = string
+    value = string
+  })
+  default = {
+    name  = "kaas.tamedia.ch/logging"
+    value = "true"
+  }
+}
+
+variable "logging_retention_in_days" {
+  description = "How log to keep kaas logs in cloudwatch"
+  type        = string
+  default     = 7
+}
