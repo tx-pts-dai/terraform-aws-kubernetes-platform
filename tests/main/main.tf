@@ -75,8 +75,7 @@ locals {
 module "k8s_platform" {
   source = "../../"
 
-  name = "replaced-with-branch-name"
-  # name = var.name
+  name = var.name
 
   cluster_admins = {
     cicd = {
@@ -112,6 +111,11 @@ module "k8s_platform" {
 
     # Optional addons
     downscaler = { enabled = true }
+  }
+
+  okta_integration = {
+    base_url                    = "https://login.tx.group"
+    secrets_manager_secret_name = "dai/okta/platform"
   }
 
   base_domain = "dai.tx.group"

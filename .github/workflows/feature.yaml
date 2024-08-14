@@ -21,7 +21,7 @@ jobs:
       environment: examples
       tf_dir: tests/main
       tf_vars: |
-        name = "${{ github.ref_name }}"
+        name = "${{ github.head_ref }}"
 
   feature_destroy:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
@@ -30,7 +30,7 @@ jobs:
       environment: examples
       tf_dir: tests/main
       tf_vars: |
-        name = "${{ github.ref_name }}"
+        name = "${{ github.head_ref }}"
 
   manual_feature_destroy:
     if: github.event_name == 'workflow_dispatch'

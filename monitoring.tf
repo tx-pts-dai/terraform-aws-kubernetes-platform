@@ -12,6 +12,16 @@ locals {
   fluentbit_cloudwatch_log_stream_prefix   = "."
   fluentbit_cloudwatch_log_stream_template = "$kubernetes['namespace_name'].$kubernetes['pod_name'].$kubernetes['container_name'].$kubernetes['docker_id']"
   fluentbit_tag                            = "kaas"
+
+
+  okta_kubernetes_secret_name = "okta-secret"
+  okta_oidc_config = jsonencode({
+    issuer                = var.okta_integration.base_url,
+    authorizationEndpoint = "${var.okta_integration.base_url}/oauth2/v1/authorize",
+    tokenEndpoint         = "${var.okta_integration.base_url}/oauth2/v1/token",
+    userInfoEndpoint      = "${var.okta_integration.base_url}/oauth2/v1/userinfo",
+    secretName            = local.okta_kubernetes_secret_name,
+  })
 }
 
 ###############################################################################
@@ -70,7 +80,7 @@ resource "helm_release" "fluent_operator" {
   ]
 
   depends_on = [
-    module.addons
+    helm_release.karpenter
   ]
 }
 
@@ -237,6 +247,10 @@ resource "helm_release" "prometheus_operator_crds" {
   repository       = "https://prometheus-community.github.io/helm-charts"
   chart            = "prometheus-operator-crds"
   version          = "13.0.2"
+
+  depends_on = [
+    module.eks
+  ]
 }
 
 resource "helm_release" "prometheus_stack" {
@@ -270,6 +284,9 @@ resource "helm_release" "prometheus_stack" {
           alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80,"HTTPS":443}]'
           alb.ingress.kubernetes.io/ssl-redirect: '443'
           alb.ingress.kubernetes.io/healthcheck-path: /-/healthy
+          alb.ingress.kubernetes.io/auth-type: oidc
+          alb.ingress.kubernetes.io/auth-idp-oidc: '${local.okta_oidc_config}'
+          alb.ingress.kubernetes.io/auth-scope: 'openid groups'
     alertmanager:
       priorityClassName: system-cluster-critical
       ingress:
@@ -286,6 +303,9 @@ resource "helm_release" "prometheus_stack" {
           alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80,"HTTPS":443}]'
           alb.ingress.kubernetes.io/ssl-redirect: '443'
           alb.ingress.kubernetes.io/healthcheck-path: /-/healthy
+          alb.ingress.kubernetes.io/auth-type: oidc
+          alb.ingress.kubernetes.io/auth-idp-oidc: '${local.okta_oidc_config}'
+          alb.ingress.kubernetes.io/auth-scope: 'openid groups'
     prometheus-node-exporter:
       priorityClassName: system-node-critical
       affinity:
@@ -322,7 +342,7 @@ resource "helm_release" "prometheus_stack" {
 
   depends_on = [
     helm_release.prometheus_operator_crds,
-    module.addons
+    helm_release.karpenter
   ]
 }
 
@@ -357,7 +377,9 @@ resource "helm_release" "grafana" {
         alb.ingress.kubernetes.io/group.name: ${local.stack_name}
         alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80,"HTTPS":443}]'
         alb.ingress.kubernetes.io/ssl-redirect: '443'
-        # okta auth
+        alb.ingress.kubernetes.io/auth-type: oidc
+        alb.ingress.kubernetes.io/auth-idp-oidc: '${local.okta_oidc_config}'
+        alb.ingress.kubernetes.io/auth-scope: 'openid groups'
     grafana.ini:
       analytics:
         check_for_updates: false
@@ -473,13 +495,58 @@ resource "helm_release" "grafana" {
         searchNamespace: ALL
         labelValue: ""
     serviceMonitor:
-      enabled: true
+      enabled: ${var.prometheus_stack.enabled}
     testFramework:
       enabled: false
     EOT
   ]
 
-  depends_on = [module.addons]
+  depends_on = [
+    helm_release.karpenter
+  ]
+}
+
+###############################################################################
+# Okta Secret
+
+resource "helm_release" "okta_secret" {
+  count = var.okta_integration.enabled ? 1 : 0
+
+  name       = "okta-secret"
+  repository = "https://dnd-it.github.io/helm-charts"
+  chart      = "custom-resources"
+  version    = "0.1.0"
+
+  values = [
+    <<-YAML
+    apiVersion: external-secrets.io/v1beta1
+    kind: ExternalSecret
+    metadata:
+      name: okta-secret
+      namespace: ${local.monitoring_namespace}
+    spec:
+      refreshInterval: 1m0s
+      secretStoreRef:
+        name: aws-secretsmanager
+        kind: ClusterSecretStore
+      target:
+        name: ${local.okta_kubernetes_secret_name}
+        creationPolicy: Owner
+      data:
+      - secretKey: clientID
+        remoteRef:
+          key: ${var.okta_integration.secrets_manager_secret_name}
+          property: clientID
+      - secretKey: clientSecret
+        remoteRef:
+          key: ${var.okta_integration.secrets_manager_secret_name}
+          property: clientSecret
+  YAML
+  ]
+
+  depends_on = [
+    module.addons.external_secrets
+  ]
 }
 
 ###############################################################################

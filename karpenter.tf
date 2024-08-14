@@ -4,6 +4,7 @@
 # Track notes here for future reference e.g. reasons for certain decisions
 # - PROPOSAL: Karpenter NodePool and EC2NodeClass management: default resources are deployed with the module.
 #   Users can create additional resources by providing their own ones outside the module.
+# TODO: Move the Karpenter resources to a submodule
 
 locals {
   karpenter = {
@@ -76,7 +77,7 @@ resource "helm_release" "karpenter" {
           cpu: ${local.karpenter.cpu_request}
           memory: ${local.karpenter.memory_request}
     serviceMonitor:
-      enabled: ${local.karpenter.service_monitor_enabled}
+      enabled: ${var.prometheus_stack.enabled}
     settings:
       clusterName: ${module.eks.cluster_name}
       clusterEndpoint: ${module.eks.cluster_endpoint}

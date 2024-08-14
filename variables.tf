@@ -72,6 +72,16 @@ variable "grafana" {
   default = {}
 }
 
+variable "okta_integration" {
+  description = "Okta integration configurations"
+  type = object({
+    enabled                     = optional(bool, true)
+    base_url                    = optional(string)
+    secrets_manager_secret_name = optional(string)
+  })
+  default = {}
+}
+
 variable "addons" {
   description = "Map of addon configurations"
   type        = any

@@ -102,7 +102,7 @@ module "addons" {
     role_name_prefix = false
     set = [{
       name  = "serviceMonitor.enabled"
-      value = "true"
+      value = var.prometheus_stack.enabled
     }]
   }
 
