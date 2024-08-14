@@ -10,7 +10,7 @@ on:
       - reopened
       - closed
     branches-ignore:
-      - renovate**
+      - renovate/*
 
 permissions:
   id-token: write

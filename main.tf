@@ -179,6 +179,7 @@ resource "aws_security_group_rule" "eks_control_plan_ingress" {
 
 resource "time_sleep" "wait_on_destroy" {
   depends_on = [
+    module.acm,
     module.eks,
     module.karpenter,
     module.karpenter_crds,

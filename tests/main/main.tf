@@ -3,7 +3,7 @@ terraform {
 
   backend "s3" {
     bucket               = "tf-state-911453050078"
-    key                  = "examples/complete.tfstate"
+    key                  = "tests/main.tfstate"
     workspace_key_prefix = "terraform-aws-kubernetes-platform"
     dynamodb_table       = "terraform-lock"
     region               = "eu-central-1"
@@ -75,7 +75,7 @@ locals {
 module "k8s_platform" {
   source = "../../"
 
-  name = "ex-complete"
+  name = "replaced-with-branch-name"
 
   cluster_admins = {
     cicd = {
@@ -91,14 +91,12 @@ module "k8s_platform" {
 
   vpc = {
     enabled = true
-    cidr    = "10.0.0.0/16"
+    cidr    = "10.240.0.0/16"
     max_az  = 3
     subnet_configs = [
       { public = 24 },
       { private = 24 },
       { intra = 26 },
-      { database = 26 },
-      { redshift = 26 },
       { karpenter = 22 }
     ]
   }
@@ -113,5 +111,17 @@ module "k8s_platform" {
 
     # Optional addons
     downscaler = { enabled = true }
+  }
+
+  base_domain = "dai.tx.group"
+
+  acm_certificate = {
+    enabled = true
+    subject_alternative_names = [
+      "prometheus",
+      "alertmanager",
+      "grafana",
+    ]
+    wildcard_certificates = true
   }
 }

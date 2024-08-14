@@ -11,6 +11,7 @@ on:
       - closed
     branches:
       - main
+  workflow_dispatch:
 
 jobs:
   feature_deploy:
@@ -18,11 +19,24 @@ jobs:
     uses: tx-pts-dai/github-workflows/.github/workflows/tf-feature.yaml@v1
     with:
       environment: examples
-      tf_dir: examples/complete
+      tf_dir: tests/main
+      tf_vars: |
+        name = "${{ github.ref_name }}"
 
   feature_destroy:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
     uses: tx-pts-dai/github-workflows/.github/workflows/tf-cleanup.yaml@v1
     with:
       environment: examples
-      tf_dir: examples/complete
+      tf_dir: tests/main
+      tf_vars: |
+        name = "${{ github.ref_name }}"
+
+  manual_feature_destroy:
+    if: github.event_name == 'workflow_dispatch'
+    uses: tx-pts-dai/github-workflows/.github/workflows/tf-cleanup.yaml@v1
+    with:
+      environment: examples
+      tf_dir: tests/main
+      tf_vars: |
+        name = "${{ github.ref_name }}"
