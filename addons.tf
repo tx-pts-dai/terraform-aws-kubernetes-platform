@@ -100,6 +100,10 @@ module "addons" {
     wait             = true
     role_name        = "external-secrets-${local.id}"
     role_name_prefix = false
+    set = [{
+      name  = "serviceMonitor.enabled"
+      value = "true"
+    }]
   }
 
   enable_fargate_fluentbit = try(var.addons.fargate_fluentbit.enabled, true)

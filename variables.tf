@@ -21,16 +21,55 @@ variable "eks" {
   default     = {}
 }
 
-variable "karpenter" {
-  description = "Map of Karpenter configurations"
-  type        = any
-  default     = {}
+variable "cluster_admins" {
+  description = "Map of IAM roles to add as cluster admins. Only exact matching role names are returned"
+  type = map(object({
+    role_name         = string
+    kubernetes_groups = optional(list(string))
+  }))
+  default = {}
 }
 
-variable "enable_karpenter_crds" {
-  description = "Enable Karpenter CRDs chart"
-  type        = bool
-  default     = true
+variable "base_domain" {
+  description = "Base domain for the platform, used for ingress and ACM certificates"
+  type        = string
+  default     = "test"
+}
+
+variable "acm_certificate" {
+  description = "ACM certificate configuration. If wildcard_certificates is true, all domains will include a wildcard prefix."
+  type = object({
+    enabled                   = optional(bool, false)
+    domain_name               = optional(string) # Overrides base_domain
+    subject_alternative_names = optional(list(string), [])
+    wildcard_certificates     = optional(bool, false)
+    wait_for_validation       = optional(bool, false)
+  })
+  default = {}
+}
+
+variable "karpenter" {
+  description = "Karpenter configurations"
+  type = object({
+    enabled = optional(bool, true)
+  })
+  default = {}
+}
+
+variable "prometheus_stack" {
+  description = "Prometheus stack configurations"
+  type = object({
+    enabled = optional(bool, true)
+  })
+  default = {}
+}
+
+variable "grafana" {
+  description = "Grafana configurations"
+  type = object({
+    enabled = optional(bool, true)
+  })
+  default = {}
 }
 
 variable "addons" {
@@ -48,6 +87,7 @@ variable "addons" {
     downscaler    = { enabled = false }
   }
 }
+<<<<<<< HEAD
 
 variable "cluster_admins" {
   description = "Map of IAM roles to add as cluster admins. Only exact matching role names are returned"
@@ -105,3 +145,5 @@ variable "acm_certificate" {
   })
   default = {}
 }
+=======
+>>>>>>> f4dc83d (feat: add dashboards to grafana)

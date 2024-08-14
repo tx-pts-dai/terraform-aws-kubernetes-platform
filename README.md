@@ -154,18 +154,23 @@ as described in the `.pre-commit-config.yaml` file
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_acm_certificate"></a> [acm\_certificate](#input\_acm\_certificate) | ACM certificate configuration. If wildcard\_certificates is true, all domains will include a wildcard prefix. | <pre>object({<br>    enabled                   = optional(bool, false)<br>    domain_name               = optional(string)<br>    subject_alternative_names = optional(list(string), [])<br>    wildcard_certificates     = optional(bool, false)<br>    wait_for_validation       = optional(bool, false)<br>  })</pre> | `{}` | no |
+| <a name="input_acm_certificate"></a> [acm\_certificate](#input\_acm\_certificate) | ACM certificate configuration. If wildcard\_certificates is true, all domains will include a wildcard prefix. | <pre>object({<br>    enabled                   = optional(bool, false)<br>    domain_name               = optional(string) # Overrides base_domain<br>    subject_alternative_names = optional(list(string), [])<br>    wildcard_certificates     = optional(bool, false)<br>    wait_for_validation       = optional(bool, false)<br>  })</pre> | `{}` | no |
 | <a name="input_addons"></a> [addons](#input\_addons) | Map of addon configurations | `any` | <pre>{<br>  "aws_load_balancer_controller": {<br>    "enabled": true<br>  },<br>  "cert_manager": {<br>    "enabled": false<br>  },<br>  "downscaler": {<br>    "enabled": false<br>  },<br>  "external_dns": {<br>    "enabled": true<br>  },<br>  "external_secrets": {<br>    "enabled": true<br>  },<br>  "fargate_fluentbit": {<br>    "enabled": true<br>  },<br>  "ingress_nginx": {<br>    "enabled": false<br>  },<br>  "metrics_server": {<br>    "enabled": true<br>  }<br>}</pre> | no |
-| <a name="input_base_domain"></a> [base\_domain](#input\_base\_domain) | Base domain for the platform | `string` | `"test"` | no |
+| <a name="input_base_domain"></a> [base\_domain](#input\_base\_domain) | Base domain for the platform, used for ingress and ACM certificates | `string` | `"test"` | no |
 | <a name="input_cluster_admins"></a> [cluster\_admins](#input\_cluster\_admins) | Map of IAM roles to add as cluster admins. Only exact matching role names are returned | <pre>map(object({<br>    role_name         = string<br>    kubernetes_groups = optional(list(string))<br>  }))</pre> | `{}` | no |
 | <a name="input_eks"></a> [eks](#input\_eks) | Map of EKS configurations | `any` | `{}` | no |
+<<<<<<< HEAD
 | <a name="input_enable_karpenter_crds"></a> [enable\_karpenter\_crds](#input\_enable\_karpenter\_crds) | Enable Karpenter CRDs chart | `bool` | `true` | no |
 | <a name="input_grafana"></a> [grafana](#input\_grafana) | Map of Grafana configurations | `any` | `{}` | no |
 | <a name="input_karpenter"></a> [karpenter](#input\_karpenter) | Map of Karpenter configurations | `any` | `{}` | no |
 | <a name="input_logging_annotation"></a> [logging\_annotation](#input\_logging\_annotation) | Annotation kaas pods should have to get they logs stored in cloudwatch | <pre>object({<br>    name  = string<br>    value = string<br>  })</pre> | <pre>{<br>  "name": "kaas.tamedia.ch/logging",<br>  "value": "true"<br>}</pre> | no |
 | <a name="input_logging_retention_in_days"></a> [logging\_retention\_in\_days](#input\_logging\_retention\_in\_days) | How log to keep kaas logs in cloudwatch | `string` | `7` | no |
+=======
+| <a name="input_grafana"></a> [grafana](#input\_grafana) | Grafana configurations | <pre>object({<br>    enabled = optional(bool, true)<br>  })</pre> | `{}` | no |
+| <a name="input_karpenter"></a> [karpenter](#input\_karpenter) | Karpenter configurations | <pre>object({<br>    enabled = optional(bool, true)<br>  })</pre> | `{}` | no |
+>>>>>>> f4dc83d (feat: add dashboards to grafana)
 | <a name="input_name"></a> [name](#input\_name) | The name of the platform | `string` | n/a | yes |
-| <a name="input_prometheus_stack"></a> [prometheus\_stack](#input\_prometheus\_stack) | Map of Prometheus stack configurations | `any` | `{}` | no |
+| <a name="input_prometheus_stack"></a> [prometheus\_stack](#input\_prometheus\_stack) | Prometheus stack configurations | <pre>object({<br>    enabled = optional(bool, true)<br>  })</pre> | `{}` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | Default tags to apply to all resources | `map(string)` | `{}` | no |
 | <a name="input_vpc"></a> [vpc](#input\_vpc) | Map of VPC configurations | `any` | `{}` | no |
 

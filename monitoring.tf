@@ -205,22 +205,25 @@ locals {
 # Prometheus Operator
 
 resource "helm_release" "prometheus_operator_crds" {
+  count = var.prometheus_stack.enabled ? 1 : 0
+
   name             = "prometheus-operator-crds"
   namespace        = local.monitoring_namespace
   create_namespace = true
   repository       = "https://prometheus-community.github.io/helm-charts"
   chart            = "prometheus-operator-crds"
-  version          = try(var.prometheus_stack.crd_chart_version, "13.0.2")
-  wait             = true
+  version          = "13.0.2"
 }
 
 resource "helm_release" "prometheus_stack" {
+  count = var.prometheus_stack.enabled ? 1 : 0
+
   name             = "prometheus-stack"
   namespace        = local.monitoring_namespace
   create_namespace = true
   repository       = "https://prometheus-community.github.io/helm-charts"
   chart            = "kube-prometheus-stack"
-  version          = try(var.prometheus_stack.chart_version, "61.8.0")
+  version          = "61.8.0"
   skip_crds        = true
   wait             = true
 
@@ -299,13 +302,15 @@ resource "helm_release" "prometheus_stack" {
 # Grafana
 
 resource "helm_release" "grafana" {
+  count = var.grafana.enabled ? 1 : 0
+
   name             = "grafana"
   namespace        = local.monitoring_namespace
   create_namespace = true
   repository       = "https://grafana.github.io/helm-charts"
   chart            = "grafana"
   wait             = true
-  version          = try(var.grafana.chart_version, "8.4.4")
+  version          = "8.4.4"
 
   values = [
     <<-EOT
@@ -325,6 +330,124 @@ resource "helm_release" "grafana" {
         alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80,"HTTPS":443}]'
         alb.ingress.kubernetes.io/ssl-redirect: '443'
         # okta auth
+    grafana.ini:
+      analytics:
+        check_for_updates: false
+        check_for_plugin_updates: false
+        reporting_enabled: false
+    dashboardProviders:
+      dashboardproviders.yaml:
+        apiVersion: 1
+        providers:
+          - name: default
+            orgId: 1
+            folder: ""
+            type: file
+            disableDeletion: false
+            editable: true
+            options:
+              path: /var/lib/grafana/dashboards/default
+          - name: kubernetes
+            orgId: 1
+            folder: Kubernetes
+            type: file
+            disableDeletion: false
+            editable: true
+            options:
+              path: /var/lib/grafana/dashboards/kubernetes
+          - name: nginx
+            orgId: 1
+            folder: Nginx
+            type: file
+            disableDeletion: false
+            editable: true
+            options:
+              path: /var/lib/grafana/dashboards/nginx
+    datasources:
+      datasources.yaml:
+        apiVersion: 1
+        deleteDatasources:
+          - { name: Alertmanager, orgId: 1 }
+          - { name: Prometheus, orgId: 1 }
+        datasources:
+          - name: Prometheus
+            type: prometheus
+            uid: prometheus
+            access: proxy
+            url: http://${helm_release.prometheus_stack[0].name}-kube-prom-prometheus.${local.monitoring_namespace}.svc.cluster.local:9090
+            jsonData:
+              prometheusType: Prometheus
+            isDefault: true
+          - name: Alertmanager
+            type: alertmanager
+            uid: alertmanager
+            access: proxy
+            url: http://alertmanager-operated.${local.monitoring_namespace}.svc.cluster.local:9093
+            jsonData:
+              implementation: prometheus
+    dashboards:
+      default:
+        cert-manager:
+          url: https://raw.githubusercontent.com/monitoring-mixins/website/master/assets/cert-manager/dashboards/cert-manager.json
+          datasource: Prometheus
+        external-dns:
+          gnetId: 15038 # https://grafana.com/grafana/dashboards/15038?tab=revisions
+          revision: 1
+          datasource: Prometheus
+        external-secrets:
+          url: https://raw.githubusercontent.com/external-secrets/external-secrets/main/docs/snippets/dashboard.json
+          datasource: Prometheus
+        node-exporter-full:
+          gnetId: 1860 # https://grafana.com/grafana/dashboards/1860?tab=revisions
+          revision: 31
+          datasource: Prometheus
+        prometheus:
+          url: https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/master/dashboards/k8s-addons-prometheus.json
+          datasource: Prometheus
+      kubernetes:
+        kubernetes-api-server:
+          url: https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/master/dashboards/k8s-system-api-server.json
+          datasource: Prometheus
+        kubernetes-coredns:
+          url: https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/master/dashboards/k8s-system-coredns.json
+          datasource: Prometheus
+        kubernetes-global:
+          url: https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/master/dashboards/k8s-views-global.json
+          datasource: Prometheus
+        kubernetes-namespaces:
+          url: https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/master/dashboards/k8s-views-namespaces.json
+          datasource: Prometheus
+        kubernetes-nodes:
+          url: https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/master/dashboards/k8s-views-nodes.json
+          datasource: Prometheus
+        kubernetes-pods:
+          url: https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/master/dashboards/k8s-views-pods.json
+          datasource: Prometheus
+      nginx:
+        nginx:
+          url: https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/grafana/dashboards/nginx.json
+          datasource: Prometheus
+        nginx-request-handling-performance:
+          url: https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/grafana/dashboards/request-handling-performance.json
+          datasource: Prometheus
+    sidecar:
+      dashboards:
+        enabled: true
+        searchNamespace: ALL
+        labelValue: ""
+        label: grafana_dashboard
+        folderAnnotation: grafana_folder
+        provider:
+          disableDelete: true
+          foldersFromFilesStructure: true
+      datasources:
+        enabled: true
+        searchNamespace: ALL
+        labelValue: ""
+    serviceMonitor:
+      enabled: true
+    testFramework:
+      enabled: false
     EOT
   ]
 }
