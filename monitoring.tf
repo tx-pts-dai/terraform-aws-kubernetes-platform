@@ -4,10 +4,11 @@
 # By default (hardcoded), fluent-operator and fluent-bit will have this annotation set
 locals {
   # Namespace for the resources deployed by the fluent-operator (fluent-bit will be here too)
-  fluent_namespace                       = "monitoring"
-  fluentbit_cloudwatch_log_group         = "/${local.stack_name}/fluentbit-logs"
-  fluentbit_cloudwatch_log_stream_prefix = "."
-  fluentbit_tag                          = "kaas"
+  fluent_namespace                         = "monitoring"
+  fluentbit_cloudwatch_log_group           = "/${local.stack_name}/fluentbit-logs"
+  fluentbit_cloudwatch_log_stream_prefix   = "."
+  fluentbit_cloudwatch_log_stream_template = "$kubernetes['namespace_name'].$kubernetes['pod_name'].$kubernetes['container_name'].$kubernetes['docker_id']"
+  fluentbit_tag                            = "kaas"
 }
 
 # Fluent-operator (https://github.com/fluent/fluent-operator operator)
@@ -144,7 +145,7 @@ resource "kubectl_manifest" "fluentbit_cluster_output_pipeline" {
           region ${data.aws_region.current.name}
           log_group_name ${local.fluentbit_cloudwatch_log_group}
           log_stream_prefix ${local.fluentbit_cloudwatch_log_stream_prefix}
-          log_stream_template $kubernetes['namespace_name'].$kubernetes['pod_name'].$kubernetes['container_name'].$kubernetes['docker_id']
+          log_stream_template ${local.fluentbit_cloudwatch_log_stream_template}
           auto_create_group On # Has to be set to On: https://github.com/fluent/fluent-bit/issues/8949
     YAML
 
@@ -178,9 +179,10 @@ resource "aws_iam_policy" "fluentbit" {
 
 # k8s Service account AWS iam role to allow fluent-bit writing log streams
 module "fluentbit_irsa" {
-  source = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
+  source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
+  version = "5.44.0"
 
-  role_name = "${local.stack_name}-fluentbit"
+  role_name = "fluentbit-${local.id}"
 
   role_policy_arns = {
     policy = aws_iam_policy.fluentbit.arn
