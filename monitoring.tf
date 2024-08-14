@@ -1,3 +1,6 @@
+###############################################################################
+# Kubernetes Platform Monitoring Stack
+
 # Base infra logging
 # Deploy fluentbit with the fluent-operator and configure it so that pods with the ${var.logging_annontation} annotation have
 # they logs pushed to CloudWatch.
@@ -11,7 +14,9 @@ locals {
   fluentbit_tag                            = "kaas"
 }
 
-# Fluent-operator (https://github.com/fluent/fluent-operator operator)
+###############################################################################
+# fluent operator (https://github.com/fluent/fluent-operator operator)
+
 resource "helm_release" "fluent_operator" {
   chart      = "fluent-operator"
   name       = "fluent-operator"
@@ -25,17 +30,29 @@ resource "helm_release" "fluent_operator" {
     <<-YAML
     containerRuntime: containerd
     operator:
+      priorityClassName: system-cluster-critical
       annotations:
         ${var.logging_annotation.name}: "${var.logging_annotation.value}"
     fluentbit:
+      priorityClassName: system-node-critical
       affinity:
         nodeAffinity:
-          # Do not start fluent-bit on Fargate node
           requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-              - matchExpressions:
-                  - key: node-role.kubernetes.io/edge # This expression is here by default
-                    operator: DoesNotExist
+              nodeSelectorTerms:
+                - matchExpressions:
+                  - key: kubernetes.io/os
+                    operator: In
+                    values:
+                      - linux
+                  - key: kubernetes.io/arch
+                    operator: In
+                    values:
+                      - amd64
+                      - arm64
+                  - key: eks.amazonaws.com/compute-type
+                    operator: NotIn
+                    values:
+                      - fargate
       annotations:
         ${var.logging_annotation.name}: "${var.logging_annotation.value}"
       # Because we deploy our own pipeline, disable the default one
@@ -50,6 +67,10 @@ resource "helm_release" "fluent_operator" {
       serviceAccountAnnotations:
         eks.amazonaws.com/role-arn: ${module.fluentbit_irsa.iam_role_arn}
     YAML
+  ]
+
+  depends_on = [
+    module.addons
   ]
 }
 
@@ -77,6 +98,10 @@ resource "kubectl_manifest" "fluentbit_cluster_input_pipeline" {
         storageType: memory
         tag: ${local.fluentbit_tag}.*
   YAML
+
+  depends_on = [
+    helm_release.fluent_operator
+  ]
 }
 
 # Fluentbit filters to log KaaS pods to cloudwatch
@@ -123,6 +148,10 @@ resource "kubectl_manifest" "fluentbit_cluster_filter_pipeline" {
       - grep:
           regex: $kubernetes['annotations']['${var.logging_annotation.name}'] ^${var.logging_annotation.value}$
   YAML
+
+  depends_on = [
+    helm_release.fluent_operator
+  ]
 }
 
 resource "kubectl_manifest" "fluentbit_cluster_output_pipeline" {
@@ -145,7 +174,9 @@ resource "kubectl_manifest" "fluentbit_cluster_output_pipeline" {
           auto_create_group On # Has to be set to On: https://github.com/fluent/fluent-bit/issues/8949
     YAML
 
-  depends_on = [helm_release.fluent_operator]
+  depends_on = [
+    helm_release.fluent_operator
+  ]
 }
 
 # CloudWatch log group and permission to allow fluent-bit to write log stream
@@ -195,13 +226,6 @@ module "fluentbit_irsa" {
 
 
 ###############################################################################
-# Kubernetes Platform Monitoring Stack
-
-locals {
-  monitoring_namespace = "monitoring"
-}
-
-###############################################################################
 # Prometheus Operator
 
 resource "helm_release" "prometheus_operator_crds" {
@@ -231,6 +255,7 @@ resource "helm_release" "prometheus_stack" {
     <<-EOT
     cleanPrometheusOperatorObjectNames: true
     prometheus:
+      priorityClassName: system-cluster-critical
       ingress:
         enabled: true
         ingressClassName: alb
@@ -246,6 +271,7 @@ resource "helm_release" "prometheus_stack" {
           alb.ingress.kubernetes.io/ssl-redirect: '443'
           alb.ingress.kubernetes.io/healthcheck-path: /-/healthy
     alertmanager:
+      priorityClassName: system-cluster-critical
       ingress:
         enabled: true
         ingressClassName: alb
@@ -261,6 +287,7 @@ resource "helm_release" "prometheus_stack" {
           alb.ingress.kubernetes.io/ssl-redirect: '443'
           alb.ingress.kubernetes.io/healthcheck-path: /-/healthy
     prometheus-node-exporter:
+      priorityClassName: system-node-critical
       affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
@@ -295,6 +322,7 @@ resource "helm_release" "prometheus_stack" {
 
   depends_on = [
     helm_release.prometheus_operator_crds,
+    module.addons
   ]
 }
 
@@ -450,6 +478,8 @@ resource "helm_release" "grafana" {
       enabled: false
     EOT
   ]
+
+  depends_on = [module.addons]
 }
 
 ###############################################################################

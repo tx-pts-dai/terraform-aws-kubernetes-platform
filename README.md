@@ -108,12 +108,8 @@ as described in the `.pre-commit-config.yaml` file
 | <a name="module_downscaler"></a> [downscaler](#module\_downscaler) | tx-pts-dai/downscaler/kubernetes | 0.3.1 |
 | <a name="module_ebs_csi_driver_irsa"></a> [ebs\_csi\_driver\_irsa](#module\_ebs\_csi\_driver\_irsa) | terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks | 5.44.0 |
 | <a name="module_eks"></a> [eks](#module\_eks) | terraform-aws-modules/eks/aws | 20.23.0 |
-<<<<<<< HEAD
 | <a name="module_fluentbit_irsa"></a> [fluentbit\_irsa](#module\_fluentbit\_irsa) | terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks | 5.44.0 |
-| <a name="module_karpenter"></a> [karpenter](#module\_karpenter) | terraform-aws-modules/eks/aws//modules/karpenter | 20.23.0 |
-=======
 | <a name="module_karpenter"></a> [karpenter](#module\_karpenter) | terraform-aws-modules/eks/aws//modules/karpenter | 20.20.0 |
->>>>>>> 43d2f6c (ci: create dedicated test deployment for feature branches)
 | <a name="module_karpenter_crds"></a> [karpenter\_crds](#module\_karpenter\_crds) | aws-ia/eks-blueprints-addon/aws | 1.1.1 |
 | <a name="module_karpenter_security_group"></a> [karpenter\_security\_group](#module\_karpenter\_security\_group) | ./modules/security-group | n/a |
 | <a name="module_network"></a> [network](#module\_network) | ./modules/network | n/a |
@@ -129,18 +125,14 @@ as described in the `.pre-commit-config.yaml` file
 | [aws_route_table_association.karpenter](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route_table_association) | resource |
 | [aws_security_group_rule.eks_control_plan_ingress](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
 | [aws_subnet.karpenter](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/subnet) | resource |
-<<<<<<< HEAD
 | [helm_release.fluent_operator](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
-| [helm_release.karpenter](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
-| [kubectl_manifest.fluentbit_cluster_filter_pipeline](https://registry.terraform.io/providers/alekc/kubectl/latest/docs/resources/manifest) | resource |
-| [kubectl_manifest.fluentbit_cluster_input_pipeline](https://registry.terraform.io/providers/alekc/kubectl/latest/docs/resources/manifest) | resource |
-| [kubectl_manifest.fluentbit_cluster_output_pipeline](https://registry.terraform.io/providers/alekc/kubectl/latest/docs/resources/manifest) | resource |
-=======
 | [helm_release.grafana](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
 | [helm_release.karpenter](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
 | [helm_release.prometheus_operator_crds](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
 | [helm_release.prometheus_stack](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
->>>>>>> bf0a448 (feat: add prometheus and grafana)
+| [kubectl_manifest.fluentbit_cluster_filter_pipeline](https://registry.terraform.io/providers/alekc/kubectl/latest/docs/resources/manifest) | resource |
+| [kubectl_manifest.fluentbit_cluster_input_pipeline](https://registry.terraform.io/providers/alekc/kubectl/latest/docs/resources/manifest) | resource |
+| [kubectl_manifest.fluentbit_cluster_output_pipeline](https://registry.terraform.io/providers/alekc/kubectl/latest/docs/resources/manifest) | resource |
 | [kubectl_manifest.karpenter_node_class](https://registry.terraform.io/providers/alekc/kubectl/latest/docs/resources/manifest) | resource |
 | [kubectl_manifest.karpenter_node_pool](https://registry.terraform.io/providers/alekc/kubectl/latest/docs/resources/manifest) | resource |
 | [kubectl_manifest.secretsmanager_auth](https://registry.terraform.io/providers/alekc/kubectl/latest/docs/resources/manifest) | resource |
@@ -163,16 +155,10 @@ as described in the `.pre-commit-config.yaml` file
 | <a name="input_base_domain"></a> [base\_domain](#input\_base\_domain) | Base domain for the platform, used for ingress and ACM certificates | `string` | `"test"` | no |
 | <a name="input_cluster_admins"></a> [cluster\_admins](#input\_cluster\_admins) | Map of IAM roles to add as cluster admins. Only exact matching role names are returned | <pre>map(object({<br>    role_name         = string<br>    kubernetes_groups = optional(list(string))<br>  }))</pre> | `{}` | no |
 | <a name="input_eks"></a> [eks](#input\_eks) | Map of EKS configurations | `any` | `{}` | no |
-<<<<<<< HEAD
-| <a name="input_enable_karpenter_crds"></a> [enable\_karpenter\_crds](#input\_enable\_karpenter\_crds) | Enable Karpenter CRDs chart | `bool` | `true` | no |
-| <a name="input_grafana"></a> [grafana](#input\_grafana) | Map of Grafana configurations | `any` | `{}` | no |
-| <a name="input_karpenter"></a> [karpenter](#input\_karpenter) | Map of Karpenter configurations | `any` | `{}` | no |
-| <a name="input_logging_annotation"></a> [logging\_annotation](#input\_logging\_annotation) | Annotation kaas pods should have to get they logs stored in cloudwatch | <pre>object({<br>    name  = string<br>    value = string<br>  })</pre> | <pre>{<br>  "name": "kaas.tamedia.ch/logging",<br>  "value": "true"<br>}</pre> | no |
-| <a name="input_logging_retention_in_days"></a> [logging\_retention\_in\_days](#input\_logging\_retention\_in\_days) | How log to keep kaas logs in cloudwatch | `string` | `7` | no |
-=======
 | <a name="input_grafana"></a> [grafana](#input\_grafana) | Grafana configurations | <pre>object({<br>    enabled = optional(bool, true)<br>  })</pre> | `{}` | no |
 | <a name="input_karpenter"></a> [karpenter](#input\_karpenter) | Karpenter configurations | <pre>object({<br>    enabled = optional(bool, true)<br>  })</pre> | `{}` | no |
->>>>>>> f4dc83d (feat: add dashboards to grafana)
+| <a name="input_logging_annotation"></a> [logging\_annotation](#input\_logging\_annotation) | Annotation kaas pods should have to get they logs stored in cloudwatch | <pre>object({<br>    name  = string<br>    value = string<br>  })</pre> | <pre>{<br>  "name": "kaas.tamedia.ch/logging",<br>  "value": "true"<br>}</pre> | no |
+| <a name="input_logging_retention_in_days"></a> [logging\_retention\_in\_days](#input\_logging\_retention\_in\_days) | How log to keep kaas logs in cloudwatch | `string` | `7` | no |
 | <a name="input_name"></a> [name](#input\_name) | The name of the platform | `string` | n/a | yes |
 | <a name="input_prometheus_stack"></a> [prometheus\_stack](#input\_prometheus\_stack) | Prometheus stack configurations | <pre>object({<br>    enabled = optional(bool, true)<br>  })</pre> | `{}` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | Default tags to apply to all resources | `map(string)` | `{}` | no |

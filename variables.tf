@@ -87,16 +87,6 @@ variable "addons" {
     downscaler    = { enabled = false }
   }
 }
-<<<<<<< HEAD
-
-variable "cluster_admins" {
-  description = "Map of IAM roles to add as cluster admins. Only exact matching role names are returned"
-  type = map(object({
-    role_name         = string
-    kubernetes_groups = optional(list(string))
-  }))
-  default = {}
-}
 
 variable "logging_annotation" {
   description = "Annotation kaas pods should have to get they logs stored in cloudwatch"
@@ -115,35 +105,3 @@ variable "logging_retention_in_days" {
   type        = string
   default     = 7
 }
-
-variable "prometheus_stack" {
-  description = "Map of Prometheus stack configurations"
-  type        = any
-  default     = {}
-}
-
-variable "grafana" {
-  description = "Map of Grafana configurations"
-  type        = any
-  default     = {}
-}
-
-variable "base_domain" {
-  description = "Base domain for the platform"
-  type        = string
-  default     = "test"
-}
-
-variable "acm_certificate" {
-  description = "ACM certificate configuration. If wildcard_certificates is true, all domains will include a wildcard prefix."
-  type = object({
-    enabled                   = optional(bool, false)
-    domain_name               = optional(string)
-    subject_alternative_names = optional(list(string), [])
-    wildcard_certificates     = optional(bool, false)
-    wait_for_validation       = optional(bool, false)
-  })
-  default = {}
-}
-=======
->>>>>>> f4dc83d (feat: add dashboards to grafana)

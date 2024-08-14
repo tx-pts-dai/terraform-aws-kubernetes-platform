@@ -76,6 +76,7 @@ module "k8s_platform" {
   source = "../../"
 
   name = "replaced-with-branch-name"
+  # name = var.name
 
   cluster_admins = {
     cicd = {

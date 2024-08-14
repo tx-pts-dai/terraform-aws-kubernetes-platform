@@ -109,7 +109,7 @@ module "eks" {
   version = "20.23.0"
 
   cluster_name                    = local.stack_name
-  cluster_version                 = try(var.eks.kubernetes_version, "1.29")
+  cluster_version                 = try(var.eks.kubernetes_version, "1.30")
   cluster_endpoint_public_access  = try(var.eks.cluster_endpoint_public_access, true)
   cluster_endpoint_private_access = try(var.eks.cluster_endpoint_private_access, true)
 
