@@ -191,7 +191,7 @@ variable "disable_openapi_validation" {
 variable "wait" {
   description = "Will wait until all resources are in a ready state before marking the release as successful. If set to `true`, it will wait for as long as `timeout`. If set to `null` fallback on `300s` timeout.  Defaults to `false`"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "wait_for_jobs" {
@@ -261,7 +261,7 @@ variable "role_name" {
 variable "role_name_use_prefix" {
   description = "Determines whether the IAM role name (`role_name`) is used as a prefix"
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "role_path" {
@@ -349,7 +349,7 @@ variable "policy_name" {
 variable "policy_name_use_prefix" {
   description = "Determines whether the IAM policy name (`policy_name`) is used as a prefix"
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "policy_path" {
@@ -362,4 +362,14 @@ variable "policy_description" {
   description = "IAM policy description"
   type        = string
   default     = null
+}
+
+################################################################################
+# Additional Helm Release
+################################################################################
+
+variable "additional_helm_releases" {
+  description = "A map of Helm releases to create. This provides the ability to pass in an arbitrary map of Helm chart definitions to create"
+  type        = any
+  default     = {}
 }

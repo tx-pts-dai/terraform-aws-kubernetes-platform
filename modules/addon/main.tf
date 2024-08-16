@@ -90,6 +90,7 @@ resource "helm_release" "this" {
 data "aws_partition" "current" {
   count = local.create_role ? 1 : 0
 }
+
 data "aws_caller_identity" "current" {
   count = local.create_role ? 1 : 0
 }
