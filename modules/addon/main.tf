@@ -81,6 +81,22 @@ resource "helm_release" "this" {
       type  = try(set_sensitive.value.type, null)
     }
   }
+
+  depends_on = [time_sleep.this]
+}
+
+
+resource "time_sleep" "this" {
+  count = var.release_delay_create_duration != null || var.release_delay_destroy_duration != null ? 1 : 0
+
+  create_duration = var.release_delay_create_duration
+
+  destroy_duration = var.release_delay_destroy_duration
+
+  triggers = {
+    # additional_helm_releases = var.depend_additional ? join(",", keys(helm_release.additional)) : ""
+    custom = join(",", var.release_custom_delay_triggers)
+  }
 }
 
 ################################################################################

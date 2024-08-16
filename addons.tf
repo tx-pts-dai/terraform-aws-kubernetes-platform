@@ -1,18 +1,18 @@
 ################################################################################
 # EKS Addons
 #
-# Notes
-#
 
-module "addons" {
+module "managed_addons" {
   source  = "aws-ia/eks-blueprints-addons/aws"
   version = "1.16.3"
 
   create_delay_dependencies = [
-    helm_release.karpenter.status
+    module.karpenter_release.status
   ]
-  # Wait for karpenter node to start so when the managed addons are applied they already have running pods, otherwise they will fail to update.
-  create_delay_duration = "3m"
+
+  # Arbitrary delay to wait for Karpenter to create nodes before creating managed addons to avoid an isssue
+  # where the managed addons are created before the nodes are ready and they fail
+  create_delay_duration = "5m"
 
   cluster_name      = module.eks.cluster_name
   cluster_endpoint  = module.eks.cluster_endpoint
@@ -25,8 +25,8 @@ module "addons" {
       preserve    = false
 
       timeouts = {
-        create = "10m"
-        delete = "10m"
+        create = "3m"
+        delete = "3m"
       }
     }
     vpc-cni = {
@@ -43,6 +43,7 @@ module "addons" {
     }
     kube-proxy = {
       most_recent = true
+      preserve    = true
     }
     aws-ebs-csi-driver = {
       most_recent = true
@@ -55,14 +56,29 @@ module "addons" {
       }
 
       timeouts = {
-        create = "10m"
-        delete = "10m"
+        create = "3m"
+        delete = "3m"
       }
     }
   }
 
-  enable_aws_load_balancer_controller = try(var.addons.aws_load_balancer_controller.enabled, true)
-  aws_load_balancer_controller = {
+  depends_on = [module.karpenter_release]
+}
+
+module "addons" {
+  source  = "aws-ia/eks-blueprints-addons/aws"
+  version = "1.16.3"
+
+  create_delay_duration = "10s"
+
+  cluster_name      = module.eks.cluster_name
+  cluster_endpoint  = module.eks.cluster_endpoint
+  cluster_version   = module.eks.cluster_version
+  oidc_provider_arn = module.eks.oidc_provider_arn
+
+  # TODO: aws lb controller should be one of the last things deleted, so ing objects can be cleaned up
+  enable_aws_load_balancer_controller = var.enable_aws_load_balancer_controller
+  aws_load_balancer_controller = merge({
     role_name        = "aws-load-balancer-controller-${local.id}"
     role_name_prefix = false
     # race condition if this is not disabled. Serivce type LB will use intree controller.
@@ -77,13 +93,13 @@ module "addons" {
       name  = "clusterSecretsPermissions.allowAllSecrets"
       value = "true" # enables Okta integration by reading client id and secret from K8s secrets
     }]
-  }
+  }, var.aws_load_balancer_controller)
 
-  enable_external_dns = try(var.addons.external_dns.enabled, true)
+  enable_external_dns = var.enable_external_dns
   external_dns_route53_zone_arns = [
     "arn:aws:route53:::hostedzone/*",
   ]
-  external_dns = {
+  external_dns = merge({
     role_name        = "external-dns-${local.id}"
     role_name_prefix = false
     set = [{
@@ -93,34 +109,40 @@ module "addons" {
       name  = "txtOwnerId"
       value = local.stack_name # avoid conflicts on the same hosted zone
     }]
-  }
+  }, var.external_dns)
 
-  enable_external_secrets = try(var.addons.external_secrets.enabled, true)
-  external_secrets = {
+  enable_external_secrets = var.enable_external_secrets
+  external_secrets = merge({
     wait             = true
     role_name        = "external-secrets-${local.id}"
     role_name_prefix = false
     set = [{
       name  = "serviceMonitor.enabled"
-      value = var.prometheus_stack.enabled
+      value = var.enable_prometheus_stack
     }]
-  }
+  }, var.external_secrets)
 
-  enable_fargate_fluentbit = try(var.addons.fargate_fluentbit.enabled, true)
-  fargate_fluentbit = {
+  enable_fargate_fluentbit = var.enable_fargate_fluentbit
+  fargate_fluentbit = merge({
     role_name        = "fargate-fluentbit-${local.id}"
     role_name_prefix = false
-  }
+  }, var.fargate_fluentbit)
 
-  enable_metrics_server = try(var.addons.metrics_server.enabled, true)
+  enable_metrics_server = var.enable_metrics_server
+  metrics_server = merge({
+    name : "replicas",
+    value : 2,
+    },
+  var.metrics_server)
 
   # Alternative Ingress
-  enable_cert_manager  = try(var.addons.cert_manager.enabled, false)
-  enable_ingress_nginx = try(var.addons.ingress_nginx.enabled, false)
+  enable_cert_manager = var.enable_cert_manager
+  cert_manager        = var.cert_manager
 
-  depends_on = [
-    helm_release.karpenter,
-  ]
+  enable_ingress_nginx = var.enable_ingress_nginx
+  ingress_nginx        = var.ingress_nginx
+
+  depends_on = [module.managed_addons]
 }
 
 ################################################################################
@@ -167,10 +189,42 @@ module "ebs_csi_driver_irsa" {
 }
 
 ################################################################################
-# External Secrets
+# Kube Downscaler
 
-resource "kubectl_manifest" "secretsmanager_auth" {
-  yaml_body = <<-YAML
+module "downscaler" {
+  source  = "tx-pts-dai/downscaler/kubernetes"
+  version = "0.3.1"
+
+  count = var.enable_downscaler ? 1 : 0
+
+  image_version = try(var.downscaler.image_version, "23.2.0")
+  dry_run       = try(var.downscaler.dry_run, false)
+  custom_args   = try(var.downscaler.custom_args, [])
+  node_selector = try(var.downscaler.node_selector, {})
+  tolerations   = try(var.downscaler.tolerations, [])
+
+  depends_on = [
+    module.addons
+  ]
+}
+
+################################################################################
+# External Secrets Custom Resources
+# TODO: move external secrets to dedicated module
+module "cluster_secret_store" {
+  source = "./modules/addon"
+
+  create = var.enable_external_secrets
+
+  name          = "cluster-secret-store-aws-secretsmanager"
+  chart         = "custom-resources"
+  chart_version = "0.1.0"
+  repository    = "https://dnd-it.github.io/helm-charts"
+  description   = "External Secrets Cluster Secret Store for AWS Secrets Manager"
+  namespace     = local.monitoring_namespace
+
+  values = [
+    <<-EOT
     apiVersion: external-secrets.io/v1beta1
     kind: ClusterSecretStore
     metadata:
@@ -179,27 +233,9 @@ resource "kubectl_manifest" "secretsmanager_auth" {
       provider:
         aws:
           service: SecretsManager
-          region: ${data.aws_region.current.name}
-  YAML
-  depends_on = [
-    module.addons
+          region: ${local.region}
+    EOT
   ]
-}
-
-################################################################################
-# Kube Downscaler
-
-module "downscaler" {
-  source  = "tx-pts-dai/downscaler/kubernetes"
-  version = "0.3.1"
-
-  count = var.addons.downscaler.enabled ? 1 : 0
-
-  image_version = try(var.addons.downscaler.image_version, "23.2.0")
-  dry_run       = try(var.addons.downscaler.dry_run, false)
-  custom_args   = try(var.addons.downscaler.custom_args, [])
-  node_selector = try(var.addons.downscaler.node_selector, {})
-  tolerations   = try(var.addons.downscaler.tolerations, [])
 
   depends_on = [
     module.addons

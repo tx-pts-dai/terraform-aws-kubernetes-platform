@@ -31,6 +31,8 @@ locals {
   tags = merge(var.tags, {
     StackName = local.stack_name
   })
+
+  region = data.aws_region.current.name
 }
 
 ################################################################################
@@ -183,14 +185,12 @@ resource "time_sleep" "wait_on_destroy" {
     module.eks,
     module.karpenter,
     module.karpenter_crds,
+    module.karpenter_release,
     module.karpenter_security_group,
     aws_subnet.karpenter,
     aws_route_table_association.karpenter,
-    helm_release.karpenter,
-    kubectl_manifest.karpenter_node_class,
-    kubectl_manifest.karpenter_node_pool,
   ]
 
-  # Sleep for 10 minutes to allow Karpenter to clean up resources
-  destroy_duration = "10m"
+  # Sleep for 5 minutes to allow Karpenter to clean up resources
+  destroy_duration = "5m"
 }

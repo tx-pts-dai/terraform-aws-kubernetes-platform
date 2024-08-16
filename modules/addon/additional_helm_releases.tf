@@ -3,7 +3,7 @@
 ################################################################################
 
 resource "helm_release" "additional" {
-  for_each = var.additional_helm_releases
+  for_each = var.create ? { for k, v in var.additional_helm_releases : k => v if try(v.create, true) } : {}
 
   name             = try(each.value.name, replace(each.key, "_", "-"))
   description      = try(each.value.description, null)
@@ -69,7 +69,18 @@ resource "helm_release" "additional" {
     }
   }
 
-  depends_on = [
-    helm_release.this
-  ]
+  depends_on = [time_sleep.additional]
+}
+
+resource "time_sleep" "additional" {
+  count = var.additional_delay_create_duration != null || var.additional_delay_destroy_duration != null ? 1 : 0
+
+  create_duration = var.additional_delay_create_duration
+
+  destroy_duration = var.additional_delay_destroy_duration
+
+  triggers = {
+    main_release = var.additional_depend_on_helm_release ? try(helm_release.this[0].name, "") : ""
+    custom       = join(",", var.additional_custom_delay_triggers)
+  }
 }

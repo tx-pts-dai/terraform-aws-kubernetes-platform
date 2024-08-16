@@ -242,6 +242,30 @@ variable "set_irsa_names" {
   default     = []
 }
 
+variable "release_delay_create_duration" {
+  description = "The duration to wait before creating the helm release"
+  type        = string
+  default     = null
+}
+
+variable "release_delay_destroy_duration" {
+  description = "The duration to wait before destroying the helm release"
+  type        = string
+  default     = null
+}
+
+variable "release_custom_delay_triggers" {
+  description = "List of resources to trigger the delay of the helm release"
+  type        = list(string)
+  default     = []
+}
+
+# variable "depend_additional" {
+#   description = "Determines whether to wait for additional helm releases to be created before creating the main helm release"
+#   type        = bool
+#   default     = false
+# }
+
 ################################################################################
 # IAM Role for Service Account(s) (IRSA)
 ################################################################################
@@ -372,4 +396,28 @@ variable "additional_helm_releases" {
   description = "A map of Helm releases to create. This provides the ability to pass in an arbitrary map of Helm chart definitions to create"
   type        = any
   default     = {}
+}
+
+variable "additional_delay_create_duration" {
+  description = "The duration to wait before creating additional helm releases. 30s, 1m, etc."
+  type        = string
+  default     = null
+}
+
+variable "additional_delay_destroy_duration" {
+  description = "The duration to wait before destroying additional helm releases. 30s, 1m, etc."
+  type        = string
+  default     = null
+}
+
+variable "additional_custom_delay_triggers" {
+  description = "List of resources to trigger the delay of additional helm releases"
+  type        = list(string)
+  default     = []
+}
+
+variable "additional_depend_on_helm_release" {
+  description = "Determines whether to wait for the main helm release to be created before creating the additional helm releases"
+  type        = bool
+  default     = true
 }

@@ -101,32 +101,41 @@ module "k8s_platform" {
     ]
   }
 
-  addons = {
-    # Core addons
-    aws_load_balancer_controller = { enabled = true }
-    external_dns                 = { enabled = true }
-    external_secrets             = { enabled = true }
-    fargate_fluentbit            = { enabled = true }
-    metrics_server               = { enabled = true }
-
-    # Optional addons
-    downscaler = { enabled = true }
+  karpenter = {
+    set = [
+      {
+        name  = "replicas"
+        value = 1
+      }
+    ]
   }
 
-  pagerduty_integration = {
-    enabled                     = true
+  metrics_server = {
+    set = [
+      {
+        name  = "replicas"
+        value = 2
+      }
+    ]
+  }
+
+  enable_downscaler = true
+
+  enable_pagerduty = true
+  pagerduty = {
     secrets_manager_secret_name = "dai/platform/pagerduty"
   }
 
-  okta_integration = {
+  enable_okta = true
+  okta = {
     base_url                    = "https://login.tx.group"
     secrets_manager_secret_name = "dai/platform/okta"
   }
 
   base_domain = "dai.tx.group"
 
+  enable_acm_certificate = true
   acm_certificate = {
-    enabled = true
     subject_alternative_names = [
       "prometheus",
       "alertmanager",

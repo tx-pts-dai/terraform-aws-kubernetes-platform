@@ -10,12 +10,8 @@ locals {
   karpenter = {
     subnet_cidrs = try(var.karpenter.subnet_cidrs, module.network.grouped_networks.karpenter)
 
-    namespace               = "kube-system"
-    replicas                = try(var.karpenter.replicas, 1)
-    service_monitor_enabled = try(var.karpenter.service_monitor_enabled, true)
-    pod_annotations         = try(var.karpenter.pod_annotations, {})
-    cpu_request             = try(var.karpenter.cpu_request, 0.25)
-    memory_request          = try(var.karpenter.memory_request, "256Mi")
+    namespace       = "kube-system"
+    pod_annotations = try(var.karpenter.pod_annotations, {})
   }
 
   azs = slice(data.aws_availability_zones.available.names, 0, 3)
@@ -43,25 +39,29 @@ module "karpenter" {
 }
 
 module "karpenter_crds" {
-  source  = "aws-ia/eks-blueprints-addon/aws"
-  version = "1.1.1"
+  source = "./modules/addon"
 
-  name             = "karpenter-crd"
-  namespace        = local.karpenter.namespace
-  create_namespace = true
-  repository       = "oci://public.ecr.aws/karpenter"
+  create = var.enable_karpenter
+
   chart            = "karpenter-crd"
   chart_version    = "0.37.0"
+  repository       = "oci://public.ecr.aws/karpenter"
+  description      = "Karpenter CRDs"
+  namespace        = local.karpenter.namespace
+  create_namespace = true
 }
 
 
-resource "helm_release" "karpenter" {
-  name             = "karpenter"
+module "karpenter_release" {
+  source = "./modules/addon"
+
+  create = var.enable_karpenter
+
+  chart            = "karpenter"
+  chart_version    = "0.37.0"
+  repository       = "oci://public.ecr.aws/karpenter"
   namespace        = local.karpenter.namespace
   create_namespace = true
-  repository       = "oci://public.ecr.aws/karpenter"
-  chart            = "karpenter"
-  version          = "0.37.0"
   skip_crds        = true
   wait             = true
 
@@ -69,15 +69,15 @@ resource "helm_release" "karpenter" {
     <<-EOT
     logLevel: info
     dnsPolicy: Default
-    replicas: "${local.karpenter.replicas}"
+    replicas: 2
     podAnnotations: ${jsonencode(local.karpenter.pod_annotations)}
     controller:
       resources:
         requests:
-          cpu: ${local.karpenter.cpu_request}
-          memory: ${local.karpenter.memory_request}
+          cpu: 0.25
+          memory: "256Mi"
     serviceMonitor:
-      enabled: ${var.prometheus_stack.enabled}
+      enabled: ${module.prometheus_operator_crds.create}
     settings:
       clusterName: ${module.eks.cluster_name}
       clusterEndpoint: ${module.eks.cluster_endpoint}
@@ -87,71 +87,91 @@ resource "helm_release" "karpenter" {
         eks.amazonaws.com/role-arn: ${module.karpenter.iam_role_arn}
     EOT
   ]
-}
 
-resource "kubectl_manifest" "karpenter_node_class" {
-  yaml_body = <<-YAML
-    apiVersion: karpenter.k8s.aws/v1beta1
-    kind: EC2NodeClass
-    metadata:
-      name: default
-    spec:
-      amiFamily: AL2
-      role: ${module.karpenter.node_iam_role_name}
-      subnetSelectorTerms:
-        - tags:
-            karpenter.sh/discovery: ${module.eks.cluster_name}
-      securityGroupSelectorTerms:
-        - tags:
-            karpenter.sh/discovery: ${module.eks.cluster_name}
-      tags:
-        karpenter.sh/discovery: ${module.eks.cluster_name}
-  YAML
+  set = try(var.karpenter.set, [])
 
-  depends_on = [
-    module.karpenter_crds
-  ]
-}
+  additional_delay_destroy_duration = "1m"
 
-resource "kubectl_manifest" "karpenter_node_pool" {
-  yaml_body = <<-YAML
-    apiVersion: karpenter.sh/v1beta1
-    kind: NodePool
-    metadata:
-      name: default
-    spec:
-      template:
+  additional_helm_releases = {
+    karpenter_node_class = {
+      description   = "Karpenter NodeClass Resource"
+      chart         = "custom-resources"
+      chart_version = "0.1.0"
+      repository    = "https://dnd-it.github.io/helm-charts"
+
+      values = [
+        <<-EOT
+        apiVersion: karpenter.k8s.aws/v1beta1
+        kind: EC2NodeClass
+        metadata:
+          name: default
         spec:
-          nodeClassRef:
-            name: default
-          requirements:
-            - key: "karpenter.k8s.aws/instance-category"
-              operator: In
-              values: ["c", "m", "r", "t"]
-            - key: "karpenter.k8s.aws/instance-cpu"
-              operator: In
-              values: ["2", "4", "8", "16", "32"]
-            - key: "karpenter.k8s.aws/instance-hypervisor"
-              operator: In
-              values: ["nitro"]
-            - key: "karpenter.k8s.aws/instance-memory"
-              operator: Gt
-              values: ["1024"]
-            - key: "karpenter.sh/capacity-type"
-              operator: In
-              values: ["spot", "on-demand"]
-            - key: "karpenter.k8s.aws/instance-generation"
-              operator: Gt
-              values: ["2"]
-      limits:
-        cpu: 1000
-      disruption:
-        consolidationPolicy: WhenUnderutilized
-        expireAfter: 720h
-  YAML
+          amiFamily: Bottlerocket
+          role: ${module.karpenter.node_iam_role_name}
+          subnetSelectorTerms:
+            - tags:
+                karpenter.sh/discovery: ${module.eks.cluster_name}
+          securityGroupSelectorTerms:
+            - tags:
+                karpenter.sh/discovery: ${module.eks.cluster_name}
+          tags:
+            karpenter.sh/discovery: ${module.eks.cluster_name}
+        EOT
+      ]
+    }
+    karpenter_node_pool = {
+      description   = "Karpenter NodePool Resource"
+      chart         = "custom-resources"
+      chart_version = "0.1.0"
+      repository    = "https://dnd-it.github.io/helm-charts"
+
+      values = [
+        <<-EOT
+        apiVersion: karpenter.sh/v1beta1
+        kind: NodePool
+        metadata:
+          name: default
+        spec:
+          template:
+            spec:
+              nodeClassRef:
+                name: default
+              requirements:
+                - key: "karpenter.k8s.aws/instance-category"
+                  operator: In
+                  values: ["c", "m", "r", "t"]
+                - key: "karpenter.k8s.aws/instance-cpu"
+                  operator: In
+                  values: ["2", "4", "8", "16", "32"]
+                - key: "karpenter.k8s.aws/instance-hypervisor"
+                  operator: In
+                  values: ["nitro"]
+                - key: "karpenter.k8s.aws/instance-memory"
+                  operator: Gt
+                  values: ["1024"]
+                - key: "karpenter.sh/capacity-type"
+                  operator: In
+                  values: ["spot", "on-demand"]
+                - key: "karpenter.k8s.aws/instance-generation"
+                  operator: Gt
+                  values: ["2"]
+          limits:
+            cpu: 1000
+          disruption:
+            consolidationPolicy: WhenUnderutilized
+            expireAfter: 720h
+        EOT
+      ]
+    }
+  }
 
   depends_on = [
-    module.karpenter_crds
+    module.prometheus_operator_crds,
+    module.karpenter_crds,
+    module.karpenter,
+    module.karpenter_security_group,
+    aws_subnet.karpenter,
+    aws_route_table_association.karpenter
   ]
 }
 

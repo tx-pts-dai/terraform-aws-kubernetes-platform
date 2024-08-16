@@ -4,22 +4,22 @@ metadata:
   name: datadog-agent-fargate
 rules:
   - apiGroups:
-    - ""
+      - ""
     resources:
-    - nodes
-    - namespaces
-    - endpoints
+      - nodes
+      - namespaces
+      - endpoints
     verbs:
-    - get
-    - list
+      - get
+      - list
   - apiGroups:
-    - ""
+      - ""
     resources:
-    - nodes/metrics
-    - nodes/spec
-    - nodes/stats
-    - nodes/proxy
-    - nodes/pods
-    - nodes/healthz
+      - nodes/metrics
+      - nodes/spec
+      - nodes/stats
+      - nodes/proxy
+      - nodes/pods
+      - nodes/healthz
     verbs:
-    - get
+      - get

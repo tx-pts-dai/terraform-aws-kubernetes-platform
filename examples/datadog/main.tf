@@ -117,7 +117,6 @@ module "k8s_platform" {
       { private = 24 },
       { intra = 26 },
       { database = 26 },
-      { redshift = 26 },
       { karpenter = 22 }
     ]
   }

@@ -1,3 +1,8 @@
+output "create" {
+  description = "Whether the resources are created"
+  value       = var.create
+}
+
 ################################################################################
 # Helm Release
 ################################################################################
@@ -35,6 +40,16 @@ output "app_version" {
 output "values" {
   description = "The compounded values from `values` and `set*` attributes"
   value       = try(helm_release.this[0].metadata[0].values, [])
+}
+
+output "manifest" {
+  description = "The manifest of the release"
+  value       = try(helm_release.this[0].manifest, null)
+}
+
+output "status" {
+  description = "The status of the release"
+  value       = try(helm_release.this[0].status, null)
 }
 
 ################################################################################

@@ -32,3 +32,10 @@ override.tf.json
 # Ignore dotenv files
 .env
 .tfenv
+
+
+# Virtual Env
+.venv/
+
+# mkdocs site
+/site/

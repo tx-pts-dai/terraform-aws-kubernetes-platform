@@ -134,6 +134,7 @@ module "eks_blueprints_addon" {
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.0 |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 4.47 |
 | <a name="requirement_helm"></a> [helm](#requirement\_helm) | >= 2.9 |
+| <a name="requirement_time"></a> [time](#requirement\_time) | >= 0.11 |
 
 ## Providers
 
@@ -141,6 +142,7 @@ module "eks_blueprints_addon" {
 |------|---------|
 | <a name="provider_aws"></a> [aws](#provider\_aws) | >= 4.47 |
 | <a name="provider_helm"></a> [helm](#provider\_helm) | >= 2.9 |
+| <a name="provider_time"></a> [time](#provider\_time) | >= 0.11 |
 
 ## Modules
 
@@ -156,6 +158,8 @@ No modules.
 | [aws_iam_role_policy_attachment.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [helm_release.additional](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
 | [helm_release.this](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
+| [time_sleep.additional](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/sleep) | resource |
+| [time_sleep.this](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/sleep) | resource |
 | [aws_caller_identity.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/caller_identity) | data source |
 | [aws_iam_policy_document.assume](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
@@ -165,6 +169,10 @@ No modules.
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| <a name="input_additional_custom_delay_triggers"></a> [additional\_custom\_delay\_triggers](#input\_additional\_custom\_delay\_triggers) | List of resources to trigger the delay of additional helm releases | `list(string)` | `[]` | no |
+| <a name="input_additional_delay_create_duration"></a> [additional\_delay\_create\_duration](#input\_additional\_delay\_create\_duration) | The duration to wait before creating additional helm releases. 30s, 1m, etc. | `string` | `null` | no |
+| <a name="input_additional_delay_destroy_duration"></a> [additional\_delay\_destroy\_duration](#input\_additional\_delay\_destroy\_duration) | The duration to wait before destroying additional helm releases. 30s, 1m, etc. | `string` | `null` | no |
+| <a name="input_additional_depend_on_helm_release"></a> [additional\_depend\_on\_helm\_release](#input\_additional\_depend\_on\_helm\_release) | Determines whether to wait for the main helm release to be created before creating the additional helm releases | `bool` | `true` | no |
 | <a name="input_additional_helm_releases"></a> [additional\_helm\_releases](#input\_additional\_helm\_releases) | A map of Helm releases to create. This provides the ability to pass in an arbitrary map of Helm chart definitions to create | `any` | `{}` | no |
 | <a name="input_allow_self_assume_role"></a> [allow\_self\_assume\_role](#input\_allow\_self\_assume\_role) | Determines whether to allow the role to be [assume itself](https://aws.amazon.com/blogs/security/announcing-an-update-to-iam-role-trust-policy-behavior/) | `bool` | `false` | no |
 | <a name="input_assume_role_condition_test"></a> [assume\_role\_condition\_test](#input\_assume\_role\_condition\_test) | Name of the [IAM condition operator](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_elements_condition_operators.html) to evaluate when assuming the role | `string` | `"StringEquals"` | no |
@@ -198,6 +206,9 @@ No modules.
 | <a name="input_policy_statements"></a> [policy\_statements](#input\_policy\_statements) | List of IAM policy [statements](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document#statement) | `any` | `[]` | no |
 | <a name="input_postrender"></a> [postrender](#input\_postrender) | Configure a command to run after helm renders the manifest which can alter the manifest contents | `any` | `{}` | no |
 | <a name="input_recreate_pods"></a> [recreate\_pods](#input\_recreate\_pods) | Perform pods restart during upgrade/rollback. Defaults to `false` | `bool` | `null` | no |
+| <a name="input_release_custom_delay_triggers"></a> [release\_custom\_delay\_triggers](#input\_release\_custom\_delay\_triggers) | List of resources to trigger the delay of the helm release | `list(string)` | `[]` | no |
+| <a name="input_release_delay_create_duration"></a> [release\_delay\_create\_duration](#input\_release\_delay\_create\_duration) | The duration to wait before creating the helm release | `string` | `null` | no |
+| <a name="input_release_delay_destroy_duration"></a> [release\_delay\_destroy\_duration](#input\_release\_delay\_destroy\_duration) | The duration to wait before destroying the helm release | `string` | `null` | no |
 | <a name="input_render_subchart_notes"></a> [render\_subchart\_notes](#input\_render\_subchart\_notes) | If set, render subchart notes along with the parent. Defaults to `true` | `bool` | `null` | no |
 | <a name="input_replace"></a> [replace](#input\_replace) | Re-use the given name, only if that name is a deleted release which remains in the history. This is unsafe in production. Defaults to `false` | `bool` | `null` | no |
 | <a name="input_repository"></a> [repository](#input\_repository) | Repository URL where to locate the requested chart | `string` | `null` | no |
@@ -232,15 +243,18 @@ No modules.
 |------|-------------|
 | <a name="output_app_version"></a> [app\_version](#output\_app\_version) | The version number of the application being deployed |
 | <a name="output_chart"></a> [chart](#output\_chart) | The name of the chart |
+| <a name="output_create"></a> [create](#output\_create) | Whether the resources are created |
 | <a name="output_iam_policy"></a> [iam\_policy](#output\_iam\_policy) | The policy document |
 | <a name="output_iam_policy_arn"></a> [iam\_policy\_arn](#output\_iam\_policy\_arn) | The ARN assigned by AWS to this policy |
 | <a name="output_iam_role_arn"></a> [iam\_role\_arn](#output\_iam\_role\_arn) | ARN of IAM role |
 | <a name="output_iam_role_name"></a> [iam\_role\_name](#output\_iam\_role\_name) | Name of IAM role |
 | <a name="output_iam_role_path"></a> [iam\_role\_path](#output\_iam\_role\_path) | Path of IAM role |
 | <a name="output_iam_role_unique_id"></a> [iam\_role\_unique\_id](#output\_iam\_role\_unique\_id) | Unique ID of IAM role |
+| <a name="output_manifest"></a> [manifest](#output\_manifest) | The manifest of the release |
 | <a name="output_name"></a> [name](#output\_name) | Name is the name of the release |
 | <a name="output_namespace"></a> [namespace](#output\_namespace) | Name of Kubernetes namespace |
 | <a name="output_revision"></a> [revision](#output\_revision) | Version is an int32 which represents the version of the release |
+| <a name="output_status"></a> [status](#output\_status) | The status of the release |
 | <a name="output_values"></a> [values](#output\_values) | The compounded values from `values` and `set*` attributes |
 | <a name="output_version"></a> [version](#output\_version) | A SemVer 2 conformant version string of the chart |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
