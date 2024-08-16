@@ -2,25 +2,24 @@
 # Kubernetes Platform Monitoring Stack
 
 # Base infra logging
-# Deploy fluentbit with the fluent-operator and configure it so that pods with the ${var.logging_annontation} annotation have
+# Deploy fluentbit with the fluent-operator and configure it so that pods with the ${var.fluent_operator.log_annotation} annotation have
 # they logs pushed to CloudWatch.
 # By default (hardcoded), fluent-operator and fluent-bit will have this annotation set
 locals {
-  # Namespace for the resources deployed by the fluent-operator (fluent-bit will be here too)
+  # Namespace for all monitoring resources
   monitoring_namespace                     = "monitoring"
   fluentbit_cloudwatch_log_group           = "/${local.stack_name}/fluentbit-logs"
   fluentbit_cloudwatch_log_stream_prefix   = "."
   fluentbit_cloudwatch_log_stream_template = "$kubernetes['namespace_name'].$kubernetes['pod_name'].$kubernetes['container_name'].$kubernetes['docker_id']"
   fluentbit_tag                            = "kaas"
+  log_annotation                           = var.fluent_operator.enabled ? format("%s: \"%s\"", var.fluent_operator.log_annotation.name, var.fluent_operator.log_annotation.value) : ""
 
-
-  okta_kubernetes_secret_name = "okta-secret"
   okta_oidc_config = jsonencode({
     issuer                = var.okta_integration.base_url,
     authorizationEndpoint = "${var.okta_integration.base_url}/oauth2/v1/authorize",
     tokenEndpoint         = "${var.okta_integration.base_url}/oauth2/v1/token",
     userInfoEndpoint      = "${var.okta_integration.base_url}/oauth2/v1/userinfo",
-    secretName            = local.okta_kubernetes_secret_name,
+    secretName            = var.okta_integration.kubernetes_secret_name,
   })
 }
 
@@ -28,10 +27,13 @@ locals {
 # fluent operator (https://github.com/fluent/fluent-operator operator)
 
 resource "helm_release" "fluent_operator" {
-  chart      = "fluent-operator"
-  name       = "fluent-operator"
-  repository = "https://fluent.github.io/helm-charts"
-  version    = "v3.0.0" # Note: using "v3.0" will issue in resource update on each terraform plan/apply
+  count = var.fluent_operator.enabled ? 1 : 0
+
+  chart       = "fluent-operator"
+  name        = "fluent-operator"
+  repository  = "https://fluent.github.io/helm-charts"
+  version     = "v3.0.0" # Note: using "v3.0" will issue in resource update on each terraform plan/apply
+  max_history = 3
 
   create_namespace = true
   namespace        = local.monitoring_namespace
@@ -42,7 +44,7 @@ resource "helm_release" "fluent_operator" {
     operator:
       priorityClassName: system-cluster-critical
       annotations:
-        ${var.logging_annotation.name}: "${var.logging_annotation.value}"
+        ${local.log_annotation}
     fluentbit:
       priorityClassName: system-node-critical
       affinity:
@@ -64,7 +66,7 @@ resource "helm_release" "fluent_operator" {
                     values:
                       - fargate
       annotations:
-        ${var.logging_annotation.name}: "${var.logging_annotation.value}"
+        ${local.log_annotation}
       # Because we deploy our own pipeline, disable the default one
       filter:
         kubernetes:
@@ -75,7 +77,7 @@ resource "helm_release" "fluent_operator" {
         tail:
           enable: false # true = default
       serviceAccountAnnotations:
-        eks.amazonaws.com/role-arn: ${module.fluentbit_irsa.iam_role_arn}
+        eks.amazonaws.com/role-arn: ${module.fluentbit_irsa[0].iam_role_arn}
     YAML
   ]
 
@@ -116,6 +118,8 @@ resource "kubectl_manifest" "fluentbit_cluster_input_pipeline" {
 
 # Fluentbit filters to log KaaS pods to cloudwatch
 resource "kubectl_manifest" "fluentbit_cluster_filter_pipeline" {
+  count = var.fluent_operator.enabled ? 1 : 0
+
   yaml_body = <<-YAML
     apiVersion: fluentbit.fluent.io/v1alpha2
     kind: ClusterFilter
@@ -156,7 +160,7 @@ resource "kubectl_manifest" "fluentbit_cluster_filter_pipeline" {
           nestUnder: kubernetes
           removePrefix: kubernetes_
       - grep:
-          regex: $kubernetes['annotations']['${var.logging_annotation.name}'] ^${var.logging_annotation.value}$
+          regex: $kubernetes['annotations']['${var.fluent_operator.log_annotation.name}'] ^${var.fluent_operator.log_annotation.value}$
   YAML
 
   depends_on = [
@@ -165,6 +169,8 @@ resource "kubectl_manifest" "fluentbit_cluster_filter_pipeline" {
 }
 
 resource "kubectl_manifest" "fluentbit_cluster_output_pipeline" {
+  count = var.fluent_operator.enabled ? 1 : 0
+
   yaml_body = <<-YAML
     apiVersion: fluentbit.fluent.io/v1alpha2
     kind: ClusterOutput
@@ -181,7 +187,7 @@ resource "kubectl_manifest" "fluentbit_cluster_output_pipeline" {
           log_group_name ${local.fluentbit_cloudwatch_log_group}
           log_stream_prefix ${local.fluentbit_cloudwatch_log_stream_prefix}
           log_stream_template ${local.fluentbit_cloudwatch_log_stream_template}
-          auto_create_group On # Has to be set to On: https://github.com/fluent/fluent-bit/issues/8949
+          auto_create_group On # Fixed in 3.1.6 - Has to be set to On: https://github.com/fluent/fluent-bit/issues/8949
     YAML
 
   depends_on = [
@@ -191,15 +197,17 @@ resource "kubectl_manifest" "fluentbit_cluster_output_pipeline" {
 
 # CloudWatch log group and permission to allow fluent-bit to write log stream
 resource "aws_cloudwatch_log_group" "fluentbit" {
+  count = var.fluent_operator.enabled ? 1 : 0
+
   name              = local.fluentbit_cloudwatch_log_group
-  retention_in_days = var.logging_retention_in_days
+  retention_in_days = var.fluent_operator.cloudwatch_retention_in_days
 }
 
 data "aws_iam_policy_document" "fluentbit" {
   statement {
     sid       = ""
     effect    = "Allow"
-    resources = ["${aws_cloudwatch_log_group.fluentbit.arn}:*"]
+    resources = ["${aws_cloudwatch_log_group.fluentbit[0].arn}:*"]
 
     actions = [
       "logs:CreateLogStream",
@@ -209,6 +217,8 @@ data "aws_iam_policy_document" "fluentbit" {
 }
 
 resource "aws_iam_policy" "fluentbit" {
+  count = var.fluent_operator.enabled ? 1 : 0
+
   name   = "${local.stack_name}-fluentbit"
   policy = data.aws_iam_policy_document.fluentbit.json
   tags   = local.tags
@@ -216,21 +226,24 @@ resource "aws_iam_policy" "fluentbit" {
 
 # k8s Service account AWS iam role to allow fluent-bit writing log streams
 module "fluentbit_irsa" {
+  count = var.fluent_operator.enabled ? 1 : 0
+
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
   version = "5.44.0"
 
   role_name = "fluentbit-${local.id}"
 
   role_policy_arns = {
-    policy = aws_iam_policy.fluentbit.arn
+    policy = aws_iam_policy.fluentbit[0].arn
   }
 
   oidc_providers = {
     main = {
       provider_arn               = module.eks.oidc_provider_arn
-      namespace_service_accounts = ["${local.monitoring_namespace}:fluent-bit"] # Don't know how to get the name...
+      namespace_service_accounts = ["${local.monitoring_namespace}:fluent-bit"]
     }
   }
+
   tags = local.tags
 }
 
@@ -247,6 +260,7 @@ resource "helm_release" "prometheus_operator_crds" {
   repository       = "https://prometheus-community.github.io/helm-charts"
   chart            = "prometheus-operator-crds"
   version          = "13.0.2"
+  max_history      = 3
 
   depends_on = [
     module.eks
@@ -264,6 +278,7 @@ resource "helm_release" "prometheus_stack" {
   version          = "61.8.0"
   skip_crds        = true
   wait             = true
+  max_history      = 3
 
   values = [
     <<-EOT
@@ -326,7 +341,6 @@ resource "helm_release" "prometheus_stack" {
                     operator: NotIn
                     values:
                       - fargate
-
       resources:
         requests:
           cpu: 10m
@@ -346,6 +360,81 @@ resource "helm_release" "prometheus_stack" {
   ]
 }
 
+# resource "helm_release" "alertmanager_pagerduty_config" {
+#   count = var.pagerduty_integration.enabled ? 1 : 0
+
+#   name        = "alertmanager-pagerduty-secrets"
+#   namespace   = local.monitoring_namespace
+#   repository  = "https://dnd-it.github.io/helm-charts"
+#   chart       = "custom-resources"
+#   version     = "0.1.0"
+#   max_history = 3
+
+#   values = [
+#     <<-YAML
+#     apiVersion: monitoring.coreos.com/v1beta1
+#     kind: AlertmanagerConfig
+#     metadata:
+#       name: config-example
+#       namespace: monitoring
+#     spec:
+#       route:
+#         receiver: 'pagerduty'
+#       receivers:
+#       - name: "pagerduty"
+#         pagerdutyConfigs:
+#         - sendResolved: true
+#           routingKey: "R028S12Q23R9IAM44G8VTAF850M03VUE"
+#           severity: '{{ .CommonLabels.severity | default "critical" }}'
+#       inhibitRules:
+#       - sourceMatch:
+#           severity: 'critical'
+#         targetMatch:
+#           severity: 'warning'
+#         equal: ['alertname', 'namespace']
+#     YAML
+#   ]
+
+#   depends_on = [
+#     helm_release.prometheus_operator_crds
+#   ]
+# }
+
+resource "helm_release" "pagerduty_secrets" {
+  count = var.pagerduty_integration.enabled ? 1 : 0
+
+  name        = "pagerduty-secrets"
+  namespace   = local.monitoring_namespace
+  repository  = "https://dnd-it.github.io/helm-charts"
+  chart       = "custom-resources"
+  version     = "0.1.0"
+  max_history = 3
+
+  values = [
+    <<-YAML
+    apiVersion: external-secrets.io/v1beta1
+    kind: ExternalSecret
+    metadata:
+      name: pagerduty-secrets
+    spec:
+      refreshInterval: 5m0s
+      secretStoreRef:
+        name: aws-secretsmanager
+        kind: ClusterSecretStore
+      target:
+        name: ${var.pagerduty_integration.kubernetes_secret_name}
+        creationPolicy: Owner
+      dataFrom:
+        - extract:
+            key: ${var.pagerduty_integration.secrets_manager_secret_name}
+    YAML
+  ]
+
+  depends_on = [
+    module.addons.external_secrets
+  ]
+}
+
 ###############################################################################
 # Grafana
 
@@ -357,11 +446,15 @@ resource "helm_release" "grafana" {
   create_namespace = true
   repository       = "https://grafana.github.io/helm-charts"
   chart            = "grafana"
-  wait             = true
   version          = "8.4.4"
+  max_history      = 3
+  wait             = true
 
   values = [
     <<-EOT
+    serviceAccount:
+      annotations:
+        eks.amazonaws.com/role-arn: ${module.grafana_irsa[0].iam_role_arn}
     resources:
       requests:
         cpu: 100m
@@ -377,14 +470,43 @@ resource "helm_release" "grafana" {
         alb.ingress.kubernetes.io/group.name: ${local.stack_name}
         alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80,"HTTPS":443}]'
         alb.ingress.kubernetes.io/ssl-redirect: '443'
-        alb.ingress.kubernetes.io/auth-type: oidc
-        alb.ingress.kubernetes.io/auth-idp-oidc: '${local.okta_oidc_config}'
-        alb.ingress.kubernetes.io/auth-scope: 'openid groups'
+        # Not required when using Okta
+        # alb.ingress.kubernetes.io/auth-type: oidc
+        # alb.ingress.kubernetes.io/auth-idp-oidc: '${local.okta_oidc_config}'
+        # alb.ingress.kubernetes.io/auth-scope: 'openid groups'
+    envFromSecrets:
+      - name: okta
     grafana.ini:
+      server:
+        root_url: https://${local.id}.grafana.${local.primary_acm_domain}
+        domain: ${local.id}.grafana.${local.primary_acm_domain}
+        serve_from_sub_path: true
+        router_logging: true
+        enforce_domain: true
       analytics:
         check_for_updates: false
         check_for_plugin_updates: false
         reporting_enabled: false
+      users:
+        auto_assign_org_role: Editor
+        viewers_can_edit: true
+      auth:
+        disable_login_form: true
+        disable_signout_menu: true
+      # JWT not supported https://github.com/grafana/grafana/pull/45191
+      # auth.jwt:
+      # Decide if we should use proxy or okta
+      # auth.proxy:
+      #   enabled: false
+      #   auto_login: true
+      #   header_name: x-amzn-oidc-identity
+      auth.okta:
+        enabled: true
+        auto_login: true
+        auth_url: ${var.okta_integration.base_url}/oauth2/v1/authorize
+        token_url: ${var.okta_integration.base_url}/oauth2/v1/token
+        api_url: ${var.okta_integration.base_url}/oauth2/v1/userinfo
+        role_attribute_path: groups
     dashboardProviders:
       dashboardproviders.yaml:
         apiVersion: 1
@@ -435,6 +557,14 @@ resource "helm_release" "grafana" {
             url: http://alertmanager-operated.${local.monitoring_namespace}.svc.cluster.local:9093
             jsonData:
               implementation: prometheus
+          - name: CloudWatch
+            type: cloudwatch
+            access: proxy
+            uid: cloudwatch
+            editable: false
+            jsonData:
+              authType: default
+              defaultRegion: ${data.aws_region.current.name}
     dashboards:
       default:
         cert-manager:
@@ -502,17 +632,41 @@ resource "helm_release" "grafana" {
   ]
 
   depends_on = [
-    helm_release.karpenter
+    helm_release.karpenter,
+    helm_release.okta_secrets
   ]
+}
+
+module "grafana_irsa" {
+  count = var.grafana.enabled ? 1 : 0
+
+  source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
+  version = "5.44.0"
+
+  role_name = "grafana-${local.id}"
+
+  role_policy_arns = {
+    CloudWatchReadOnlyAccess = "arn:aws:iam::aws:policy/CloudWatchReadOnlyAccess",
+  }
+
+  oidc_providers = {
+    main = {
+      provider_arn               = module.eks.oidc_provider_arn
+      namespace_service_accounts = ["${local.monitoring_namespace}:grafana"]
+    }
+  }
+
+  tags = local.tags
 }
 
 ###############################################################################
 # Okta Secret
 
-resource "helm_release" "okta_secret" {
+resource "helm_release" "okta_secrets" {
   count = var.okta_integration.enabled ? 1 : 0
 
-  name       = "okta-secret"
+  name       = "okta-secrets"
+  namespace  = local.monitoring_namespace
   repository = "https://dnd-it.github.io/helm-charts"
   chart      = "custom-resources"
   version    = "0.1.0"
@@ -522,25 +676,32 @@ resource "helm_release" "okta_secret" {
     apiVersion: external-secrets.io/v1beta1
     kind: ExternalSecret
     metadata:
-      name: okta-secret
-      namespace: ${local.monitoring_namespace}
+      name: okta-secrets
     spec:
       refreshInterval: 1m0s
       secretStoreRef:
         name: aws-secretsmanager
         kind: ClusterSecretStore
       target:
-        name: ${local.okta_kubernetes_secret_name}
+        name: ${var.okta_integration.kubernetes_secret_name}
         creationPolicy: Owner
       data:
-      - secretKey: clientID
-        remoteRef:
-          key: ${var.okta_integration.secrets_manager_secret_name}
-          property: clientID
-      - secretKey: clientSecret
-        remoteRef:
-          key: ${var.okta_integration.secrets_manager_secret_name}
-          property: clientSecret
+        - secretKey: clientID
+          remoteRef:
+            key: ${var.okta_integration.secrets_manager_secret_name}
+            property: clientID
+        - secretKey: clientSecret
+          remoteRef:
+            key: ${var.okta_integration.secrets_manager_secret_name}
+            property: clientSecret
+        - secretKey: GF_AUTH_OKTA_CLIENT_ID
+          remoteRef:
+            key: ${var.okta_integration.secrets_manager_secret_name}
+            property: clientID
+        - secretKey: GF_AUTH_OKTA_CLIENT_SECRET
+          remoteRef:
+            key: ${var.okta_integration.secrets_manager_secret_name}
+            property: clientSecret
   YAML
   ]
 

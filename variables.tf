@@ -1,5 +1,5 @@
 variable "name" {
-  description = "The name of the platform"
+  description = "The name of the platform, a timestamp will be appended to this name to make the stack_name"
   type        = string
 }
 
@@ -52,6 +52,23 @@ variable "karpenter" {
   description = "Karpenter configurations"
   type = object({
     enabled = optional(bool, true)
+    set = optional(list(object({
+      name  = string
+      value = string
+    })))
+  })
+  default = {}
+}
+
+variable "fluent_operator" {
+  description = "Fluent configurations. If enabled, fluentbit will be deployed.\n log_annotation is the annotation to add to pods to get logs stored in cloudwatch\n cloudwatch_retention_in_days is the number of days to keep logs in cloudwatch"
+  type = object({
+    enabled = optional(bool, true)
+    log_annotation = optional(object({
+      name  = optional(string)
+      value = optional(string)
+    }), { name = "kaas.tamedia.ch/logging", value = "true" })
+    cloudwatch_retention_in_days = optional(string, "7")
   })
   default = {}
 }
@@ -60,6 +77,10 @@ variable "prometheus_stack" {
   description = "Prometheus stack configurations"
   type = object({
     enabled = optional(bool, true)
+    set = optional(list(object({
+      name  = string
+      value = string
+    })))
   })
   default = {}
 }
@@ -68,16 +89,32 @@ variable "grafana" {
   description = "Grafana configurations"
   type = object({
     enabled = optional(bool, true)
+    set = optional(list(object({
+      name  = string
+      value = string
+    })))
   })
   default = {}
 }
 
+variable "pagerduty_integration" {
+  description = "PagerDuty integration configurations"
+  type = object({
+    enabled                     = optional(bool, false)
+    secrets_manager_secret_name = optional(string)
+    kubernetes_secret_name      = optional(string, "pagerduty")
+    routing_key                 = optional(string)
+  })
+  default = {}
+
+}
 variable "okta_integration" {
   description = "Okta integration configurations"
   type = object({
     enabled                     = optional(bool, true)
     base_url                    = optional(string)
     secrets_manager_secret_name = optional(string)
+    kubernetes_secret_name      = optional(string, "okta")
   })
   default = {}
 }
@@ -96,22 +133,4 @@ variable "addons" {
     ingress_nginx = { enabled = false }
     downscaler    = { enabled = false }
   }
-}
-
-variable "logging_annotation" {
-  description = "Annotation kaas pods should have to get they logs stored in cloudwatch"
-  type = object({
-    name  = string
-    value = string
-  })
-  default = {
-    name  = "kaas.tamedia.ch/logging"
-    value = "true"
-  }
-}
-
-variable "logging_retention_in_days" {
-  description = "How log to keep kaas logs in cloudwatch"
-  type        = string
-  default     = 7
 }

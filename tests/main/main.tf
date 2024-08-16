@@ -113,9 +113,14 @@ module "k8s_platform" {
     downscaler = { enabled = true }
   }
 
+  pagerduty_integration = {
+    enabled                     = true
+    secrets_manager_secret_name = "dai/platform/pagerduty"
+  }
+
   okta_integration = {
     base_url                    = "https://login.tx.group"
-    secrets_manager_secret_name = "dai/okta/platform"
+    secrets_manager_secret_name = "dai/platform/okta"
   }
 
   base_domain = "dai.tx.group"
