@@ -1,0 +1,20 @@
+testFramework:
+  enabled: false
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+sidecar:
+  dashboards:
+    enabled: true
+    searchNamespace: ALL
+    labelValue: ""
+    label: grafana_dashboard
+    folderAnnotation: grafana_folder
+    provider:
+      disableDelete: true
+      foldersFromFilesStructure: true
+  datasources:
+    enabled: true
+    searchNamespace: ALL
+    labelValue: ""

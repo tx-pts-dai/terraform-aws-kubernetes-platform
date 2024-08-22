@@ -1,151 +1,9 @@
 ################################################################################
 # EKS Addons
 #
-# Notes
-#
-
-module "addons" {
-  source  = "aws-ia/eks-blueprints-addons/aws"
-  version = "1.16.3"
-
-  create_delay_dependencies = [
-    helm_release.karpenter.status
-  ]
-  # Wait for karpenter node to start so when the managed addons are applied they already have running pods, otherwise they will fail to update.
-  create_delay_duration = "3m"
-
-  cluster_name      = module.eks.cluster_name
-  cluster_endpoint  = module.eks.cluster_endpoint
-  cluster_version   = module.eks.cluster_version
-  oidc_provider_arn = module.eks.oidc_provider_arn
-
-  eks_addons = {
-    coredns = {
-      most_recent = true
-      preserve    = false
-
-      timeouts = {
-        create = "10m"
-        delete = "10m"
-      }
-    }
-    vpc-cni = {
-      most_recent = true
-      preserve    = true
-
-      service_account_role_arn = module.vpc_cni_irsa.iam_role_arn
-
-      configurations = {
-        env = {
-          ENABLE_PREFIX_DELEGATION = "true"
-        }
-      }
-    }
-    kube-proxy = {
-      most_recent = true
-    }
-    aws-ebs-csi-driver = {
-      most_recent = true
-      preserve    = false
-
-      service_account_role_arn = module.ebs_csi_driver_irsa.iam_role_arn
-
-      configurations = {
-        replicaCount = 1
-      }
-
-      timeouts = {
-        create = "10m"
-        delete = "10m"
-      }
-    }
-  }
-
-  enable_aws_load_balancer_controller = try(var.addons.aws_load_balancer_controller.enabled, true)
-  aws_load_balancer_controller = {
-    role_name        = "aws-load-balancer-controller-${local.id}"
-    role_name_prefix = false
-    # race condition if this is not disabled. Serivce type LB will use intree controller.
-    # This just means annotations are needed for the service to use the aws load balancer controller
-    set = [{
-      name  = "enableServiceMutatorWebhook"
-      value = "false"
-      }, {
-      name  = "replicaCount"
-      value = 1
-      }, {
-      name  = "clusterSecretsPermissions.allowAllSecrets"
-      value = "true" # enables Okta integration by reading client id and secret from K8s secrets
-    }]
-  }
-
-  enable_external_dns = try(var.addons.external_dns.enabled, true)
-  external_dns_route53_zone_arns = [
-    "arn:aws:route53:::hostedzone/*",
-  ]
-  external_dns = {
-    role_name        = "external-dns-${local.id}"
-    role_name_prefix = false
-    set = [{
-      name  = "policy"
-      value = "sync" # allows deletion of dns records
-      }, {
-      name  = "txtOwnerId"
-      value = local.stack_name # avoid conflicts on the same hosted zone
-    }]
-  }
-
-  enable_external_secrets = try(var.addons.external_secrets.enabled, true)
-  external_secrets = {
-    wait             = true
-    role_name        = "external-secrets-${local.id}"
-    role_name_prefix = false
-  }
-
-  enable_fargate_fluentbit = try(var.addons.fargate_fluentbit.enabled, true)
-  fargate_fluentbit = {
-    role_name        = "fargate-fluentbit-${local.id}"
-    role_name_prefix = false
-  }
-
-  enable_metrics_server = try(var.addons.metrics_server.enabled, true)
-
-  # Monitoring
-  enable_kube_prometheus_stack = try(var.addons.kube_prometheus_stack.enabled, false)
-
-  # Alternative Ingress
-  enable_cert_manager  = try(var.addons.cert_manager.enabled, false)
-  enable_ingress_nginx = try(var.addons.ingress_nginx.enabled, false)
-
-  depends_on = [
-    helm_release.karpenter,
-  ]
-}
 
 ################################################################################
-# VPC CNI
-
-module "vpc_cni_irsa" {
-  source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
-  version = "5.44.0"
-
-  role_name = "vpc-cni-${local.id}"
-
-  attach_vpc_cni_policy = true
-  vpc_cni_enable_ipv4   = true
-
-  oidc_providers = {
-    main = {
-      provider_arn               = module.eks.oidc_provider_arn
-      namespace_service_accounts = ["kube-system:aws-node"]
-    }
-  }
-
-  tags = local.tags
-}
-
-################################################################################
-# EBS CSI Controller
+# EBS CSI Controller IAM Role for Service Accounts
 
 module "ebs_csi_driver_irsa" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
@@ -165,24 +23,118 @@ module "ebs_csi_driver_irsa" {
   tags = local.tags
 }
 
-################################################################################
-# External Secrets
+module "addons" {
+  source  = "aws-ia/eks-blueprints-addons/aws"
+  version = "1.16.3"
 
-resource "kubectl_manifest" "secretsmanager_auth" {
-  yaml_body = <<-YAML
-    apiVersion: external-secrets.io/v1beta1
-    kind: ClusterSecretStore
-    metadata:
-      name: aws-secretsmanager
-    spec:
-      provider:
-        aws:
-          service: SecretsManager
-          region: ${data.aws_region.current.name}
-  YAML
-  depends_on = [
-    module.addons
+  create_delay_dependencies = [
+    module.karpenter_release.status
   ]
+
+  # Arbitrary delay to wait for Karpenter to create nodes before creating managed addons to avoid an isssue
+  # where the managed addons are created before the nodes are ready and they fail
+  create_delay_duration = "3m"
+
+  cluster_name      = module.eks.cluster_name
+  cluster_endpoint  = module.eks.cluster_endpoint
+  cluster_version   = module.eks.cluster_version
+  oidc_provider_arn = module.eks.oidc_provider_arn
+
+  eks_addons = {
+    coredns = {
+      most_recent = true
+      preserve    = false
+
+      timeouts = {
+        create = "3m"
+        delete = "3m"
+      }
+    }
+
+    aws-ebs-csi-driver = {
+      most_recent = true
+      preserve    = false
+
+      service_account_role_arn = module.ebs_csi_driver_irsa.iam_role_arn
+
+      configurations = {
+        replicaCount = 1
+      }
+
+      timeouts = {
+        create = "3m"
+        delete = "3m"
+      }
+    }
+  }
+
+  # TODO: aws lb controller should be one of the last things deleted, so ing objects can be cleaned up
+  enable_aws_load_balancer_controller = var.enable_aws_load_balancer_controller
+  aws_load_balancer_controller = merge({
+    role_name        = "aws-load-balancer-controller-${local.id}"
+    role_name_prefix = false
+    # race condition if this is not disabled. Serivce type LB will use intree controller.
+    # This just means annotations are needed for the service to use the aws load balancer controller
+    set = [{
+      name  = "enableServiceMutatorWebhook"
+      value = "false"
+      }, {
+      name  = "replicaCount"
+      value = 1
+      }, {
+      name  = "clusterSecretsPermissions.allowAllSecrets"
+      value = "true" # enables Okta integration by reading client id and secret from K8s secrets
+    }]
+  }, var.aws_load_balancer_controller)
+
+  enable_external_dns = var.enable_external_dns
+  external_dns_route53_zone_arns = [
+    "arn:aws:route53:::hostedzone/*",
+  ]
+  external_dns = merge({
+    role_name        = "external-dns-${local.id}"
+    role_name_prefix = false
+    set = [{
+      name  = "policy"
+      value = "sync" # allows deletion of dns records
+      }, {
+      name  = "txtOwnerId"
+      value = local.stack_name # avoid conflicts on the same hosted zone
+    }]
+  }, var.external_dns)
+
+  enable_external_secrets = var.enable_external_secrets
+  external_secrets = merge({
+    wait             = true
+    role_name        = "external-secrets-${local.id}"
+    role_name_prefix = false
+    set = [{
+      name  = "serviceMonitor.enabled"
+      value = var.enable_prometheus_stack
+    }]
+  }, var.external_secrets)
+
+  enable_fargate_fluentbit = var.enable_fargate_fluentbit
+  fargate_fluentbit = merge({
+    role_name        = "fargate-fluentbit-${local.id}"
+    role_name_prefix = false
+  }, var.fargate_fluentbit)
+
+  enable_metrics_server = var.enable_metrics_server
+  metrics_server = merge({
+    name : "replicas",
+    value : 2,
+    },
+  var.metrics_server)
+
+  # Alternative Ingress
+  enable_cert_manager = var.enable_cert_manager
+  cert_manager        = var.cert_manager
+
+  enable_ingress_nginx = var.enable_ingress_nginx
+  ingress_nginx        = var.ingress_nginx
+
+  depends_on = [module.karpenter_release]
 }
 
 ################################################################################
@@ -192,13 +144,47 @@ module "downscaler" {
   source  = "tx-pts-dai/downscaler/kubernetes"
   version = "0.3.1"
 
-  count = var.addons.downscaler.enabled ? 1 : 0
+  count = var.enable_downscaler ? 1 : 0
 
-  image_version = try(var.addons.downscaler.image_version, "23.2.0")
-  dry_run       = try(var.addons.downscaler.dry_run, false)
-  custom_args   = try(var.addons.downscaler.custom_args, [])
-  node_selector = try(var.addons.downscaler.node_selector, {})
-  tolerations   = try(var.addons.downscaler.tolerations, [])
+  image_version = try(var.downscaler.image_version, "23.2.0")
+  dry_run       = try(var.downscaler.dry_run, false)
+  custom_args   = try(var.downscaler.custom_args, [])
+  node_selector = try(var.downscaler.node_selector, {})
+  tolerations   = try(var.downscaler.tolerations, [])
+
+  depends_on = [
+    module.addons
+  ]
+}
+
+################################################################################
+# External Secrets Custom Resources
+# TODO: move external secrets to dedicated module
+module "cluster_secret_store" {
+  source = "./modules/addon"
+
+  create = var.enable_external_secrets
+
+  name          = "cluster-secret-store-aws-secretsmanager"
+  chart         = "custom-resources"
+  chart_version = "0.1.0"
+  repository    = "https://dnd-it.github.io/helm-charts"
+  description   = "External Secrets Cluster Secret Store for AWS Secrets Manager"
+  namespace     = local.monitoring_namespace
+
+  values = [
+    <<-EOT
+    apiVersion: external-secrets.io/v1beta1
+    kind: ClusterSecretStore
+    metadata:
+      name: aws-secretsmanager
+    spec:
+      provider:
+        aws:
+          service: SecretsManager
+          region: ${local.region}
+    EOT
+  ]
 
   depends_on = [
     module.addons

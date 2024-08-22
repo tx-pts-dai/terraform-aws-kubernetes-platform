@@ -3,20 +3,16 @@ terraform {
 
   backend "s3" {
     bucket               = "tf-state-911453050078"
-    key                  = "examples/datadog.tfstate"
+    key                  = "tests/main.tfstate"
     workspace_key_prefix = "terraform-aws-kubernetes-platform"
-    region               = "eu-central-1"
     dynamodb_table       = "terraform-lock"
+    region               = "eu-central-1"
   }
 
   required_providers {
     aws = {
       source  = "hashicorp/aws"
       version = "~> 5.0"
-    }
-    kubernetes = {
-      source  = "hashicorp/kubernetes"
-      version = "~> 2.27"
     }
     helm = {
       source  = "hashicorp/helm"
@@ -26,9 +22,9 @@ terraform {
       source  = "alekc/kubectl"
       version = "~> 2.0"
     }
-    time = {
-      source  = "hashicorp/time"
-      version = "0.11.2"
+    kubernetes = {
+      source  = "hashicorp/kubernetes"
+      version = "~> 2.27"
     }
   }
 }
@@ -36,7 +32,6 @@ terraform {
 provider "aws" {
   region = local.region
 }
-
 
 provider "kubernetes" {
   host                   = module.k8s_platform.eks.cluster_endpoint
@@ -80,7 +75,7 @@ locals {
 module "k8s_platform" {
   source = "../../"
 
-  name = "ex-datadog"
+  name = var.name
 
   cluster_admins = {
     cicd = {
@@ -94,41 +89,58 @@ module "k8s_platform" {
     GithubOrg   = "tx-pts-dai"
   }
 
-  karpenter = {
-    pod_annotations = {
-      "ad.datadoghq.com/controller.checks" = jsonencode(
-        {
-          "karpenter" : {
-            "init_config" : {},
-            "instances" : [{ "openmetrics_endpoint" : "http://%%host%%:8000/metrics" }]
-          }
-        }
-      )
-    }
-    memory_request = "768Mi"
-  }
-
   vpc = {
     enabled = true
-    cidr    = "10.0.0.0/16"
+    cidr    = "10.240.0.0/16"
     max_az  = 3
     subnet_configs = [
       { public = 24 },
       { private = 24 },
       { intra = 26 },
-      { database = 26 },
       { karpenter = 22 }
     ]
   }
-}
 
-module "datadog" {
-  source = "../../modules/datadog"
+  karpenter = {
+    set = [
+      {
+        name  = "replicas"
+        value = 1
+      }
+    ]
+  }
 
-  cluster_name   = module.k8s_platform.eks.cluster_name
-  datadog_secret = "dai/datadog/tamedia/keys"
-  environment    = "sandbox"
-  product_name   = "dai"
+  metrics_server = {
+    set = [
+      {
+        name  = "replicas"
+        value = 2
+      }
+    ]
+  }
 
-  depends_on = [module.k8s_platform]
+  enable_downscaler = true
+
+  enable_pagerduty = true
+  pagerduty = {
+    secrets_manager_secret_name = "dai/platform/pagerduty"
+  }
+
+  enable_okta = true
+  okta = {
+    base_url                    = "https://login.tx.group"
+    secrets_manager_secret_name = "dai/platform/okta"
+  }
+
+  base_domain = "dai.tx.group"
+
+  enable_acm_certificate = true
+  acm_certificate = {
+    subject_alternative_names = [
+      "prometheus",
+      "alertmanager",
+      "grafana",
+    ]
+    wildcard_certificates = true
+  }
 }

@@ -3,5 +3,8 @@
   "baseBranches": ["main"],
   "extends": [
     "github>tx-pts-dai/renovate-config"
+  ],
+  "schedule": [
+    "after 9am on Monday"
   ]
 }

@@ -1,0 +1,36 @@
+cleanPrometheusOperatorObjectNames: true
+prometheus:
+  priorityClassName: system-cluster-critical
+alertmanager:
+  priorityClassName: system-cluster-critical
+prometheus-node-exporter:
+  priorityClassName: system-node-critical
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: kubernetes.io/os
+                operator: In
+                values:
+                  - linux
+              - key: kubernetes.io/arch
+                operator: In
+                values:
+                  - amd64
+                  - arm64
+              - key: eks.amazonaws.com/compute-type
+                operator: NotIn
+                values:
+                  - fargate
+  resources:
+    requests:
+      cpu: 10m
+      memory: 32Mi
+grafana:
+  enabled: false
+  forceDeployDashboards: true
+kubeControllerManager:
+  enabled: false
+kubeScheduler:
+  enabled: false

@@ -38,3 +38,8 @@ repos:
     rev: 37.399.9
     hooks:
       - id: renovate-config-validator
+  - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
+    rev: v2.14.0
+    hooks:
+      - id: pretty-format-yaml
+        args: [--autofix, --indent, '2', --offset, '2', --preserve-quotes]

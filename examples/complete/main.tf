@@ -98,20 +98,10 @@ module "k8s_platform" {
       { private = 24 },
       { intra = 26 },
       { database = 26 },
-      { redshift = 26 },
       { karpenter = 22 }
     ]
   }
 
-  addons = {
-    # Core addons
-    aws_load_balancer_controller = { enabled = true }
-    external_dns                 = { enabled = true }
-    external_secrets             = { enabled = true }
-    fargate_fluentbit            = { enabled = true }
-    metrics_server               = { enabled = true }
-
-    # Optional addons
-    downscaler = { enabled = true }
-  }
+  # Optional addons
+  enable_downscaler = true
 }
