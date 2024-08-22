@@ -139,7 +139,6 @@ as described in the `.pre-commit-config.yaml` file
 | <a name="module_karpenter_crds"></a> [karpenter\_crds](#module\_karpenter\_crds) | ./modules/addon | n/a |
 | <a name="module_karpenter_release"></a> [karpenter\_release](#module\_karpenter\_release) | ./modules/addon | n/a |
 | <a name="module_karpenter_security_group"></a> [karpenter\_security\_group](#module\_karpenter\_security\_group) | ./modules/security-group | n/a |
-| <a name="module_managed_addons"></a> [managed\_addons](#module\_managed\_addons) | aws-ia/eks-blueprints-addons/aws | 1.16.3 |
 | <a name="module_network"></a> [network](#module\_network) | ./modules/network | n/a |
 | <a name="module_okta_secrets"></a> [okta\_secrets](#module\_okta\_secrets) | ./modules/addon | n/a |
 | <a name="module_pagerduty_secrets"></a> [pagerduty\_secrets](#module\_pagerduty\_secrets) | ./modules/addon | n/a |

@@ -256,7 +256,7 @@ module "prometheus_stack" {
     <<-EOT
     prometheus:
       ingress:
-        enabled: "${var.enable_okta}"
+        enabled: ${var.enable_okta}
         ingressClassName: alb
         hosts:
         - ${local.id}.prometheus.${local.primary_acm_domain}
@@ -274,7 +274,7 @@ module "prometheus_stack" {
           alb.ingress.kubernetes.io/auth-scope: 'openid groups'
     alertmanager:
       ingress:
-        enabled: "${var.enable_okta}"
+        enabled: ${var.enable_okta}
         ingressClassName: alb
         hosts:
         - ${local.id}.alertmanager.${local.primary_acm_domain}

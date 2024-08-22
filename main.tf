@@ -106,6 +106,28 @@ locals {
   } }
 }
 
+################################################################################
+# VPC CNI IAM Role for Service Accounts
+
+module "vpc_cni_irsa" {
+  source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
+  version = "5.44.0"
+
+  role_name = "vpc-cni-${local.id}"
+
+  attach_vpc_cni_policy = true
+  vpc_cni_enable_ipv4   = true
+
+  oidc_providers = {
+    main = {
+      provider_arn               = module.eks.oidc_provider_arn
+      namespace_service_accounts = ["kube-system:aws-node"]
+    }
+  }
+
+  tags = local.tags
+}
+
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
   version = "20.23.0"
@@ -114,6 +136,26 @@ module "eks" {
   cluster_version                 = try(var.eks.kubernetes_version, "1.30")
   cluster_endpoint_public_access  = try(var.eks.cluster_endpoint_public_access, true)
   cluster_endpoint_private_access = try(var.eks.cluster_endpoint_private_access, true)
+
+  cluster_addons = {
+    vpc-cni = {
+      most_recent = true
+      preserve    = true
+
+      service_account_role_arn = module.vpc_cni_irsa.iam_role_arn
+
+      configurationsi_values = {
+        env = {
+          ENABLE_PREFIX_DELEGATION = "true"
+        }
+      }
+    }
+
+    kube-proxy = {
+      most_recent = true
+      preserve    = true
+    }
+  }
 
   iam_role_name            = local.stack_name
   iam_role_use_name_prefix = false

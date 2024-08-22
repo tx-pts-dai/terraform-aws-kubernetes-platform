@@ -2,7 +2,28 @@
 # EKS Addons
 #
 
-module "managed_addons" {
+################################################################################
+# EBS CSI Controller IAM Role for Service Accounts
+
+module "ebs_csi_driver_irsa" {
+  source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
+  version = "5.44.0"
+
+  role_name = "ebs-csi-driver-${local.id}"
+
+  attach_ebs_csi_policy = true
+
+  oidc_providers = {
+    main = {
+      provider_arn               = module.eks.oidc_provider_arn
+      namespace_service_accounts = ["kube-system:ebs-csi-controller-sa"]
+    }
+  }
+
+  tags = local.tags
+}
+
+module "addons" {
   source  = "aws-ia/eks-blueprints-addons/aws"
   version = "1.16.3"
 
@@ -12,7 +33,7 @@ module "managed_addons" {
 
   # Arbitrary delay to wait for Karpenter to create nodes before creating managed addons to avoid an isssue
   # where the managed addons are created before the nodes are ready and they fail
-  create_delay_duration = "5m"
+  create_delay_duration = "3m"
 
   cluster_name      = module.eks.cluster_name
   cluster_endpoint  = module.eks.cluster_endpoint
@@ -29,22 +50,7 @@ module "managed_addons" {
         delete = "3m"
       }
     }
-    vpc-cni = {
-      most_recent = true
-      preserve    = true
 
-      service_account_role_arn = module.vpc_cni_irsa.iam_role_arn
-
-      configurations = {
-        env = {
-          ENABLE_PREFIX_DELEGATION = "true"
-        }
-      }
-    }
-    kube-proxy = {
-      most_recent = true
-      preserve    = true
-    }
     aws-ebs-csi-driver = {
       most_recent = true
       preserve    = false
@@ -61,20 +67,6 @@ module "managed_addons" {
       }
     }
   }
-
-  depends_on = [module.karpenter_release]
-}
-
-module "addons" {
-  source  = "aws-ia/eks-blueprints-addons/aws"
-  version = "1.16.3"
-
-  create_delay_duration = "10s"
-
-  cluster_name      = module.eks.cluster_name
-  cluster_endpoint  = module.eks.cluster_endpoint
-  cluster_version   = module.eks.cluster_version
-  oidc_provider_arn = module.eks.oidc_provider_arn
 
   # TODO: aws lb controller should be one of the last things deleted, so ing objects can be cleaned up
   enable_aws_load_balancer_controller = var.enable_aws_load_balancer_controller
@@ -142,50 +134,7 @@ module "addons" {
   enable_ingress_nginx = var.enable_ingress_nginx
   ingress_nginx        = var.ingress_nginx
 
-  depends_on = [module.managed_addons]
-}
-
-################################################################################
-# VPC CNI
-
-module "vpc_cni_irsa" {
-  source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
-  version = "5.44.0"
-
-  role_name = "vpc-cni-${local.id}"
-
-  attach_vpc_cni_policy = true
-  vpc_cni_enable_ipv4   = true
-
-  oidc_providers = {
-    main = {
-      provider_arn               = module.eks.oidc_provider_arn
-      namespace_service_accounts = ["kube-system:aws-node"]
-    }
-  }
-
-  tags = local.tags
-}
-
-################################################################################
-# EBS CSI Controller
-
-module "ebs_csi_driver_irsa" {
-  source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
-  version = "5.44.0"
-
-  role_name = "ebs-csi-driver-${local.id}"
-
-  attach_ebs_csi_policy = true
-
-  oidc_providers = {
-    main = {
-      provider_arn               = module.eks.oidc_provider_arn
-      namespace_service_accounts = ["kube-system:ebs-csi-controller-sa"]
-    }
-  }
-
-  tags = local.tags
+  depends_on = [module.karpenter_release]
 }
 
 ################################################################################
