@@ -70,6 +70,7 @@ module "fluent_operator" {
     }
   }
 
+  additional_delay_create_duration  = "10s" # TODO: Remove when CRDs are split out
   additional_delay_destroy_duration = "10s"
 
   additional_helm_releases = {
@@ -298,6 +299,8 @@ module "prometheus_stack" {
   # TODO: Placeholder for future use
   additional_helm_releases = {
     pagerduty_config = {
+      create = var.enable_pagerduty
+
       description   = "PagerDuty Alert Manager Config"
       chart         = "custom-resources"
       chart_version = "0.1.0"
@@ -448,7 +451,7 @@ module "grafana" {
     }
   }
 
-  release_delay_create_duration = "1m"
+  release_delay_create_duration = "10s"
 
   additional_helm_releases = {
     grafana_secrets = {

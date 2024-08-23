@@ -80,7 +80,8 @@ resource "time_sleep" "additional" {
   destroy_duration = var.additional_delay_destroy_duration
 
   triggers = {
-    main_release = var.additional_depend_on_helm_release ? try(helm_release.this[0].name, "") : ""
-    custom       = join(",", var.additional_custom_delay_triggers)
+    # TODO: even if count is zero and var set to false, this creates a dependancy. find a way to depend on the main release dynamically
+    # main_release = var.additional_depend_on_helm_release ? try(helm_release.this[0].name, "") : ""
+    custom = join(",", var.additional_custom_delay_triggers)
   }
 }

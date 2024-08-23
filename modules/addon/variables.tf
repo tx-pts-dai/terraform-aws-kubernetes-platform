@@ -415,9 +415,3 @@ variable "additional_custom_delay_triggers" {
   type        = list(string)
   default     = []
 }
-
-variable "additional_depend_on_helm_release" {
-  description = "Determines whether to wait for the main helm release to be created before creating the additional helm releases"
-  type        = bool
-  default     = true
-}
