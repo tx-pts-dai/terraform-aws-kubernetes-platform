@@ -1,6 +1,8 @@
 module "ssm" {
   source = "./../ssm"
 
+  count = var.create_vpc ? 1 : 0
+
   stack_type = "network"
   stack_name = var.stack_name
 
