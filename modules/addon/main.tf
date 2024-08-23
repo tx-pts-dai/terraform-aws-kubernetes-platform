@@ -94,6 +94,7 @@ resource "time_sleep" "this" {
   destroy_duration = var.release_delay_destroy_duration
 
   triggers = {
+    # TODO: even if count is zero and var is set to false, this creates a dependancy. find a way to depend on the additional releases dynamically
     # additional_helm_releases = var.depend_additional ? join(",", keys(helm_release.additional)) : ""
     custom = join(",", var.release_custom_delay_triggers)
   }
