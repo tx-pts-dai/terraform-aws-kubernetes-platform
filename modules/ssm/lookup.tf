@@ -31,11 +31,10 @@ locals {
   }
 
   # Identify the latest stack - since stacks are reversed, the latest stack is the first element
-  # latest_stack = length(local.stacks) > 0 ? element(local.stacks, length(local.stacks) - 1) : null
-  latest_stack = local.stacks[0]
+  latest_stack = try(local.stacks[0], null)
   # Extract parameters for the latest stack if latest_stack is not null
   latest_stack_parameters = local.latest_stack != null ? {
-    for key, value in local.parameters : key => value
+    for key, value in local.parameters : element(split("/", key), length(split("/", key)) - 1) => value
     if strcontains(key, local.latest_stack)
   } : {}
 }
