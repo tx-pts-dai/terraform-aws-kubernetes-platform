@@ -161,10 +161,10 @@ No modules.
 | Name | Description |
 |------|-------------|
 | <a name="output_filtered_parameters"></a> [filtered\_parameters](#output\_filtered\_parameters) | List of parameters filtered by stack name prefix |
-| <a name="output_latest_stack_parameters"></a> [latest\_stack\_parameters](#output\_latest\_stack\_parameters) | Latest stack parameters |
-| <a name="output_lookup"></a> [lookup](#output\_lookup) | Map of looked up parameters |
-| <a name="output_parameters"></a> [parameters](#output\_parameters) | Parameters defined in SSM |
-| <a name="output_stacks"></a> [stacks](#output\_stacks) | List of stacks defined in SSM |
+| <a name="output_latest_stack_parameters"></a> [latest\_stack\_parameters](#output\_latest\_stack\_parameters) | Latest created stack parameters |
+| <a name="output_lookup"></a> [lookup](#output\_lookup) | Map of parameters from filtered parameters containing only keys defined in lookup |
+| <a name="output_parameters"></a> [parameters](#output\_parameters) | All parameters defined in SSM |
+| <a name="output_stacks"></a> [stacks](#output\_stacks) | List of stacks defined in SSM ordered by creation date (latest first) |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 
 ## Contributions
