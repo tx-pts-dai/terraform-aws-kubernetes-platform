@@ -16,8 +16,8 @@ locals {
   }
 
   # Extract stack names filtered by stack name prefix
-  stacks = distinct([for key, _ in local.parameters : element(split("/", key), length(split("/", key)) - 2)
-  if var.stack_name_prefix == "" || startswith(element(split("/", key), length(split("/", key)) - 2), var.stack_name_prefix)])
+  stacks = reverse(distinct([for key, _ in local.parameters : element(split("/", key), length(split("/", key)) - 2)
+  if var.stack_name_prefix == "" || startswith(element(split("/", key), length(split("/", key)) - 2), var.stack_name_prefix)]))
 
   # Create a lookup map for stack-specific parameters
   lookup = {
@@ -30,8 +30,9 @@ locals {
     }
   }
 
-  # Identify the latest stack
-  latest_stack = length(local.stacks) > 0 ? element(local.stacks, length(local.stacks) - 1) : null
+  # Identify the latest stack - since stacks are reversed, the latest stack is the first element
+  # latest_stack = length(local.stacks) > 0 ? element(local.stacks, length(local.stacks) - 1) : null
+  latest_stack = local.stacks[0]
   # Extract parameters for the latest stack if latest_stack is not null
   latest_stack_parameters = local.latest_stack != null ? {
     for key, value in local.parameters : key => value
