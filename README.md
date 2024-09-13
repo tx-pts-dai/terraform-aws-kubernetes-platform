@@ -143,6 +143,7 @@ as described in the `.pre-commit-config.yaml` file
 | <a name="module_network"></a> [network](#module\_network) | ./modules/network | n/a |
 | <a name="module_okta_secrets"></a> [okta\_secrets](#module\_okta\_secrets) | ./modules/addon | n/a |
 | <a name="module_pagerduty_secrets"></a> [pagerduty\_secrets](#module\_pagerduty\_secrets) | ./modules/addon | n/a |
+| <a name="module_prometheus_irsa"></a> [prometheus\_irsa](#module\_prometheus\_irsa) | terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks | 5.44.0 |
 | <a name="module_prometheus_operator_crds"></a> [prometheus\_operator\_crds](#module\_prometheus\_operator\_crds) | ./modules/addon | n/a |
 | <a name="module_prometheus_stack"></a> [prometheus\_stack](#module\_prometheus\_stack) | ./modules/addon | n/a |
 | <a name="module_ssm"></a> [ssm](#module\_ssm) | ./modules/ssm | n/a |
@@ -179,6 +180,7 @@ as described in the `.pre-commit-config.yaml` file
 | <a name="input_downscaler"></a> [downscaler](#input\_downscaler) | Downscaler configurations | `any` | `{}` | no |
 | <a name="input_eks"></a> [eks](#input\_eks) | Map of EKS configurations | `any` | `{}` | no |
 | <a name="input_enable_acm_certificate"></a> [enable\_acm\_certificate](#input\_enable\_acm\_certificate) | Enable ACM certificate | `bool` | `false` | no |
+| <a name="input_enable_amp"></a> [enable\_amp](#input\_enable\_amp) | Enable AWS Managed Prometheus | `bool` | `false` | no |
 | <a name="input_enable_aws_load_balancer_controller"></a> [enable\_aws\_load\_balancer\_controller](#input\_enable\_aws\_load\_balancer\_controller) | Enable AWS Load Balancer Controller | `bool` | `true` | no |
 | <a name="input_enable_cert_manager"></a> [enable\_cert\_manager](#input\_enable\_cert\_manager) | Enable Cert Manager | `bool` | `false` | no |
 | <a name="input_enable_downscaler"></a> [enable\_downscaler](#input\_enable\_downscaler) | Enable Downscaler | `bool` | `false` | no |
@@ -197,7 +199,7 @@ as described in the `.pre-commit-config.yaml` file
 | <a name="input_external_secrets"></a> [external\_secrets](#input\_external\_secrets) | External Secrets configurations | `any` | `{}` | no |
 | <a name="input_fargate_fluentbit"></a> [fargate\_fluentbit](#input\_fargate\_fluentbit) | Fargate Fluentbit configurations | `any` | `{}` | no |
 | <a name="input_fluent_cloudwatch_retention_in_days"></a> [fluent\_cloudwatch\_retention\_in\_days](#input\_fluent\_cloudwatch\_retention\_in\_days) | Number of days to keep logs in cloudwatch | `string` | `"7"` | no |
-| <a name="input_fluent_log_annotation"></a> [fluent\_log\_annotation](#input\_fluent\_log\_annotation) | Pod Annotation required to enable fluent logging. Setting name to empty string will disable annotation requirement. | <pre>object({<br>    name  = optional(string, "fluentbit.io/include")<br>    value = optional(string, "true")<br>  })</pre> | `{}` | no |
+| <a name="input_fluent_log_annotation"></a> [fluent\_log\_annotation](#input\_fluent\_log\_annotation) | Pod Annotation required to enable fluent bit logging. Setting name to empty string will disable annotation requirement. | <pre>object({<br>    name  = optional(string, "fluentbit.io/include")<br>    value = optional(string, "true")<br>  })</pre> | `{}` | no |
 | <a name="input_fluent_operator"></a> [fluent\_operator](#input\_fluent\_operator) | Fluent configurations | `any` | `{}` | no |
 | <a name="input_grafana"></a> [grafana](#input\_grafana) | Grafana configurations, used to override default configurations | `any` | `{}` | no |
 | <a name="input_ingress_nginx"></a> [ingress\_nginx](#input\_ingress\_nginx) | Ingress Nginx configurations | `any` | `{}` | no |

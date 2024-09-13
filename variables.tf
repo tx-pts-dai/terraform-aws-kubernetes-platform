@@ -181,7 +181,7 @@ variable "fluent_operator" {
 }
 
 variable "fluent_log_annotation" {
-  description = "Pod Annotation required to enable fluent logging. Setting name to empty string will disable annotation requirement."
+  description = "Pod Annotation required to enable fluent bit logging. Setting name to empty string will disable annotation requirement."
   type = object({
     name  = optional(string, "fluentbit.io/include")
     value = optional(string, "true")
@@ -206,6 +206,12 @@ variable "prometheus_stack" {
   description = "Prometheus stack configurations"
   type        = any
   default     = {}
+}
+
+variable "enable_amp" {
+  description = "Enable AWS Managed Prometheus"
+  type        = bool
+  default     = false
 }
 
 variable "enable_grafana" {

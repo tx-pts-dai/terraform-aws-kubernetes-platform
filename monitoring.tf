@@ -130,41 +130,39 @@ module "fluent_operator" {
         spec:
           match: ${local.fluentbit_tag}.*
           filters:
-          - lua:
-              script:
-                key: containerd.lua
-                name: fluent-bit-containerd-config
-              call: containerd
-              timeAsTable: true
-          - kubernetes:
-              kubeURL: https://kubernetes.default.svc:443
-              kubeCAFile: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
-              kubeTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
-              kubeTagPrefix: ${local.fluentbit_tag}.var.log.containers
-              labels: true
-              annotations: true
-          - nest:
-              operation: lift
-              nestedUnder: kubernetes
-              addPrefix: kubernetes_
-          - modify:
-              rules:
-              - remove: stream
-              - remove: kubernetes_pod_id
-              - remove: kubernetes_host
-              - remove: kubernetes_container_hash
-          - nest:
-              operation: nest
-              wildcard:
-              - kubernetes_*
-              nestUnder: kubernetes
-              removePrefix: kubernetes_
-          - grep:
-              %{if var.fluent_log_annotation.name != ""}
-              regex: kubernetes['annotations']['${var.fluent_log_annotation.name}'] ^${var.fluent_log_annotation.value}$
-              %{else}
-              regex: kubernetes['annotations'] .*  # Matches all annotations
-              %{endif}
+            - lua:
+                script:
+                  key: containerd.lua
+                  name: fluent-bit-containerd-config
+                call: containerd
+                timeAsTable: true
+            - kubernetes:
+                kubeURL: https://kubernetes.default.svc:443
+                kubeCAFile: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+                kubeTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
+                kubeTagPrefix: ${local.fluentbit_tag}.var.log.containers
+                labels: true
+                annotations: true
+            - nest:
+                operation: lift
+                nestedUnder: kubernetes
+                addPrefix: kubernetes_
+            - modify:
+                rules:
+                - remove: stream
+                - remove: kubernetes_pod_id
+                - remove: kubernetes_host
+                - remove: kubernetes_container_hash
+            - nest:
+                operation: nest
+                wildcard:
+                - kubernetes_*
+                nestUnder: kubernetes
+                removePrefix: kubernetes_
+            %{if var.fluent_log_annotation.name != ""}
+            - grep:
+                regex: kubernetes['annotations']['${var.fluent_log_annotation.name}'] ^${var.fluent_log_annotation.value}$
+            %{endif}
         EOT
       ]
     }
@@ -234,6 +232,24 @@ resource "aws_cloudwatch_log_group" "fluentbit" {
 ###############################################################################
 # Prometheus Operator
 
+module "prometheus_irsa" {
+  source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
+  version = "5.44.0"
+
+  role_name = "prometheus-${local.id}"
+
+  attach_amazon_managed_service_prometheus_policy = true
+
+  oidc_providers = {
+    main = {
+      provider_arn               = module.eks.oidc_provider_arn
+      namespace_service_accounts = ["${local.monitoring_namespace}:kube-prometheus-stack-prometheus"]
+    }
+  }
+
+  tags = local.tags
+}
+
 module "prometheus_operator_crds" {
   source = "./modules/addon"
 
@@ -287,6 +303,17 @@ module "prometheus_stack" {
           alb.ingress.kubernetes.io/auth-type: oidc
           alb.ingress.kubernetes.io/auth-idp-oidc: '${local.okta_oidc_config}'
           alb.ingress.kubernetes.io/auth-scope: 'openid groups'
+      prometheusSpec:
+        %{if var.enable_amp}
+        remoteWrite:
+          - url: ${module.amp.workspace_prometheus_endpoint}
+            sigv4:
+              region: ${local.region}
+            queue_config:
+              max_samples_per_send: 1000
+              max_shards: 200
+              capacity: 2500
+        %{endif}
     alertmanager:
       ingress:
         enabled: ${var.enable_okta}
@@ -309,6 +336,9 @@ module "prometheus_stack" {
   ]
 
   set = try(var.prometheus_stack.set, [])
+
+  set_irsa_names = ["prometheus.serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn"]
+  role_name      = "prometheus-${local.id}"
 
   # TODO: Placeholder for future use
   additional_helm_releases = {

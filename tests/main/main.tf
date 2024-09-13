@@ -148,4 +148,6 @@ module "k8s_platform" {
     name  = ""
     value = ""
   }
+
+  enable_amp = true
 }
