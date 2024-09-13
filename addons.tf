@@ -116,8 +116,9 @@ module "addons" {
 
   enable_fargate_fluentbit = var.enable_fargate_fluentbit
   fargate_fluentbit = merge({
-    role_name        = "fargate-fluentbit-${local.id}"
-    role_name_prefix = false
+    fargate_fluentbit_cw_log_group_name = "/aws/eks/${module.eks.cluster_name}/fargate"
+    role_name                           = "fargate-fluentbit-${local.id}"
+    role_name_prefix                    = false
   }, var.fargate_fluentbit)
 
   enable_metrics_server = var.enable_metrics_server
