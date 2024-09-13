@@ -129,6 +129,7 @@ as described in the `.pre-commit-config.yaml` file
 |------|--------|---------|
 | <a name="module_acm"></a> [acm](#module\_acm) | terraform-aws-modules/acm/aws | 5.1.0 |
 | <a name="module_addons"></a> [addons](#module\_addons) | aws-ia/eks-blueprints-addons/aws | 1.16.3 |
+| <a name="module_amp"></a> [amp](#module\_amp) | terraform-aws-modules/managed-service-prometheus/aws | 3.0.0 |
 | <a name="module_cluster_secret_store"></a> [cluster\_secret\_store](#module\_cluster\_secret\_store) | ./modules/addon | n/a |
 | <a name="module_downscaler"></a> [downscaler](#module\_downscaler) | tx-pts-dai/downscaler/kubernetes | 0.3.1 |
 | <a name="module_ebs_csi_driver_irsa"></a> [ebs\_csi\_driver\_irsa](#module\_ebs\_csi\_driver\_irsa) | terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks | 5.44.0 |
@@ -196,7 +197,7 @@ as described in the `.pre-commit-config.yaml` file
 | <a name="input_external_secrets"></a> [external\_secrets](#input\_external\_secrets) | External Secrets configurations | `any` | `{}` | no |
 | <a name="input_fargate_fluentbit"></a> [fargate\_fluentbit](#input\_fargate\_fluentbit) | Fargate Fluentbit configurations | `any` | `{}` | no |
 | <a name="input_fluent_cloudwatch_retention_in_days"></a> [fluent\_cloudwatch\_retention\_in\_days](#input\_fluent\_cloudwatch\_retention\_in\_days) | Number of days to keep logs in cloudwatch | `string` | `"7"` | no |
-| <a name="input_fluent_log_annotation"></a> [fluent\_log\_annotation](#input\_fluent\_log\_annotation) | Annotation to add to pods to get logs stored in cloudwatch | <pre>object({<br>    name  = optional(string, "kaas.tamedia.ch/logging")<br>    value = optional(string, "true")<br>  })</pre> | `{}` | no |
+| <a name="input_fluent_log_annotation"></a> [fluent\_log\_annotation](#input\_fluent\_log\_annotation) | Pod Annotation required to enable fluent logging. Setting name to empty string will disable annotation requirement. | <pre>object({<br>    name  = optional(string, "fluentbit.io/include")<br>    value = optional(string, "true")<br>  })</pre> | `{}` | no |
 | <a name="input_fluent_operator"></a> [fluent\_operator](#input\_fluent\_operator) | Fluent configurations | `any` | `{}` | no |
 | <a name="input_grafana"></a> [grafana](#input\_grafana) | Grafana configurations, used to override default configurations | `any` | `{}` | no |
 | <a name="input_ingress_nginx"></a> [ingress\_nginx](#input\_ingress\_nginx) | Ingress Nginx configurations | `any` | `{}` | no |

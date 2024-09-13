@@ -181,9 +181,9 @@ variable "fluent_operator" {
 }
 
 variable "fluent_log_annotation" {
-  description = "Annotation to add to pods to get logs stored in cloudwatch"
+  description = "Pod Annotation required to enable fluent logging. Setting name to empty string will disable annotation requirement."
   type = object({
-    name  = optional(string, "kaas.tamedia.ch/logging")
+    name  = optional(string, "fluentbit.io/include")
     value = optional(string, "true")
   })
   default = {}

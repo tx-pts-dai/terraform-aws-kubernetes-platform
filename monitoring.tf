@@ -12,7 +12,7 @@ locals {
   fluentbit_cloudwatch_log_stream_prefix   = "."
   fluentbit_cloudwatch_log_stream_template = "$kubernetes['namespace_name'].$kubernetes['pod_name'].$kubernetes['container_name'].$kubernetes['docker_id']"
   fluentbit_tag                            = "kaas"
-  log_annotation                           = var.enable_fluent_operator ? format("%s: \"%s\"", var.fluent_log_annotation.name, var.fluent_log_annotation.value) : ""
+  log_annotation                           = var.enable_fluent_operator && var.fluent_log_annotation.name != "" ? "${var.fluent_log_annotation.name}: \"${var.fluent_log_annotation.value}\"" : "{}"
 
   okta_oidc_config = jsonencode({
     issuer                = var.okta.base_url,
@@ -21,6 +21,16 @@ locals {
     userInfoEndpoint      = "${var.okta.base_url}/oauth2/v1/userinfo",
     secretName            = var.okta.kubernetes_secret_name,
   })
+}
+
+
+module "amp" {
+  source  = "terraform-aws-modules/managed-service-prometheus/aws"
+  version = "3.0.0"
+
+  create = false
+
+  workspace_alias = local.stack_name
 }
 
 ###############################################################################
@@ -150,7 +160,11 @@ module "fluent_operator" {
               nestUnder: kubernetes
               removePrefix: kubernetes_
           - grep:
-              regex: $kubernetes['annotations']['${var.fluent_log_annotation.name}'] ^${var.fluent_log_annotation.value}$
+              %{if var.fluent_log_annotation.name != ""}
+              regex: kubernetes['annotations']['${var.fluent_log_annotation.name}'] ^${var.fluent_log_annotation.value}$
+              %{else}
+              regex: kubernetes['annotations'] .*  # Matches all annotations
+              %{endif}
         EOT
       ]
     }
