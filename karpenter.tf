@@ -21,6 +21,8 @@ module "karpenter" {
   source  = "terraform-aws-modules/eks/aws//modules/karpenter"
   version = "20.24.2"
 
+  # create                          = var.create
+
   cluster_name                    = module.eks.cluster_name
   enable_irsa                     = true
   irsa_oidc_provider_arn          = module.eks.oidc_provider_arn

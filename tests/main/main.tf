@@ -75,6 +75,8 @@ locals {
 module "k8s_platform" {
   source = "../../"
 
+  create = true
+
   name = var.name
 
   cluster_admins = {

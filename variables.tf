@@ -1,3 +1,9 @@
+variable "create" {
+  description = "Create the platform resources. if set to false, no resources will be created"
+  type        = bool
+  default     = true
+}
+
 variable "name" {
   description = "The name of the platform, a timestamp will be appended to this name to make the stack_name. If not provided, the name of the directory will be used."
   type        = string

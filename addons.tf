@@ -9,6 +9,8 @@ module "ebs_csi_driver_irsa" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
   version = "5.44.1"
 
+  create_role = var.create
+
   role_name = "ebs-csi-driver-${local.id}"
 
   attach_ebs_csi_policy = true
@@ -26,6 +28,8 @@ module "ebs_csi_driver_irsa" {
 module "addons" {
   source  = "aws-ia/eks-blueprints-addons/aws"
   version = "1.16.4"
+
+  create_kubernetes_resources = var.create
 
   create_delay_dependencies = [
     module.karpenter_release.status
@@ -145,7 +149,7 @@ module "downscaler" {
   source  = "tx-pts-dai/downscaler/kubernetes"
   version = "0.3.1"
 
-  count = var.enable_downscaler ? 1 : 0
+  count = var.create && var.enable_downscaler ? 1 : 0
 
   image_version = try(var.downscaler.image_version, "23.2.0")
   dry_run       = try(var.downscaler.dry_run, false)
@@ -164,7 +168,7 @@ module "downscaler" {
 module "cluster_secret_store" {
   source = "./modules/addon"
 
-  create = var.enable_external_secrets
+  create = var.create && var.enable_external_secrets
 
   name          = "cluster-secret-store-aws-secretsmanager"
   chart         = "custom-resources"

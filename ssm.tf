@@ -1,6 +1,8 @@
 module "ssm" {
   source = "./modules/ssm"
 
+  create = var.create
+
   stack_type = "platform"
   stack_name = local.stack_name
 

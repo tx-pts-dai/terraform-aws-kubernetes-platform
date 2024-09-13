@@ -115,6 +115,8 @@ module "vpc_cni_irsa" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
   version = "5.44.1"
 
+  create_role = var.create
+
   role_name = "vpc-cni-${local.id}"
 
   attach_vpc_cni_policy = true
@@ -133,6 +135,8 @@ module "vpc_cni_irsa" {
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
   version = "20.24.2"
+
+  # create = var.create
 
   cluster_name                    = local.stack_name
   cluster_version                 = try(var.eks.kubernetes_version, "1.30")

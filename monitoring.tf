@@ -30,7 +30,7 @@ resource "kubernetes_namespace" "monitoring" {
     name = local.monitoring_namespace
 
     labels = {
-      name = local.monitoring_namespace
+      name                                      = local.monitoring_namespace
       "elbv2.k8s.aws/pod-readiness-gate-inject" = "enabled"
     }
   }
@@ -530,7 +530,7 @@ module "grafana" {
   set_irsa_names = ["serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn"]
   role_name      = "grafana-${local.id}"
   role_policies = {
-    CloudWatchReadOnlyAccess = "arn:aws:iam::aws:policy/CloudWatchReadOnlyAccess"
+    CloudWatchReadOnlyAccess    = "arn:aws:iam::aws:policy/CloudWatchReadOnlyAccess"
     AmazonPrometheusQueryAccess = "arn:aws:iam::aws:policy/AmazonPrometheusQueryAccess"
   }
 
