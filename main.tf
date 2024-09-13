@@ -24,8 +24,10 @@ resource "time_static" "timestamp_id" {}
 # and this create a tags merge issue,
 
 locals {
-  id         = format("%08x", time_static.timestamp_id.unix)
-  name       = coalesce(var.name, replace(basename(path.root), "_", "-"))
+  id = format("%08x", time_static.timestamp_id.unix)
+
+  # This is not the best way to handle naming compatibility but its a simple approach to fix renovate PR deployments
+  name       = coalesce(replace(var.name, "/", "-"), replace(basename(path.root), "_", "-"))
   stack_name = "${local.name}-${local.id}"
 
   tags = merge(var.tags, {
