@@ -33,7 +33,7 @@ module "fluent_operator" {
   create = var.enable_fluent_operator
 
   chart         = "fluent-operator"
-  chart_version = "3.0.0"
+  chart_version = "3.1.0"
   repository    = "https://fluent.github.io/helm-charts"
   description   = "Fluent Operator"
   namespace     = local.monitoring_namespace
