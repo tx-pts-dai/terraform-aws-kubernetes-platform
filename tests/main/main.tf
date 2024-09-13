@@ -143,4 +143,9 @@ module "k8s_platform" {
     ]
     wildcard_certificates = true
   }
+
+  fluent_log_annotation = {
+    name  = ""
+    value = ""
+  }
 }
