@@ -23,12 +23,24 @@ locals {
   })
 }
 
+resource "kubernetes_namespace" "monitoring" {
+  count = var.create ? 1 : 0
+
+  metadata {
+    name = local.monitoring_namespace
+
+    labels = {
+      name = local.monitoring_namespace
+      "elbv2.k8s.aws/pod-readiness-gate-inject" = "enabled"
+    }
+  }
+}
 
 module "amp" {
   source  = "terraform-aws-modules/managed-service-prometheus/aws"
   version = "3.0.0"
 
-  create = false
+  create = var.create && var.enable_amp
 
   workspace_alias = local.stack_name
 }
@@ -40,7 +52,7 @@ module "amp" {
 module "fluent_operator" {
   source = "./modules/addon"
 
-  create = var.enable_fluent_operator
+  create = var.create && var.enable_fluent_operator
 
   chart         = "fluent-operator"
   chart_version = "3.1.0"
@@ -214,7 +226,7 @@ data "aws_iam_policy_document" "fluentbit" {
 }
 
 resource "aws_iam_policy" "fluentbit" {
-  count = var.enable_fluent_operator ? 1 : 0
+  count = var.create && var.enable_fluent_operator ? 1 : 0
 
   name   = "fluent-bit-${local.id}"
   policy = data.aws_iam_policy_document.fluentbit.json
@@ -223,7 +235,7 @@ resource "aws_iam_policy" "fluentbit" {
 
 # CloudWatch log group and permission to allow fluent-bit to write log stream
 resource "aws_cloudwatch_log_group" "fluentbit" {
-  count = var.enable_fluent_operator ? 1 : 0
+  count = var.create && var.enable_fluent_operator ? 1 : 0
 
   name              = local.fluentbit_cloudwatch_log_group
   retention_in_days = var.fluent_cloudwatch_retention_in_days
@@ -235,6 +247,8 @@ resource "aws_cloudwatch_log_group" "fluentbit" {
 module "prometheus_irsa" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
   version = "5.44.0"
+
+  create_role = var.create && var.enable_prometheus_stack
 
   role_name = "prometheus-${local.id}"
 
@@ -253,7 +267,7 @@ module "prometheus_irsa" {
 module "prometheus_operator_crds" {
   source = "./modules/addon"
 
-  create = var.enable_prometheus_stack
+  create = var.create && var.enable_prometheus_stack
 
   chart         = "prometheus-operator-crds"
   chart_version = "13.0.2"
@@ -271,7 +285,7 @@ module "prometheus_operator_crds" {
 module "prometheus_stack" {
   source = "./modules/addon"
 
-  create = var.enable_prometheus_stack
+  create = var.create && var.enable_prometheus_stack
 
   chart         = "kube-prometheus-stack"
   chart_version = "61.8.0"
@@ -286,6 +300,9 @@ module "prometheus_stack" {
     file("${path.module}/files/helm/prometheus/common.yaml"),
     <<-EOT
     prometheus:
+      serviceAccount:
+        annotations:
+          eks.amazonaws.com/role-arn: ${module.prometheus_irsa.iam_role_arn}
       ingress:
         enabled: ${var.enable_okta}
         ingressClassName: alb
@@ -306,7 +323,7 @@ module "prometheus_stack" {
       prometheusSpec:
         %{if var.enable_amp}
         remoteWrite:
-          - url: ${module.amp.workspace_prometheus_endpoint}
+          - url: ${module.amp.workspace_prometheus_endpoint}api/v1/remote_write
             sigv4:
               region: ${local.region}
             queue_config:
@@ -337,8 +354,20 @@ module "prometheus_stack" {
 
   set = try(var.prometheus_stack.set, [])
 
-  set_irsa_names = ["prometheus.serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn"]
-  role_name      = "prometheus-${local.id}"
+  # create_role = true
+
+  # set_irsa_names = ["prometheus.serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn"]
+  # role_name      = "prometheus-${local.id}"
+  # role_policies = {
+  #   AmazonPrometheusRemoteWriteAccess = "arn:aws:iam::aws:policy/AmazonPrometheusRemoteWriteAccess"
+  # }
+
+  # oidc_providers = {
+  #   this = {
+  #     provider_arn    = module.eks.oidc_provider_arn
+  #     service_account = "kube-prometheus-stack-prometheus"
+  #   }
+  # }
 
   # TODO: Placeholder for future use
   additional_helm_releases = {
@@ -383,7 +412,7 @@ locals {
 module "grafana" {
   source = "./modules/addon"
 
-  create = var.enable_grafana
+  create = var.create && var.enable_grafana
 
   chart         = "grafana"
   chart_version = "8.4.4"
@@ -426,6 +455,7 @@ module "grafana" {
       auth:
         disable_login_form: true
         disable_signout_menu: true
+        sigv4_auth_enabled: ${var.enable_amp}
       auth.proxy:
         enabled: false
         auto_login: true
@@ -444,14 +474,14 @@ module "grafana" {
           - { name: Alertmanager, orgId: 1 }
           - { name: Prometheus, orgId: 1 }
         datasources:
-          - name: Prometheus
+          - name: ${var.enable_amp ? "Prometheus-Local" : "Prometheus"}
             type: prometheus
-            uid: prometheus
+            uid: ${var.enable_amp ? "prometheus-local" : "prometheus"}
             access: proxy
             url: http://${module.prometheus_stack.name}-prometheus.${local.monitoring_namespace}.svc.cluster.local:9090
             jsonData:
               prometheusType: Prometheus
-            isDefault: true
+            isDefault: ${var.enable_amp ? false : true}
           - name: Alertmanager
             type: alertmanager
             uid: alertmanager
@@ -467,6 +497,21 @@ module "grafana" {
             jsonData:
               authType: default
               defaultRegion: ${local.region}
+          %{if var.enable_amp}
+          - name: Prometheus
+            type: prometheus
+            uid: prometheus
+            access: proxy
+            url: ${module.amp.workspace_prometheus_endpoint}
+            jsonData:
+              prometheusType: Prometheus
+            isDefault: true
+            basicAuth: false
+            jsonData:
+              sigV4Auth: true
+              sigV4AuthType: default
+              sigV4Region: ${local.region}
+          %{endif}
     serviceMonitor:
       enabled: ${var.enable_prometheus_stack}
     EOT
@@ -486,6 +531,7 @@ module "grafana" {
   role_name      = "grafana-${local.id}"
   role_policies = {
     CloudWatchReadOnlyAccess = "arn:aws:iam::aws:policy/CloudWatchReadOnlyAccess"
+    AmazonPrometheusQueryAccess = "arn:aws:iam::aws:policy/AmazonPrometheusQueryAccess"
   }
 
   oidc_providers = {
@@ -545,7 +591,7 @@ module "grafana" {
 module "okta_secrets" {
   source = "./modules/addon"
 
-  create = var.enable_okta
+  create = var.create && var.enable_okta
 
   name          = "okta-secrets"
   chart         = "custom-resources"
@@ -590,7 +636,7 @@ module "okta_secrets" {
 module "pagerduty_secrets" {
   source = "./modules/addon"
 
-  create = var.enable_pagerduty
+  create = var.create && var.enable_pagerduty
 
   name          = "pagerduty-secrets"
   chart         = "custom-resources"
