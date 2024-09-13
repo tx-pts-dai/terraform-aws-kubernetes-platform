@@ -145,7 +145,7 @@ module "k8s_platform" {
   }
 
   fluent_log_annotation = {
-    name  = ""
+    name  = "foo"
     value = ""
   }
 }
