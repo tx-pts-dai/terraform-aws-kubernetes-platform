@@ -21,7 +21,7 @@ module "karpenter" {
   source  = "terraform-aws-modules/eks/aws//modules/karpenter"
   version = "20.24.2"
 
-  # create                          = var.create
+  create = var.create_core
 
   cluster_name                    = module.eks.cluster_name
   enable_irsa                     = true
@@ -43,7 +43,7 @@ module "karpenter" {
 module "karpenter_crds" {
   source = "./modules/addon"
 
-  create = var.enable_karpenter
+  create = var.create_core && var.enable_karpenter
 
   chart            = "karpenter-crd"
   chart_version    = "0.37.0"
@@ -57,7 +57,7 @@ module "karpenter_crds" {
 module "karpenter_release" {
   source = "./modules/addon"
 
-  create = var.enable_karpenter
+  create = var.create_core && var.enable_karpenter
 
   chart            = "karpenter"
   chart_version    = "0.37.0"
@@ -181,7 +181,7 @@ module "karpenter_release" {
 # Karpenter Networking
 
 resource "aws_subnet" "karpenter" {
-  count = length(local.karpenter.subnet_cidrs)
+  count = var.create_core ? length(local.karpenter.subnet_cidrs) : 0
 
   vpc_id            = local.vpc.vpc_id
   cidr_block        = local.karpenter.subnet_cidrs[count.index]
@@ -203,7 +203,7 @@ data "aws_route_tables" "private_route_tables" {
 }
 
 resource "aws_route_table_association" "karpenter" {
-  count = length(local.karpenter.subnet_cidrs)
+  count = var.create_core ? length(local.karpenter.subnet_cidrs) : 0
 
   subnet_id      = aws_subnet.karpenter[count.index].id
   route_table_id = try(data.aws_route_tables.private_route_tables.ids[count.index], data.aws_route_tables.private_route_tables.ids[0], "") # Depends on the number of Nat Gateways

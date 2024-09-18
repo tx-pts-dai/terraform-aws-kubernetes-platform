@@ -3,7 +3,7 @@
 ################################################################################
 
 resource "helm_release" "additional" {
-  for_each = var.create ? { for k, v in var.additional_helm_releases : k => v if try(v.create, true) } : {}
+  for_each = { for k, v in var.additional_helm_releases : k => v if var.create && try(v.create, true) }
 
   name             = try(each.value.name, replace(each.key, "_", "-"))
   description      = try(each.value.description, null)

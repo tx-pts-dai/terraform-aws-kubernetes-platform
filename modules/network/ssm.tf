@@ -7,6 +7,9 @@ module "ssm" {
   stack_name = var.stack_name
 
   parameters = {
+    vpc_name = {
+      insecure_value = module.vpc.name
+    },
     vpc_cidr = {
       insecure_value = module.vpc.vpc_cidr_block
     },

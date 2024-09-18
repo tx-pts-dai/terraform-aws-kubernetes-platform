@@ -1,7 +1,7 @@
 module "ssm" {
   source = "./modules/ssm"
 
-  create = var.create
+  create = var.create_core
 
   stack_type = "platform"
   stack_name = local.stack_name

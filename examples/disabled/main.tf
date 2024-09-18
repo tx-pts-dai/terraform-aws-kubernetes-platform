@@ -3,7 +3,7 @@ terraform {
 
   backend "s3" {
     bucket               = "tf-state-911453050078"
-    key                  = "tests/main.tfstate"
+    key                  = "examples/disabled.tfstate"
     workspace_key_prefix = "terraform-aws-kubernetes-platform"
     dynamodb_table       = "terraform-lock"
     region               = "eu-central-1"
@@ -75,10 +75,7 @@ locals {
 module "k8s_platform" {
   source = "../../"
 
-  create_core   = true
-  create_addons = true
-
-  name = var.name
+  name = "ex-disabled"
 
   cluster_admins = {
     cicd = {
@@ -93,64 +90,19 @@ module "k8s_platform" {
   }
 
   vpc = {
-    enabled = true
-    cidr    = "10.240.0.0/16"
+    enabled = false
+    cidr    = "10.0.0.0/16"
     max_az  = 3
     subnet_configs = [
       { public = 24 },
       { private = 24 },
       { intra = 26 },
+      { database = 26 },
       { karpenter = 22 }
     ]
   }
 
-  karpenter = {
-    set = [
-      {
-        name  = "replicas"
-        value = 1
-      }
-    ]
-  }
+  create_core   = false
+  create_addons = false
 
-  metrics_server = {
-    set = [
-      {
-        name  = "replicas"
-        value = 2
-      }
-    ]
-  }
-
-  enable_downscaler = true
-
-  enable_pagerduty = true
-  pagerduty = {
-    secrets_manager_secret_name = "dai/platform/pagerduty"
-  }
-
-  enable_okta = true
-  okta = {
-    base_url                    = "https://login.tx.group"
-    secrets_manager_secret_name = "dai/platform/okta"
-  }
-
-  base_domain = "dai.tx.group"
-
-  enable_acm_certificate = true
-  acm_certificate = {
-    subject_alternative_names = [
-      "prometheus",
-      "alertmanager",
-      "grafana",
-    ]
-    wildcard_certificates = true
-  }
-
-  fluent_log_annotation = {
-    name  = ""
-    value = ""
-  }
-
-  enable_amp = true
 }
