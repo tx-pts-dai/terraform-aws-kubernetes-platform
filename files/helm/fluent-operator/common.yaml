@@ -1,12 +1,9 @@
-cleanPrometheusOperatorObjectNames: true
-prometheus:
-  promtheusSpec:
-    priorityClassName: system-cluster-critical
-alertmanager:
-  alertmanagerSpec:
-    priorityClassName: system-cluster-critical
-
-prometheus-node-exporter:
+containerRuntime: containerd
+operator:
+  priorityClassName: system-cluster-critical
+fluentbit:
+  enabled: true
+  priorityClassName: system-node-critical
   affinity:
     nodeAffinity:
       requiredDuringSchedulingIgnoredDuringExecution:
@@ -25,14 +22,23 @@ prometheus-node-exporter:
                 operator: NotIn
                 values:
                   - fargate
-  resources:
-    requests:
-      cpu: 10m
-      memory: 32Mi
-grafana:
-  enabled: false
-  forceDeployDashboards: true
-kubeControllerManager:
-  enabled: false
-kubeScheduler:
-  enabled: false
+  filter:
+    kubernetes:
+      enable: true
+      labels: true
+      annotations: true
+    containerd:
+      enable: true
+    multiline:
+      enable: true
+      parsers:
+        - go
+        - python
+        - java
+        - java-multiline
+  input:
+    tail:
+      enable: true
+  parsers:
+    javaMultiline:
+      enable: true

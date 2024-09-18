@@ -1,5 +1,11 @@
-variable "create" {
-  description = "Create the platform resources. if set to false, no resources will be created"
+variable "create_core" {
+  description = "Create the platform core resources. if set to false, no resources will be created."
+  type        = bool
+  default     = true
+}
+
+variable "create_addons" {
+  description = "Create the platform addons. if set to false, no addons will be created"
   type        = bool
   default     = true
 }
