@@ -102,6 +102,36 @@ module "k8s_platform" {
     ]
   }
 
-  # Optional addons
   enable_downscaler = true
+
+  enable_pagerduty = true
+  pagerduty = {
+    secrets_manager_secret_name = "dai/platform/pagerduty"
+  }
+
+  enable_okta = true
+  okta = {
+    base_url                    = "https://login.tx.group"
+    secrets_manager_secret_name = "dai/platform/okta"
+  }
+
+  base_domain = "dai.tx.group"
+
+  enable_acm_certificate = true
+  acm_certificate = {
+    subject_alternative_names = [
+      "prometheus",
+      "alertmanager",
+      "grafana",
+    ]
+    wildcard_certificates = true
+  }
+
+  fluent_log_annotation = {
+    name  = ""
+    value = ""
+  }
+
+  enable_amp = true
+
 }
