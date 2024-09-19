@@ -192,7 +192,7 @@ locals {
 }
 
 resource "aws_security_group_rule" "eks_control_plane_ingress" {
-  for_each = local.ingress_rules
+  for_each = var.create_core ? local.ingress_rules : {}
 
   security_group_id = module.eks.cluster_primary_security_group_id
   description       = each.value.description

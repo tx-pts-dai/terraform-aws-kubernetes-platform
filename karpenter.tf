@@ -21,7 +21,8 @@ module "karpenter" {
   source  = "terraform-aws-modules/eks/aws//modules/karpenter"
   version = "20.24.2"
 
-  create = var.create_core
+  count = var.create_core ? 1 : 0
+  # create = var.create_core
 
   cluster_name                    = module.eks.cluster_name
   enable_irsa                     = true
@@ -83,10 +84,10 @@ module "karpenter_release" {
     settings:
       clusterName: ${module.eks.cluster_name}
       clusterEndpoint: ${module.eks.cluster_endpoint}
-      interruptionQueue: ${module.karpenter.queue_name}
+      interruptionQueue: ${module.karpenter[0].queue_name}
     serviceAccount:
       annotations:
-        eks.amazonaws.com/role-arn: ${module.karpenter.iam_role_arn}
+        eks.amazonaws.com/role-arn: ${module.karpenter[0].iam_role_arn}
     EOT
   ]
 
@@ -109,7 +110,7 @@ module "karpenter_release" {
           name: default
         spec:
           amiFamily: Bottlerocket
-          role: ${module.karpenter.node_iam_role_name}
+          role: ${module.karpenter[0].node_iam_role_name}
           subnetSelectorTerms:
             - tags:
                 karpenter.sh/discovery: ${module.eks.cluster_name}

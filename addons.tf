@@ -127,10 +127,11 @@ module "addons" {
 
   enable_metrics_server = var.enable_metrics_server
   metrics_server = merge({
-    name : "replicas",
-    value : 2,
-    },
-  var.metrics_server)
+    set = [{
+      name : "replicas",
+      value : 2,
+    }]
+  }, var.metrics_server)
 
   # Alternative Ingress
   enable_cert_manager = var.enable_cert_manager
