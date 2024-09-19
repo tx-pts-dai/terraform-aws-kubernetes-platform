@@ -194,6 +194,8 @@ resource "aws_subnet" "karpenter" {
 }
 
 data "aws_route_tables" "private_route_tables" {
+  count = var.create_core ? 1 : 0
+
   vpc_id = local.vpc.vpc_id
 
   filter {
@@ -206,11 +208,13 @@ resource "aws_route_table_association" "karpenter" {
   count = var.create_core ? length(local.karpenter.subnet_cidrs) : 0
 
   subnet_id      = aws_subnet.karpenter[count.index].id
-  route_table_id = try(data.aws_route_tables.private_route_tables.ids[count.index], data.aws_route_tables.private_route_tables.ids[0], "") # Depends on the number of Nat Gateways
+  route_table_id = try(data.aws_route_tables.private_route_tables[0].ids[count.index], data.aws_route_tables.private_route_tables[0].ids[0], "") # Depends on the number of Nat Gateways
 }
 
 module "karpenter_security_group" {
   source = "./modules/security-group"
+
+  create = var.create_core
 
   name        = "karpenter-default-${local.stack_name}"
   description = "Karpenter default security group"
