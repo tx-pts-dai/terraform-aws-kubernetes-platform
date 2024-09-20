@@ -26,7 +26,7 @@ locals {
 # This allows for the AWS Load Balancer Controller add / remove pods
 # from the load balancer when available
 resource "kubernetes_annotations" "monitoring" {
-  count = var.enable_aws_load_balancer_controller ? 1 : 0
+  count = var.create_addons && var.enable_aws_load_balancer_controller ? 1 : 0
 
   api_version = "v1"
   kind        = "Namespace"

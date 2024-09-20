@@ -73,7 +73,7 @@ module "addons" {
   }
 
   # TODO: aws lb controller should be one of the last things deleted, so ing objects can be cleaned up
-  enable_aws_load_balancer_controller = var.enable_aws_load_balancer_controller
+  enable_aws_load_balancer_controller = var.enable_aws_load_balancer_controller && var.create_addons
   aws_load_balancer_controller = merge({
     role_name        = "aws-load-balancer-controller-${local.id}"
     role_name_prefix = false
@@ -84,14 +84,14 @@ module "addons" {
       value = "false"
       }, {
       name  = "replicaCount"
-      value = 1
+      value = 2
       }, {
       name  = "clusterSecretsPermissions.allowAllSecrets"
       value = "true" # enables Okta integration by reading client id and secret from K8s secrets
     }]
   }, var.aws_load_balancer_controller)
 
-  enable_external_dns = var.enable_external_dns
+  enable_external_dns = var.enable_external_dns && var.create_addons
   external_dns_route53_zone_arns = [
     "arn:aws:route53:::hostedzone/*",
   ]
@@ -107,7 +107,7 @@ module "addons" {
     }]
   }, var.external_dns)
 
-  enable_external_secrets = var.enable_external_secrets
+  enable_external_secrets = var.enable_external_secrets && var.create_addons
   external_secrets = merge({
     wait             = true
     role_name        = "external-secrets-${local.id}"
@@ -125,7 +125,7 @@ module "addons" {
     role_name_prefix                    = false
   }, var.fargate_fluentbit)
 
-  enable_metrics_server = var.enable_metrics_server
+  enable_metrics_server = var.enable_metrics_server && var.create_addons
   metrics_server = merge({
     set = [{
       name : "replicas",
@@ -150,7 +150,7 @@ module "downscaler" {
   source  = "tx-pts-dai/downscaler/kubernetes"
   version = "0.3.1"
 
-  count = var.create_addons && var.enable_downscaler ? 1 : 0
+  count = var.enable_downscaler && var.create_addons ? 1 : 0
 
   image_version = try(var.downscaler.image_version, "23.2.0")
   dry_run       = try(var.downscaler.dry_run, false)
@@ -169,7 +169,7 @@ module "downscaler" {
 module "cluster_secret_store" {
   source = "./modules/addon"
 
-  create = var.create_addons && var.enable_external_secrets
+  create = var.enable_external_secrets && var.create_addons
 
   name          = "cluster-secret-store-aws-secretsmanager"
   chart         = "custom-resources"

@@ -116,14 +116,23 @@ module "k8s_platform" {
     set = [
       {
         name  = "replicas"
-        value = 2
+        value = 1
+      }
+    ]
+  }
+
+  aws_load_balancer_controller = {
+    set = [
+      {
+        name  = "replicaCount"
+        value = 1
       }
     ]
   }
 
   enable_downscaler = true
 
-  enable_pagerduty = false
+  enable_pagerduty = true
   pagerduty = {
     secrets_manager_secret_name = "dai/platform/pagerduty"
   }

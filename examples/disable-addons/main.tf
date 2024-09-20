@@ -3,7 +3,7 @@ terraform {
 
   backend "s3" {
     bucket               = "tf-state-911453050078"
-    key                  = "examples/disabled.tfstate"
+    key                  = "examples/disable-addons.tfstate"
     workspace_key_prefix = "terraform-aws-kubernetes-platform"
     dynamodb_table       = "terraform-lock"
     region               = "eu-central-1"
