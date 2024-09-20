@@ -75,7 +75,7 @@ locals {
 module "k8s_platform" {
   source = "../../"
 
-  name = "ex-disabled"
+  name = "ex-disable-addons"
 
   cluster_admins = {
     cicd = {

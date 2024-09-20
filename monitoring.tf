@@ -253,6 +253,7 @@ module "prometheus_stack" {
   # https://github.com/prometheus-community/helm-charts/blob/main/charts/kube-prometheus-stack/values.yaml
   values = [
     file("${path.module}/files/helm/prometheus/common.yaml"),
+    file("${path.module}/files/helm/prometheus/alertmanager-template.yaml"),
     <<-EOT
     prometheus:
       serviceAccount:
@@ -289,6 +290,10 @@ module "prometheus_stack" {
               capacity: 2500
         %{endif}
     alertmanager:
+      defaultRules:
+        labels:
+          cluster: ${local.stack_name}
+          # environment: foo
       ingress:
         enabled: ${var.enable_okta}
         ingressClassName: alb
@@ -307,9 +312,13 @@ module "prometheus_stack" {
           alb.ingress.kubernetes.io/auth-idp-oidc: '${local.okta_oidc_config}'
           alb.ingress.kubernetes.io/auth-scope: 'openid groups'
       alertmanagerSpec:
-      %{if var.enable_pagerduty}
         secrets:
+          %{if var.enable_pagerduty}
           - ${var.pagerduty.kubernetes_secret_name}
+          %{endif}
+          %{if var.enable_slack}
+          - ${var.slack.kubernetes_secret_name}
+          %{endif}
       config:
         route:
           receiver: "null"
@@ -323,21 +332,29 @@ module "prometheus_stack" {
               matchers:
                 - alertname="Watchdog"
               continue: false
+            %{if var.enable_pagerduty}
             - receiver: pagerduty-critical
-              match:
-                severity: critical
+              matchers:
+                - severity="critical"
               continue: false
             - receiver: pagerduty-warning
-              match:
-                severity: warning
+              matchers:
+                - severity="warning"
               continue: false
             - receiver: pagerduty-info
-              match:
-                severity: info
+              matchers:
+                - severity="info"
               continue: false
-
+            %{endif}
+            %{if var.enable_slack}
+            - receiver: it-pts-dai-monitoring
+              matchers:
+                - severity=~"info|warning|critical"
+              continue: false
+            %{endif}
         receivers:
           - name: "null"
+          %{if var.enable_pagerduty}
           - name: pagerduty-critical
             pagerduty_configs:
             - send_resolved: true
@@ -404,33 +421,34 @@ module "prometheus_stack" {
                 severity: '{{ .CommonLabels.severity }}'
               source: '{{ template "pagerduty.default.client" . }}'
               severity: info
-      %{endif}
+          %{endif}
+          %{if var.enable_slack}
+          - name: it-pts-dai-monitoring
+            slack_configs:
+            - send_resolved: true
+              api_url_file: /etc/alertmanager/secrets/${var.slack.kubernetes_secret_name}/it_pts_dai_monitoring
+              http_config:
+                follow_redirects: true
+                enable_http2: true
+              channel: '#it-pts-dai-monitoring'
+              title: '{{ template "slack.default.title" . }}'
+              text: '{{ template "slack.default.text" . }}'
+              footer: '{{ template "slack.default.footer" . }}'
+              icon_url: '{{ template "slack.default.iconURL" . }}'
+              username: '{{ template "slack.default.username" . }}'
+              color: '{{ template "slack.default.color" . }}'
+          %{endif}
     EOT
   ]
 
   set = try(var.prometheus_stack.set, [])
 
-  # TODO: Placeholder for future use
-  # additional_helm_releases = {
-  #   pagerduty_config = {
-  #     create = var.enable_pagerduty
-
-  #     description   = "PagerDuty Alert Manager Config"
-  #     chart         = "custom-resources"
-  #     chart_version = "0.1.0"
-  #     repository    = "https://dnd-it.github.io/helm-charts"
-
-  #     values = [
-  #       file("${path.module}/files/helm/prometheus/alertmanagerconfig-pagerduty.yaml")
-  #     ]
-  #   }
-  # }
-
   depends_on = [
     module.prometheus_operator_crds,
     module.addons,
     module.okta_secrets,
-    module.pagerduty_secrets
+    module.pagerduty_secrets,
+    module.slack_secrets
   ]
 }
 
@@ -694,6 +712,45 @@ module "pagerduty_secrets" {
       dataFrom:
         - extract:
             key: ${var.pagerduty.secrets_manager_secret_name}
+    EOT
+  ]
+
+  release_delay_destroy_duration = "1m"
+
+  depends_on = [
+    module.addons
+  ]
+}
+
+module "slack_secrets" {
+  source = "./modules/addon"
+
+  create = var.create_addons && var.enable_slack
+
+  name          = "slack-secrets"
+  chart         = "custom-resources"
+  chart_version = "0.1.0"
+  repository    = "https://dnd-it.github.io/helm-charts"
+  description   = "Slack Secrets"
+  namespace     = local.monitoring_namespace
+
+  values = [
+    <<-EOT
+    apiVersion: external-secrets.io/v1beta1
+    kind: ExternalSecret
+    metadata:
+      name: slack-secrets
+    spec:
+      refreshInterval: 5m0s
+      secretStoreRef:
+        name: aws-secretsmanager
+        kind: ClusterSecretStore
+      target:
+        name: ${var.slack.kubernetes_secret_name}
+        creationPolicy: Owner
+      dataFrom:
+        - extract:
+            key: ${var.slack.secrets_manager_secret_name}
     EOT
   ]
 

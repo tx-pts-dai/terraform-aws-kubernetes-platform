@@ -96,6 +96,21 @@ variable "pagerduty" {
   default = {}
 }
 
+variable "enable_slack" {
+  description = "Enable Slack integration"
+  type        = bool
+  default     = false
+}
+
+variable "slack" {
+  description = "Slack configurations"
+  type = object({
+    secrets_manager_secret_name = optional(string, "")
+    kubernetes_secret_name      = optional(string, "slack")
+  })
+  default = {}
+}
+
 ################################################################################
 # Core Addons - Installed by default
 

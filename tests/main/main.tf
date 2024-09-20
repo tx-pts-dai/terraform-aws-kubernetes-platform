@@ -143,6 +143,11 @@ module "k8s_platform" {
     secrets_manager_secret_name = "dai/platform/okta"
   }
 
+  enable_slack = true
+  slack = {
+    secrets_manager_secret_name = "dai/platform/slack"
+  }
+
   base_domain = "dai.tx.group"
 
   enable_acm_certificate = true

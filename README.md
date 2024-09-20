@@ -147,6 +147,7 @@ as described in the `.pre-commit-config.yaml` file
 | <a name="module_prometheus_irsa"></a> [prometheus\_irsa](#module\_prometheus\_irsa) | terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks | 5.44.0 |
 | <a name="module_prometheus_operator_crds"></a> [prometheus\_operator\_crds](#module\_prometheus\_operator\_crds) | ./modules/addon | n/a |
 | <a name="module_prometheus_stack"></a> [prometheus\_stack](#module\_prometheus\_stack) | ./modules/addon | n/a |
+| <a name="module_slack_secrets"></a> [slack\_secrets](#module\_slack\_secrets) | ./modules/addon | n/a |
 | <a name="module_ssm"></a> [ssm](#module\_ssm) | ./modules/ssm | n/a |
 | <a name="module_vpc_cni_irsa"></a> [vpc\_cni\_irsa](#module\_vpc\_cni\_irsa) | terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks | 5.44.0 |
 
@@ -198,6 +199,7 @@ as described in the `.pre-commit-config.yaml` file
 | <a name="input_enable_okta"></a> [enable\_okta](#input\_enable\_okta) | Enable Okta integration | `bool` | `false` | no |
 | <a name="input_enable_pagerduty"></a> [enable\_pagerduty](#input\_enable\_pagerduty) | Enable PagerDuty integration | `bool` | `false` | no |
 | <a name="input_enable_prometheus_stack"></a> [enable\_prometheus\_stack](#input\_enable\_prometheus\_stack) | Enable Prometheus stack | `bool` | `true` | no |
+| <a name="input_enable_slack"></a> [enable\_slack](#input\_enable\_slack) | Enable Slack integration | `bool` | `false` | no |
 | <a name="input_external_dns"></a> [external\_dns](#input\_external\_dns) | External DNS configurations | `any` | `{}` | no |
 | <a name="input_external_secrets"></a> [external\_secrets](#input\_external\_secrets) | External Secrets configurations | `any` | `{}` | no |
 | <a name="input_fargate_fluentbit"></a> [fargate\_fluentbit](#input\_fargate\_fluentbit) | Fargate Fluentbit configurations | `any` | `{}` | no |
@@ -212,6 +214,7 @@ as described in the `.pre-commit-config.yaml` file
 | <a name="input_okta"></a> [okta](#input\_okta) | Okta configurations | <pre>object({<br>    base_url                    = optional(string, "")<br>    secrets_manager_secret_name = optional(string, "")<br>    kubernetes_secret_name      = optional(string, "okta")<br>  })</pre> | `{}` | no |
 | <a name="input_pagerduty"></a> [pagerduty](#input\_pagerduty) | PagerDuty configurations | <pre>object({<br>    secrets_manager_secret_name = optional(string, "")<br>    kubernetes_secret_name      = optional(string, "pagerduty")<br>  })</pre> | `{}` | no |
 | <a name="input_prometheus_stack"></a> [prometheus\_stack](#input\_prometheus\_stack) | Prometheus stack configurations | `any` | `{}` | no |
+| <a name="input_slack"></a> [slack](#input\_slack) | Slack configurations | <pre>object({<br>    secrets_manager_secret_name = optional(string, "")<br>    kubernetes_secret_name      = optional(string, "slack")<br>  })</pre> | `{}` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | Default tags to apply to all resources | `map(string)` | `{}` | no |
 | <a name="input_vpc"></a> [vpc](#input\_vpc) | Map of VPC configurations | `any` | `{}` | no |
 
