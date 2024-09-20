@@ -99,7 +99,6 @@ module "k8s_platform" {
       { intra = 26 },
     ]
   }
-  enable_karpenter = false
-  create_addons    = false
 
+  create_addons = false
 }
