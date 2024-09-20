@@ -180,7 +180,6 @@ as described in the `.pre-commit-config.yaml` file
 | <a name="input_cert_manager"></a> [cert\_manager](#input\_cert\_manager) | Cert Manager configurations | `any` | `{}` | no |
 | <a name="input_cluster_admins"></a> [cluster\_admins](#input\_cluster\_admins) | Map of IAM roles to add as cluster admins. Only exact matching role names are returned | <pre>map(object({<br>    role_name         = string<br>    kubernetes_groups = optional(list(string))<br>  }))</pre> | `{}` | no |
 | <a name="input_create_addons"></a> [create\_addons](#input\_create\_addons) | Create the platform addons. if set to false, no addons will be created | `bool` | `true` | no |
-| <a name="input_create_core"></a> [create\_core](#input\_create\_core) | Create the platform core resources. if set to false, no resources will be created. | `bool` | `true` | no |
 | <a name="input_downscaler"></a> [downscaler](#input\_downscaler) | Downscaler configurations | `any` | `{}` | no |
 | <a name="input_eks"></a> [eks](#input\_eks) | Map of EKS configurations | `any` | `{}` | no |
 | <a name="input_enable_acm_certificate"></a> [enable\_acm\_certificate](#input\_enable\_acm\_certificate) | Enable ACM certificate | `bool` | `false` | no |

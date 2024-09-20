@@ -33,40 +33,40 @@ provider "aws" {
   region = local.region
 }
 
-# provider "kubernetes" {
-#   host                   = module.k8s_platform.eks.cluster_endpoint
-#   cluster_ca_certificate = base64decode(module.k8s_platform.eks.cluster_certificate_authority_data)
-#   exec {
-#     api_version = "client.authentication.k8s.io/v1beta1"
-#     command     = "aws"
-#     args        = ["eks", "get-token", "--cluster-name", module.k8s_platform.eks.cluster_name]
-#   }
-# }
+provider "kubernetes" {
+  host                   = module.k8s_platform.eks.cluster_endpoint
+  cluster_ca_certificate = base64decode(module.k8s_platform.eks.cluster_certificate_authority_data)
+  exec {
+    api_version = "client.authentication.k8s.io/v1beta1"
+    command     = "aws"
+    args        = ["eks", "get-token", "--cluster-name", module.k8s_platform.eks.cluster_name]
+  }
+}
 
-# provider "helm" {
-#   kubernetes {
-#     host                   = module.k8s_platform.eks.cluster_endpoint
-#     cluster_ca_certificate = base64decode(module.k8s_platform.eks.cluster_certificate_authority_data)
-#     exec {
-#       api_version = "client.authentication.k8s.io/v1beta1"
-#       command     = "aws"
-#       args        = ["eks", "get-token", "--cluster-name", module.k8s_platform.eks.cluster_name]
-#     }
-#   }
-# }
+provider "helm" {
+  kubernetes {
+    host                   = module.k8s_platform.eks.cluster_endpoint
+    cluster_ca_certificate = base64decode(module.k8s_platform.eks.cluster_certificate_authority_data)
+    exec {
+      api_version = "client.authentication.k8s.io/v1beta1"
+      command     = "aws"
+      args        = ["eks", "get-token", "--cluster-name", module.k8s_platform.eks.cluster_name]
+    }
+  }
+}
 
-# provider "kubectl" {
-#   apply_retry_count      = 5
-#   host                   = module.k8s_platform.eks.cluster_endpoint
-#   cluster_ca_certificate = base64decode(module.k8s_platform.eks.cluster_certificate_authority_data)
-#   load_config_file       = false
+provider "kubectl" {
+  apply_retry_count      = 5
+  host                   = module.k8s_platform.eks.cluster_endpoint
+  cluster_ca_certificate = base64decode(module.k8s_platform.eks.cluster_certificate_authority_data)
+  load_config_file       = false
 
-#   exec {
-#     api_version = "client.authentication.k8s.io/v1beta1"
-#     command     = "aws"
-#     args        = ["eks", "get-token", "--cluster-name", module.k8s_platform.eks.cluster_name]
-#   }
-# }
+  exec {
+    api_version = "client.authentication.k8s.io/v1beta1"
+    command     = "aws"
+    args        = ["eks", "get-token", "--cluster-name", module.k8s_platform.eks.cluster_name]
+  }
+}
 
 locals {
   region = "eu-central-1"
@@ -90,19 +90,16 @@ module "k8s_platform" {
   }
 
   vpc = {
-    enabled = false
+    enabled = true
     cidr    = "10.0.0.0/16"
     max_az  = 3
     subnet_configs = [
       { public = 24 },
       { private = 24 },
       { intra = 26 },
-      { database = 26 },
-      { karpenter = 22 }
     ]
   }
-
-  create_core   = false
-  create_addons = false
+  enable_karpenter = false
+  create_addons    = false
 
 }

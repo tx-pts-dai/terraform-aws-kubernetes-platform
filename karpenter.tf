@@ -10,7 +10,8 @@ locals {
   karpenter = {
     subnet_cidrs = try(var.karpenter.subnet_cidrs, module.network.grouped_networks.karpenter)
 
-    namespace       = "kube-system"
+    namespace = "kube-system"
+    # TODO: move to helm value inputs
     pod_annotations = try(var.karpenter.pod_annotations, {})
   }
 
@@ -21,8 +22,7 @@ module "karpenter" {
   source  = "terraform-aws-modules/eks/aws//modules/karpenter"
   version = "20.24.2"
 
-  count = var.create_core ? 1 : 0
-  # create = var.create_core
+  create = var.enable_karpenter
 
   cluster_name                    = module.eks.cluster_name
   enable_irsa                     = true
@@ -44,7 +44,7 @@ module "karpenter" {
 module "karpenter_crds" {
   source = "./modules/addon"
 
-  create = var.create_core && var.enable_karpenter
+  create = var.enable_karpenter
 
   chart            = "karpenter-crd"
   chart_version    = "0.37.0"
@@ -58,7 +58,7 @@ module "karpenter_crds" {
 module "karpenter_release" {
   source = "./modules/addon"
 
-  create = var.create_core && var.enable_karpenter
+  create = var.enable_karpenter
 
   chart            = "karpenter"
   chart_version    = "0.37.0"
@@ -84,10 +84,10 @@ module "karpenter_release" {
     settings:
       clusterName: ${module.eks.cluster_name}
       clusterEndpoint: ${module.eks.cluster_endpoint}
-      interruptionQueue: ${module.karpenter[0].queue_name}
+      interruptionQueue: ${module.karpenter.queue_name}
     serviceAccount:
       annotations:
-        eks.amazonaws.com/role-arn: ${module.karpenter[0].iam_role_arn}
+        eks.amazonaws.com/role-arn: ${module.karpenter.iam_role_arn}
     EOT
   ]
 
@@ -110,7 +110,7 @@ module "karpenter_release" {
           name: default
         spec:
           amiFamily: Bottlerocket
-          role: ${module.karpenter[0].node_iam_role_name}
+          role: ${module.karpenter.node_iam_role_name}
           subnetSelectorTerms:
             - tags:
                 karpenter.sh/discovery: ${module.eks.cluster_name}
@@ -169,6 +169,7 @@ module "karpenter_release" {
   }
 
   depends_on = [
+    # service monitor depends on prometheus operator CRDs
     module.prometheus_operator_crds,
     module.karpenter_crds,
     module.karpenter,
@@ -182,7 +183,7 @@ module "karpenter_release" {
 # Karpenter Networking
 
 resource "aws_subnet" "karpenter" {
-  count = var.create_core ? length(local.karpenter.subnet_cidrs) : 0
+  count = var.enable_karpenter ? length(local.karpenter.subnet_cidrs) : 0
 
   vpc_id            = local.vpc.vpc_id
   cidr_block        = local.karpenter.subnet_cidrs[count.index]
@@ -195,7 +196,7 @@ resource "aws_subnet" "karpenter" {
 }
 
 data "aws_route_tables" "private_route_tables" {
-  count = var.create_core ? 1 : 0
+  count = var.enable_karpenter ? 1 : 0
 
   vpc_id = local.vpc.vpc_id
 
@@ -206,7 +207,7 @@ data "aws_route_tables" "private_route_tables" {
 }
 
 resource "aws_route_table_association" "karpenter" {
-  count = var.create_core ? length(local.karpenter.subnet_cidrs) : 0
+  count = var.enable_karpenter ? length(local.karpenter.subnet_cidrs) : 0
 
   subnet_id      = aws_subnet.karpenter[count.index].id
   route_table_id = try(data.aws_route_tables.private_route_tables[0].ids[count.index], data.aws_route_tables.private_route_tables[0].ids[0], "") # Depends on the number of Nat Gateways
@@ -215,7 +216,7 @@ resource "aws_route_table_association" "karpenter" {
 module "karpenter_security_group" {
   source = "./modules/security-group"
 
-  create = var.create_core
+  create = var.enable_karpenter
 
   name        = "karpenter-default-${local.stack_name}"
   description = "Karpenter default security group"

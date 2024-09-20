@@ -112,8 +112,6 @@ module "eks" {
   source  = "terraform-aws-modules/eks/aws"
   version = "20.24.2"
 
-  create = var.create_core
-
   cluster_name                    = local.stack_name
   cluster_version                 = try(var.eks.kubernetes_version, "1.30")
   cluster_endpoint_public_access  = try(var.eks.cluster_endpoint_public_access, true)
@@ -192,7 +190,7 @@ locals {
 }
 
 resource "aws_security_group_rule" "eks_control_plane_ingress" {
-  for_each = var.create_core ? local.ingress_rules : {}
+  for_each = local.ingress_rules
 
   security_group_id = module.eks.cluster_primary_security_group_id
   description       = each.value.description
@@ -213,8 +211,6 @@ resource "aws_security_group_rule" "eks_control_plane_ingress" {
 module "vpc_cni_irsa" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
   version = "5.44.0"
-
-  create_role = var.create_core
 
   role_name = "vpc-cni-${local.id}"
 

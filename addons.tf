@@ -9,7 +9,7 @@ module "ebs_csi_driver_irsa" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
   version = "5.44.1"
 
-  create_role = var.create_core
+  create_role = var.create_addons
 
   role_name = "ebs-csi-driver-${local.id}"
 

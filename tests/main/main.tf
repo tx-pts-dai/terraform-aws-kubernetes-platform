@@ -75,7 +75,6 @@ locals {
 module "k8s_platform" {
   source = "../../"
 
-  create_core   = true
   create_addons = true
 
   name = var.name
@@ -124,7 +123,7 @@ module "k8s_platform" {
 
   enable_downscaler = true
 
-  enable_pagerduty = true
+  enable_pagerduty = false
   pagerduty = {
     secrets_manager_secret_name = "dai/platform/pagerduty"
   }

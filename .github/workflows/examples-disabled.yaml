@@ -18,14 +18,14 @@ permissions:
   pull-requests: write
 
 jobs:
-  example_complete_deploy:
+  example_disabled_deploy:
     if: github.event_name == 'pull_request' && github.event.action != 'closed'
     uses: tx-pts-dai/github-workflows/.github/workflows/tf-feature.yaml@v1
     with:
       environment: examples
       tf_dir: examples/disabled
 
-  example_complete_destroy:
+  example_disabled_destroy:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
     uses: tx-pts-dai/github-workflows/.github/workflows/tf-cleanup.yaml@v1
     with:
