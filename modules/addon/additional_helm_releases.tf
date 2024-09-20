@@ -73,7 +73,7 @@ resource "helm_release" "additional" {
 }
 
 resource "time_sleep" "additional" {
-  count = var.additional_delay_create_duration != null || var.additional_delay_destroy_duration != null ? 1 : 0
+  count = (var.create && var.additional_delay_create_duration != null) || (var.create && var.additional_delay_destroy_duration != null) ? 1 : 0
 
   create_duration = var.additional_delay_create_duration
 

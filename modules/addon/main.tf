@@ -87,7 +87,7 @@ resource "helm_release" "this" {
 
 
 resource "time_sleep" "this" {
-  count = var.release_delay_create_duration != null || var.release_delay_destroy_duration != null ? 1 : 0
+  count = (var.create && var.release_delay_create_duration != null) || (var.create && var.release_delay_destroy_duration != null) ? 1 : 0
 
   create_duration = var.release_delay_create_duration
 

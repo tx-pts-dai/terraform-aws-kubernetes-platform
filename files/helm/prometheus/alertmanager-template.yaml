@@ -1,0 +1,30 @@
+# alertmanager:
+#   templateFiles:
+#     pagerduty.tmpl: |-
+#       {{ define "pagerduty.summary" }}
+#         {{- $root := . -}}
+#         {{ $routingKey := (readFile "/path/to/routing_key.txt") | trimSpace }}
+#         {{ range .Alerts }}
+#           {
+#             "routing_key": "{{ $routingKey }}",
+#             "event_action": "trigger",
+#             "payload": {
+#               "summary": "{{ .Annotations.summary }}",
+#               "severity": "{{ .Labels.severity }}",
+#               "source": "{{ .ExternalURL }}",
+#               "component": "{{ .Labels.component }}",
+#               "group": "{{ template "cluster" $root }}",
+#               "class": "{{ .Labels.alertname }}",
+#               "custom_details": {
+#                 "description": "{{ .Annotations.description }}",
+#                 "runbook": "{{ .Annotations.runbook }}",
+#                 "graph_link": "{{ .GeneratorURL }}"
+#               }
+#             }
+#           }
+#         {{ end }}
+#       {{ end }}
+
+#       {{ define "cluster" }}
+#         {{ .ExternalURL | reReplaceAll ".*alertmanager\\.(.*)" "$1" }}
+#       {{ end }}
