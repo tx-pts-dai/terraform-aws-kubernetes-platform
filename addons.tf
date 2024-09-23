@@ -81,10 +81,16 @@ module "addons" {
     # This just means annotations are needed for the service to use the aws load balancer controller
     set = [{
       name  = "enableServiceMutatorWebhook"
-      value = "false"
+      value = "true"
+      }, {
+      name  = "serviceMutatorWebhookConfig"
+      value = "Ignore"
       }, {
       name  = "replicaCount"
       value = 2
+      }, {
+      name  = "enableServiceMonitor"
+      value = var.enable_prometheus_stack
       }, {
       name  = "clusterSecretsPermissions.allowAllSecrets"
       value = "true" # enables Okta integration by reading client id and secret from K8s secrets
@@ -176,7 +182,7 @@ module "cluster_secret_store" {
   chart_version = "0.1.0"
   repository    = "https://dnd-it.github.io/helm-charts"
   description   = "External Secrets Cluster Secret Store for AWS Secrets Manager"
-  namespace     = local.monitoring_namespace
+  namespace     = "external-secrets"
 
   values = [
     <<-EOT

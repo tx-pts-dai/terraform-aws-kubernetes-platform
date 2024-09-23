@@ -31,6 +31,7 @@ Integrations (optional):
 
 - Okta
 - PagerDuty
+- Slack
 
 ## Requirements
 
@@ -134,10 +135,10 @@ as described in the `.pre-commit-config.yaml` file
 | <a name="module_cluster_secret_store"></a> [cluster\_secret\_store](#module\_cluster\_secret\_store) | ./modules/addon | n/a |
 | <a name="module_downscaler"></a> [downscaler](#module\_downscaler) | tx-pts-dai/downscaler/kubernetes | 0.3.1 |
 | <a name="module_ebs_csi_driver_irsa"></a> [ebs\_csi\_driver\_irsa](#module\_ebs\_csi\_driver\_irsa) | terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks | 5.44.0 |
-| <a name="module_eks"></a> [eks](#module\_eks) | terraform-aws-modules/eks/aws | 20.24.1 |
+| <a name="module_eks"></a> [eks](#module\_eks) | terraform-aws-modules/eks/aws | 20.24.2 |
 | <a name="module_fluent_operator"></a> [fluent\_operator](#module\_fluent\_operator) | ./modules/addon | n/a |
 | <a name="module_grafana"></a> [grafana](#module\_grafana) | ./modules/addon | n/a |
-| <a name="module_karpenter"></a> [karpenter](#module\_karpenter) | terraform-aws-modules/eks/aws//modules/karpenter | 20.24.1 |
+| <a name="module_karpenter"></a> [karpenter](#module\_karpenter) | terraform-aws-modules/eks/aws//modules/karpenter | 20.24.2 |
 | <a name="module_karpenter_crds"></a> [karpenter\_crds](#module\_karpenter\_crds) | ./modules/addon | n/a |
 | <a name="module_karpenter_release"></a> [karpenter\_release](#module\_karpenter\_release) | ./modules/addon | n/a |
 | <a name="module_karpenter_security_group"></a> [karpenter\_security\_group](#module\_karpenter\_security\_group) | ./modules/security-group | n/a |
@@ -209,6 +210,7 @@ as described in the `.pre-commit-config.yaml` file
 | <a name="input_grafana"></a> [grafana](#input\_grafana) | Grafana configurations, used to override default configurations | `any` | `{}` | no |
 | <a name="input_ingress_nginx"></a> [ingress\_nginx](#input\_ingress\_nginx) | Ingress Nginx configurations | `any` | `{}` | no |
 | <a name="input_karpenter"></a> [karpenter](#input\_karpenter) | Karpenter configurations | `any` | `{}` | no |
+| <a name="input_metadata"></a> [metadata](#input\_metadata) | Metadata for the platform | <pre>object({<br>    environment = optional(string, "")<br>    team        = optional(string, "")<br>  })</pre> | `{}` | no |
 | <a name="input_metrics_server"></a> [metrics\_server](#input\_metrics\_server) | Metrics Server configurations | `any` | `{}` | no |
 | <a name="input_name"></a> [name](#input\_name) | The name of the platform, a timestamp will be appended to this name to make the stack\_name. If not provided, the name of the directory will be used. | `string` | `""` | no |
 | <a name="input_okta"></a> [okta](#input\_okta) | Okta configurations | <pre>object({<br>    base_url                    = optional(string, "")<br>    secrets_manager_secret_name = optional(string, "")<br>    kubernetes_secret_name      = optional(string, "okta")<br>  })</pre> | `{}` | no |

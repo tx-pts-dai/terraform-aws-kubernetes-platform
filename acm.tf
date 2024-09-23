@@ -26,4 +26,6 @@ module "acm" {
 
   validation_method   = "DNS"
   wait_for_validation = var.acm_certificate.wait_for_validation
+
+  tags = local.tags
 }

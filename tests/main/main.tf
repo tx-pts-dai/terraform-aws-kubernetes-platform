@@ -85,6 +85,11 @@ module "k8s_platform" {
     }
   }
 
+  metadata = {
+    environment = "sandbox"
+    team        = "dai"
+  }
+
   tags = {
     Environment = "sandbox"
     GithubRepo  = "terraform-aws-kubernetes-platform"

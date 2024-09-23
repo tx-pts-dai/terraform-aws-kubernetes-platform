@@ -26,7 +26,7 @@ locals {
 # This allows for the AWS Load Balancer Controller add / remove pods
 # from the load balancer when available
 resource "kubernetes_annotations" "monitoring" {
-  count = var.create_addons && var.enable_aws_load_balancer_controller ? 1 : 0
+  count = var.create_addons && var.enable_aws_load_balancer_controller && var.enable_prometheus_stack ? 1 : 0
 
   api_version = "v1"
   kind        = "Namespace"
@@ -49,6 +49,8 @@ module "amp" {
   create = var.create_addons && var.enable_amp
 
   workspace_alias = local.stack_name
+
+  tags = local.tags
 }
 
 ###############################################################################
@@ -253,8 +255,24 @@ module "prometheus_stack" {
   # https://github.com/prometheus-community/helm-charts/blob/main/charts/kube-prometheus-stack/values.yaml
   values = [
     file("${path.module}/files/helm/prometheus/common.yaml"),
-    file("${path.module}/files/helm/prometheus/alertmanager-template.yaml"),
     <<-EOT
+    defaultRules:
+      create: true
+      rules:
+        # Disable EKS managed services
+        etcd: false
+        kubeApiserverAvailability: false
+        kubeApiserverBurnrate: false
+        kubeApiserverHistogram: false
+        kubeApiserverSlos: false
+        kubeControllerManager: false
+        # We dont support windows
+        windows: false
+      labels:
+        kind: platform
+        cluster: ${local.stack_name}
+        environment: ${var.metadata.environment}
+        team: ${var.metadata.team}
     prometheus:
       serviceAccount:
         annotations:
@@ -290,10 +308,6 @@ module "prometheus_stack" {
               capacity: 2500
         %{endif}
     alertmanager:
-      defaultRules:
-        labels:
-          cluster: ${local.stack_name}
-          # environment: foo
       ingress:
         enabled: ${var.enable_okta}
         ingressClassName: alb
@@ -320,9 +334,11 @@ module "prometheus_stack" {
           - ${var.slack.kubernetes_secret_name}
           %{endif}
       config:
+        global:
+          slack_api_url: https://slack.com/api/chat.postMessage
         route:
           receiver: "null"
-          group_by: [...]
+          group_by: ['alertname', 'cluster', 'environment']
           continue: false
           group_wait: 30s
           group_interval: 5m
@@ -332,96 +348,21 @@ module "prometheus_stack" {
               matchers:
                 - alertname="Watchdog"
               continue: false
-            %{if var.enable_pagerduty}
-            - receiver: pagerduty-critical
-              matchers:
-                - severity="critical"
-              continue: false
-            - receiver: pagerduty-warning
-              matchers:
-                - severity="warning"
-              continue: false
-            - receiver: pagerduty-info
-              matchers:
-                - severity="info"
-              continue: false
-            %{endif}
             %{if var.enable_slack}
             - receiver: it-pts-dai-monitoring
               matchers:
                 - severity=~"info|warning|critical"
+              continue: true
+            %{endif}
+            %{if var.enable_pagerduty}
+            - receiver: pagerduty-platform
+              matchers:
+                - severity=~"info|warning|critical"
+                - kind="platform"
               continue: false
             %{endif}
         receivers:
           - name: "null"
-          %{if var.enable_pagerduty}
-          - name: pagerduty-critical
-            pagerduty_configs:
-            - send_resolved: true
-              http_config:
-                follow_redirects: true
-                enable_http2: true
-              routing_key_file: /etc/alertmanager/secrets/${var.pagerduty.kubernetes_secret_name}/pagerduty_dai_critical_support_hours_key
-              url: https://events.pagerduty.com/v2/enqueue
-              client: '{{ template "pagerduty.default.client" . }}'
-              client_url: '{{ template "pagerduty.default.clientURL" . }}'
-              description: '{{ template "pagerduty.default.description" .}}'
-              details:
-                alertname: '{{ .CommonLabels.alertname }}'
-                description: '{{ .CommonAnnotations.description }}'
-                firing: '{{ template "pagerduty.default.instances" .Alerts.Firing }}'
-                instance: '{{ .CommonLabels.instance }}'
-                num_firing: '{{ .Alerts.Firing | len }}'
-                num_resolved: '{{ .Alerts.Resolved | len }}'
-                resolved: '{{ template "pagerduty.default.instances" .Alerts.Resolved }}'
-                severity: '{{ .CommonLabels.severity }}'
-              source: '{{ template "pagerduty.default.client" . }}'
-              severity: critical
-          - name: pagerduty-warning
-            pagerduty_configs:
-            - send_resolved: true
-              http_config:
-                follow_redirects: true
-                enable_http2: true
-              routing_key_file: /etc/alertmanager/secrets/${var.pagerduty.kubernetes_secret_name}/pagerduty_dai_warning_key
-              url: https://events.pagerduty.com/v2/enqueue
-              client: '{{ template "pagerduty.default.client" . }}'
-              client_url: '{{ template "pagerduty.default.clientURL" . }}'
-              description: '{{ template "pagerduty.default.description" .}}'
-              details:
-                alertname: '{{ .CommonLabels.alertname }}'
-                description: '{{ .CommonAnnotations.description }}'
-                firing: '{{ template "pagerduty.default.instances" .Alerts.Firing }}'
-                instance: '{{ .CommonLabels.instance }}'
-                num_firing: '{{ .Alerts.Firing | len }}'
-                num_resolved: '{{ .Alerts.Resolved | len }}'
-                resolved: '{{ template "pagerduty.default.instances" .Alerts.Resolved }}'
-                severity: '{{ .CommonLabels.severity }}'
-              source: '{{ template "pagerduty.default.client" . }}'
-              severity: warning
-          - name: pagerduty-info
-            pagerduty_configs:
-            - send_resolved: true
-              http_config:
-                follow_redirects: true
-                enable_http2: true
-              routing_key_file: /etc/alertmanager/secrets/${var.pagerduty.kubernetes_secret_name}/pagerduty_dai_info_key
-              url: https://events.pagerduty.com/v2/enqueue
-              client: '{{ template "pagerduty.default.client" . }}'
-              client_url: '{{ template "pagerduty.default.clientURL" . }}'
-              description: '{{ template "pagerduty.default.description" .}}'
-              details:
-                alertname: '{{ .CommonLabels.alertname }}'
-                description: '{{ .CommonAnnotations.description }}'
-                firing: '{{ template "pagerduty.default.instances" .Alerts.Firing }}'
-                instance: '{{ .CommonLabels.instance }}'
-                num_firing: '{{ .Alerts.Firing | len }}'
-                num_resolved: '{{ .Alerts.Resolved | len }}'
-                resolved: '{{ template "pagerduty.default.instances" .Alerts.Resolved }}'
-                severity: '{{ .CommonLabels.severity }}'
-              source: '{{ template "pagerduty.default.client" . }}'
-              severity: info
-          %{endif}
           %{if var.enable_slack}
           - name: it-pts-dai-monitoring
             slack_configs:
@@ -430,14 +371,48 @@ module "prometheus_stack" {
               http_config:
                 follow_redirects: true
                 enable_http2: true
-              channel: '#it-pts-dai-monitoring'
-              title: '{{ template "slack.default.title" . }}'
-              text: '{{ template "slack.default.text" . }}'
-              footer: '{{ template "slack.default.footer" . }}'
-              icon_url: '{{ template "slack.default.iconURL" . }}'
-              username: '{{ template "slack.default.username" . }}'
-              color: '{{ template "slack.default.color" . }}'
+              color: '{{ template "slack.color" . }}'
+              title: '{{ template "slack.title" . }}'
+              text: '{{ template "slack.text" . }}'
+
+              channel: '#it_pts_dai_monitoring'
+              actions:
+                - type: button
+                  text: 'Runbook :green_book:'
+                  url: '{{ (index .Alerts 0).Annotations.runbook_url }}'
+                - type: button
+                  text: 'Query :mag:'
+                  url: '{{ (index .Alerts 0).GeneratorURL }}'
+                - type: button
+                  text: 'Dashboard :chart_with_upwards_trend:'
+                  url: '{{ (index .Alerts 0).Annotations.dashboard_url }}'
+                - type: button
+                  text: 'Silence :no_bell:'
+                  url: '{{ template "__alert_silence_link" . }}'
           %{endif}
+          %{if var.enable_pagerduty}
+          - name: pagerduty-platform
+            pagerduty_configs:
+            - send_resolved: true
+              http_config:
+                follow_redirects: true
+                enable_http2: true
+              routing_key_file: /etc/alertmanager/secrets/${var.pagerduty.kubernetes_secret_name}/pagerduty_dai_platform_key
+              url: https://events.pagerduty.com/v2/enqueue
+              client: '{{ template "pagerduty.default.client" . }}'
+              client_url: '{{ template "pagerduty.default.clientURL" . }}'
+              description: '{{ template "pagerduty.title" . }}'
+              # details: '{{ template "pagerduty.details" . }}'
+              source: '{{ template "pagerduty.default.client" . }}'
+              severity: '{{ .CommonLabels.severity }}'
+          %{endif}
+      templateFiles:
+        common.tmpl: |-
+          ${indent(6, file("${path.module}/files/helm/prometheus/alertmanager/templates/common.tmpl"))}
+        pagerduty.tmpl: |-
+          ${indent(6, file("${path.module}/files/helm/prometheus/alertmanager/templates/pagerduty.tmpl"))}
+        slack.tmpl: |-
+          ${indent(6, file("${path.module}/files/helm/prometheus/alertmanager/templates/slack.tmpl"))}
     EOT
   ]
 

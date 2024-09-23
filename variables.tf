@@ -1,3 +1,12 @@
+variable "metadata" {
+  description = "Metadata for the platform"
+  type = object({
+    environment = optional(string, "")
+    team        = optional(string, "")
+  })
+  default = {}
+}
+
 variable "create_addons" {
   description = "Create the platform addons. if set to false, no addons will be created"
   type        = bool
