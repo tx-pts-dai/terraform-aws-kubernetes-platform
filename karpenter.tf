@@ -19,7 +19,7 @@ locals {
 
 module "karpenter" {
   source  = "terraform-aws-modules/eks/aws//modules/karpenter"
-  version = "20.24.1"
+  version = "20.24.2"
 
   cluster_name                    = module.eks.cluster_name
   enable_irsa                     = true
