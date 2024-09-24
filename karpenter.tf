@@ -22,8 +22,6 @@ module "karpenter" {
   source  = "terraform-aws-modules/eks/aws//modules/karpenter"
   version = "20.24.2"
 
-  create = var.enable_karpenter
-
   cluster_name                    = module.eks.cluster_name
   enable_irsa                     = true
   irsa_oidc_provider_arn          = module.eks.oidc_provider_arn
@@ -44,8 +42,6 @@ module "karpenter" {
 module "karpenter_crds" {
   source = "./modules/addon"
 
-  create = var.enable_karpenter
-
   chart            = "karpenter-crd"
   chart_version    = "0.37.0"
   repository       = "oci://public.ecr.aws/karpenter"
@@ -57,8 +53,6 @@ module "karpenter_crds" {
 
 module "karpenter_release" {
   source = "./modules/addon"
-
-  create = var.enable_karpenter
 
   chart            = "karpenter"
   chart_version    = "0.37.0"
@@ -183,7 +177,7 @@ module "karpenter_release" {
 # Karpenter Networking
 
 resource "aws_subnet" "karpenter" {
-  count = var.enable_karpenter ? length(local.karpenter.subnet_cidrs) : 0
+  count = length(local.karpenter.subnet_cidrs)
 
   vpc_id            = local.vpc.vpc_id
   cidr_block        = local.karpenter.subnet_cidrs[count.index]
@@ -196,8 +190,6 @@ resource "aws_subnet" "karpenter" {
 }
 
 data "aws_route_tables" "private_route_tables" {
-  count = var.enable_karpenter ? 1 : 0
-
   vpc_id = local.vpc.vpc_id
 
   filter {
@@ -207,16 +199,14 @@ data "aws_route_tables" "private_route_tables" {
 }
 
 resource "aws_route_table_association" "karpenter" {
-  count = var.enable_karpenter ? length(local.karpenter.subnet_cidrs) : 0
+  count = length(local.karpenter.subnet_cidrs)
 
   subnet_id      = aws_subnet.karpenter[count.index].id
-  route_table_id = try(data.aws_route_tables.private_route_tables[0].ids[count.index], data.aws_route_tables.private_route_tables[0].ids[0], "") # Depends on the number of Nat Gateways
+  route_table_id = try(data.aws_route_tables.private_route_tables.ids[count.index], data.aws_route_tables.private_route_tables.ids[0], "") # Depends on the number of Nat Gateways
 }
 
 module "karpenter_security_group" {
   source = "./modules/security-group"
-
-  create = var.enable_karpenter
 
   name        = "karpenter-default-${local.stack_name}"
   description = "Karpenter default security group"

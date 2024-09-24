@@ -122,13 +122,6 @@ variable "slack" {
 
 ################################################################################
 # Core Addons - Installed by default
-
-variable "enable_karpenter" {
-  description = "Enable Karpenter"
-  type        = bool
-  default     = true
-}
-
 variable "karpenter" {
   description = "Karpenter configurations"
   type        = any

@@ -195,7 +195,6 @@ as described in the `.pre-commit-config.yaml` file
 | <a name="input_enable_fluent_operator"></a> [enable\_fluent\_operator](#input\_enable\_fluent\_operator) | Enable fluent operator | `bool` | `true` | no |
 | <a name="input_enable_grafana"></a> [enable\_grafana](#input\_enable\_grafana) | Enable Grafana | `bool` | `true` | no |
 | <a name="input_enable_ingress_nginx"></a> [enable\_ingress\_nginx](#input\_enable\_ingress\_nginx) | Enable Ingress Nginx | `bool` | `false` | no |
-| <a name="input_enable_karpenter"></a> [enable\_karpenter](#input\_enable\_karpenter) | Enable Karpenter | `bool` | `true` | no |
 | <a name="input_enable_metrics_server"></a> [enable\_metrics\_server](#input\_enable\_metrics\_server) | Enable Metrics Server | `bool` | `true` | no |
 | <a name="input_enable_okta"></a> [enable\_okta](#input\_enable\_okta) | Enable Okta integration | `bool` | `false` | no |
 | <a name="input_enable_pagerduty"></a> [enable\_pagerduty](#input\_enable\_pagerduty) | Enable PagerDuty integration | `bool` | `false` | no |
