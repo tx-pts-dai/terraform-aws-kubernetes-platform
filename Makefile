@@ -14,11 +14,11 @@ check-amtool:
 
 test-slack: check-amtool
 	@echo "\n\nTesting slack title and text...\n\n"
-	amtool template render --template.glob='files/helm/prometheus/alertmanager/templates/*.tmpl' --template.data='files/helm/prometheus/alertmanager/templates/_test.json'  --template.text='{{ template "slack.title" . }}{{ "\n" }}{{ template "slack.text" . }}'
+	amtool template render --template.glob='tests/alertmanager/*.tmpl' --template.glob='files/helm/prometheus/alertmanager/templates/*.tmpl' --template.data='tests/alertmanager/_test.json'  --template.text='{{ template "slack.title" . }}{{ "\n" }}{{ template "slack.text" . }}'
 
 test-pagerduty: check-amtool
 	@echo "\n\nTesting pagerduty title and details...\n\n"
-	amtool template render --template.glob='files/helm/prometheus/alertmanager/templates/*.tmpl' --template.data='files/helm/prometheus/alertmanager/templates/_test.json'  --template.text='{{ template "pagerduty.title" . }}{{ "\n" }}{{ template "pagerduty.details" . }}'
+	amtool template render --template.glob='tests/alertmanager/*.tmpl' --template.glob='files/helm/prometheus/alertmanager/templates/*.tmpl' --template.data='tests/alertmanager/_test.json'  --template.text='{{ template "pagerduty.title" . }}{{ "\n" }}{{ template "pagerduty.details" . }}'
 
 test-alertmanager-templates: test-slack test-pagerduty
 	@echo "\n\nAll templates passed."
