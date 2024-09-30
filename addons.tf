@@ -7,7 +7,7 @@
 
 module "ebs_csi_driver_irsa" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
-  version = "5.44.0"
+  version = "5.44.1"
 
   role_name = "ebs-csi-driver-${local.id}"
 
@@ -25,7 +25,7 @@ module "ebs_csi_driver_irsa" {
 
 module "addons" {
   source  = "aws-ia/eks-blueprints-addons/aws"
-  version = "1.16.3"
+  version = "1.16.4"
 
   create_delay_dependencies = [
     module.karpenter_release.status
