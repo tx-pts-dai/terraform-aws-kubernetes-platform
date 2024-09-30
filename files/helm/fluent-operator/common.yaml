@@ -2,6 +2,7 @@ containerRuntime: containerd
 operator:
   priorityClassName: system-cluster-critical
 fluentbit:
+  enabled: true
   priorityClassName: system-node-critical
   affinity:
     nodeAffinity:
@@ -21,12 +22,23 @@ fluentbit:
                 operator: NotIn
                 values:
                   - fargate
-  # Because we deploy our own pipeline, disable the default one
   filter:
     kubernetes:
-      enable: false # true = default
+      enable: true
+      labels: true
+      annotations: true
     containerd:
-      enable: true # If disabled, fluent-operator has reconciler error
+      enable: true
+    multiline:
+      enable: true
+      parsers:
+        - go
+        - python
+        - java
+        - java-multiline
   input:
     tail:
-      enable: false # true = default
+      enable: true
+  parsers:
+    javaMultiline:
+      enable: true

@@ -3,7 +3,7 @@
 ################################################################################
 
 resource "helm_release" "additional" {
-  for_each = var.create ? { for k, v in var.additional_helm_releases : k => v if try(v.create, true) } : {}
+  for_each = { for k, v in var.additional_helm_releases : k => v if var.create && try(v.create, true) }
 
   name             = try(each.value.name, replace(each.key, "_", "-"))
   description      = try(each.value.description, null)
@@ -73,7 +73,7 @@ resource "helm_release" "additional" {
 }
 
 resource "time_sleep" "additional" {
-  count = var.additional_delay_create_duration != null || var.additional_delay_destroy_duration != null ? 1 : 0
+  count = (var.create && var.additional_delay_create_duration != null) || (var.create && var.additional_delay_destroy_duration != null) ? 1 : 0
 
   create_duration = var.additional_delay_create_duration
 

@@ -87,6 +87,10 @@ module "k8s_platform" {
     }
   }
 
+  enable_prometheus_stack = false
+  enable_grafana          = false
+  enable_fluent_operator  = false
+
   tags = {
     Environment = "sandbox"
     GithubRepo  = "terraform-aws-kubernetes-platform"

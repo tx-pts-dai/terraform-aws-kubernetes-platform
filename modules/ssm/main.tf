@@ -3,7 +3,7 @@ locals {
 }
 
 resource "aws_ssm_parameter" "cluster_name" {
-  for_each = var.parameters
+  for_each = var.create ? var.parameters : {}
 
   name           = join("/", ["", local.ssm_hierarchy, coalesce(each.value.name, each.key)])
   type           = each.value.type

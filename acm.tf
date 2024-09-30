@@ -8,7 +8,7 @@ locals {
 }
 
 data "aws_route53_zone" "base_domain_zone" {
-  count = var.enable_acm_certificate ? 1 : 0
+  count = var.create_addons && var.enable_acm_certificate ? 1 : 0
 
   name = local.primary_acm_domain
 }
@@ -17,7 +17,7 @@ module "acm" {
   source  = "terraform-aws-modules/acm/aws"
   version = "5.1.0"
 
-  count = var.enable_acm_certificate ? 1 : 0
+  count = var.create_addons && var.enable_acm_certificate ? 1 : 0
 
   domain_name = local.primary_acm_domain
   zone_id     = data.aws_route53_zone.base_domain_zone[0].zone_id
@@ -26,4 +26,6 @@ module "acm" {
 
   validation_method   = "DNS"
   wait_for_validation = var.acm_certificate.wait_for_validation
+
+  tags = local.tags
 }

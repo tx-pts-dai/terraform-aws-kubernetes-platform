@@ -108,28 +108,6 @@ locals {
   } }
 }
 
-################################################################################
-# VPC CNI IAM Role for Service Accounts
-
-module "vpc_cni_irsa" {
-  source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
-  version = "5.44.1"
-
-  role_name = "vpc-cni-${local.id}"
-
-  attach_vpc_cni_policy = true
-  vpc_cni_enable_ipv4   = true
-
-  oidc_providers = {
-    main = {
-      provider_arn               = module.eks.oidc_provider_arn
-      namespace_service_accounts = ["kube-system:aws-node"]
-    }
-  }
-
-  tags = local.tags
-}
-
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
   version = "20.24.2"
@@ -211,7 +189,7 @@ locals {
   }
 }
 
-resource "aws_security_group_rule" "eks_control_plan_ingress" {
+resource "aws_security_group_rule" "eks_control_plane_ingress" {
   for_each = local.ingress_rules
 
   security_group_id = module.eks.cluster_primary_security_group_id
@@ -221,6 +199,32 @@ resource "aws_security_group_rule" "eks_control_plan_ingress" {
   from_port         = each.value.from_port
   to_port           = each.value.to_port
   cidr_blocks       = each.value.cidr_blocks
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+################################################################################
+# VPC CNI IAM Role for Service Accounts
+
+module "vpc_cni_irsa" {
+  source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
+  version = "5.44.0"
+
+  role_name = "vpc-cni-${local.id}"
+
+  attach_vpc_cni_policy = true
+  vpc_cni_enable_ipv4   = true
+
+  oidc_providers = {
+    main = {
+      provider_arn               = module.eks.oidc_provider_arn
+      namespace_service_accounts = ["kube-system:aws-node"]
+    }
+  }
+
+  tags = local.tags
 }
 
 resource "time_sleep" "wait_on_destroy" {

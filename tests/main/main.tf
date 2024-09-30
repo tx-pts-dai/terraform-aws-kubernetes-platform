@@ -75,12 +75,19 @@ locals {
 module "k8s_platform" {
   source = "../../"
 
+  create_addons = true
+
   name = var.name
 
   cluster_admins = {
     cicd = {
       role_name = "cicd-iac"
     }
+  }
+
+  metadata = {
+    environment = "sandbox"
+    team        = "dai"
   }
 
   tags = {
@@ -114,7 +121,16 @@ module "k8s_platform" {
     set = [
       {
         name  = "replicas"
-        value = 2
+        value = 1
+      }
+    ]
+  }
+
+  aws_load_balancer_controller = {
+    set = [
+      {
+        name  = "replicaCount"
+        value = 1
       }
     ]
   }
@@ -132,6 +148,11 @@ module "k8s_platform" {
     secrets_manager_secret_name = "dai/platform/okta"
   }
 
+  enable_slack = true
+  slack = {
+    secrets_manager_secret_name = "dai/platform/slack"
+  }
+
   base_domain = "dai.tx.group"
 
   enable_acm_certificate = true
@@ -143,4 +164,11 @@ module "k8s_platform" {
     ]
     wildcard_certificates = true
   }
+
+  fluent_log_annotation = {
+    name  = ""
+    value = ""
+  }
+
+  enable_amp = true
 }

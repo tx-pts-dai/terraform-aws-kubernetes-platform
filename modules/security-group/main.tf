@@ -1,4 +1,6 @@
 resource "aws_security_group" "this" {
+  count = var.create ? 1 : 0
+
   name        = var.name
   description = var.description
   vpc_id      = var.vpc_id
@@ -14,9 +16,9 @@ resource "aws_security_group" "this" {
 }
 
 resource "aws_security_group_rule" "this" {
-  for_each = { for k, v in merge(var.ingress_rules, var.egress_rules) : k => v }
+  for_each = { for k, v in merge(var.ingress_rules, var.egress_rules) : k => v if var.create }
 
-  security_group_id = aws_security_group.this.id
+  security_group_id = aws_security_group.this[0].id
   type              = each.value.type
   protocol          = each.value.protocol
   from_port         = each.value.from_port

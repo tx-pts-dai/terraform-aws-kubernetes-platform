@@ -3,7 +3,7 @@ terraform {
 
   backend "s3" {
     bucket               = "tf-state-911453050078"
-    key                  = "examples/complete.tfstate"
+    key                  = "examples/disable-addons.tfstate"
     workspace_key_prefix = "terraform-aws-kubernetes-platform"
     dynamodb_table       = "terraform-lock"
     region               = "eu-central-1"
@@ -75,7 +75,7 @@ locals {
 module "k8s_platform" {
   source = "../../"
 
-  name = "ex-complete"
+  name = "ex-disable-addons"
 
   cluster_admins = {
     cicd = {
@@ -97,13 +97,8 @@ module "k8s_platform" {
       { public = 24 },
       { private = 24 },
       { intra = 26 },
-      { database = 26 },
-      { karpenter = 22 }
     ]
   }
 
-  enable_downscaler = true
-
-  enable_amp = true
-
+  create_addons = false
 }

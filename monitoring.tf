@@ -11,8 +11,7 @@ locals {
   fluentbit_cloudwatch_log_group           = "/platform/${local.stack_name}/logs"
   fluentbit_cloudwatch_log_stream_prefix   = "."
   fluentbit_cloudwatch_log_stream_template = "$kubernetes['namespace_name'].$kubernetes['pod_name'].$kubernetes['container_name'].$kubernetes['docker_id']"
-  fluentbit_tag                            = "kaas"
-  log_annotation                           = var.enable_fluent_operator ? format("%s: \"%s\"", var.fluent_log_annotation.name, var.fluent_log_annotation.value) : ""
+  log_annotation                           = var.enable_fluent_operator && var.fluent_log_annotation.name != "" ? "${var.fluent_log_annotation.name}: \"${var.fluent_log_annotation.value}\"" : "{}"
 
   okta_oidc_config = jsonencode({
     issuer                = var.okta.base_url,
@@ -23,17 +22,49 @@ locals {
   })
 }
 
+# Enable pod readiness gate injection for the monitoring namespace.
+# This allows for the AWS Load Balancer Controller add / remove pods
+# from the load balancer when available
+resource "kubernetes_annotations" "monitoring" {
+  count = var.create_addons && var.enable_aws_load_balancer_controller && var.enable_prometheus_stack ? 1 : 0
+
+  api_version = "v1"
+  kind        = "Namespace"
+  metadata {
+    name = local.monitoring_namespace
+  }
+  annotations = {
+    "elbv2.k8s.aws/pod-readiness-gate-inject" = "enabled"
+  }
+
+  depends_on = [
+    module.prometheus_operator_crds
+  ]
+}
+
+module "amp" {
+  source  = "terraform-aws-modules/managed-service-prometheus/aws"
+  version = "3.0.0"
+
+  create = var.create_addons && var.enable_amp
+
+  workspace_alias = local.stack_name
+
+  tags = local.tags
+}
+
 ###############################################################################
 # fluent operator (https://github.com/fluent/fluent-operator)
 
-# TODO: Split CRDs and Operator into separate modules
+# ISSUE: helm uninstall deletes the operator before the custom resource are removed
+# TODO: Split Custom Resources / Operator https://github.com/fluent/fluent-operator/pull/1348
 module "fluent_operator" {
   source = "./modules/addon"
 
-  create = var.enable_fluent_operator
+  create = var.create_addons && var.enable_fluent_operator
 
   chart         = "fluent-operator"
-  chart_version = "3.0.0"
+  chart_version = "3.1.0"
   repository    = "https://fluent.github.io/helm-charts"
   description   = "Fluent Operator"
   namespace     = local.monitoring_namespace
@@ -42,25 +73,25 @@ module "fluent_operator" {
 
   # https://github.com/fluent/fluent-operator/blob/master/charts/fluent-operator/values.yaml
   values = [
-    file("${path.module}/files/helm/fluent/common.yaml"),
+    file("${path.module}/files/helm/fluent-operator/common.yaml"),
     <<-EOT
     operator:
       annotations:
         ${local.log_annotation}
     fluentbit:
-      annotations:
-        ${local.log_annotation}
+      image:
+        tag: 3.1.7 # FIXES: Configuring log_group_class requires `auto_create_group On` - Remove when chart is updated
     EOT
   ]
 
   set = try(var.fluent_operator.set, [])
 
-  create_role = true
+  create_role = var.create_addons && var.enable_fluent_operator
 
   set_irsa_names = ["fluentbit.serviceAccountAnnotations.eks\\.amazonaws\\.com/role-arn"]
   role_name      = "fluent-bit-${local.id}"
   role_policies = {
-    fluentbit = aws_iam_policy.fluentbit[0].arn
+    fluentbit = try(aws_iam_policy.fluentbit[0].arn, "")
   }
 
   oidc_providers = {
@@ -74,37 +105,10 @@ module "fluent_operator" {
   additional_delay_destroy_duration = "10s"
 
   additional_helm_releases = {
-    fluentbit_cluster_input = {
-      description   = "Fluentbit Cluster Input Pipeline"
-      chart         = "custom-resources"
-      chart_version = "0.1.0"
-      repository    = "https://dnd-it.github.io/helm-charts"
+    fluentbit_cluster_filter_grep = {
+      create = var.fluent_log_annotation.name != "" && var.fluent_log_annotation.value != ""
 
-      values = [
-        <<-EOT
-        apiVersion: fluentbit.fluent.io/v1alpha2
-        kind: ClusterInput
-        metadata:
-          name: kaas-pipeline
-          labels:
-            fluentbit.fluent.io/enabled: "true"
-        spec:
-          tail:
-            db: /fluent-bit/tail/pos-${local.fluentbit_tag}.db
-            dbSync: Normal
-            memBufLimit: 100MB
-            parser: cri
-            path: /var/log/containers/*.log
-            readFromHead: false
-            refreshIntervalSeconds: 10
-            skipLongLines: true
-            storageType: memory
-            tag: ${local.fluentbit_tag}.*
-        EOT
-      ]
-    }
-    fluentbit_cluster_filter = {
-      description   = "Fluentbit Cluster Filter Pipeline"
+      description   = "Fluentbit Cluster Filter Grep"
       chart         = "custom-resources"
       chart_version = "0.1.0"
       repository    = "https://dnd-it.github.io/helm-charts"
@@ -114,48 +118,21 @@ module "fluent_operator" {
         apiVersion: fluentbit.fluent.io/v1alpha2
         kind: ClusterFilter
         metadata:
-          name: kaas-pipeline
+          name: z-grep
           labels:
             fluentbit.fluent.io/enabled: "true"
+            fluentbit.fluent.io/component: logging
         spec:
-          match: ${local.fluentbit_tag}.*
+          match: kube.*
           filters:
-          - lua:
-              script:
-                key: containerd.lua
-                name: fluent-bit-containerd-config
-              call: containerd
-              timeAsTable: true
-          - kubernetes:
-              kubeURL: https://kubernetes.default.svc:443
-              kubeCAFile: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
-              kubeTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
-              kubeTagPrefix: ${local.fluentbit_tag}.var.log.containers
-              labels: true
-              annotations: true
-          - nest:
-              operation: lift
-              nestedUnder: kubernetes
-              addPrefix: kubernetes_
-          - modify:
-              rules:
-              - remove: stream
-              - remove: kubernetes_pod_id
-              - remove: kubernetes_host
-              - remove: kubernetes_container_hash
-          - nest:
-              operation: nest
-              wildcard:
-              - kubernetes_*
-              nestUnder: kubernetes
-              removePrefix: kubernetes_
-          - grep:
-              regex: $kubernetes['annotations']['${var.fluent_log_annotation.name}'] ^${var.fluent_log_annotation.value}$
+            - grep:
+                regex: kubernetes['annotations']['${var.fluent_log_annotation.name}'] ^${var.fluent_log_annotation.value}$
         EOT
       ]
     }
-    fluentbit_cluster_output = {
-      description   = "Fluentbit Cluster Output Pipeline"
+
+    fluentbit_cluster_output_cloudwatch = {
+      description   = "Fluentbit Cluster Output Cloudwatch"
       chart         = "custom-resources"
       chart_version = "0.1.0"
       repository    = "https://dnd-it.github.io/helm-charts"
@@ -165,19 +142,18 @@ module "fluent_operator" {
         apiVersion: fluentbit.fluent.io/v1alpha2
         kind: ClusterOutput
         metadata:
-          name: kaas-pipeline
+          name: cloudwatch
           labels:
             fluentbit.fluent.io/enabled: "true"
         spec:
           customPlugin:
             config: |
               Name cloudwatch_logs
-              Match ${local.fluentbit_tag}.*
+              Match kube.*
               region ${data.aws_region.current.name}
               log_group_name ${local.fluentbit_cloudwatch_log_group}
               log_stream_prefix ${local.fluentbit_cloudwatch_log_stream_prefix}
               log_stream_template ${local.fluentbit_cloudwatch_log_stream_template}
-              auto_create_group On # Fixed in 3.1.6 - Has to be set to On: https://github.com/fluent/fluent-bit/issues/8949
         EOT
       ]
     }
@@ -189,6 +165,8 @@ module "fluent_operator" {
 }
 
 data "aws_iam_policy_document" "fluentbit" {
+  count = var.create_addons && var.enable_fluent_operator ? 1 : 0
+
   statement {
     sid       = ""
     effect    = "Allow"
@@ -202,16 +180,16 @@ data "aws_iam_policy_document" "fluentbit" {
 }
 
 resource "aws_iam_policy" "fluentbit" {
-  count = var.enable_fluent_operator ? 1 : 0
+  count = var.create_addons && var.enable_fluent_operator ? 1 : 0
 
   name   = "fluent-bit-${local.id}"
-  policy = data.aws_iam_policy_document.fluentbit.json
+  policy = data.aws_iam_policy_document.fluentbit[0].json
   tags   = local.tags
 }
 
 # CloudWatch log group and permission to allow fluent-bit to write log stream
 resource "aws_cloudwatch_log_group" "fluentbit" {
-  count = var.enable_fluent_operator ? 1 : 0
+  count = var.create_addons && var.enable_fluent_operator ? 1 : 0
 
   name              = local.fluentbit_cloudwatch_log_group
   retention_in_days = var.fluent_cloudwatch_retention_in_days
@@ -219,11 +197,34 @@ resource "aws_cloudwatch_log_group" "fluentbit" {
 
 ###############################################################################
 # Prometheus Operator
+locals {
+  prometheus_service_url = try("https://${module.prometheus_stack.name}-prometheus.${local.monitoring_namespace}.svc.cluster.local:9090", "")
+}
+
+module "prometheus_irsa" {
+  source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
+  version = "5.44.0"
+
+  create_role = var.create_addons && var.enable_prometheus_stack
+
+  role_name = "prometheus-${local.id}"
+
+  attach_amazon_managed_service_prometheus_policy = true
+
+  oidc_providers = {
+    main = {
+      provider_arn               = module.eks.oidc_provider_arn
+      namespace_service_accounts = ["${local.monitoring_namespace}:kube-prometheus-stack-prometheus"]
+    }
+  }
+
+  tags = local.tags
+}
 
 module "prometheus_operator_crds" {
   source = "./modules/addon"
 
-  create = var.enable_prometheus_stack
+  create = var.create_addons && var.enable_prometheus_stack
 
   chart         = "prometheus-operator-crds"
   chart_version = "13.0.2"
@@ -241,7 +242,7 @@ module "prometheus_operator_crds" {
 module "prometheus_stack" {
   source = "./modules/addon"
 
-  create = var.enable_prometheus_stack
+  create = var.create_addons && var.enable_prometheus_stack
 
   chart         = "kube-prometheus-stack"
   chart_version = "61.8.0"
@@ -255,7 +256,27 @@ module "prometheus_stack" {
   values = [
     file("${path.module}/files/helm/prometheus/common.yaml"),
     <<-EOT
+    defaultRules:
+      create: true
+      rules:
+        # Disable EKS managed services
+        etcd: false
+        kubeApiserverAvailability: false
+        kubeApiserverBurnrate: false
+        kubeApiserverHistogram: false
+        kubeApiserverSlos: false
+        kubeControllerManager: false
+        # We dont support windows
+        windows: false
+      labels:
+        kind: platform
+        cluster: ${local.stack_name}
+        environment: ${var.metadata.environment}
+        team: ${var.metadata.team}
     prometheus:
+      serviceAccount:
+        annotations:
+          eks.amazonaws.com/role-arn: ${module.prometheus_irsa.iam_role_arn}
       ingress:
         enabled: ${var.enable_okta}
         ingressClassName: alb
@@ -273,6 +294,19 @@ module "prometheus_stack" {
           alb.ingress.kubernetes.io/auth-type: oidc
           alb.ingress.kubernetes.io/auth-idp-oidc: '${local.okta_oidc_config}'
           alb.ingress.kubernetes.io/auth-scope: 'openid groups'
+      prometheusSpec:
+        # allow prometheus rules to be created in any namespace
+        ruleSelectorNilUsesHelmValues: false
+        %{if var.enable_amp}
+        remoteWrite:
+          - url: ${module.amp.workspace_prometheus_endpoint}api/v1/remote_write
+            sigv4:
+              region: ${local.region}
+            queue_config:
+              max_samples_per_send: 1000
+              max_shards: 200
+              capacity: 2500
+        %{endif}
     alertmanager:
       ingress:
         enabled: ${var.enable_okta}
@@ -291,41 +325,105 @@ module "prometheus_stack" {
           alb.ingress.kubernetes.io/auth-type: oidc
           alb.ingress.kubernetes.io/auth-idp-oidc: '${local.okta_oidc_config}'
           alb.ingress.kubernetes.io/auth-scope: 'openid groups'
+      alertmanagerSpec:
+        secrets:
+          %{if var.enable_pagerduty}
+          - ${var.pagerduty.kubernetes_secret_name}
+          %{endif}
+          %{if var.enable_slack}
+          - ${var.slack.kubernetes_secret_name}
+          %{endif}
+      config:
+        global:
+          slack_api_url: https://slack.com/api/chat.postMessage
+        route:
+          receiver: "null"
+          group_by: ['alertname', 'cluster', 'environment']
+          continue: false
+          group_wait: 30s
+          group_interval: 5m
+          repeat_interval: 12h
+          routes:
+            - receiver: "null"
+              matchers:
+                - alertname="Watchdog"
+              continue: false
+            %{if var.enable_slack}
+            - receiver: it-pts-dai-monitoring
+              matchers:
+                - severity=~"info|warning|critical"
+              continue: true
+            %{endif}
+            %{if var.enable_pagerduty}
+            - receiver: pagerduty-platform
+              matchers:
+                - severity=~"info|warning|critical"
+                - kind="platform"
+              continue: false
+            %{endif}
+        receivers:
+          - name: "null"
+          %{if var.enable_slack}
+          - name: it-pts-dai-monitoring
+            slack_configs:
+            - send_resolved: true
+              api_url_file: /etc/alertmanager/secrets/${var.slack.kubernetes_secret_name}/it_pts_dai_monitoring
+              http_config:
+                follow_redirects: true
+                enable_http2: true
+              color: '{{ template "slack.color" . }}'
+              title: '{{ template "slack.title" . }}'
+              text: '{{ template "slack.text" . }}'
+
+              channel: '#it_pts_dai_monitoring'
+              actions:
+                - type: button
+                  text: 'Runbook :green_book:'
+                  url: '{{ (index .Alerts 0).Annotations.runbook_url }}'
+                - type: button
+                  text: 'Query :mag:'
+                  url: '{{ (index .Alerts 0).GeneratorURL }}'
+                - type: button
+                  text: 'Dashboard :chart_with_upwards_trend:'
+                  url: '{{ (index .Alerts 0).Annotations.dashboard_url }}'
+                - type: button
+                  text: 'Silence :no_bell:'
+                  url: '{{ template "__alert_silence_link" . }}'
+          %{endif}
+          %{if var.enable_pagerduty}
+          - name: pagerduty-platform
+            pagerduty_configs:
+            - send_resolved: true
+              http_config:
+                follow_redirects: true
+                enable_http2: true
+              routing_key_file: /etc/alertmanager/secrets/${var.pagerduty.kubernetes_secret_name}/pagerduty_dai_platform_key
+              url: https://events.pagerduty.com/v2/enqueue
+              client: '{{ template "pagerduty.default.client" . }}'
+              client_url: '{{ template "pagerduty.default.clientURL" . }}'
+              description: '{{ template "pagerduty.title" . }}'
+              # details: '{{ template "pagerduty.details" . }}'
+              source: '{{ template "pagerduty.default.client" . }}'
+              severity: '{{ .CommonLabels.severity }}'
+          %{endif}
+      templateFiles:
+        common.tmpl: |-
+          ${indent(6, file("${path.module}/files/helm/prometheus/alertmanager/templates/common.tmpl"))}
+        pagerduty.tmpl: |-
+          ${indent(6, file("${path.module}/files/helm/prometheus/alertmanager/templates/pagerduty.tmpl"))}
+        slack.tmpl: |-
+          ${indent(6, file("${path.module}/files/helm/prometheus/alertmanager/templates/slack.tmpl"))}
     EOT
   ]
 
   set = try(var.prometheus_stack.set, [])
 
-  # TODO: Placeholder for future use
-  additional_helm_releases = {
-    pagerduty_config = {
-      create = var.enable_pagerduty
-
-      description   = "PagerDuty Alert Manager Config"
-      chart         = "custom-resources"
-      chart_version = "0.1.0"
-      repository    = "https://dnd-it.github.io/helm-charts"
-
-      values = [
-        <<-EOT
-        apiVersion: monitoring.coreos.com/v1alpha1
-        kind: AlertmanagerConfig
-        metadata:
-          name: pagerduty
-          namespace: monitoring
-        spec:
-          route:
-            receiver: 'pagerduty'
-        EOT
-      ]
-    }
-  }
-
   depends_on = [
     module.prometheus_operator_crds,
     module.addons,
     module.okta_secrets,
-    module.pagerduty_secrets
+    module.pagerduty_secrets,
+    module.slack_secrets
   ]
 }
 
@@ -339,7 +437,7 @@ locals {
 module "grafana" {
   source = "./modules/addon"
 
-  create = var.enable_grafana
+  create = var.create_addons && var.enable_grafana
 
   chart         = "grafana"
   chart_version = "8.4.4"
@@ -382,6 +480,7 @@ module "grafana" {
       auth:
         disable_login_form: true
         disable_signout_menu: true
+        sigv4_auth_enabled: ${var.enable_amp}
       auth.proxy:
         enabled: false
         auto_login: true
@@ -400,14 +499,14 @@ module "grafana" {
           - { name: Alertmanager, orgId: 1 }
           - { name: Prometheus, orgId: 1 }
         datasources:
-          - name: Prometheus
+          - name: ${var.enable_amp ? "Prometheus-Local" : "Prometheus"}
             type: prometheus
-            uid: prometheus
+            uid: ${var.enable_amp ? "prometheus-local" : "prometheus"}
             access: proxy
-            url: http://${module.prometheus_stack.name}-prometheus.${local.monitoring_namespace}.svc.cluster.local:9090
+            url: ${local.prometheus_service_url}
             jsonData:
               prometheusType: Prometheus
-            isDefault: true
+            isDefault: ${var.enable_amp ? false : true}
           - name: Alertmanager
             type: alertmanager
             uid: alertmanager
@@ -423,6 +522,21 @@ module "grafana" {
             jsonData:
               authType: default
               defaultRegion: ${local.region}
+          %{if var.enable_amp}
+          - name: Prometheus
+            type: prometheus
+            uid: prometheus
+            access: proxy
+            url: ${module.amp.workspace_prometheus_endpoint}
+            jsonData:
+              prometheusType: Prometheus
+            isDefault: true
+            basicAuth: false
+            jsonData:
+              sigV4Auth: true
+              sigV4AuthType: default
+              sigV4Region: ${local.region}
+          %{endif}
     serviceMonitor:
       enabled: ${var.enable_prometheus_stack}
     EOT
@@ -441,7 +555,8 @@ module "grafana" {
   set_irsa_names = ["serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn"]
   role_name      = "grafana-${local.id}"
   role_policies = {
-    CloudWatchReadOnlyAccess = "arn:aws:iam::aws:policy/CloudWatchReadOnlyAccess"
+    CloudWatchReadOnlyAccess    = "arn:aws:iam::aws:policy/CloudWatchReadOnlyAccess"
+    AmazonPrometheusQueryAccess = "arn:aws:iam::aws:policy/AmazonPrometheusQueryAccess"
   }
 
   oidc_providers = {
@@ -501,7 +616,7 @@ module "grafana" {
 module "okta_secrets" {
   source = "./modules/addon"
 
-  create = var.enable_okta
+  create = var.create_addons && var.enable_okta
 
   name          = "okta-secrets"
   chart         = "custom-resources"
@@ -546,7 +661,7 @@ module "okta_secrets" {
 module "pagerduty_secrets" {
   source = "./modules/addon"
 
-  create = var.enable_pagerduty
+  create = var.create_addons && var.enable_pagerduty
 
   name          = "pagerduty-secrets"
   chart         = "custom-resources"
@@ -572,6 +687,45 @@ module "pagerduty_secrets" {
       dataFrom:
         - extract:
             key: ${var.pagerduty.secrets_manager_secret_name}
+    EOT
+  ]
+
+  release_delay_destroy_duration = "1m"
+
+  depends_on = [
+    module.addons
+  ]
+}
+
+module "slack_secrets" {
+  source = "./modules/addon"
+
+  create = var.create_addons && var.enable_slack
+
+  name          = "slack-secrets"
+  chart         = "custom-resources"
+  chart_version = "0.1.0"
+  repository    = "https://dnd-it.github.io/helm-charts"
+  description   = "Slack Secrets"
+  namespace     = local.monitoring_namespace
+
+  values = [
+    <<-EOT
+    apiVersion: external-secrets.io/v1beta1
+    kind: ExternalSecret
+    metadata:
+      name: slack-secrets
+    spec:
+      refreshInterval: 5m0s
+      secretStoreRef:
+        name: aws-secretsmanager
+        kind: ClusterSecretStore
+      target:
+        name: ${var.slack.kubernetes_secret_name}
+        creationPolicy: Owner
+      dataFrom:
+        - extract:
+            key: ${var.slack.secrets_manager_secret_name}
     EOT
   ]
 

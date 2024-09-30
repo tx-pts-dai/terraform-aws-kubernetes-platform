@@ -1,10 +1,12 @@
 cleanPrometheusOperatorObjectNames: true
 prometheus:
-  priorityClassName: system-cluster-critical
+  promtheusSpec:
+    priorityClassName: system-cluster-critical
 alertmanager:
-  priorityClassName: system-cluster-critical
+  alertmanagerSpec:
+    priorityClassName: system-cluster-critical
+
 prometheus-node-exporter:
-  priorityClassName: system-node-critical
   affinity:
     nodeAffinity:
       requiredDuringSchedulingIgnoredDuringExecution:

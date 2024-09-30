@@ -1,3 +1,18 @@
+variable "metadata" {
+  description = "Metadata for the platform"
+  type = object({
+    environment = optional(string, "")
+    team        = optional(string, "")
+  })
+  default = {}
+}
+
+variable "create_addons" {
+  description = "Create the platform addons. if set to false, no addons will be created"
+  type        = bool
+  default     = true
+}
+
 variable "name" {
   description = "The name of the platform, a timestamp will be appended to this name to make the stack_name. If not provided, the name of the directory will be used."
   type        = string
@@ -90,15 +105,23 @@ variable "pagerduty" {
   default = {}
 }
 
-################################################################################
-# Core Addons - Installed by default
-
-variable "enable_karpenter" {
-  description = "Enable Karpenter"
+variable "enable_slack" {
+  description = "Enable Slack integration"
   type        = bool
-  default     = true
+  default     = false
 }
 
+variable "slack" {
+  description = "Slack configurations"
+  type = object({
+    secrets_manager_secret_name = optional(string, "")
+    kubernetes_secret_name      = optional(string, "slack")
+  })
+  default = {}
+}
+
+################################################################################
+# Core Addons - Installed by default
 variable "karpenter" {
   description = "Karpenter configurations"
   type        = any
@@ -181,9 +204,9 @@ variable "fluent_operator" {
 }
 
 variable "fluent_log_annotation" {
-  description = "Annotation to add to pods to get logs stored in cloudwatch"
+  description = "Pod Annotation required to enable fluent bit logging. Setting name to empty string will disable annotation requirement."
   type = object({
-    name  = optional(string, "kaas.tamedia.ch/logging")
+    name  = optional(string, "fluentbit.io/include")
     value = optional(string, "true")
   })
   default = {}
@@ -206,6 +229,12 @@ variable "prometheus_stack" {
   description = "Prometheus stack configurations"
   type        = any
   default     = {}
+}
+
+variable "enable_amp" {
+  description = "Enable AWS Managed Prometheus"
+  type        = bool
+  default     = false
 }
 
 variable "enable_grafana" {

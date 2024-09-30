@@ -1,0 +1,59 @@
+{
+  "receiver": "receiver",
+  "status": "firing",
+  "alerts": [
+    {
+      "status": "firing",
+      "labels": {
+        "job":          "some-job",
+        "label2":       "value2",
+        "instance":     "some-instance01:1234",
+        "commonlabelkey1": "commonlabelvalue1",
+        "commonlabelkey2": "commonlabelvalue2"
+      },
+      "annotations": {
+        "title":        "Alert Title text",
+        "description":  "Configuration has failed to load for {{ $labels.namespace }}/{{ $labels.pod}}.",
+        "runbook":      "https://runbooks.prometheus-operator.dev/runbooks/alertmanager/alertmanagerfailedreload",
+        "summary":      "Reloading an Alertmanager configuration has failed."
+      },
+      "generatorURL": "https://prometheus-dev.example.com"
+    },
+    {
+      "status": "resolved",
+      "labels": {
+        "job":          "some-job",
+        "label2":       "value2",
+        "instance":     "some-instance02:1234",
+        "manyletters":  "long_long_text_to_test_how_it_looks_like_in_the_alert_message_foo_bar_baz",
+        "commonlabelkey1": "commonlabelvalue1",
+        "commonlabelkey2": "commonlabelvalue2"
+      },
+      "annotations": {
+        "title":        "Alert Title text",
+        "description":  "Errors encountered while the {{$labels.pod}} config-reloader sidecar attempts to sync config in {{$labels.namespace}} namespace. As a result, configuration for service running in {{$labels.pod}} may be stale and cannot be updated anymore.",
+        "runbook":      "https://runbooks.prometheus-operator.dev/runbooks/prometheus-operator/configreloadersidecarerrors",
+        "summary":      "config-reloader sidecar has not had a successful reload for 10m"
+      },
+      "generatorURL": "https://prometheus-dev.example.com"
+    }
+  ],
+  "groupLabels": {
+    "namespace":      "monitoring",
+    "grouplabelkey2": "grouplabelvalue2"
+  },
+  "commonLabels": {
+    "alertname":   "InstanceDown",
+    "job":         "some-job",
+    "severity":    "critical",
+    "kind":        "platform",
+    "cluster":     "foo-cluster",
+    "team":        "foo-team",
+    "environment": "foo-environment"
+  },
+  "commonAnnotations": {
+    "commonannotationfoo": "foo",
+    "commonannotationbar": "bar"
+  },
+  "externalURL": "https://alertmanager-dev.example.com"
+}

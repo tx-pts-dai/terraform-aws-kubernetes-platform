@@ -10,7 +10,8 @@ locals {
   karpenter = {
     subnet_cidrs = try(var.karpenter.subnet_cidrs, module.network.grouped_networks.karpenter)
 
-    namespace       = "kube-system"
+    namespace = "kube-system"
+    # TODO: move to helm value inputs
     pod_annotations = try(var.karpenter.pod_annotations, {})
   }
 
@@ -41,8 +42,6 @@ module "karpenter" {
 module "karpenter_crds" {
   source = "./modules/addon"
 
-  create = var.enable_karpenter
-
   chart            = "karpenter-crd"
   chart_version    = "0.37.0"
   repository       = "oci://public.ecr.aws/karpenter"
@@ -54,8 +53,6 @@ module "karpenter_crds" {
 
 module "karpenter_release" {
   source = "./modules/addon"
-
-  create = var.enable_karpenter
 
   chart            = "karpenter"
   chart_version    = "0.37.0"
@@ -166,6 +163,7 @@ module "karpenter_release" {
   }
 
   depends_on = [
+    # service monitor depends on prometheus operator CRDs
     module.prometheus_operator_crds,
     module.karpenter_crds,
     module.karpenter,

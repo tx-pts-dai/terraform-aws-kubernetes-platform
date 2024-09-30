@@ -1,3 +1,9 @@
+variable "create" {
+  description = "Create the security group."
+  type        = bool
+  default     = true
+}
+
 variable "tags" {
   description = "A map of tags to add to all resources."
   type        = map(string)
