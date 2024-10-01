@@ -32,11 +32,11 @@ provider "cloudflare" {
 module "cloudflare" {
   source = "../../cloudflare"
 
-  for_each = var.zones
+  for_each = module.route53_zones.route53_zone_name
 
-  zone_name    = module.route53_zones[each.key].route53_zone_name[each.key]
+  zone_name    = each.key
   comment      = "Managed by KAAS examples"
-  name_servers = module.route53_zones[each.key].route53_zone_name_servers[each.key]
+  name_servers = module.route53_zones.route53_zone_name_servers[each.key]
   account_id   = jsondecode(data.aws_secretsmanager_secret_version.cloudflare.secret_string)["accountId"]
 }
 
@@ -44,11 +44,5 @@ module "route53_zones" {
   source  = "terraform-aws-modules/route53/aws//modules/zones"
   version = "2.11.1"
 
-  for_each = var.zones
-
-  zones = {
-    (each.key) = {
-      comment = each.value.comment
-    }
-  }
+  zones = var.zones
 }

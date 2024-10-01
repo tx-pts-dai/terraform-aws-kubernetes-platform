@@ -10,11 +10,13 @@ data "cloudflare_zone" "this" {
 }
 
 resource "cloudflare_record" "ns" {
-  count   = length(var.name_servers)
+  for_each = toset(var.name_servers)
+
   zone_id = data.cloudflare_zone.this.id
+
   name    = var.zone_name
   comment = var.comment
   type    = "NS"
-  value   = element(var.name_servers, count.index)
+  content = each.value
   ttl     = 3600
 }
