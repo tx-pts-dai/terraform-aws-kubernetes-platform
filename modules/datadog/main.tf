@@ -97,7 +97,7 @@ resource "helm_release" "datadog_secrets_fargate" {
 }
 
 ################################################################################
-# Datadog Agent
+# Datadog Agent - available specs options https://github.com/DataDog/datadog-operator/blob/main/docs/configuration.v2alpha1.md
 
 resource "helm_release" "datadog_agent" {
   name       = "datadog-agent"
@@ -171,6 +171,8 @@ resource "helm_release" "datadog_agent" {
                     app.kubernetes.io/name: karpenter
       override:
         clusterAgent:
+          priorityClassName: system-cluster-critical
+          replicas: 2
           containers:
             cluster-agent:
               resources:
