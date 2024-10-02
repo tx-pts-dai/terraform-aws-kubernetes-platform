@@ -22,22 +22,11 @@ terraform {
 }
 
 data "aws_secretsmanager_secret_version" "cloudflare" {
-  secret_id = "dai/cloudflare/tamedia/apiToken"
+  secret_id = "dai/cloudflare/apiToken"
 }
 
 provider "cloudflare" {
   api_token = jsondecode(data.aws_secretsmanager_secret_version.cloudflare.secret_string)["apiToken"]
-}
-
-module "cloudflare" {
-  source = "../../cloudflare"
-
-  for_each = module.route53_zones.route53_zone_name
-
-  zone_name    = each.key
-  comment      = "Managed by KAAS examples"
-  name_servers = module.route53_zones.route53_zone_name_servers[each.key]
-  account_id   = jsondecode(data.aws_secretsmanager_secret_version.cloudflare.secret_string)["accountId"]
 }
 
 module "route53_zones" {
@@ -45,4 +34,22 @@ module "route53_zones" {
   version = "2.11.1"
 
   zones = var.zones
+}
+
+module "cloudflare" {
+  source = "./../../cloudflare"
+
+  for_each = var.zones
+
+  account_id = jsondecode(data.aws_secretsmanager_secret_version.cloudflare.secret_string)["accountId"]
+  zone_name  = "example.ch"
+
+  records = [
+    for i in range(4) : {
+      name    = each.key
+      type    = "NS"
+      content = module.route53_zones.route53_zone_name_servers[each.key][i]
+      ttl     = 3600
+    }
+  ]
 }

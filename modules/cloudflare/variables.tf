@@ -1,20 +1,20 @@
-variable "zone_name" {
-  description = "The domain name to delegate in Cloudflare"
-  type        = string
+variable "records" {
+  description = "List of records to create in Cloudflare"
+  type = list(object({
+    name    = string
+    comment = optional(string, "Managed by Terraform")
+    type    = string
+    content = string
+    ttl     = optional(number, 60)
+  }))
 }
 
-variable "name_servers" {
-  description = "List of name servers to delegate to Cloudflare"
-  type        = list(string)
+variable "zone_name" {
+  description = "The zone to create records in"
+  type        = string
 }
 
 variable "account_id" {
   description = "Cloudflare account id"
   type        = string
-}
-
-variable "comment" {
-  description = "Record comment"
-  type        = string
-  default     = "Managed by Terraform"
 }

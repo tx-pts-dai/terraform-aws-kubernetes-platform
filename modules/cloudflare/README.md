@@ -35,7 +35,7 @@ No modules.
 
 | Name | Type |
 |------|------|
-| [cloudflare_record.ns](https://registry.terraform.io/providers/cloudflare/cloudflare/latest/docs/resources/record) | resource |
+| [cloudflare_record.this](https://registry.terraform.io/providers/cloudflare/cloudflare/latest/docs/resources/record) | resource |
 | [cloudflare_zone.this](https://registry.terraform.io/providers/cloudflare/cloudflare/latest/docs/data-sources/zone) | data source |
 
 ## Inputs
@@ -43,13 +43,14 @@ No modules.
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_account_id"></a> [account\_id](#input\_account\_id) | Cloudflare account id | `string` | n/a | yes |
-| <a name="input_comment"></a> [comment](#input\_comment) | Record comment | `string` | `"Managed by Terraform"` | no |
-| <a name="input_name_servers"></a> [name\_servers](#input\_name\_servers) | List of name servers to delegate to Cloudflare | `list(string)` | n/a | yes |
-| <a name="input_zone_name"></a> [zone\_name](#input\_zone\_name) | The domain name to delegate in Cloudflare | `string` | n/a | yes |
+| <a name="input_records"></a> [records](#input\_records) | List of records to create in Cloudflare | <pre>list(object({<br>    name    = string<br>    comment = optional(string, "Managed by Terraform")<br>    type    = string<br>    content = string<br>    ttl     = optional(number, 60)<br>  }))</pre> | n/a | yes |
+| <a name="input_zone_name"></a> [zone\_name](#input\_zone\_name) | The zone to create records in | `string` | n/a | yes |
 
 ## Outputs
 
-No outputs.
+| Name | Description |
+|------|-------------|
+| <a name="output_records"></a> [records](#output\_records) | A map of cloudflare records |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 
 <!-- BEGIN_TF_DOCS -->

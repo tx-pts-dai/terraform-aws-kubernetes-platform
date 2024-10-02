@@ -3,5 +3,9 @@ variable "zones" {
   type = map(object({
     comment = optional(string, "")
   }))
-  default = {}
+  default = {
+    "test.exmaple.ch" = {
+      comment = "Managed by KAAS examples"
+    }
+  }
 }
