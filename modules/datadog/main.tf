@@ -107,6 +107,8 @@ resource "helm_release" "datadog_agent" {
 
   values = [
     <<-YAML
+    # yaml-language-server: $schema=https://github.com/datreeio/CRDs-catalog/blob/main/datadoghq.com/datadogagent_v2alpha1.json
+    # The line above allows vscode to validate the yaml file. To validate, copy the yaml as is with comments included into your editor
     apiVersion: datadoghq.com/v2alpha1
     kind: DatadogAgent
     metadata:
