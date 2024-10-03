@@ -203,7 +203,7 @@ locals {
 
 module "prometheus_irsa" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
-  version = "5.44.0"
+  version = "5.44.2"
 
   create_role = var.create_addons && var.enable_prometheus_stack
 
