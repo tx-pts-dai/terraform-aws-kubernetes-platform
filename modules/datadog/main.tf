@@ -127,8 +127,6 @@ resource "helm_release" "datadog_agent" {
           appSecret:
             secretName: datadog-keys
             keyName: app-key
-      agent:
-        properties:
       features:
         apm:
           enabled: true

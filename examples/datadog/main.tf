@@ -130,5 +130,10 @@ module "datadog" {
   environment    = "sandbox"
   product_name   = "dai"
 
+  datadog_agent_helm_values = [{
+    name  = "override.clusterAgent.replicas",
+    value = 3
+  }]
+
   depends_on = [module.k8s_platform]
 }
