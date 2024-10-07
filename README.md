@@ -134,7 +134,7 @@ as described in the `.pre-commit-config.yaml` file
 | <a name="module_amp"></a> [amp](#module\_amp) | terraform-aws-modules/managed-service-prometheus/aws | 3.0.0 |
 | <a name="module_cluster_secret_store"></a> [cluster\_secret\_store](#module\_cluster\_secret\_store) | ./modules/addon | n/a |
 | <a name="module_downscaler"></a> [downscaler](#module\_downscaler) | tx-pts-dai/downscaler/kubernetes | 0.3.1 |
-| <a name="module_ebs_csi_driver_irsa"></a> [ebs\_csi\_driver\_irsa](#module\_ebs\_csi\_driver\_irsa) | terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks | 5.44.1 |
+| <a name="module_ebs_csi_driver_irsa"></a> [ebs\_csi\_driver\_irsa](#module\_ebs\_csi\_driver\_irsa) | terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks | 5.44.2 |
 | <a name="module_eks"></a> [eks](#module\_eks) | terraform-aws-modules/eks/aws | 20.24.2 |
 | <a name="module_fluent_operator"></a> [fluent\_operator](#module\_fluent\_operator) | ./modules/addon | n/a |
 | <a name="module_grafana"></a> [grafana](#module\_grafana) | ./modules/addon | n/a |
@@ -145,12 +145,13 @@ as described in the `.pre-commit-config.yaml` file
 | <a name="module_network"></a> [network](#module\_network) | ./modules/network | n/a |
 | <a name="module_okta_secrets"></a> [okta\_secrets](#module\_okta\_secrets) | ./modules/addon | n/a |
 | <a name="module_pagerduty_secrets"></a> [pagerduty\_secrets](#module\_pagerduty\_secrets) | ./modules/addon | n/a |
-| <a name="module_prometheus_irsa"></a> [prometheus\_irsa](#module\_prometheus\_irsa) | terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks | 5.44.0 |
+| <a name="module_prometheus_irsa"></a> [prometheus\_irsa](#module\_prometheus\_irsa) | terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks | 5.44.2 |
 | <a name="module_prometheus_operator_crds"></a> [prometheus\_operator\_crds](#module\_prometheus\_operator\_crds) | ./modules/addon | n/a |
 | <a name="module_prometheus_stack"></a> [prometheus\_stack](#module\_prometheus\_stack) | ./modules/addon | n/a |
+| <a name="module_reloader"></a> [reloader](#module\_reloader) | ./modules/addon | n/a |
 | <a name="module_slack_secrets"></a> [slack\_secrets](#module\_slack\_secrets) | ./modules/addon | n/a |
 | <a name="module_ssm"></a> [ssm](#module\_ssm) | ./modules/ssm | n/a |
-| <a name="module_vpc_cni_irsa"></a> [vpc\_cni\_irsa](#module\_vpc\_cni\_irsa) | terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks | 5.44.0 |
+| <a name="module_vpc_cni_irsa"></a> [vpc\_cni\_irsa](#module\_vpc\_cni\_irsa) | terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks | 5.44.2 |
 
 ## Resources
 
@@ -176,11 +177,11 @@ as described in the `.pre-commit-config.yaml` file
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_acm_certificate"></a> [acm\_certificate](#input\_acm\_certificate) | ACM certificate configuration. If wildcard\_certificates is true, all domains will include a wildcard prefix. | <pre>object({<br>    domain_name               = optional(string) # Overrides base_domain<br>    subject_alternative_names = optional(list(string), [])<br>    wildcard_certificates     = optional(bool, false)<br>    wait_for_validation       = optional(bool, false)<br>  })</pre> | `{}` | no |
+| <a name="input_acm_certificate"></a> [acm\_certificate](#input\_acm\_certificate) | ACM certificate configuration. If wildcard\_certificates is true, all domains will include a wildcard prefix. | <pre>object({<br/>    domain_name               = optional(string) # Overrides base_domain<br/>    subject_alternative_names = optional(list(string), [])<br/>    wildcard_certificates     = optional(bool, false)<br/>    wait_for_validation       = optional(bool, false)<br/>  })</pre> | `{}` | no |
 | <a name="input_aws_load_balancer_controller"></a> [aws\_load\_balancer\_controller](#input\_aws\_load\_balancer\_controller) | AWS Load Balancer Controller configurations | `any` | `{}` | no |
 | <a name="input_base_domain"></a> [base\_domain](#input\_base\_domain) | Base domain for the platform, used for ingress and ACM certificates | `string` | `"test"` | no |
 | <a name="input_cert_manager"></a> [cert\_manager](#input\_cert\_manager) | Cert Manager configurations | `any` | `{}` | no |
-| <a name="input_cluster_admins"></a> [cluster\_admins](#input\_cluster\_admins) | Map of IAM roles to add as cluster admins. Only exact matching role names are returned | <pre>map(object({<br>    role_name         = string<br>    kubernetes_groups = optional(list(string))<br>  }))</pre> | `{}` | no |
+| <a name="input_cluster_admins"></a> [cluster\_admins](#input\_cluster\_admins) | Map of IAM roles to add as cluster admins. Only exact matching role names are returned | <pre>map(object({<br/>    role_name         = string<br/>    kubernetes_groups = optional(list(string))<br/>  }))</pre> | `{}` | no |
 | <a name="input_create_addons"></a> [create\_addons](#input\_create\_addons) | Create the platform addons. if set to false, no addons will be created | `bool` | `true` | no |
 | <a name="input_downscaler"></a> [downscaler](#input\_downscaler) | Downscaler configurations | `any` | `{}` | no |
 | <a name="input_eks"></a> [eks](#input\_eks) | Map of EKS configurations | `any` | `{}` | no |
@@ -199,23 +200,25 @@ as described in the `.pre-commit-config.yaml` file
 | <a name="input_enable_okta"></a> [enable\_okta](#input\_enable\_okta) | Enable Okta integration | `bool` | `false` | no |
 | <a name="input_enable_pagerduty"></a> [enable\_pagerduty](#input\_enable\_pagerduty) | Enable PagerDuty integration | `bool` | `false` | no |
 | <a name="input_enable_prometheus_stack"></a> [enable\_prometheus\_stack](#input\_enable\_prometheus\_stack) | Enable Prometheus stack | `bool` | `true` | no |
+| <a name="input_enable_reloader"></a> [enable\_reloader](#input\_enable\_reloader) | Enable Reloader | `bool` | `true` | no |
 | <a name="input_enable_slack"></a> [enable\_slack](#input\_enable\_slack) | Enable Slack integration | `bool` | `false` | no |
 | <a name="input_external_dns"></a> [external\_dns](#input\_external\_dns) | External DNS configurations | `any` | `{}` | no |
 | <a name="input_external_secrets"></a> [external\_secrets](#input\_external\_secrets) | External Secrets configurations | `any` | `{}` | no |
 | <a name="input_fargate_fluentbit"></a> [fargate\_fluentbit](#input\_fargate\_fluentbit) | Fargate Fluentbit configurations | `any` | `{}` | no |
 | <a name="input_fluent_cloudwatch_retention_in_days"></a> [fluent\_cloudwatch\_retention\_in\_days](#input\_fluent\_cloudwatch\_retention\_in\_days) | Number of days to keep logs in cloudwatch | `string` | `"7"` | no |
-| <a name="input_fluent_log_annotation"></a> [fluent\_log\_annotation](#input\_fluent\_log\_annotation) | Pod Annotation required to enable fluent bit logging. Setting name to empty string will disable annotation requirement. | <pre>object({<br>    name  = optional(string, "fluentbit.io/include")<br>    value = optional(string, "true")<br>  })</pre> | `{}` | no |
+| <a name="input_fluent_log_annotation"></a> [fluent\_log\_annotation](#input\_fluent\_log\_annotation) | Pod Annotation required to enable fluent bit logging. Setting name to empty string will disable annotation requirement. | <pre>object({<br/>    name  = optional(string, "fluentbit.io/include")<br/>    value = optional(string, "true")<br/>  })</pre> | `{}` | no |
 | <a name="input_fluent_operator"></a> [fluent\_operator](#input\_fluent\_operator) | Fluent configurations | `any` | `{}` | no |
 | <a name="input_grafana"></a> [grafana](#input\_grafana) | Grafana configurations, used to override default configurations | `any` | `{}` | no |
 | <a name="input_ingress_nginx"></a> [ingress\_nginx](#input\_ingress\_nginx) | Ingress Nginx configurations | `any` | `{}` | no |
 | <a name="input_karpenter"></a> [karpenter](#input\_karpenter) | Karpenter configurations | `any` | `{}` | no |
-| <a name="input_metadata"></a> [metadata](#input\_metadata) | Metadata for the platform | <pre>object({<br>    environment = optional(string, "")<br>    team        = optional(string, "")<br>  })</pre> | `{}` | no |
+| <a name="input_metadata"></a> [metadata](#input\_metadata) | Metadata for the platform | <pre>object({<br/>    environment = optional(string, "")<br/>    team        = optional(string, "")<br/>  })</pre> | `{}` | no |
 | <a name="input_metrics_server"></a> [metrics\_server](#input\_metrics\_server) | Metrics Server configurations | `any` | `{}` | no |
 | <a name="input_name"></a> [name](#input\_name) | The name of the platform, a timestamp will be appended to this name to make the stack\_name. If not provided, the name of the directory will be used. | `string` | `""` | no |
-| <a name="input_okta"></a> [okta](#input\_okta) | Okta configurations | <pre>object({<br>    base_url                    = optional(string, "")<br>    secrets_manager_secret_name = optional(string, "")<br>    kubernetes_secret_name      = optional(string, "okta")<br>  })</pre> | `{}` | no |
-| <a name="input_pagerduty"></a> [pagerduty](#input\_pagerduty) | PagerDuty configurations | <pre>object({<br>    secrets_manager_secret_name = optional(string, "")<br>    kubernetes_secret_name      = optional(string, "pagerduty")<br>  })</pre> | `{}` | no |
+| <a name="input_okta"></a> [okta](#input\_okta) | Okta configurations | <pre>object({<br/>    base_url                    = optional(string, "")<br/>    secrets_manager_secret_name = optional(string, "")<br/>    kubernetes_secret_name      = optional(string, "okta")<br/>  })</pre> | `{}` | no |
+| <a name="input_pagerduty"></a> [pagerduty](#input\_pagerduty) | PagerDuty configurations | <pre>object({<br/>    secrets_manager_secret_name = optional(string, "")<br/>    kubernetes_secret_name      = optional(string, "pagerduty")<br/>  })</pre> | `{}` | no |
 | <a name="input_prometheus_stack"></a> [prometheus\_stack](#input\_prometheus\_stack) | Prometheus stack configurations | `any` | `{}` | no |
-| <a name="input_slack"></a> [slack](#input\_slack) | Slack configurations | <pre>object({<br>    secrets_manager_secret_name = optional(string, "")<br>    kubernetes_secret_name      = optional(string, "slack")<br>  })</pre> | `{}` | no |
+| <a name="input_reloader"></a> [reloader](#input\_reloader) | Reloader configurations | `any` | `{}` | no |
+| <a name="input_slack"></a> [slack](#input\_slack) | Slack configurations | <pre>object({<br/>    secrets_manager_secret_name = optional(string, "")<br/>    kubernetes_secret_name      = optional(string, "slack")<br/>  })</pre> | `{}` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | Default tags to apply to all resources | `map(string)` | `{}` | no |
 | <a name="input_vpc"></a> [vpc](#input\_vpc) | Map of VPC configurations | `any` | `{}` | no |
 

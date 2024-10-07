@@ -202,3 +202,28 @@ module "cluster_secret_store" {
     module.addons
   ]
 }
+
+################################################################################
+# Reloader
+module "reloader" {
+  source = "./modules/addon"
+  create = var.create_addons && var.enable_reloader
+
+  chart         = "reloader"
+  chart_version = "1.0.121"
+  repository    = "https://stakater.github.io/stakater-charts"
+  description   = "Reloader"
+  namespace     = local.monitoring_namespace
+
+  create_namespace = true
+
+  # https://github.com/stakater/Reloader/blob/master/deployments/kubernetes/chart/reloader/values.yaml
+  values = [
+    file("${path.module}/files/helm/reloader/common.yaml")
+  ]
+
+  set = try(var.reloader.set, [])
+
+  additional_delay_create_duration  = "10s" # TODO: Remove when CRDs are split out
+  additional_delay_destroy_duration = "10s"
+}
