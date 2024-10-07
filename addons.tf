@@ -207,7 +207,6 @@ module "cluster_secret_store" {
 # Reloader
 module "reloader" {
   source = "./modules/addon"
-
   create = var.create_addons && var.enable_reloader
 
   chart         = "reloader"
