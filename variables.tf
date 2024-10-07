@@ -176,6 +176,19 @@ variable "external_secrets" {
   default     = {}
 }
 
+variable "enable_reloader" {
+  description = "Enable Reloader"
+  type        = bool
+  default     = true
+}
+
+variable "reloader" {
+  description = "Reloader configurations"
+  type        = any
+  default     = {}
+}
+
+
 ################################################################################
 # Logging and Monitoring
 

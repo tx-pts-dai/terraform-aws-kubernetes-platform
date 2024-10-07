@@ -137,32 +137,32 @@ module "k8s_platform" {
 
   enable_downscaler = true
 
-  enable_pagerduty = true
+  enable_pagerduty = false
   pagerduty = {
     secrets_manager_secret_name = "dai/platform/pagerduty"
   }
 
-  enable_okta = true
+  enable_okta = false
   okta = {
     base_url                    = "https://login.tx.group"
     secrets_manager_secret_name = "dai/platform/okta"
   }
 
-  enable_slack = true
+  enable_slack = false
   slack = {
     secrets_manager_secret_name = "dai/platform/slack"
   }
 
   base_domain = "dai.tx.group"
 
-  enable_acm_certificate = true
+  enable_acm_certificate = false
   acm_certificate = {
     subject_alternative_names = [
       "prometheus",
       "alertmanager",
       "grafana",
     ]
-    wildcard_certificates = true
+    wildcard_certificates = false
   }
 
   fluent_log_annotation = {
@@ -170,5 +170,5 @@ module "k8s_platform" {
     value = ""
   }
 
-  enable_amp = true
+  enable_amp = false
 }
