@@ -131,7 +131,7 @@ module "datadog" {
   product_name   = "dai"
 
   # Example: how to override specs in the Datadog Custom Resource
-  datadog_agent_helm_values = [{ name = "override.clusterAgent.replicas", value = 1 }]
+  datadog_agent_helm_values = [{ name = "spec.override.clusterAgent.replicas", value = 3 }]
 
   depends_on = [module.k8s_platform]
 }
