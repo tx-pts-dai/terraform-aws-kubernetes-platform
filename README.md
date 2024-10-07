@@ -93,7 +93,7 @@ spec:
     metadata:
 ```
 
-Reloader will now watch for updates and manage rolling restats of pods.
+Reloader will now watch for updates and manage rolling restats of pods for this specific deployment.
 
 ## Examples
 
