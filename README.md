@@ -79,7 +79,7 @@ The [Stakater Reloader](https://github.com/stakater/Reloader) is a Kubernetes co
 
 When an application relies on configuration data or sensitive information stored in ConfigMaps or Secrets, and these resources are modified, Reloader automates the process of applying these changes by updating the relevant pods. Without Reloader, such changes would require a manual pod restart or redeployment to take effect.
 
-Reloader is deployed by default on the cluster but is used as "on demand" via annotating kubernetes deployments.
+Reloader is deployed by default on the cluster but is used as "on demand" via annotations.
 
 Considering this kubernetes deployment and the required annotation:
 ```yaml
