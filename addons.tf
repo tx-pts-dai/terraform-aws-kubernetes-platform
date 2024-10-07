@@ -219,9 +219,6 @@ module "reloader" {
   create_namespace = true
 
   # https://github.com/stakater/Reloader/blob/master/deployments/kubernetes/chart/reloader/values.yaml
-  values = [
-    file("${path.module}/files/helm/reloader/common.yaml")
-  ]
 
   set = try(var.reloader.set, [])
 
