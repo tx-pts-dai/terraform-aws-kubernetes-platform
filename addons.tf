@@ -213,7 +213,7 @@ module "reloader" {
   chart_version = "1.0.121"
   repository    = "https://stakater.github.io/stakater-charts"
   description   = "Reloader"
-  namespace     = local.monitoring_namespace
+  namespace     = "reloader"
 
   create_namespace = true
 
