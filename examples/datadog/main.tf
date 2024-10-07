@@ -130,10 +130,11 @@ module "datadog" {
   environment    = "sandbox"
   product_name   = "dai"
 
-  datadog_agent_helm_values = [{
-    name  = "override.clusterAgent.replicas",
-    value = 3
-  }]
+  # Example of how to override helm values in the Datadog Custom Resource
+  datadog_agent_helm_values = [
+    { name = "features.apm.enabled", value = false },
+    { name = "features.logCollection.enabled", value = false }
+  ] #,{ name  = "override.clusterAgent.replicas", value = 1}]
 
   depends_on = [module.k8s_platform]
 }
