@@ -20,6 +20,7 @@ Core components (installed by default):
 - Grafana
 - Fluent Operator
 - Fluentbit for Fargate
+- Reloader
 
 Additional components (optional):
 
@@ -72,6 +73,27 @@ Why this module?
 - To provide an AWS account with a K8s cluster with batteries included so that you can start deploying your workloads on a well-built foundation
 - To encourage standardization and common practices
 - To ease maintenance
+
+## Reloader
+The [Stakater Reloader](https://github.com/stakater/Reloader) is a Kubernetes controller that automatically watches for changes in ConfigMaps and Secrets and triggers rolling restarts of the associated deployments, statefulsets, or daemonsets when these configurations are updated. This functionality ensures that applications deployed within a Kubernetes cluster always reflect the latest configuration without manual intervention.
+
+When an application relies on configuration data or sensitive information stored in ConfigMaps or Secrets, and these resources are modified, Reloader automates the process of applying these changes by updating the relevant pods. Without Reloader, such changes would require a manual pod restart or redeployment to take effect.
+
+Reloader is deployed by default on the cluster but is used as "on demand" via annotating kubernetes deployments.
+
+Considering this kubernetes deployment and the required annotation:
+```yaml
+kind: Deployment
+metadata:
+  name: foo
+  annotations:
+    reloader.stakater.com/auto: "true"
+spec:
+  template:
+    metadata:
+```
+
+Reloader will now watch for updates and manage rolling restats of pods.
 
 ## Examples
 
