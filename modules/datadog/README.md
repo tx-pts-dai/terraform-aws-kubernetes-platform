@@ -15,7 +15,7 @@ module "datadog" {
   depends_on = [module.k8s_platform]
 }
 ```
-<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- BEGIN_TF_DOCS -->
 ## Requirements
 
 | Name | Version |
@@ -71,7 +71,7 @@ module "datadog" {
 ## Outputs
 
 No outputs.
-<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- END_TF_DOCS -->
 
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
@@ -120,7 +120,7 @@ No outputs.
 ## Outputs
 
 No outputs.
-<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- END_TF_DOCS -->
 
 <!-- BEGIN_TF_DOCS -->
 ## Requirements

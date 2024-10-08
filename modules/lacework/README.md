@@ -10,7 +10,7 @@ module "lacework" {
   cluster_name = module.eks.cluster_name
 }
 ```
-<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- BEGIN_TF_DOCS -->
 ## Requirements
 
 | Name | Version |
@@ -59,7 +59,7 @@ module "lacework" {
 ## Outputs
 
 No outputs.
-<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- END_TF_DOCS -->
 
 <!-- BEGIN_TF_DOCS -->
 ## Requirements

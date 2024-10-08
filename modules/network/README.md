@@ -2,7 +2,7 @@
 
 This module is a wrapper around the public VPC module with some additional configuration options suitable for the Tamedia platform.
 
-<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- BEGIN_TF_DOCS -->
 ## Requirements
 
 | Name | Version |
@@ -51,7 +51,7 @@ This module is a wrapper around the public VPC module with some additional confi
 | <a name="output_network_cidr_blocks"></a> [network\_cidr\_blocks](#output\_network\_cidr\_blocks) | A map from network names to allocated address prefixes in CIDR notation. |
 | <a name="output_networks"></a> [networks](#output\_networks) | A list of network objects with name, az, hosts, and cidr\_block. |
 | <a name="output_vpc"></a> [vpc](#output\_vpc) | Map of attributes for the VPC |
-<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- END_TF_DOCS -->
 
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
