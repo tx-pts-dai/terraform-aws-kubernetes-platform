@@ -119,7 +119,7 @@ The module uses the `aws_ssm_parameters_by_path` data source to retrieve paramet
 
 The `filtered_parameters` local variable is used to filter parameters based on the stack name prefix. The `lookup` local variable creates a nested map of stack-specific parameters based on the provided lookup list. The `latest_stack_parameters` local variable identifies and retrieves parameters for the last created stack since we use timestamps in the stack names suffix.
 
-<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- BEGIN_TF_DOCS -->
 ## Requirements
 
 | Name | Version |
@@ -151,7 +151,7 @@ No modules.
 | <a name="input_base_prefix"></a> [base\_prefix](#input\_base\_prefix) | Base SSM namespace prefix for the parameters | `string` | `"infrastructure"` | no |
 | <a name="input_create"></a> [create](#input\_create) | Create the SSM parameters | `bool` | `true` | no |
 | <a name="input_lookup"></a> [lookup](#input\_lookup) | List of parameters to Lookup | `list(any)` | `[]` | no |
-| <a name="input_parameters"></a> [parameters](#input\_parameters) | Map of SSM parameters to create | <pre>map(object({<br/>    name           = optional(string)<br/>    type           = optional(string, "String")<br/>    value          = optional(string)<br/>    insecure_value = optional(string)<br/>  }))</pre> | `{}` | no |
+| <a name="input_parameters"></a> [parameters](#input\_parameters) | Map of SSM parameters to create | <pre>map(object({<br>    name           = optional(string)<br>    type           = optional(string, "String")<br>    value          = optional(string)<br>    insecure_value = optional(string)<br>  }))</pre> | `{}` | no |
 | <a name="input_stack_name"></a> [stack\_name](#input\_stack\_name) | The name of the stack | `string` | `null` | no |
 | <a name="input_stack_name_prefix"></a> [stack\_name\_prefix](#input\_stack\_name\_prefix) | Filter all stacks that include this prefix in the name. | `string` | `""` | no |
 | <a name="input_stack_type"></a> [stack\_type](#input\_stack\_type) | The type of terraform stack to be used in the namespace prefix. platform, network, account, shared | `string` | `""` | no |
@@ -166,7 +166,7 @@ No modules.
 | <a name="output_lookup"></a> [lookup](#output\_lookup) | Map of parameters from filtered parameters containing only keys defined in lookup |
 | <a name="output_parameters"></a> [parameters](#output\_parameters) | All parameters defined in SSM |
 | <a name="output_stacks"></a> [stacks](#output\_stacks) | List of stacks defined in SSM ordered by creation date (latest first) |
-<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- END_TF_DOCS -->
 
 ## Contributions
 

@@ -2,7 +2,7 @@
 
 This module is a wrapper around the public VPC module with some additional configuration options suitable for the Tamedia platform.
 
-<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- BEGIN_TF_DOCS -->
 ## Requirements
 
 | Name | Version |
@@ -39,7 +39,7 @@ This module is a wrapper around the public VPC module with some additional confi
 | <a name="input_enable_nat_gateway"></a> [enable\_nat\_gateway](#input\_enable\_nat\_gateway) | Enable NAT Gateways | `bool` | `true` | no |
 | <a name="input_single_nat_gateway"></a> [single\_nat\_gateway](#input\_single\_nat\_gateway) | Use a single NAT Gateway | `bool` | `true` | no |
 | <a name="input_stack_name"></a> [stack\_name](#input\_stack\_name) | The stack name for the resources | `string` | n/a | yes |
-| <a name="input_subnet_configs"></a> [subnet\_configs](#input\_subnet\_configs) | List of networks objects with their name and size in bits. The order of the list should not change. | `list(map(number))` | <pre>[<br/>  {<br/>    "public": 24<br/>  },<br/>  {<br/>    "private": 24<br/>  },<br/>  {<br/>    "intra": 26<br/>  },<br/>  {<br/>    "database": 26<br/>  },<br/>  {<br/>    "redshift": 26<br/>  },<br/>  {<br/>    "karpenter": 22<br/>  }<br/>]</pre> | no |
+| <a name="input_subnet_configs"></a> [subnet\_configs](#input\_subnet\_configs) | List of networks objects with their name and size in bits. The order of the list should not change. | `list(map(number))` | <pre>[<br>  {<br>    "public": 24<br>  },<br>  {<br>    "private": 24<br>  },<br>  {<br>    "intra": 26<br>  },<br>  {<br>    "database": 26<br>  },<br>  {<br>    "redshift": 26<br>  },<br>  {<br>    "karpenter": 22<br>  }<br>]</pre> | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | A map of tags to add to all resources | `map(string)` | `{}` | no |
 
 ## Outputs
@@ -51,7 +51,7 @@ This module is a wrapper around the public VPC module with some additional confi
 | <a name="output_network_cidr_blocks"></a> [network\_cidr\_blocks](#output\_network\_cidr\_blocks) | A map from network names to allocated address prefixes in CIDR notation. |
 | <a name="output_networks"></a> [networks](#output\_networks) | A list of network objects with name, az, hosts, and cidr\_block. |
 | <a name="output_vpc"></a> [vpc](#output\_vpc) | Map of attributes for the VPC |
-<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- END_TF_DOCS -->
 
 <!-- BEGIN_TF_DOCS -->
 ## Requirements

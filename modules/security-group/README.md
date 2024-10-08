@@ -2,7 +2,7 @@
 
 This module creates a security group and rules.
 
-<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- BEGIN_TF_DOCS -->
 ## Requirements
 
 | Name | Version |
@@ -33,8 +33,8 @@ No modules.
 |------|-------------|------|---------|:--------:|
 | <a name="input_create"></a> [create](#input\_create) | Create the security group. | `bool` | `true` | no |
 | <a name="input_description"></a> [description](#input\_description) | The description of the security group. | `string` | `""` | no |
-| <a name="input_egress_rules"></a> [egress\_rules](#input\_egress\_rules) | The egress rules for the security group. | <pre>map(object({<br/>    type                     = string<br/>    protocol                 = string<br/>    from_port                = number<br/>    to_port                  = number<br/>    description              = optional(string)<br/>    cidr_blocks              = optional(list(string))<br/>    ipv6_cidr_blocks         = optional(list(string))<br/>    prefix_list_ids          = optional(list(string))<br/>    self                     = optional(bool)<br/>    source_security_group_id = optional(string)<br/>  }))</pre> | `{}` | no |
-| <a name="input_ingress_rules"></a> [ingress\_rules](#input\_ingress\_rules) | The ingress rules for the security group. | <pre>map(object({<br/>    type                     = string<br/>    protocol                 = string<br/>    from_port                = number<br/>    to_port                  = number<br/>    description              = optional(string)<br/>    cidr_blocks              = optional(list(string))<br/>    ipv6_cidr_blocks         = optional(list(string))<br/>    prefix_list_ids          = optional(list(string))<br/>    self                     = optional(bool)<br/>    source_security_group_id = optional(string)<br/>  }))</pre> | `{}` | no |
+| <a name="input_egress_rules"></a> [egress\_rules](#input\_egress\_rules) | The egress rules for the security group. | <pre>map(object({<br>    type                     = string<br>    protocol                 = string<br>    from_port                = number<br>    to_port                  = number<br>    description              = optional(string)<br>    cidr_blocks              = optional(list(string))<br>    ipv6_cidr_blocks         = optional(list(string))<br>    prefix_list_ids          = optional(list(string))<br>    self                     = optional(bool)<br>    source_security_group_id = optional(string)<br>  }))</pre> | `{}` | no |
+| <a name="input_ingress_rules"></a> [ingress\_rules](#input\_ingress\_rules) | The ingress rules for the security group. | <pre>map(object({<br>    type                     = string<br>    protocol                 = string<br>    from_port                = number<br>    to_port                  = number<br>    description              = optional(string)<br>    cidr_blocks              = optional(list(string))<br>    ipv6_cidr_blocks         = optional(list(string))<br>    prefix_list_ids          = optional(list(string))<br>    self                     = optional(bool)<br>    source_security_group_id = optional(string)<br>  }))</pre> | `{}` | no |
 | <a name="input_name"></a> [name](#input\_name) | The name of the security group, this name must be unique within the VPC. | `string` | n/a | yes |
 | <a name="input_tags"></a> [tags](#input\_tags) | A map of tags to add to all resources. | `map(string)` | `{}` | no |
 | <a name="input_vpc_id"></a> [vpc\_id](#input\_vpc\_id) | The VPC id to create the security group in. | `string` | n/a | yes |
@@ -42,7 +42,7 @@ No modules.
 ## Outputs
 
 No outputs.
-<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- END_TF_DOCS -->
 
 <!-- BEGIN_TF_DOCS -->
 
