@@ -13,7 +13,7 @@ module "cloudflare" {
   domain_name  = module.route53_zones[each.key].route53_zone_name[each.key]
 }
 ```
-<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- BEGIN_TF_DOCS -->
 ## Requirements
 
 | Name | Version |
@@ -50,7 +50,7 @@ No modules.
 ## Outputs
 
 No outputs.
-<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- END_TF_DOCS -->
 
 <!-- BEGIN_TF_DOCS -->
 <!-- END_TF_DOCS -->

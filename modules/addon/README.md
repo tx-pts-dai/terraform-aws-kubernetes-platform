@@ -126,7 +126,7 @@ module "eks_blueprints_addon" {
 }
 ```
 
-<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- BEGIN_TF_DOCS -->
 ## Requirements
 
 | Name | Version |
@@ -256,4 +256,4 @@ No modules.
 | <a name="output_status"></a> [status](#output\_status) | The status of the release |
 | <a name="output_values"></a> [values](#output\_values) | The compounded values from `values` and `set*` attributes |
 | <a name="output_version"></a> [version](#output\_version) | A SemVer 2 conformant version string of the chart |
-<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- END_TF_DOCS -->

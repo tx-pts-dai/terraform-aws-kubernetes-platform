@@ -119,7 +119,7 @@ The module uses the `aws_ssm_parameters_by_path` data source to retrieve paramet
 
 The `filtered_parameters` local variable is used to filter parameters based on the stack name prefix. The `lookup` local variable creates a nested map of stack-specific parameters based on the provided lookup list. The `latest_stack_parameters` local variable identifies and retrieves parameters for the last created stack since we use timestamps in the stack names suffix.
 
-<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- BEGIN_TF_DOCS -->
 ## Requirements
 
 | Name | Version |
@@ -166,7 +166,7 @@ No modules.
 | <a name="output_lookup"></a> [lookup](#output\_lookup) | Map of parameters from filtered parameters containing only keys defined in lookup |
 | <a name="output_parameters"></a> [parameters](#output\_parameters) | All parameters defined in SSM |
 | <a name="output_stacks"></a> [stacks](#output\_stacks) | List of stacks defined in SSM ordered by creation date (latest first) |
-<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- END_TF_DOCS -->
 
 ## Contributions
 
