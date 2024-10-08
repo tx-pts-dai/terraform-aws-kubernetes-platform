@@ -24,7 +24,7 @@ on:
       - 'renovate.json'
 
 env:
-  TERRAFORM_DOCS_VERSION: v0.16.0
+  TERRAFORM_DOCS_VERSION: v0.19.0
   TFLINT_VERSION: v0.44.1
 
 jobs:
