@@ -127,7 +127,7 @@ The `pre-commit` command will run:
 
 as described in the `.pre-commit-config.yaml` file
 
-<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- BEGIN_TF_DOCS -->
 ## Requirements
 
 | Name | Version |
@@ -250,7 +250,7 @@ as described in the `.pre-commit-config.yaml` file
 |------|-------------|
 | <a name="output_eks"></a> [eks](#output\_eks) | Map of attributes for the EKS cluster |
 | <a name="output_network"></a> [network](#output\_network) | Map of attributes for the EKS cluster |
-<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- END_TF_DOCS -->
 
 ## Authors
 
