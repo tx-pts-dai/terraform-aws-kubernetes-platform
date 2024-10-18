@@ -7,6 +7,7 @@ alertmanager:
     priorityClassName: system-cluster-critical
 
 prometheus-node-exporter:
+  priorityClassName: system-node-critical
   affinity:
     nodeAffinity:
       requiredDuringSchedulingIgnoredDuringExecution:
