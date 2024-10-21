@@ -22,7 +22,7 @@ permissions:
 
 jobs:
   example_complete:
-    uses: tx-pts-dai/github-workflows/.github/workflows/tf-cleanup.yaml@v1
+    uses: tx-pts-dai/github-workflows/.github/workflows/tf-cleanup.yaml@v2
     with:
       environment: examples
       tf_dir: ${{ inputs.tf_dir }}
