@@ -12,4 +12,4 @@ permissions:
 
 jobs:
   release:
-    uses: tx-pts-dai/github-workflows/.github/workflows/gh-release-on-main.yaml@v1
+    uses: tx-pts-dai/github-workflows/.github/workflows/gh-release-on-main.yaml@v2
