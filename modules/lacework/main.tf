@@ -13,7 +13,7 @@ resource "kubernetes_namespace_v1" "lacework" {
 
 module "lacework_k8s_datacollector" {
   source  = "lacework/agent/kubernetes"
-  version = "2.5.1"
+  version = "2.5.2"
 
   enable_cluster_agent = var.enable_cluster_agent
 
