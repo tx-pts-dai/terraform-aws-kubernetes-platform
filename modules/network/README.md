@@ -2,6 +2,45 @@
 
 This module is a wrapper around the public VPC module with some additional configuration options suitable for the Tamedia platform.
 
+See the [network example](../../example/network) how to use it.
+
+## SSM Parameter Store
+
+The following informations (defined in [ssm.tf](ssm.tf)) are put in AWS SSM Parameter Store:
+
+- /infrastructure/network/NAME/public_subnet_ids
+- /infrastructure/network/NAME/vpc_cidr
+- /infrastructure/network/NAME/vpc_id
+- /infrastructure/network/NAME/vpc_name
+
+and can get be retrieved by:
+
+```hcl
+module "ssm_lookup" {
+  source  = "tx-pts-dai/kubernetes-platform/aws//ssm"
+
+  base_prefix       = "infrastructure"
+  stack_type        = "network"
+  stack_name_prefix = var.network_stack_name
+
+  lookup = [
+    "public_subnet_ids",
+    "vpc_cidr",
+    "vpc_id",
+    "vpc_name"
+  ]
+}
+
+output "network_stack_infos" {
+  value = {
+    public_subnet_ids = split(",", module.ssm_lookup.lookup[var.network_stack_name].public_subnet_ids)
+    vpc_cidr          = module.ssm_lookup.lookup[var.network_stack_name].vpc_cidr
+    vpc_id            = module.ssm_lookup.lookup[var.network_stack_name].vpc_id
+    vpc_name          = module.ssm_lookup.lookup[var.network_stack_name].vpc_name
+  }
+}
+```
+
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 
@@ -21,7 +60,7 @@ This module is a wrapper around the public VPC module with some additional confi
 | Name | Source | Version |
 |------|--------|---------|
 | <a name="module_ssm"></a> [ssm](#module\_ssm) | ./../ssm | n/a |
-| <a name="module_vpc"></a> [vpc](#module\_vpc) | terraform-aws-modules/vpc/aws | 5.13.0 |
+| <a name="module_vpc"></a> [vpc](#module\_vpc) | terraform-aws-modules/vpc/aws | 5.14.0 |
 
 ## Resources
 
