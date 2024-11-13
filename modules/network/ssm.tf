@@ -16,10 +16,6 @@ module "ssm" {
     vpc_id = {
       insecure_value = module.vpc.vpc_id
     }
-    public_subnet_ids = {
-      type           = "StringList"
-      insecure_value = join(",", module.vpc.public_subnets)
-    }
   }
 
   tags = var.tags

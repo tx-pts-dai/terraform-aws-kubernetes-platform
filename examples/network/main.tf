@@ -45,12 +45,22 @@ module "ssm_lookup" {
   stack_type  = "network"
 
   lookup = [
-    "public_subnet_ids",
     "vpc_cidr",
     "vpc_id",
     "vpc_name"
   ]
 
+  # depends_on can/should be removed if the ssm_lookup is in another stack than the network stack
   depends_on = [module.network]
+}
 
+data "aws_subnets" "public_subnets" {
+  filter {
+    name   = "vpc-id"
+    values = [module.ssm_lookup.lookup[local.network_stack_name].vpc_id]
+  }
+  filter {
+    name   = "tag:Name"
+    values = ["*public*"]
+  }
 }
