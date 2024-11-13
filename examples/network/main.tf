@@ -38,6 +38,8 @@ module "network" {
   }
 }
 
+# Rest of the file is to show how to retrieve the informations about the resources created by the "network" module from another stack.
+# See the "outputs.tf" file too.
 module "ssm_lookup" {
   source = "../../modules/ssm"
 

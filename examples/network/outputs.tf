@@ -1,5 +1,5 @@
 output "network_stack_infos" {
-  description = "Example of how to retrieve SSM parameters from network stack"
+  description = "Example of how to retrieve infos from network module from another stack"
   value = {
     public_subnet_ids = data.aws_subnets.public_subnets.ids
     vpc_cidr          = module.ssm_lookup.lookup[local.network_stack_name].vpc_cidr
