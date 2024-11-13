@@ -2,53 +2,7 @@
 
 This module is a wrapper around the public VPC module with some additional configuration options suitable for the Tamedia platform.
 
-See the [network example](../../example/network) how to use it.
-
-## Retrieve Network stack resources
-
-The following informations (defined in [ssm.tf](ssm.tf)) are put in AWS SSM Parameter Store:
-
-- /infrastructure/network/NAME/vpc_cidr
-- /infrastructure/network/NAME/vpc_id
-- /infrastructure/network/NAME/vpc_name
-
-They can get be retrieved with the ssm submodule and allow to get other infos with the terraform "data" source:
-
-```hcl
-module "ssm_lookup" {
-  source  = "tx-pts-dai/kubernetes-platform/aws//ssm"
-
-  base_prefix       = "infrastructure"
-  stack_type        = "network"
-  stack_name_prefix = var.network_stack_name
-
-  lookup = [
-    "vpc_cidr",
-    "vpc_id",
-    "vpc_name"
-  ]
-}
-
-data "aws_subnets" "public_subnets" {
-  filter {
-    name   = "vpc-id"
-    values = [module.ssm_lookup.lookup[local.network_stack_name].vpc_id]
-  }
-  filter {
-    name   = "tag:Name"
-    values = ["*public*"]
-  }
-}
-
-output "network_stack_infos" {
-  value = {
-    public_subnet_ids = data.aws_subnets.public_subnets.ids
-    vpc_cidr          = module.ssm_lookup.lookup[var.network_stack_name].vpc_cidr
-    vpc_id            = module.ssm_lookup.lookup[var.network_stack_name].vpc_id
-    vpc_name          = module.ssm_lookup.lookup[var.network_stack_name].vpc_name
-  }
-}
-```
+See the [network example](../../example/network) how to use it and how to retrieve informations on the created resources from another stack.
 
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
