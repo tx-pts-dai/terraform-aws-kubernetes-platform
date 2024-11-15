@@ -7,7 +7,7 @@
 
 module "ebs_csi_driver_irsa" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
-  version = "5.46.0"
+  version = "5.48.0"
 
   create_role = var.create_addons
 
@@ -27,7 +27,7 @@ module "ebs_csi_driver_irsa" {
 
 module "addons" {
   source  = "aws-ia/eks-blueprints-addons/aws"
-  version = "1.17.0"
+  version = "1.19.0"
 
   create_kubernetes_resources = var.create_addons
 
