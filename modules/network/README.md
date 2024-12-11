@@ -2,6 +2,8 @@
 
 This module is a wrapper around the public VPC module with some additional configuration options suitable for the Tamedia platform.
 
+See the [network example](../../example/network) how to use it and how to retrieve informations on the created resources from another stack.
+
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 
@@ -21,7 +23,7 @@ This module is a wrapper around the public VPC module with some additional confi
 | Name | Source | Version |
 |------|--------|---------|
 | <a name="module_ssm"></a> [ssm](#module\_ssm) | ./../ssm | n/a |
-| <a name="module_vpc"></a> [vpc](#module\_vpc) | terraform-aws-modules/vpc/aws | 5.13.0 |
+| <a name="module_vpc"></a> [vpc](#module\_vpc) | terraform-aws-modules/vpc/aws | 5.16.0 |
 
 ## Resources
 

@@ -32,7 +32,7 @@ module "lacework" {
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_lacework_k8s_datacollector"></a> [lacework\_k8s\_datacollector](#module\_lacework\_k8s\_datacollector) | lacework/agent/kubernetes | 2.5.1 |
+| <a name="module_lacework_k8s_datacollector"></a> [lacework\_k8s\_datacollector](#module\_lacework\_k8s\_datacollector) | lacework/agent/kubernetes | 2.5.2 |
 
 ## Resources
 

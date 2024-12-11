@@ -14,6 +14,7 @@ on:
           - examples/lacework
           - examples/datadog
           - examples/disable-addons
+          - examples/network
 
 permissions:
   id-token: write
