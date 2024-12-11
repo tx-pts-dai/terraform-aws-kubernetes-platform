@@ -18,7 +18,7 @@ module "lacework" {
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.3.2 |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 5.0.0 |
 | <a name="requirement_kubernetes"></a> [kubernetes](#requirement\_kubernetes) | >= 2.0.0 |
-| <a name="requirement_lacework"></a> [lacework](#requirement\_lacework) | >= 1.18.2 |
+| <a name="requirement_lacework"></a> [lacework](#requirement\_lacework) | >= 2.0.0 |
 
 ## Providers
 
@@ -26,13 +26,13 @@ module "lacework" {
 |------|---------|
 | <a name="provider_aws"></a> [aws](#provider\_aws) | >= 5.0.0 |
 | <a name="provider_kubernetes"></a> [kubernetes](#provider\_kubernetes) | >= 2.0.0 |
-| <a name="provider_lacework"></a> [lacework](#provider\_lacework) | >= 1.18.2 |
+| <a name="provider_lacework"></a> [lacework](#provider\_lacework) | >= 2.0.0 |
 
 ## Modules
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_lacework_k8s_datacollector"></a> [lacework\_k8s\_datacollector](#module\_lacework\_k8s\_datacollector) | lacework/agent/kubernetes | 2.5.1 |
+| <a name="module_lacework_k8s_datacollector"></a> [lacework\_k8s\_datacollector](#module\_lacework\_k8s\_datacollector) | lacework/agent/kubernetes | 2.5.2 |
 
 ## Resources
 
