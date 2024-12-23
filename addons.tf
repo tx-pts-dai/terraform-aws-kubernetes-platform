@@ -13,7 +13,9 @@ module "ebs_csi_driver_irsa" {
 
   role_name = "ebs-csi-driver-${local.id}"
 
-  attach_ebs_csi_policy = true
+  role_policy_arns = {
+    ebs_csi_driver = "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
+  }
 
   oidc_providers = {
     main = {
