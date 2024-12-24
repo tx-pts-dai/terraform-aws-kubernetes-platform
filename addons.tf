@@ -179,7 +179,7 @@ module "cluster_secret_store" {
 
   name          = "cluster-secret-store-aws-secretsmanager"
   chart         = "custom-resources"
-  chart_version = "0.1.0"
+  chart_version = "0.1.2"
   repository    = "https://dnd-it.github.io/helm-charts"
   description   = "External Secrets Cluster Secret Store for AWS Secrets Manager"
   namespace     = "external-secrets"
@@ -211,7 +211,7 @@ module "reloader" {
   create = var.create_addons && var.enable_reloader
 
   chart         = "reloader"
-  chart_version = "1.0.121"
+  chart_version = "1.2.0"
   repository    = "https://stakater.github.io/stakater-charts"
   description   = "Reloader"
   namespace     = "reloader"
