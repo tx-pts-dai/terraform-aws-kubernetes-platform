@@ -93,7 +93,7 @@ module "karpenter_release" {
     karpenter_node_class = {
       description   = "Karpenter NodeClass Resource"
       chart         = "custom-resources"
-      chart_version = "0.1.0"
+      chart_version = "0.1.2"
       repository    = "https://dnd-it.github.io/helm-charts"
 
       values = [
@@ -119,7 +119,7 @@ module "karpenter_release" {
     karpenter_node_pool = {
       description   = "Karpenter NodePool Resource"
       chart         = "custom-resources"
-      chart_version = "0.1.0"
+      chart_version = "0.1.2"
       repository    = "https://dnd-it.github.io/helm-charts"
 
       values = [
