@@ -227,7 +227,7 @@ module "prometheus_operator_crds" {
   create = var.create_addons && var.enable_prometheus_stack
 
   chart         = "prometheus-operator-crds"
-  chart_version = "13.0.2"
+  chart_version = "17.0.2"
   repository    = "https://prometheus-community.github.io/helm-charts"
   description   = "Prometheus Operator CRDs"
   namespace     = local.monitoring_namespace
@@ -245,7 +245,7 @@ module "prometheus_stack" {
   create = var.create_addons && var.enable_prometheus_stack
 
   chart         = "kube-prometheus-stack"
-  chart_version = "61.9.0"
+  chart_version = "67.4.0"
   repository    = "https://prometheus-community.github.io/helm-charts"
   description   = "Prometheus Stack"
   namespace     = local.monitoring_namespace
