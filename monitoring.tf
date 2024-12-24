@@ -64,7 +64,7 @@ module "fluent_operator" {
   create = var.create_addons && var.enable_fluent_operator
 
   chart         = "fluent-operator"
-  chart_version = "3.1.0"
+  chart_version = "3.2.0"
   repository    = "https://fluent.github.io/helm-charts"
   description   = "Fluent Operator"
   namespace     = local.monitoring_namespace
@@ -110,7 +110,7 @@ module "fluent_operator" {
 
       description   = "Fluentbit Cluster Filter Grep"
       chart         = "custom-resources"
-      chart_version = "0.1.0"
+      chart_version = "0.1.2"
       repository    = "https://dnd-it.github.io/helm-charts"
 
       values = [
@@ -134,7 +134,7 @@ module "fluent_operator" {
     fluentbit_cluster_output_cloudwatch = {
       description   = "Fluentbit Cluster Output Cloudwatch"
       chart         = "custom-resources"
-      chart_version = "0.1.0"
+      chart_version = "0.1.2"
       repository    = "https://dnd-it.github.io/helm-charts"
 
       values = [
@@ -245,7 +245,7 @@ module "prometheus_stack" {
   create = var.create_addons && var.enable_prometheus_stack
 
   chart         = "kube-prometheus-stack"
-  chart_version = "61.8.0"
+  chart_version = "61.9.0"
   repository    = "https://prometheus-community.github.io/helm-charts"
   description   = "Prometheus Stack"
   namespace     = local.monitoring_namespace
@@ -440,7 +440,7 @@ module "grafana" {
   create = var.create_addons && var.enable_grafana
 
   chart         = "grafana"
-  chart_version = "8.4.4"
+  chart_version = "8.8.2"
   repository    = "https://grafana.github.io/helm-charts"
   description   = "Grafana"
   namespace     = local.monitoring_namespace
@@ -574,7 +574,7 @@ module "grafana" {
 
       description   = "Grafana Secrets"
       chart         = "custom-resources"
-      chart_version = "0.1.0"
+      chart_version = "0.1.2"
       repository    = "https://dnd-it.github.io/helm-charts"
 
       values = [
@@ -620,7 +620,7 @@ module "okta_secrets" {
 
   name          = "okta-secrets"
   chart         = "custom-resources"
-  chart_version = "0.1.0"
+  chart_version = "0.1.2"
   repository    = "https://dnd-it.github.io/helm-charts"
   description   = "Okta Secrets"
   namespace     = local.monitoring_namespace
@@ -665,7 +665,7 @@ module "pagerduty_secrets" {
 
   name          = "pagerduty-secrets"
   chart         = "custom-resources"
-  chart_version = "0.1.0"
+  chart_version = "0.1.2"
   repository    = "https://dnd-it.github.io/helm-charts"
   description   = "PagerDuty Secrets"
   namespace     = local.monitoring_namespace
@@ -704,7 +704,7 @@ module "slack_secrets" {
 
   name          = "slack-secrets"
   chart         = "custom-resources"
-  chart_version = "0.1.0"
+  chart_version = "0.1.2"
   repository    = "https://dnd-it.github.io/helm-charts"
   description   = "Slack Secrets"
   namespace     = local.monitoring_namespace
