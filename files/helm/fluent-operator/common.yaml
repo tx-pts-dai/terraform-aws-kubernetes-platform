@@ -1,6 +1,13 @@
 containerRuntime: containerd
 operator:
   priorityClassName: system-cluster-critical
+  resources:
+    limits:
+      cpu: 100m
+      memory: 60Mi
+    requests:
+      cpu: 100m
+      memory: 40Mi
 fluentbit:
   enabled: true
   priorityClassName: system-node-critical
