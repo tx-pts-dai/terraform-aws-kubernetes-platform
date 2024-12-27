@@ -2,6 +2,9 @@ containerRuntime: containerd
 operator:
   priorityClassName: system-cluster-critical
   resources:
+    limits:
+      cpu:
+      memory:
     requests:
       cpu: 100m
       memory: 100Mi
