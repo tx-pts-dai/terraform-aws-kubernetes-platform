@@ -43,7 +43,7 @@ module "karpenter_crds" {
   source = "./modules/addon"
 
   chart            = "karpenter-crd"
-  chart_version    = "0.37.6"
+  chart_version    = "1.1.1"
   repository       = "oci://public.ecr.aws/karpenter"
   description      = "Karpenter CRDs"
   namespace        = local.karpenter.namespace
@@ -55,7 +55,7 @@ module "karpenter_release" {
   source = "./modules/addon"
 
   chart            = "karpenter"
-  chart_version    = "0.37.6"
+  chart_version    = "1.1.1"
   repository       = "oci://public.ecr.aws/karpenter"
   namespace        = local.karpenter.namespace
   create_namespace = true
@@ -76,9 +76,12 @@ module "karpenter_release" {
     serviceMonitor:
       enabled: ${module.prometheus_operator_crds.create}
     settings:
+      eksControlPlane: true
       clusterName: ${module.eks.cluster_name}
       clusterEndpoint: ${module.eks.cluster_endpoint}
       interruptionQueue: ${module.karpenter.queue_name}
+      featureGates:
+        spotToSpotConsolidation: true
     serviceAccount:
       annotations:
         eks.amazonaws.com/role-arn: ${module.karpenter.iam_role_arn}
@@ -98,12 +101,13 @@ module "karpenter_release" {
 
       values = [
         <<-EOT
-        apiVersion: karpenter.k8s.aws/v1beta1
+        apiVersion: karpenter.k8s.aws/v1
         kind: EC2NodeClass
         metadata:
           name: default
         spec:
-          amiFamily: Bottlerocket
+          amiSelectorTerms:
+            - alias: bottlerocket@latest
           role: ${module.karpenter.node_iam_role_name}
           subnetSelectorTerms:
             - tags:
@@ -112,7 +116,8 @@ module "karpenter_release" {
             - tags:
                 karpenter.sh/discovery: ${module.eks.cluster_name}
           tags:
-            karpenter.sh/discovery: ${module.eks.cluster_name}
+            environment: ${var.metadata.environment}
+            team: ${var.metadata.team}
         EOT
       ]
     }
@@ -124,7 +129,7 @@ module "karpenter_release" {
 
       values = [
         <<-EOT
-        apiVersion: karpenter.sh/v1beta1
+        apiVersion: karpenter.sh/v1
         kind: NodePool
         metadata:
           name: default
@@ -133,6 +138,8 @@ module "karpenter_release" {
             spec:
               nodeClassRef:
                 name: default
+                kind: EC2NodeClass
+                group: karpenter.k8s.aws
               requirements:
                 - key: "karpenter.k8s.aws/instance-category"
                   operator: In
@@ -152,11 +159,12 @@ module "karpenter_release" {
                 - key: "karpenter.k8s.aws/instance-generation"
                   operator: Gt
                   values: ["2"]
+              expireAfter: 720h
           limits:
-            cpu: 1000
+            cpu: "1000"
           disruption:
-            consolidationPolicy: WhenUnderutilized
-            expireAfter: 720h
+            consolidationPolicy: WhenEmptyOrUnderutilized
+            consolidateAfter: 1m
         EOT
       ]
     }

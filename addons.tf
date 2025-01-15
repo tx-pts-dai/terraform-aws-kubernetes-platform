@@ -222,6 +222,7 @@ module "reloader" {
 
   set = try(var.reloader.set, [])
 
-  additional_delay_create_duration  = "10s" # TODO: Remove when CRDs are split out
-  additional_delay_destroy_duration = "10s"
+  depends_on = [
+    module.addons
+  ]
 }
