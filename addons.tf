@@ -70,6 +70,20 @@ module "addons" {
         delete = "3m"
       }
     }
+
+    eks-pod-identity-agent = {
+      most_recent = true
+      preserve    = false
+
+      configurations = {
+        replicaCount = 2
+      }
+
+      timeouts = {
+        create = "3m"
+        delete = "3m"
+      }
+    }
   }
 
   # TODO: aws lb controller should be one of the last things deleted, so ing objects can be cleaned up
