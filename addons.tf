@@ -7,7 +7,7 @@
 
 module "ebs_csi_driver_irsa" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
-  version = "5.48.0"
+  version = "5.52.2"
 
   create_role = var.create_addons
 
@@ -211,7 +211,7 @@ module "reloader" {
   create = var.create_addons && var.enable_reloader
 
   chart         = "reloader"
-  chart_version = "1.2.0"
+  chart_version = "1.2.1"
   repository    = "https://stakater.github.io/stakater-charts"
   description   = "Reloader"
   namespace     = "reloader"
