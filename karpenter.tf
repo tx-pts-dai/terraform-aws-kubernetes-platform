@@ -106,6 +106,9 @@ module "karpenter_release" {
         metadata:
           name: default
         spec:
+          # Required so containers can access node metadata
+          metadataOptions:
+            httpPutResponseHopLimit: 2
           amiSelectorTerms:
             - alias: bottlerocket@latest
           role: ${module.karpenter.node_iam_role_name}
