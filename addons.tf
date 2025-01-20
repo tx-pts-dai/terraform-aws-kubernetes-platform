@@ -91,18 +91,13 @@ module "addons" {
   aws_load_balancer_controller = merge({
     role_name        = "aws-load-balancer-controller-${local.id}"
     role_name_prefix = false
-    # race condition if this is not disabled. Serivce type LB will use intree controller.
-    # This just means annotations are needed for the service to use the aws load balancer controller
+
+    # renovate: datasource=helm depName=aws-load-balancer-controller registryUrl=https://aws.github.io/eks-charts
+    chart_version = "1.11.0"
+
+    wait = true
+
     set = [{
-      name  = "enableServiceMutatorWebhook"
-      value = "true"
-      }, {
-      name  = "serviceMutatorWebhookConfig"
-      value = "Ignore"
-      }, {
-      name  = "replicaCount"
-      value = 2
-      }, {
       name  = "enableServiceMonitor"
       value = var.enable_prometheus_stack
       }, {
@@ -236,6 +231,7 @@ module "reloader" {
 
   set = try(var.reloader.set, [])
 
-  additional_delay_create_duration  = "10s" # TODO: Remove when CRDs are split out
-  additional_delay_destroy_duration = "10s"
+  depends_on = [
+    module.addons
+  ]
 }
