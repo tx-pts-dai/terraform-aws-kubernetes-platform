@@ -110,7 +110,7 @@ locals {
 
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
-  version = "20.31.6"
+  version = "20.33.0"
 
   cluster_name                    = local.stack_name
   cluster_version                 = try(var.eks.kubernetes_version, "1.30")
