@@ -71,8 +71,8 @@ module "karpenter_release" {
     controller:
       resources:
         requests:
-          cpu: 0.25
-          memory: "256Mi"
+          cpu: 0.5
+          memory: "512Mi"
     serviceMonitor:
       enabled: ${module.prometheus_operator_crds.create}
     settings:
