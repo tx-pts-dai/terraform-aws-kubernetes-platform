@@ -1,22 +1,19 @@
 name: Feature Branch
 
 on:
-  # pull_request: # This is only temporary: lately this workflow fails for renovate PRs leaving clusters in broken state. we can change it back when we fix the issue
-  #   paths:
-  #     - "*.tf"
-  #     - "files/helm/**/*.yaml"
-  #   types:
-  #     - opened
-  #     - synchronize
-  #     - reopened
-  #     - closed
-  #   branches:
-  #     - main
   workflow_dispatch:
+    inputs:
+      tf_dir:
+        description: 'Directory'
+        required: true
+        default: 'tests/main'
+        type: choice
+        options:
+          - tests/main
 
 jobs:
   feature_deploy:
-    if: github.event_name == 'pull_request' && github.event.action != 'closed'
+    if: github.event_name == 'workflow_dispatch'
     uses: tx-pts-dai/github-workflows/.github/workflows/tf-feature.yaml@v2
     with:
       environment: examples
@@ -25,19 +22,10 @@ jobs:
         name = "${{ github.head_ref }}"
 
   feature_destroy:
-    if: github.event_name == 'pull_request' && github.event.action == 'closed'
-    uses: tx-pts-dai/github-workflows/.github/workflows/tf-cleanup.yaml@v2
-    with:
-      environment: examples
-      tf_dir: tests/main
-      tf_vars: |
-        name = "${{ github.head_ref }}"
-
-  manual_feature_destroy:
     if: github.event_name == 'workflow_dispatch'
     uses: tx-pts-dai/github-workflows/.github/workflows/tf-cleanup.yaml@v2
     with:
       environment: examples
       tf_dir: tests/main
       tf_vars: |
-        name = "${{ github.ref_name }}"
+        name = "${{ github.head_ref }}"
