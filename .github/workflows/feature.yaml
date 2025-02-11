@@ -1,17 +1,17 @@
 name: Feature Branch
 
 on:
-  pull_request:
-    paths:
-      - "*.tf"
-      - "files/helm/**/*.yaml"
-    types:
-      - opened
-      - synchronize
-      - reopened
-      - closed
-    branches:
-      - main
+  # pull_request: # This is only temporary: lately this workflow fails for renovate PRs leaving clusters in broken state. we can change it back when we fix the issue
+  #   paths:
+  #     - "*.tf"
+  #     - "files/helm/**/*.yaml"
+  #   types:
+  #     - opened
+  #     - synchronize
+  #     - reopened
+  #     - closed
+  #   branches:
+  #     - main
   workflow_dispatch:
 
 jobs:
