@@ -1,19 +1,17 @@
 name: Feature Branch
 
 on:
-  pull_request:
-    paths:
-      - "*.tf"
-      - "files/helm/**/*.yaml"
-    types:
-      - opened
-      - synchronize
-      - reopened
-      - closed
-    branches:
-      - main
-    branches-ignore:
-      - renovate/*
+  # pull_request:
+  #   paths:
+  #     - "*.tf"
+  #     - "files/helm/**/*.yaml"
+  #   types:
+  #     - opened
+  #     - synchronize
+  #     - reopened
+  #     - closed
+  #   branches:
+  #     - main
   workflow_dispatch:
 
 jobs:
