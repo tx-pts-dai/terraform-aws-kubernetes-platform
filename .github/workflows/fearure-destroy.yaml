@@ -18,7 +18,7 @@ permissions:
 
 jobs:
   destroy_feature:
-    uses: tx-pts-dai/github-workflows/.github/workflows/tf-cleanup.yaml@fum-3427
+    uses: tx-pts-dai/github-workflows/.github/workflows/tf-cleanup.yaml@v2
     with:
       environment: examples
       tf_dir: ${{ inputs.tf_dir }}
