@@ -1,6 +1,14 @@
-name: Feature Branch
+name: Feature Branch Test
 
 on:
+  pull_request: # This is only temporary: lately this workflow fails for renovate PRs leaving clusters in broken state. we can change it back when we fix the issue
+    paths:
+      - "*.tf"
+      - "files/helm/**/*.yaml"
+    types:
+      - closed
+    branches:
+      - main
   workflow_dispatch:
     inputs:
       tf_dir:
@@ -22,7 +30,7 @@ jobs:
         name = "${{ github.head_ref }}"
 
   feature_destroy:
-    if: github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'pull_request' && github.event.action == 'closed'
     uses: tx-pts-dai/github-workflows/.github/workflows/tf-cleanup.yaml@v2
     with:
       environment: examples
