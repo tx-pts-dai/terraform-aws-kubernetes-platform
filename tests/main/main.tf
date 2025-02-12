@@ -77,7 +77,7 @@ module "k8s_platform" {
 
   create_addons = true
 
-  name = var.name
+  name = "tests-main"
 
   cluster_admins = {
     cicd = {

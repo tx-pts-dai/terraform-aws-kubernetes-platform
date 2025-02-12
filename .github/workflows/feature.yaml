@@ -1,10 +1,7 @@
 name: Feature Branch Test
 
 on:
-  pull_request: # This is only temporary: lately this workflow fails for renovate PRs leaving clusters in broken state. we can change it back when we fix the issue
-    paths:
-      - "*.tf"
-      - "files/helm/**/*.yaml"
+  pull_request:
     types:
       - closed
     branches:
@@ -26,8 +23,6 @@ jobs:
     with:
       environment: examples
       tf_dir: tests/main
-      tf_vars: |
-        name = "${{ github.head_ref }}"
 
   feature_destroy:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
@@ -35,5 +30,3 @@ jobs:
     with:
       environment: examples
       tf_dir: tests/main
-      tf_vars: |
-        name = "${{ github.head_ref }}"

@@ -22,5 +22,3 @@ jobs:
     with:
       environment: examples
       tf_dir: ${{ inputs.tf_dir }}
-      tf_vars: |
-        name = "${{ github.ref_name }}"
