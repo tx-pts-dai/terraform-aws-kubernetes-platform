@@ -17,7 +17,7 @@ permissions:
   pull-requests: write
 
 jobs:
-  destroy_feature_test:
+  destroy_feature:
     uses: tx-pts-dai/github-workflows/.github/workflows/tf-cleanup.yaml@v2
     with:
       environment: examples
