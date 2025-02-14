@@ -41,7 +41,7 @@ See the [network example](../../example/network) how to use it and how to retrie
 | <a name="input_enable_nat_gateway"></a> [enable\_nat\_gateway](#input\_enable\_nat\_gateway) | Enable NAT Gateways | `bool` | `true` | no |
 | <a name="input_single_nat_gateway"></a> [single\_nat\_gateway](#input\_single\_nat\_gateway) | Use a single NAT Gateway | `bool` | `true` | no |
 | <a name="input_stack_name"></a> [stack\_name](#input\_stack\_name) | The stack name for the resources | `string` | n/a | yes |
-| <a name="input_subnet_configs"></a> [subnet\_configs](#input\_subnet\_configs) | List of networks objects with their name and size in bits. The order of the list should not change. | `list(map(number))` | <pre>[<br/>  {<br/>    "public": 24<br/>  },<br/>  {<br/>    "private": 24<br/>  },<br/>  {<br/>    "intra": 26<br/>  },<br/>  {<br/>    "database": 26<br/>  },<br/>  {<br/>    "redshift": 26<br/>  },<br/>  {<br/>    "karpenter": 22<br/>  }<br/>]</pre> | no |
+| <a name="input_subnet_configs"></a> [subnet\_configs](#input\_subnet\_configs) | List of networks objects with their name and size in bits. The order of the list should not change. | `list(map(number))` | <pre>[<br>  {<br>    "public": 24<br>  },<br>  {<br>    "private": 24<br>  },<br>  {<br>    "intra": 26<br>  },<br>  {<br>    "database": 26<br>  },<br>  {<br>    "redshift": 26<br>  },<br>  {<br>    "karpenter": 22<br>  }<br>]</pre> | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | A map of tags to add to all resources | `map(string)` | `{}` | no |
 
 ## Outputs

@@ -13,6 +13,9 @@ locals {
     namespace = "kube-system"
     # TODO: move to helm value inputs
     pod_annotations = try(var.karpenter.pod_annotations, {})
+
+    root_volume_size = try(var.karpenter.root_volume_size, "4Gi")
+    data_volume_size = try(var.karpenter.data_volume_size, "20Gi")
   }
 
   azs = slice(data.aws_availability_zones.available.names, 0, 3)
@@ -118,6 +121,19 @@ module "karpenter_release" {
           securityGroupSelectorTerms:
             - tags:
                 karpenter.sh/discovery: ${module.eks.cluster_name}
+          blockDeviceMappings:
+            - deviceName: /dev/xvda
+              ebs:
+                volumeSize: ${local.karpenter.root_volume_size}
+                volumeType: gp3
+                encrypted: true
+                deleteOnTermination: true
+            - deviceName: /dev/xvdb
+              ebs:
+                volumeSize: ${local.karpenter.data_volume_size}
+                volumeType: gp3
+                encrypted: true
+                deleteOnTermination: true
           tags:
             environment: ${var.metadata.environment}
             team: ${var.metadata.team}
