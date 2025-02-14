@@ -1,10 +1,10 @@
-name: Manual Destroy Feature branch test
+name: Manual Destroy Feature Branch Test
 
 on:
   workflow_dispatch:
     inputs:
       tf_dir:
-        description: 'Test directory'
+        description: 'Directory'
         required: true
         default: 'tests/main'
         type: choice
@@ -17,10 +17,8 @@ permissions:
   pull-requests: write
 
 jobs:
-  example_complete:
+  destroy_feature:
     uses: tx-pts-dai/github-workflows/.github/workflows/tf-cleanup.yaml@v2
     with:
       environment: examples
       tf_dir: ${{ inputs.tf_dir }}
-      tf_vars: |
-        name = "${{ github.ref_name }}"
