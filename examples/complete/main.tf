@@ -102,6 +102,11 @@ module "k8s_platform" {
     ]
   }
 
+  karpenter = {
+    root_volume_size = "8Gi"
+    data_volume_size = "80Gi"
+  }
+
   enable_downscaler = true
 
   enable_amp = true
