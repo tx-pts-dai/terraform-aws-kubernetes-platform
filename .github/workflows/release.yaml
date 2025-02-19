@@ -12,4 +12,78 @@ permissions:
 
 jobs:
   release:
-    uses: tx-pts-dai/github-workflows/.github/workflows/gh-release-on-main.yaml@v2
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+
+      - name: Retrieve Merge Commit Message
+        id: merge_commit_message
+        run: |
+          COMMIT_MESSAGE=$(git log -1 --pretty=%B | head -n 1)
+          echo "COMMIT_MESSAGE=$COMMIT_MESSAGE" >> $GITHUB_ENV
+
+      - name: Capture Terraform Output
+        id: tf_output
+        run: echo "CLUSTER_VERSION=$(terraform output -raw CLUSTER_VERSION)" >> $GITHUB_OUTPUT
+        
+      - name: Determine version increment
+        id: version_increment
+        run: |
+          # Retrieve cluster version from Terraform output
+          CLUSTER_VERSION=${{ steps.tf_output.outputs.CLUSTER_VERSION }}
+
+          git fetch --tags
+          CURRENT_TAG=$(git tag | sort -V | tail -1)
+          if [ "$CURRENT_TAG" = "" ]; then
+            CURRENT_TAG="v0.0.1"
+          fi
+
+          MAJOR=$(echo $CURRENT_TAG | awk -F. '{print $1}' | sed 's/v//')
+          MINOR=$(echo $CURRENT_TAG | awk -F. '{print $2}')
+          PATCH=$(echo $CURRENT_TAG | awk -F. '{print $3}')
+
+          COMMIT_MESSAGE="${{ env.COMMIT_MESSAGE }}"
+          if [[ "$COMMIT_MESSAGE" =~ ^feat!: ]]; then
+            MAJOR=$((MAJOR + 1))
+            MINOR=0
+            PATCH=0
+          elif [[ "$COMMIT_MESSAGE" =~ ^feat: ]]; then
+            MINOR=$((MINOR + 1))
+            PATCH=0
+          elif [[ "$COMMIT_MESSAGE" =~ ^fix: ]]; then
+            PATCH=$((PATCH + 1))
+          else
+            echo "Nothing to release"
+            echo "RELEASE=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          NEW_TAG="v$MAJOR.$MINOR.$PATCH+$CLUSTER_VERSION"
+          MAJOR_VERSION="v$MAJOR"
+          MINOR_VERSION="v$MAJOR.$MINOR"
+
+          echo "NEW_TAG=$NEW_TAG" >> $GITHUB_OUTPUT
+          echo "MAJOR_VERSION=$MAJOR_VERSION" >> $GITHUB_ENV
+          echo "MINOR_VERSION=$MINOR_VERSION" >> $GITHUB_ENV
+          echo "RELEASE=true" >> $GITHUB_OUTPUT
+
+      - name: Release
+        if: steps.version_increment.outputs.RELEASE == 'true'
+        uses: softprops/action-gh-release@c95fe1489396fe8a9eb87c0abf8aa5b2ef267fda # v2
+        with:
+          tag_name: ${{ steps.version_increment.outputs.NEW_TAG }}
+          generate_release_notes: true
+
+      - name: Update major and minor version tags
+        if: steps.version_increment.outputs.RELEASE == 'true'
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git tag -fa ${{ env.MAJOR_VERSION }} -m "Update major version tag"
+          git push origin ${{ env.MAJOR_VERSION }} --force
+          git tag -fa ${{ env.MINOR_VERSION }} -m "Update minor version tag"
+          git push origin ${{ env.MINOR_VERSION }} --force
