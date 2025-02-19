@@ -58,9 +58,8 @@ jobs:
           elif [[ "$COMMIT_MESSAGE" =~ ^fix: ]]; then
             PATCH=$((PATCH + 1))
           else
-            echo "Nothing to release"
-            echo "RELEASE=false" >> $GITHUB_OUTPUT
-            # exit 0
+            echo "ok Nothing to release"
+
           fi
 
           MINOR=$((MINOR + 1))
