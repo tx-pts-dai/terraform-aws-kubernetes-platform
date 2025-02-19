@@ -47,6 +47,7 @@ jobs:
           PATCH=$(echo $CURRENT_TAG | awk -F. '{print $3}')
 
           COMMIT_MESSAGE="${{ env.COMMIT_MESSAGE }}"
+          echo "$COMMIT_MESSAGE"
           if [[ "$COMMIT_MESSAGE" =~ ^feat!: ]]; then
             MAJOR=$((MAJOR + 1))
             MINOR=0
