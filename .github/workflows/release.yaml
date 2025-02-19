@@ -28,7 +28,7 @@ jobs:
 
       - name: Capture Terraform Output
         id: tf_output
-        run: echo "CLUSTER_VERSION=$(terraform output -raw CLUSTER_VERSION)" >> $GITHUB_OUTPUT
+        run: echo "CLUSTER_VERSION=$(terraform output -raw eks_cluster_version)" >> $GITHUB_OUTPUT
 
       - name: Determine version increment
         id: version_increment
