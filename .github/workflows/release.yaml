@@ -43,7 +43,7 @@ jobs:
         run: |
           # Retrieve cluster version from Terraform output
           CLUSTER_VERSION=${{ env.CLUSTER_VERSION }}
-          echo "$CLUSTER_VERSION"
+
           git fetch --tags
           CURRENT_TAG=$(git tag | sort -V | tail -1)
           if [ "$CURRENT_TAG" = "" ]; then
@@ -81,7 +81,7 @@ jobs:
           echo "NEW_TAG=$NEW_TAG" >> $GITHUB_OUTPUT
           echo "MAJOR_VERSION=$MAJOR_VERSION" >> $GITHUB_ENV
           echo "MINOR_VERSION=$MINOR_VERSION" >> $GITHUB_ENV
-          # echo "RELEASE=true" >> $GITHUB_OUTPUT
+          echo "RELEASE=true" >> $GITHUB_OUTPUT
 
       - name: Release
         if: steps.version_increment.outputs.RELEASE == 'true'
