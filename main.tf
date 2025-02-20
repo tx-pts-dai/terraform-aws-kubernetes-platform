@@ -106,7 +106,7 @@ locals {
       }
     }
   } }
-  k8s_version = file("K8S_VERSION")
+  k8s_version = file("./K8S_VERSION")
 }
 
 module "eks" {
