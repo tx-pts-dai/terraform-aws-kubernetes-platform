@@ -249,7 +249,6 @@ as described in the `.pre-commit-config.yaml` file
 | Name | Description |
 |------|-------------|
 | <a name="output_eks"></a> [eks](#output\_eks) | Map of attributes for the EKS cluster |
-| <a name="output_eks_cluster_version"></a> [eks\_cluster\_version](#output\_eks\_cluster\_version) | Current EKS cluster version |
 | <a name="output_karpenter"></a> [karpenter](#output\_karpenter) | Map of attributes for the Karpenter module |
 | <a name="output_network"></a> [network](#output\_network) | Map of attributes for the VPC module |
 <!-- END_TF_DOCS -->

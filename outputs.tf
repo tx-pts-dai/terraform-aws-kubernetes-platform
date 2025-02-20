@@ -3,11 +3,6 @@ output "eks" {
   value       = module.eks
 }
 
-output "eks_cluster_version" {
-  description = "Current EKS cluster version"
-  value       = module.eks.cluster_version
-}
-
 output "network" {
   description = "Map of attributes for the VPC module"
   value       = module.network

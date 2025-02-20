@@ -2,7 +2,7 @@ name: Release
 
 on:
   workflow_dispatch:
-  pull_request:
+  push:
     branches:
       - main
     paths:
@@ -13,3 +13,5 @@ permissions:
 jobs:
   release:
     uses: tx-pts-dai/github-workflows/.github/workflows/gh-release-on-main.yaml@Add-release-with-metadata
+    with:
+      metadata_file: ./K8S_VERSION
