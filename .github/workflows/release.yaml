@@ -12,6 +12,6 @@ permissions:
 
 jobs:
   release:
-    uses: tx-pts-dai/github-workflows/.github/workflows/gh-release-on-main.yaml@Add-release-with-metadata
+    uses: tx-pts-dai/github-workflows/.github/workflows/gh-release-on-main.yaml@2
     with:
       metadata_file: ./K8S_VERSION
