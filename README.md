@@ -43,6 +43,34 @@ IAM service-linked roles
 - AWSServiceRoleForEC2Spot
 - [AWSServiceRoleForEC2SpotFleet](https://docs.aws.amazon.com/batch/latest/userguide/spot_fleet_IAM_role.html)
 
+## Release new kubernetes version
+**important**
+Each new kubernetes version needs it's own release. This is due to the fact that we should not skip kubernetes versions during a cluster upgrade.
+
+To release a new Kubernetes version, follow these steps:
+
+1. **Update the version file**:
+   - Open the `K8S_VERSION` file located in the root of the repository.
+   - Update the version number to the next Kubernetes version.
+
+2. **Commit the Changes**:
+   - Commit the changes to the `K8S_VERSION` file with a meaningful commit message following the release proces. For example:
+     ```sh
+     git add K8S_VERSION
+     git commit -m "feat! update Kubernetes version to 1.30"
+     ```
+
+3. **Push the Changes**:
+   - Push the changes to the main branch, the release workflow will automatically run. This workflow will:
+     - Read the updated Kubernetes version from the `K8S_VERSION` file.
+     - Determine the new module version based on the commit message.
+     - Create a new release with the updated module version and the kubernetes version as metadata. The format would be X.Y.Z+A.B where X.Y.Z is the module version and A.B is the kubenetes control plane version.
+
+4. **Verify the Release**:
+   - Check the [GitHub Actions](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/actions) page to ensure the release workflow completed successfully.
+   - Verify that the new module version is available in the [Terraform Registry](https://registry.terraform.io/modules/tx-pts-dai/kubernetes-platform/aws).
+
+
 ## Usage
 
 ```tf

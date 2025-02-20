@@ -106,6 +106,7 @@ locals {
       }
     }
   } }
+  k8s_version = file("${path.module}/K8S_VERSION")
 }
 
 module "eks" {
@@ -113,7 +114,7 @@ module "eks" {
   version = "20.31.6"
 
   cluster_name                    = local.stack_name
-  cluster_version                 = try(var.eks.kubernetes_version, "1.30")
+  cluster_version                 = local.k8s_version
   cluster_endpoint_public_access  = try(var.eks.cluster_endpoint_public_access, true)
   cluster_endpoint_private_access = try(var.eks.cluster_endpoint_private_access, true)
 
