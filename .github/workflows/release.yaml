@@ -33,7 +33,7 @@ jobs:
 
       - name: Read Kubernetes Version from File
         id: read_k8s_version
-        run: echo "CLUSTER_VERSION=$(cat kubernetes_version.txt)" >> $GITHUB_ENV
+        run: echo "CLUSTER_VERSION=$(cat k8s_version.txt)" >> $GITHUB_ENV
 
 
       - name: Determine version increment
