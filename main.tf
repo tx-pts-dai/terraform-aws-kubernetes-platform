@@ -168,7 +168,7 @@ module "eks" {
   tags = local.tags
 }
 
-# Allow all traffic from the VPC to the EKS control plane
+# Allows all traffic from the VPC to the EKS control plane
 locals {
   ingress_rules = {
     vpc_control_plane = {
