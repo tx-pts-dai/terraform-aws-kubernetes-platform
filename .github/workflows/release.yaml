@@ -42,7 +42,7 @@ jobs:
         id: version_increment
         run: |
           # Retrieve cluster version from Terraform output
-          CLUSTER_VERSION=${{ steps.k8s_version.outputs.CLUSTER_VERSION }}
+          CLUSTER_VERSION=${{ env.CLUSTER_VERSION }}
           echo "$CLUSTER_VERSION"
           git fetch --tags
           CURRENT_TAG=$(git tag | sort -V | tail -1)
@@ -54,7 +54,7 @@ jobs:
           MINOR=$(echo $CURRENT_TAG | awk -F. '{print $2}')
           PATCH=$(echo $CURRENT_TAG | awk -F. '{print $3}')
 
-          COMMIT_MESSAGE="${{ steps.merge_commit_message.outputs.COMMIT_MESSAGE }}"
+          COMMIT_MESSAGE="${{ env.COMMIT_MESSAGE }}"
           echo "$COMMIT_MESSAGE"
           if [[ "$COMMIT_MESSAGE" =~ ^feat!: ]]; then
             MAJOR=$((MAJOR + 1))
