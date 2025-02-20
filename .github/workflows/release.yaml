@@ -43,7 +43,7 @@ jobs:
         run: |
           # Retrieve cluster version from Terraform output
           CLUSTER_VERSION=${{ steps.k8s_version.outputs.CLUSTER_VERSION }}
-
+          echo "$CLUSTER_VERSION"
           git fetch --tags
           CURRENT_TAG=$(git tag | sort -V | tail -1)
           if [ "$CURRENT_TAG" = "" ]; then
