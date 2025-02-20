@@ -26,9 +26,15 @@ jobs:
           COMMIT_MESSAGE=$(git log -1 --pretty=%B | head -n 1)
           echo "COMMIT_MESSAGE=$COMMIT_MESSAGE" >> $GITHUB_ENV
 
-      - name: Capture Terraform Output
-        id: tf_output
-        run: echo "CLUSTER_VERSION=$(terraform output -raw eks_cluster_version)" >> $GITHUB_OUTPUT
+      # - name: Capture Terraform Output
+      #   id: tf_output
+      #   run: echo "CLUSTER_VERSION=$(terraform output -raw eks_cluster_version)" >> $GITHUB_OUTPUT
+
+
+      - name: Read Kubernetes Version from File
+        id: read_k8s_version
+        run: echo "CLUSTER_VERSION=$(cat kubernetes_version.txt)" >> $GITHUB_ENV
+
 
       - name: Determine version increment
         id: version_increment
