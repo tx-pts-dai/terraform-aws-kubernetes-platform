@@ -66,7 +66,7 @@ To release a new Kubernetes version, follow these steps:
      - Determine the new module version based on the commit message.
      - Create a new release with the updated module version and the kubernetes version as metadata. The format would be X.Y.Z+A.B where X.Y.Z is the module version and A.B is the kubenetes control plane version.
 
-5. **Verify the Release**:
+4. **Verify the Release**:
    - Check the [GitHub Actions](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/actions) page to ensure the release workflow completed successfully.
    - Verify that the new module version is available in the [Terraform Registry](https://registry.terraform.io/modules/tx-pts-dai/kubernetes-platform/aws).
 
