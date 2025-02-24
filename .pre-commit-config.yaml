@@ -35,7 +35,7 @@ repos:
       - id: trailing-whitespace
       - id: no-commit-to-branch
   - repo: https://github.com/renovatebot/pre-commit-hooks
-    rev: 39.174.3
+    rev: 39.178.1
     hooks:
       - id: renovate-config-validator
   - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
