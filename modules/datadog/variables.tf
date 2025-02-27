@@ -61,7 +61,7 @@ variable "datadog_secret" {
 variable "datadog_agent_version_fargate" {
   description = "Version of the datadog agent injected in Fargate"
   type        = string
-  default     = "7.54.0"
+  default     = "7.57.2"
 }
 
 variable "product_name" {

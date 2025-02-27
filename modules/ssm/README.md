@@ -151,7 +151,7 @@ No modules.
 | <a name="input_base_prefix"></a> [base\_prefix](#input\_base\_prefix) | Base SSM namespace prefix for the parameters | `string` | `"infrastructure"` | no |
 | <a name="input_create"></a> [create](#input\_create) | Create the SSM parameters | `bool` | `true` | no |
 | <a name="input_lookup"></a> [lookup](#input\_lookup) | List of parameters to Lookup | `list(any)` | `[]` | no |
-| <a name="input_parameters"></a> [parameters](#input\_parameters) | Map of SSM parameters to create | <pre>map(object({<br/>    name           = optional(string)<br/>    type           = optional(string, "String")<br/>    value          = optional(string)<br/>    insecure_value = optional(string)<br/>  }))</pre> | `{}` | no |
+| <a name="input_parameters"></a> [parameters](#input\_parameters) | Map of SSM parameters to create | <pre>map(object({<br>    name           = optional(string)<br>    type           = optional(string, "String")<br>    value          = optional(string)<br>    insecure_value = optional(string)<br>  }))</pre> | `{}` | no |
 | <a name="input_stack_name"></a> [stack\_name](#input\_stack\_name) | The name of the stack | `string` | `null` | no |
 | <a name="input_stack_name_prefix"></a> [stack\_name\_prefix](#input\_stack\_name\_prefix) | Filter all stacks that include this prefix in the name. | `string` | `""` | no |
 | <a name="input_stack_type"></a> [stack\_type](#input\_stack\_type) | The type of terraform stack to be used in the namespace prefix. platform, network, account, shared | `string` | `""` | no |

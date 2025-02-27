@@ -137,5 +137,10 @@ module "datadog" {
     { name = "spec.override.clusterAgent.replicas", value = 3 }
   ]
 
+  datadog_agent_version_fargate = "7.57.2"
+  datadog = {
+    operator_chart_version = "1.8.1"
+  }
+
   depends_on = [module.k8s_platform]
 }
