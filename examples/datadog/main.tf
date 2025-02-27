@@ -100,7 +100,7 @@ module "k8s_platform" {
         {
           "karpenter" : {
             "init_config" : {},
-            "instances" : [{ "openmetrics_endpoint" : "http://%%host%%:8000/metrics" }]
+            "instances" : [{ "openmetrics_endpoint" : "http://%%host%%:8080/metrics" }]
           }
         }
       )
