@@ -19,14 +19,14 @@ on:
 jobs:
   feature_deploy:
     if: (github.event_name == 'pull_request' && github.event.action != 'closed' && github.triggering_actor != 'renovate[bot]') || github.event_name == 'workflow_dispatch'
-    uses: tx-pts-dai/github-workflows/.github/workflows/tf-feature.yaml@v2
+    uses: DND-IT/github-workflows/.github/workflows/tf-feature.yaml@v2
     with:
       environment: examples
       tf_dir: tests/main
 
   feature_destroy:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
-    uses: tx-pts-dai/github-workflows/.github/workflows/tf-cleanup.yaml@v2
+    uses: DND-IT/github-workflows/.github/workflows/tf-cleanup.yaml@v2
     with:
       environment: examples
       tf_dir: tests/main

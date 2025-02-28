@@ -13,6 +13,6 @@ permissions:
 
 jobs:
   release:
-    uses: tx-pts-dai/github-workflows/.github/workflows/gh-release-on-main.yaml@v2
+    uses: DND-IT/github-workflows/.github/workflows/gh-release-on-main.yaml@v2
     with:
       metadata_file: ./K8S_VERSION
