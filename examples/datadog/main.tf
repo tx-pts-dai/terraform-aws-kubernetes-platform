@@ -28,7 +28,7 @@ terraform {
     }
     time = {
       source  = "hashicorp/time"
-      version = "0.11.2"
+      version = "~> 0.11"
     }
   }
 }
@@ -137,9 +137,9 @@ module "datadog" {
     { name = "spec.override.clusterAgent.replicas", value = 3 }
   ]
 
-  datadog_agent_version_fargate = "7.57.2" # github-release/DataDog/datadog-agent
+  datadog_agent_version_fargate = "7.57.2" # github-releases/DataDog/datadog-agent
   datadog = {
-    operator_chart_version = "1.8.1" # github-release/DataDog/datadog-operator
+    operator_chart_version = "1.8.1" # github-releases/DataDog/datadog-operator
   }
 
   depends_on = [module.k8s_platform]

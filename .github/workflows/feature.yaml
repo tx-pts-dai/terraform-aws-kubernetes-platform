@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - "*.tf"
+      - "modules/**/*.tf"
       - "files/helm/**/*.yaml"
       - "K8S_VERSION"
     types:
@@ -15,6 +16,11 @@ on:
       - main
 
   workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
 
 jobs:
   feature_deploy:
