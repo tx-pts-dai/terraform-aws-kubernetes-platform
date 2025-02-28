@@ -16,7 +16,7 @@ module "datadog_operator" {
   chart            = "datadog-operator"
   namespace        = var.namespace
   max_history      = 10
-  chart_version    = try(var.datadog.operator_chart_version, "1.8.1")
+  chart_version    = try(var.datadog.operator_chart_version, "1.8.1") # github-releases/DataDog/datadog-operator
   atomic           = true
   create_namespace = true
 

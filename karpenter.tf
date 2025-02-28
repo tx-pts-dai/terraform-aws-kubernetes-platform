@@ -46,7 +46,7 @@ module "karpenter_crds" {
   source = "./modules/addon"
 
   chart            = "karpenter-crd"
-  chart_version    = "1.0.8"
+  chart_version    = "1.0.8" # github-releases/aws/karpenter-provider-aws
   repository       = "oci://public.ecr.aws/karpenter"
   description      = "Karpenter CRDs"
   namespace        = local.karpenter.namespace
@@ -58,7 +58,7 @@ module "karpenter_release" {
   source = "./modules/addon"
 
   chart            = "karpenter"
-  chart_version    = "1.0.8"
+  chart_version    = "1.0.8" # github-releases/aws/karpenter-provider-aws
   repository       = "oci://public.ecr.aws/karpenter"
   namespace        = local.karpenter.namespace
   create_namespace = true
