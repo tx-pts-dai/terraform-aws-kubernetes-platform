@@ -141,7 +141,7 @@ module "cloudflare" {
 
   zone_name    = module.route53_zones[each.key].route53_zone_name[each.key]
   comment      = "Managed by KAAS examples"
-  name_servers = [for i in range(4) : module.route53_zones.route53_zone_name_servers[each.key][i]]
+  name_servers = [for i in range(4) : module.route53_zones[each.key].route53_zone_name_servers[each.key][i]]
   account_id   = jsondecode(data.aws_secretsmanager_secret_version.cloudflare.secret_string)["accountId"]
 }
 
