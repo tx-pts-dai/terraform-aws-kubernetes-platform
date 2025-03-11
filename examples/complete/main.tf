@@ -145,7 +145,6 @@ module "cloudflare" {
   account_id   = jsondecode(data.aws_secretsmanager_secret_version.cloudflare.secret_string)["accountId"]
 }
 
-
 module "route53_zones" {
   source  = "terraform-aws-modules/route53/aws//modules/zones"
   version = "2.11.1"
