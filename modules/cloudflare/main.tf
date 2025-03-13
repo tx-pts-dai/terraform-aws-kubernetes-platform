@@ -20,7 +20,5 @@ resource "cloudflare_dns_record" "ns" {
   comment = var.comment
   type    = "NS"
   ttl     = 3600
-  data = {
-    value = element(var.name_servers, count.index)
-  }
+  content = element(var.name_servers, count.index)
 }
