@@ -8,12 +8,13 @@ data "cloudflare_zone" "this" {
   filter = {
     name = local.top_level_domain
   }
+  #zone_id = "86397519f9e1b141fea64d467249f958"
 }
 
 
 resource "cloudflare_dns_record" "ns" {
   count   = length(var.name_servers)
-  zone_id = data.cloudflare_zone.this.id
+  zone_id = data.cloudflare_zone.this.zone_id
   name    = var.zone_name
   comment = var.comment
   type    = "NS"
