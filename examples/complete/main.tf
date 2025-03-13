@@ -132,6 +132,7 @@ locals {
   }
 }
 
+# Manage DNS sub-domaisn in cloudflare and attach them to they parent in route53
 module "cloudflare" {
   source = "../../modules/cloudflare"
 
