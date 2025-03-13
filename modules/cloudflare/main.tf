@@ -6,9 +6,6 @@ locals {
 
 data "cloudflare_zone" "this" {
   filter = {
-    account = {
-      id = var.account_id
-    }
     name = local.top_level_domain
   }
 }
