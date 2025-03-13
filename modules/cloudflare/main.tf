@@ -5,16 +5,22 @@ locals {
 }
 
 data "cloudflare_zone" "this" {
-  account_id = var.account_id
-  name       = local.top_level_domain
+  filter = {
+    account = {
+      id = var.account_id
+    }
+    name = local.top_level_domain
+  }
 }
 
-resource "cloudflare_record" "ns" {
+resource "cloudflare_dns_record" "ns" {
   count   = length(var.name_servers)
-  zone_id = data.cloudflare_zone.this.id
+  zone_id = data.cloudflare_zone.this.zone_id
   name    = var.zone_name
   comment = var.comment
   type    = "NS"
-  value   = element(var.name_servers, count.index)
   ttl     = 3600
+  data = {
+    value = element(var.name_servers, count.index)
+  }
 }
