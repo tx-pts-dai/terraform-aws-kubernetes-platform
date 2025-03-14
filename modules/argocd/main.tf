@@ -12,7 +12,7 @@ locals {
       namespace: argocd
       labels:
         argocd.argoproj.io/secret-type: cluster
-        ${join("\n", [for k, v in var.labels : "${k}: ${v}"])}
+        ${join("\n    ", [for k, v in var.labels : "${k}: ${v}"])}
     type: Opaque
     stringData:
       name: ${var.cluster_name}
