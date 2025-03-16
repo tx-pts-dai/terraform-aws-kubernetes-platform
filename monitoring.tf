@@ -64,7 +64,7 @@ module "fluent_operator" {
   create = var.create_addons && var.enable_fluent_operator
 
   chart         = "fluent-operator"
-  chart_version = "3.2.0"
+  chart_version = "3.3.0"
   repository    = "https://fluent.github.io/helm-charts"
   description   = "Fluent Operator"
   namespace     = local.monitoring_namespace
@@ -440,7 +440,7 @@ module "grafana" {
   create = var.create_addons && var.enable_grafana
 
   chart         = "grafana"
-  chart_version = "8.10.1"
+  chart_version = "8.10.4"
   repository    = "https://grafana.github.io/helm-charts"
   description   = "Grafana"
   namespace     = local.monitoring_namespace
