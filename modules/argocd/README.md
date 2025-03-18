@@ -76,7 +76,6 @@ module "spoke" {
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | Name of the EKS cluster | `string` | n/a | yes |
-| <a name="input_cluster_secret_annotations"></a> [cluster\_secret\_annotations](#input\_cluster\_secret\_annotations) | Annotations to add to the ArgoCD Cluster Secret | `map(string)` | `{}` | no |
 | <a name="input_cluster_secret_labels"></a> [cluster\_secret\_labels](#input\_cluster\_secret\_labels) | Labels to add to the ArgoCD Cluster Secret | `map(string)` | `{}` | no |
 | <a name="input_cluster_secret_suffix"></a> [cluster\_secret\_suffix](#input\_cluster\_secret\_suffix) | Suffix to add to the ArgoCD Cluster Secret. This will show in the ArgoCD UI | `string` | `""` | no |
 | <a name="input_enable_hub"></a> [enable\_hub](#input\_enable\_hub) | Enable ArgoCD Hub | `bool` | `false` | no |

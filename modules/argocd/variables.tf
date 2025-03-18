@@ -52,13 +52,6 @@ variable "cluster_secret_labels" {
   default = {}
 }
 
-variable "cluster_secret_annotations" {
-  description = "Annotations to add to the ArgoCD Cluster Secret"
-  type        = map(string)
-
-  default = {}
-}
-
 variable "cluster_secret_suffix" {
   description = "Suffix to add to the ArgoCD Cluster Secret. This will show in the ArgoCD UI"
   type        = string
