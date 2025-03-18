@@ -8,7 +8,7 @@ output "cluster_name" {
   value       = var.cluster_name
 }
 
-output "spoke_cluster_secret_yaml" {
+output "cluster_secret_yaml" {
   description = "ArgoCD cluster secret YAML configuration"
-  value       = local.spoke_cluster_secret_yaml
+  value       = local.cluster_secret_yaml
 }

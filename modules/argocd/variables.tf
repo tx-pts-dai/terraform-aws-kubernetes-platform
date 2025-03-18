@@ -1,3 +1,8 @@
+variable "cluster_name" {
+  description = "Name of the EKS cluster"
+  type        = string
+}
+
 variable "tags" {
   description = "A map of tags to add to all resources"
   type        = map(string)
@@ -19,6 +24,13 @@ variable "enable_spoke" {
   default = false
 }
 
+variable "hub_iam_role_name" {
+  description = "IAM Role Name for ArgoCD Hub"
+  type        = string
+
+  default = "argocd-controller"
+}
+
 variable "hub_iam_role_arn" {
   description = "IAM Role ARN for ArgoCD Hub"
   type        = string
@@ -26,25 +38,42 @@ variable "hub_iam_role_arn" {
   default = null
 }
 
-variable "cluster_name" {
-  description = "Name of the EKS cluster"
+variable "namespace" {
+  description = "Namespace to deploy ArgoCD"
   type        = string
+
+  default = "argocd"
 }
 
-variable "labels" {
+variable "cluster_secret_labels" {
   description = "Labels to add to the ArgoCD Cluster Secret"
   type        = map(string)
 
   default = {}
 }
-variable "values" {
+
+variable "cluster_secret_annotations" {
+  description = "Annotations to add to the ArgoCD Cluster Secret"
+  type        = map(string)
+
+  default = {}
+}
+
+variable "cluster_secret_suffix" {
+  description = "Suffix to add to the ArgoCD Cluster Secret. This will show in the ArgoCD UI"
+  type        = string
+
+  default = ""
+}
+
+variable "helm_values" {
   description = "Values to pass to the Helm chart"
   type        = list(string)
 
   default = []
 }
 
-variable "set" {
+variable "helm_set" {
   description = "Set values to pass to the Helm chart"
   type        = list(string)
 

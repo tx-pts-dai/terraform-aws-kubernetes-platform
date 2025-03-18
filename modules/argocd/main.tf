@@ -1,35 +1,38 @@
 locals {
-  # Not recommended to change the namespace as it requires additional configuration
-  namespace = "argocd"
-
   # Module Outputs
-  iam_role_arn = try(aws_iam_role.argocd_controller[0].arn, aws_iam_role.spoke[0].arn, null)
-  spoke_cluster_secret_yaml = (var.enable_spoke ? <<-EOT
-    apiVersion: v1
-    kind: Secret
-    metadata:
-      name: ${var.cluster_name}
-      namespace: argocd
-      labels:
-        argocd.argoproj.io/secret-type: cluster
-        ${join("\n    ", [for k, v in var.labels : "${k}: ${v}"])}
-    type: Opaque
-    stringData:
-      name: ${var.cluster_name}
-      server: ${data.aws_eks_cluster.cluster.endpoint}
-      config: |
-        {
-          "tlsClientConfig": {
-            "insecure": false,
-            "caData": "${data.aws_eks_cluster.cluster.certificate_authority[0].data}"
-          },
-          "awsAuthConfig": {
-            "clusterName": "${var.cluster_name}",
-            "roleARN": "${try(aws_iam_role.spoke[0].arn, "")}"
-          }
+  iam_role_arn = try(aws_iam_role.argocd_controller[0].arn, aws_iam_role.argocd_spoke[0].arn, null)
+
+  full_cluster_name = join("-", [var.cluster_name, var.cluster_secret_suffix])
+
+  cluster_secret = {
+    apiVersion = "v1"
+    kind       = "Secret"
+    metadata = {
+      name      = "cluster-${local.full_cluster_name}"
+      namespace = var.namespace
+      labels = merge({
+        "argocd.argoproj.io/secret-type" = "cluster"
+      }, var.cluster_secret_labels)
+      annotations = var.cluster_secret_annotations
+    }
+    type = "Opaque"
+    stringData = {
+      name   = local.full_cluster_name
+      server = data.aws_eks_cluster.cluster.endpoint
+      config = jsonencode({
+        tlsClientConfig = {
+          insecure = false
+          caData   = data.aws_eks_cluster.cluster.certificate_authority[0].data
         }
-    EOT
-  : "")
+        awsAuthConfig = {
+          clusterName = var.cluster_name
+          roleARN     = local.iam_role_arn
+        }
+      })
+    }
+  }
+
+  cluster_secret_yaml = yamlencode(local.cluster_secret)
 }
 
 data "aws_eks_cluster" "cluster" {
@@ -38,7 +41,7 @@ data "aws_eks_cluster" "cluster" {
 
 ##################### ArgoCD Hub #############################################
 
-data "aws_iam_policy_document" "hub_pod_identity" {
+data "aws_iam_policy_document" "argocd_controller_assume_role" {
   count = var.enable_hub ? 1 : 0
 
   statement {
@@ -54,11 +57,11 @@ data "aws_iam_policy_document" "hub_pod_identity" {
 resource "aws_iam_role" "argocd_controller" {
   count = var.enable_hub ? 1 : 0
 
-  name               = "${var.cluster_name}-argocd-controller"
-  assume_role_policy = data.aws_iam_policy_document.hub_pod_identity[0].json
+  name               = var.hub_iam_role_name
+  assume_role_policy = data.aws_iam_policy_document.argocd_controller_assume_role[0].json
 }
 
-data "aws_iam_policy_document" "iam_assume_policy" {
+data "aws_iam_policy_document" "argocd_controller" {
   count = var.enable_hub ? 1 : 0
 
   statement {
@@ -68,50 +71,50 @@ data "aws_iam_policy_document" "iam_assume_policy" {
   }
 }
 
-resource "aws_iam_policy" "iam_assume_policy" {
+resource "aws_iam_policy" "argocd_controller" {
   count = var.enable_hub ? 1 : 0
 
   name        = "${var.cluster_name}-argocd-aws-assume"
   description = "IAM Policy for ArgoCD Controller"
-  policy      = data.aws_iam_policy_document.iam_assume_policy[0].json
+  policy      = data.aws_iam_policy_document.argocd_controller[0].json
 
   tags = var.tags
 }
 
-resource "aws_iam_role_policy_attachment" "iam_assume_policy" {
+resource "aws_iam_role_policy_attachment" "argocd_controller" {
   count = var.enable_hub ? 1 : 0
 
   role       = aws_iam_role.argocd_controller[0].name
-  policy_arn = aws_iam_policy.iam_assume_policy[0].arn
+  policy_arn = aws_iam_policy.argocd_controller[0].arn
 }
 
-resource "aws_eks_pod_identity_association" "argocd_app_controller" {
+resource "aws_eks_pod_identity_association" "argocd_application_controller" {
   count = var.enable_hub ? 1 : 0
 
   cluster_name    = var.cluster_name
-  namespace       = local.namespace
+  namespace       = var.namespace
   service_account = "argocd-application-controller"
   role_arn        = aws_iam_role.argocd_controller[0].arn
 
   tags = var.tags
 }
 
-resource "aws_eks_pod_identity_association" "argocd_appset_controller" {
+resource "aws_eks_pod_identity_association" "argocd_applicationset_controller" {
   count = var.enable_hub ? 1 : 0
 
   cluster_name    = var.cluster_name
-  namespace       = local.namespace
+  namespace       = var.namespace
   service_account = "argocd-applicationset-controller"
   role_arn        = aws_iam_role.argocd_controller[0].arn
 
   tags = var.tags
 }
 
-resource "aws_eks_pod_identity_association" "argocd_api_server" {
+resource "aws_eks_pod_identity_association" "argocd_server" {
   count = var.enable_hub ? 1 : 0
 
   cluster_name    = var.cluster_name
-  namespace       = local.namespace
+  namespace       = var.namespace
   service_account = "argocd-server"
   role_arn        = aws_iam_role.argocd_controller[0].arn
 
@@ -120,7 +123,7 @@ resource "aws_eks_pod_identity_association" "argocd_api_server" {
 
 ##################### ArgoCD Spoke ###########################################
 
-data "aws_iam_policy_document" "spoke" {
+data "aws_iam_policy_document" "argocd_spoke" {
   count = var.enable_spoke ? 1 : 0
 
   statement {
@@ -132,32 +135,32 @@ data "aws_iam_policy_document" "spoke" {
   }
 }
 
-resource "aws_iam_role" "spoke" {
+resource "aws_iam_role" "argocd_spoke" {
   count = var.enable_spoke ? 1 : 0
 
   name               = "${var.cluster_name}-argocd-spoke"
-  assume_role_policy = data.aws_iam_policy_document.spoke[0].json
+  assume_role_policy = data.aws_iam_policy_document.argocd_spoke[0].json
 
   tags = var.tags
 }
 
-resource "aws_eks_access_entry" "example" {
+resource "aws_eks_access_entry" "argocd_spoke" {
   count = var.enable_spoke ? 1 : 0
 
   cluster_name      = var.cluster_name
-  principal_arn     = aws_iam_role.spoke[0].arn
+  principal_arn     = aws_iam_role.argocd_spoke[0].arn
   kubernetes_groups = []
   type              = "STANDARD"
 
   tags = var.tags
 }
 
-resource "aws_eks_access_policy_association" "example" {
+resource "aws_eks_access_policy_association" "argocd_spoke" {
   count = var.enable_spoke ? 1 : 0
 
   cluster_name  = var.cluster_name
   policy_arn    = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
-  principal_arn = aws_iam_role.spoke[0].arn
+  principal_arn = aws_iam_role.argocd_spoke[0].arn
 
   access_scope {
     type = "cluster"
@@ -174,13 +177,14 @@ module "argocd" {
   chart_version = "7.8.10"
   repository    = "https://argoproj.github.io/argo-helm"
   description   = "A Helm chart to install the ArgoCD"
-  namespace     = local.namespace
+  namespace     = var.namespace
+  wait          = true
 
   create_namespace = true
 
   # https://github.com/argoproj/argo-helm/blob/main/charts/argo-cd/values.yaml
-  values = var.values
-  set    = var.set
+  values = var.helm_values
+  set    = var.helm_set
 
   tags = var.tags
 }

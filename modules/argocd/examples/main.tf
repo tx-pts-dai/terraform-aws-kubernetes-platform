@@ -1,12 +1,12 @@
 terraform {
-  required_version = ">= 1.6.0"
+  required_version = ">= 1.11"
 
   backend "s3" {
     bucket               = "tf-state-911453050078"
     key                  = "modules/argocd/examples/simple.tfstate"
     workspace_key_prefix = "terraform-aws-kubernetes-platform"
-    dynamodb_table       = "terraform-lock"
     region               = "eu-central-1"
+    use_lockfile         = true
   }
 
   required_providers {
@@ -96,7 +96,6 @@ module "hub" {
   enable_hub = true
 
   cluster_name = "example-cluster"
-
 }
 
 module "spoke" {
@@ -105,6 +104,8 @@ module "spoke" {
   enable_spoke = true
 
   cluster_name = "example-cluster"
+
+  cluster_secret_suffix = "sandbox"
 
   hub_iam_role_arn = module.hub.iam_role_arn
 }
