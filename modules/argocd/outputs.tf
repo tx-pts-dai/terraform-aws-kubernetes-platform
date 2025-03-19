@@ -1,6 +1,11 @@
-output "iam_role_arn" {
+output "hub_iam_role_arn" {
   description = "IAM Role ARN for ArgoCD"
-  value       = local.iam_role_arn
+  value       = try(aws_iam_role.argocd_controller[0].arn, "")
+}
+
+output "spoke_iam_role_arn" {
+  description = "IAM Role ARN for ArgoCD Spoke"
+  value       = try(aws_iam_role.argocd_spoke[0].arn, "")
 }
 
 output "cluster_name" {

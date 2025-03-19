@@ -235,3 +235,26 @@ module "reloader" {
     module.addons
   ]
 }
+
+################################################################################
+# ArgoCD
+module "argocd" {
+  source = "./modules/argocd"
+
+  create = var.create_addons && var.enable_argocd
+
+  cluster_name = module.eks.cluster_name
+  namespace    = try(var.argocd.namespace, "argocd")
+
+  enable_hub   = try(var.argocd.enable_hub, false)
+  enable_spoke = try(var.argocd.enable_spoke, false)
+
+  hub_iam_role_name = try(var.argocd.hub_iam_role_name, "argocd-controller")
+  hub_iam_role_arn  = try(var.argocd.hub_iam_role_arn, null)
+
+  cluster_secret_suffix = try(var.argocd.cluster_secret_suffix, "")
+  cluster_secret_labels = try(var.argocd.cluster_secret_labels, {})
+
+  helm_values = try(var.argocd.helm_values, [])
+  helm_set    = try(var.argocd.helm_set, [])
+}

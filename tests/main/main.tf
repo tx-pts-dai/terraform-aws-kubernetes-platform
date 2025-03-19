@@ -1,12 +1,12 @@
 terraform {
-  required_version = ">= 1.6.0"
+  required_version = ">= 1.11"
 
   backend "s3" {
     bucket               = "tf-state-911453050078"
     key                  = "tests/main.tfstate"
     workspace_key_prefix = "terraform-aws-kubernetes-platform"
-    dynamodb_table       = "terraform-lock"
     region               = "eu-central-1"
+    use_lockfile         = true
   }
 
   required_providers {
@@ -171,4 +171,17 @@ module "k8s_platform" {
   }
 
   enable_amp = false
+
+  enable_argocd = true
+
+  argocd = {
+    enable_hub   = true
+    enable_spoke = true
+
+    cluster_secret_suffix = "example"
+    cluster_secret_labels = {
+      team        = "example"
+      environment = "example"
+    }
+  }
 }

@@ -60,7 +60,7 @@ locals {
 }
 
 module "k8s_platform" {
-  source = ".././../.."
+  source = "./../../.."
 
   name = "ex-argocd"
 
@@ -95,7 +95,7 @@ module "hub" {
 
   enable_hub = true
 
-  cluster_name = "example-cluster"
+  cluster_name = module.k8s_platform.eks.cluster_name
 }
 
 module "spoke" {
@@ -103,9 +103,9 @@ module "spoke" {
 
   enable_spoke = true
 
-  cluster_name = "example-cluster"
+  cluster_name = module.k8s_platform.eks.cluster_name
 
   cluster_secret_suffix = "sandbox"
 
-  hub_iam_role_arn = module.hub.iam_role_arn
+  hub_iam_role_arn = module.hub.hub_iam_role_arn
 }

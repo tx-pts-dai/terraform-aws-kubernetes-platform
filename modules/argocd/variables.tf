@@ -1,3 +1,10 @@
+variable "create" {
+  description = "Create the ArgoCD resources"
+  type        = bool
+
+  default = true
+}
+
 variable "cluster_name" {
   description = "Name of the EKS cluster"
   type        = string
@@ -25,14 +32,14 @@ variable "enable_spoke" {
 }
 
 variable "hub_iam_role_name" {
-  description = "IAM Role Name for ArgoCD Hub"
+  description = "IAM Role Name for ArgoCD Hub. This is referenced by the Spoke clusters"
   type        = string
 
   default = "argocd-controller"
 }
 
 variable "hub_iam_role_arn" {
-  description = "IAM Role ARN for ArgoCD Hub"
+  description = "IAM Role ARN for ArgoCD Hub. This is required for spoke clusters"
   type        = string
 
   default = null

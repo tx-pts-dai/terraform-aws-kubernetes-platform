@@ -1,10 +1,12 @@
 # ArgoCD
 
-This module deploys ArgoCD as either the hub or spoke controller.
+This module deploys ArgoCD as either the hub or spoke controller. This will deploy the default ArgoCD Helm chart and all the necessary IAM roles and policies.
 
 ## Examples
 
 ### Hub
+
+The hub is the controller that manages the spoke clusters. This is where the applications are defined and synced to the spoke clusters.
 
 ```hcl
 module "hub" {
@@ -17,6 +19,8 @@ module "hub" {
 ```
 
 ### Spoke
+
+The spoke is the controller that manages the applications on the cluster. This is where the applications are deployed and synced from the hub.
 
 ```hcl
 module "spoke" {
@@ -78,12 +82,13 @@ module "spoke" {
 | <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | Name of the EKS cluster | `string` | n/a | yes |
 | <a name="input_cluster_secret_labels"></a> [cluster\_secret\_labels](#input\_cluster\_secret\_labels) | Labels to add to the ArgoCD Cluster Secret | `map(string)` | `{}` | no |
 | <a name="input_cluster_secret_suffix"></a> [cluster\_secret\_suffix](#input\_cluster\_secret\_suffix) | Suffix to add to the ArgoCD Cluster Secret. This will show in the ArgoCD UI | `string` | `""` | no |
+| <a name="input_create"></a> [create](#input\_create) | Create the ArgoCD resources | `bool` | `true` | no |
 | <a name="input_enable_hub"></a> [enable\_hub](#input\_enable\_hub) | Enable ArgoCD Hub | `bool` | `false` | no |
 | <a name="input_enable_spoke"></a> [enable\_spoke](#input\_enable\_spoke) | Enable ArgoCD Spoke | `bool` | `false` | no |
 | <a name="input_helm_set"></a> [helm\_set](#input\_helm\_set) | Set values to pass to the Helm chart | `list(string)` | `[]` | no |
 | <a name="input_helm_values"></a> [helm\_values](#input\_helm\_values) | Values to pass to the Helm chart | `list(string)` | `[]` | no |
-| <a name="input_hub_iam_role_arn"></a> [hub\_iam\_role\_arn](#input\_hub\_iam\_role\_arn) | IAM Role ARN for ArgoCD Hub | `string` | `null` | no |
-| <a name="input_hub_iam_role_name"></a> [hub\_iam\_role\_name](#input\_hub\_iam\_role\_name) | IAM Role Name for ArgoCD Hub | `string` | `"argocd-controller"` | no |
+| <a name="input_hub_iam_role_arn"></a> [hub\_iam\_role\_arn](#input\_hub\_iam\_role\_arn) | IAM Role ARN for ArgoCD Hub. This is required for spoke clusters | `string` | `null` | no |
+| <a name="input_hub_iam_role_name"></a> [hub\_iam\_role\_name](#input\_hub\_iam\_role\_name) | IAM Role Name for ArgoCD Hub. This is referenced by the Spoke clusters | `string` | `"argocd-controller"` | no |
 | <a name="input_namespace"></a> [namespace](#input\_namespace) | Namespace to deploy ArgoCD | `string` | `"argocd"` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | A map of tags to add to all resources | `map(string)` | `{}` | no |
 
@@ -93,5 +98,6 @@ module "spoke" {
 |------|-------------|
 | <a name="output_cluster_name"></a> [cluster\_name](#output\_cluster\_name) | Name of the EKS cluster |
 | <a name="output_cluster_secret_yaml"></a> [cluster\_secret\_yaml](#output\_cluster\_secret\_yaml) | ArgoCD cluster secret YAML configuration |
-| <a name="output_iam_role_arn"></a> [iam\_role\_arn](#output\_iam\_role\_arn) | IAM Role ARN for ArgoCD |
+| <a name="output_hub_iam_role_arn"></a> [hub\_iam\_role\_arn](#output\_hub\_iam\_role\_arn) | IAM Role ARN for ArgoCD |
+| <a name="output_spoke_iam_role_arn"></a> [spoke\_iam\_role\_arn](#output\_spoke\_iam\_role\_arn) | IAM Role ARN for ArgoCD Spoke |
 <!-- END_TF_DOCS -->
