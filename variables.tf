@@ -300,3 +300,15 @@ variable "downscaler" {
   type        = any
   default     = {}
 }
+
+variable "enable_argocd" {
+  description = "Enable Argo CD"
+  type        = bool
+  default     = false
+}
+
+variable "argocd" {
+  description = "Argo CD configurations"
+  type        = any
+  default     = {}
+}

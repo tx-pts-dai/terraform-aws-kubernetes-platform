@@ -11,22 +11,23 @@ Managed Addons:
 
 Core components (installed by default):
 
-- Karpenter
-- Metrics Server
-- AWS Load Balancer Controller
-- External DNS
-- External Secrets
-- Prometheus Operator
-- Grafana
-- Fluent Operator
-- Fluentbit for Fargate
-- Reloader
+- [Karpenter](https://karpenter.sh/)
+- [Metrics Server](https://github.com/kubernetes-sigs/metrics-server)
+- [AWS Load Balancer Controller](https://kubernetes-sigs.github.io/aws-load-balancer-controller/latest/)
+- [External DNS](https://github.com/kubernetes-sigs/external-dns)
+- [External Secrets Operator](https://external-secrets.io/latest/)
+- [Prometheus Operator](https://prometheus-operator.dev/docs/getting-started/introduction/)
+- [Grafana](https://grafana.com/)
+- [Fluent Operator](https://github.com/fluent/fluent-operator)
+- [Fluentbit for Fargate]()
+- [Reloader](https://docs.stakater.com/reloader/)
 
 Additional components (optional):
 
-- Cert Manager
-- Ingress Nginx
-- Downscaler
+- [Cert Manager](https://cert-manager.io/docs/)
+- [Ingress Nginx](https://kubernetes.github.io/ingress-nginx/)
+- [Downscaler]()
+- [ArgoCD](https://argoproj.github.io/argo-cd/)
 
 Integrations (optional):
 
@@ -182,6 +183,7 @@ as described in the `.pre-commit-config.yaml` file
 | <a name="module_acm"></a> [acm](#module\_acm) | terraform-aws-modules/acm/aws | 5.1.1 |
 | <a name="module_addons"></a> [addons](#module\_addons) | aws-ia/eks-blueprints-addons/aws | 1.19.0 |
 | <a name="module_amp"></a> [amp](#module\_amp) | terraform-aws-modules/managed-service-prometheus/aws | 3.0.0 |
+| <a name="module_argocd"></a> [argocd](#module\_argocd) | ./modules/argocd | n/a |
 | <a name="module_cluster_secret_store"></a> [cluster\_secret\_store](#module\_cluster\_secret\_store) | ./modules/addon | n/a |
 | <a name="module_downscaler"></a> [downscaler](#module\_downscaler) | tx-pts-dai/downscaler/kubernetes | 0.3.1 |
 | <a name="module_ebs_csi_driver_irsa"></a> [ebs\_csi\_driver\_irsa](#module\_ebs\_csi\_driver\_irsa) | terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks | 5.52.2 |
@@ -228,6 +230,7 @@ as described in the `.pre-commit-config.yaml` file
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_acm_certificate"></a> [acm\_certificate](#input\_acm\_certificate) | ACM certificate configuration. If wildcard\_certificates is true, all domains will include a wildcard prefix. | <pre>object({<br/>    domain_name               = optional(string) # Overrides base_domain<br/>    subject_alternative_names = optional(list(string), [])<br/>    wildcard_certificates     = optional(bool, false)<br/>    wait_for_validation       = optional(bool, false)<br/>  })</pre> | `{}` | no |
+| <a name="input_argocd"></a> [argocd](#input\_argocd) | Argo CD configurations | `any` | `{}` | no |
 | <a name="input_aws_load_balancer_controller"></a> [aws\_load\_balancer\_controller](#input\_aws\_load\_balancer\_controller) | AWS Load Balancer Controller configurations | `any` | `{}` | no |
 | <a name="input_base_domain"></a> [base\_domain](#input\_base\_domain) | Base domain for the platform, used for ingress and ACM certificates | `string` | `"test"` | no |
 | <a name="input_cert_manager"></a> [cert\_manager](#input\_cert\_manager) | Cert Manager configurations | `any` | `{}` | no |
@@ -237,6 +240,7 @@ as described in the `.pre-commit-config.yaml` file
 | <a name="input_eks"></a> [eks](#input\_eks) | Map of EKS configurations | `any` | `{}` | no |
 | <a name="input_enable_acm_certificate"></a> [enable\_acm\_certificate](#input\_enable\_acm\_certificate) | Enable ACM certificate | `bool` | `false` | no |
 | <a name="input_enable_amp"></a> [enable\_amp](#input\_enable\_amp) | Enable AWS Managed Prometheus | `bool` | `false` | no |
+| <a name="input_enable_argocd"></a> [enable\_argocd](#input\_enable\_argocd) | Enable Argo CD | `bool` | `false` | no |
 | <a name="input_enable_aws_load_balancer_controller"></a> [enable\_aws\_load\_balancer\_controller](#input\_enable\_aws\_load\_balancer\_controller) | Enable AWS Load Balancer Controller | `bool` | `true` | no |
 | <a name="input_enable_cert_manager"></a> [enable\_cert\_manager](#input\_enable\_cert\_manager) | Enable Cert Manager | `bool` | `false` | no |
 | <a name="input_enable_downscaler"></a> [enable\_downscaler](#input\_enable\_downscaler) | Enable Downscaler | `bool` | `false` | no |
@@ -276,6 +280,7 @@ as described in the `.pre-commit-config.yaml` file
 
 | Name | Description |
 |------|-------------|
+| <a name="output_argocd"></a> [argocd](#output\_argocd) | Map of attributes for the ArgoCD module |
 | <a name="output_eks"></a> [eks](#output\_eks) | Map of attributes for the EKS cluster |
 | <a name="output_karpenter"></a> [karpenter](#output\_karpenter) | Map of attributes for the Karpenter module |
 | <a name="output_network"></a> [network](#output\_network) | Map of attributes for the VPC module |
