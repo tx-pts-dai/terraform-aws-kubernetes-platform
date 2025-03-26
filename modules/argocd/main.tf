@@ -119,7 +119,7 @@ resource "aws_eks_pod_identity_association" "argocd_server" {
 
 ##################### ArgoCD Spoke ###########################################
 locals {
-  hub_iam_role_arn = coalesce(var.hub_iam_role_arn, aws_iam_role.argocd_controller[0].arn)
+  hub_iam_role_arn = var.create && var.enable_spoke ? (var.hub_iam_role_arn != null ? var.hub_iam_role_arn : (var.enable_hub ? aws_iam_role.argocd_controller[0].arn : null)) : null
 }
 
 data "aws_iam_policy_document" "argocd_spoke" {
