@@ -1,6 +1,6 @@
 locals {
   # Module Outputs
-  iam_role_arn = try(aws_iam_role.argocd_controller[0].arn, aws_iam_role.argocd_spoke[0].arn, null)
+  iam_role_arn = try(aws_iam_role.argocd_controller[0].arn, aws_iam_role.argocd_spoke[0].arn, "")
 
   full_cluster_name = join("-", [var.cluster_name, var.cluster_secret_suffix])
 
