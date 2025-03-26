@@ -155,7 +155,7 @@ module "k8s_platform" {
 
   base_domain = "dai.tx.group"
 
-  enable_acm_certificate = false
+  enable_acm_certificate = true
   acm_certificate = {
     subject_alternative_names = [
       "prometheus",
