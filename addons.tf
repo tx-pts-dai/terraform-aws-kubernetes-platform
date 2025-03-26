@@ -220,7 +220,7 @@ module "reloader" {
   create = var.create_addons && var.enable_reloader
 
   chart         = "reloader"
-  chart_version = "1.3.0"
+  chart_version = "2.0.0"
   repository    = "https://stakater.github.io/stakater-charts"
   description   = "Reloader"
   namespace     = "reloader"
