@@ -125,12 +125,19 @@ module "k8s_platform" {
       }
     ]
   }
-
   aws_load_balancer_controller = {
     set = [
       {
         name  = "replicaCount"
         value = 1
+      },
+      {
+        name  = "enableServiceMonitor"
+        value = true
+      },
+      {
+        name  = "clusterSecretsPermissions.allowAllSecrets"
+        value = true # enables Okta integration by reading client id and secret from K8s secrets
       }
     ]
   }
@@ -163,7 +170,7 @@ module "k8s_platform" {
       "grafana",
     ]
     prepend_stack_id      = true
-    wildcard_certificates = false
+    wildcard_certificates = false # Don't create wildcards for test deployments since other stacks might use them and cause cleanup failures
   }
 
   fluent_log_annotation = {

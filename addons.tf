@@ -93,17 +93,17 @@ module "addons" {
     role_name_prefix = false
 
     # renovate: datasource=helm depName=aws-load-balancer-controller registryUrl=https://aws.github.io/eks-charts
-    chart_version = "1.11.0"
+    chart_version = "1.12.0"
 
     wait = true
 
-    set = concat([{
+    set = [{
       name  = "enableServiceMonitor"
       value = var.enable_prometheus_stack
       }, {
       name  = "clusterSecretsPermissions.allowAllSecrets"
       value = true # enables Okta integration by reading client id and secret from K8s secrets
-    }], try(var.aws_load_balancer_controller.set, []))
+    }]
   }, var.aws_load_balancer_controller)
 
   enable_external_dns = var.enable_external_dns && var.create_addons
