@@ -142,7 +142,7 @@ module "k8s_platform" {
     secrets_manager_secret_name = "dai/platform/pagerduty"
   }
 
-  enable_okta = false
+  enable_okta = true
   okta = {
     base_url                    = "https://login.tx.group"
     secrets_manager_secret_name = "dai/platform/okta"
