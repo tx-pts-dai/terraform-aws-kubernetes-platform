@@ -69,6 +69,7 @@ variable "acm_certificate" {
     domain_name               = optional(string) # Overrides base_domain
     subject_alternative_names = optional(list(string), [])
     wildcard_certificates     = optional(bool, false)
+    prepend_stack_id          = optional(bool, false)
     wait_for_validation       = optional(bool, false)
   })
   default = {}

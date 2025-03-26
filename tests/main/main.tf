@@ -153,7 +153,7 @@ module "k8s_platform" {
     secrets_manager_secret_name = "dai/platform/slack"
   }
 
-  base_domain = "dai.tx.group"
+  base_domain = "dai-sandbox.tamedia.tech"
 
   enable_acm_certificate = true
   acm_certificate = {
@@ -162,6 +162,7 @@ module "k8s_platform" {
       "alertmanager",
       "grafana",
     ]
+    prepend_stack_id      = true
     wildcard_certificates = false
   }
 
