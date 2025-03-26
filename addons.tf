@@ -97,13 +97,13 @@ module "addons" {
 
     wait = true
 
-    set = [{
+    set = concat([{
       name  = "enableServiceMonitor"
       value = var.enable_prometheus_stack
       }, {
       name  = "clusterSecretsPermissions.allowAllSecrets"
-      value = "true" # enables Okta integration by reading client id and secret from K8s secrets
-    }]
+      value = true # enables Okta integration by reading client id and secret from K8s secrets
+    }], try(var.aws_load_balancer_controller.set, []))
   }, var.aws_load_balancer_controller)
 
   enable_external_dns = var.enable_external_dns && var.create_addons
