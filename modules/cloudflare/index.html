@@ -15,7 +15,7 @@
         <link rel="canonical" href="https://tx-pts-dai.github.io/terraform-aws-kubernetes-platform/modules/cloudflare/">
       
       
-        <link rel="prev" href="../addon/">
+        <link rel="prev" href="../argocd/">
       
       
         <link rel="next" href="../datadog/">
@@ -565,6 +565,27 @@
                 
   
   
+  
+  
+    <li class="md-nav__item">
+      <a href="../argocd/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Argocd
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
     
   
   
@@ -1048,7 +1069,7 @@
 </span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">  </span><span class="na">domain_name</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="nv">module.route53_zones[each.key].route53_zone_name[each.key</span><span class="p">]</span>
 </span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="p">}</span>
 </span></code></pre></div>
-<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- BEGIN_TF_DOCS -->
 <h2 id="requirements">Requirements<a class="headerlink" href="#requirements" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
@@ -1064,7 +1085,7 @@
 </tr>
 <tr>
 <td><a name="requirement_cloudflare"></a> <a href="../../modules/cloudflare#requirement_cloudflare">cloudflare</a></td>
-<td>&gt;= 4.0</td>
+<td>&gt;= 4.0, &lt; 5.0</td>
 </tr>
 </tbody>
 </table>
@@ -1079,7 +1100,7 @@
 <tbody>
 <tr>
 <td><a name="provider_cloudflare"></a> <a href="../../modules/cloudflare#provider_cloudflare">cloudflare</a></td>
-<td>&gt;= 4.0</td>
+<td>&gt;= 4.0, &lt; 5.0</td>
 </tr>
 </tbody>
 </table>
@@ -1148,9 +1169,6 @@
 </table>
 <h2 id="outputs">Outputs<a class="headerlink" href="#outputs" title="Permanent link">&para;</a></h2>
 <p>No outputs.</p>
-<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
-
-<!-- BEGIN_TF_DOCS -->
 <!-- END_TF_DOCS -->
 
 <!-- END INCLUDE -->

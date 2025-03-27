@@ -568,6 +568,27 @@
   
   
     <li class="md-nav__item">
+      <a href="../argocd/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Argocd
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../cloudflare/" class="md-nav__link">
         
   
@@ -1266,7 +1287,7 @@
 </span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">  </span><span class="na">depends_on</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="nv">module.k8s_platform</span><span class="p">]</span>
 </span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="p">}</span>
 </span></code></pre></div>
-<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- BEGIN_TF_DOCS -->
 <h2 id="requirements">Requirements<a class="headerlink" href="#requirements" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
@@ -1407,14 +1428,14 @@
 <tr>
 <td><a name="input_datadog"></a> <a href="../../modules/datadog#input_datadog">datadog</a></td>
 <td>Object of Datadog configurations</td>
-<td><pre>object({<br>    agent_api_key_name            = optional(string) # by default it uses the cluster name<br>    agent_app_key_name            = optional(string) # by default it uses the cluster name<br>    operator_chart_version        = optional(string)<br>    custom_resource_chart_version = optional(string)<br>  })</pre></td>
+<td><pre>object({<br/>    agent_api_key_name            = optional(string) # by default it uses the cluster name<br/>    agent_app_key_name            = optional(string) # by default it uses the cluster name<br/>    operator_chart_version        = optional(string)<br/>    custom_resource_chart_version = optional(string)<br/>  })</pre></td>
 <td><code>{}</code></td>
 <td style="text-align: center;">no</td>
 </tr>
 <tr>
 <td><a name="input_datadog_agent_helm_values"></a> <a href="../../modules/datadog#input_datadog_agent_helm_values">datadog_agent_helm_values</a></td>
 <td>List of Datadog Agent custom resource values. https://github.com/DataDog/datadog-operator/blob/main/docs/configuration.v2alpha1.md</td>
-<td><pre>list(object({<br>    name  = string<br>    value = string<br>  }))</pre></td>
+<td><pre>list(object({<br/>    name  = string<br/>    value = string<br/>  }))</pre></td>
 <td><code>[]</code></td>
 <td style="text-align: center;">no</td>
 </tr>
@@ -1422,14 +1443,14 @@
 <td><a name="input_datadog_agent_version_fargate"></a> <a href="../../modules/datadog#input_datadog_agent_version_fargate">datadog_agent_version_fargate</a></td>
 <td>Version of the datadog agent injected in Fargate</td>
 <td><code>string</code></td>
-<td><code>"7.54.0"</code></td>
+<td><code>"7.57.2"</code></td>
 <td style="text-align: center;">no</td>
 </tr>
 <tr>
 <td><a name="input_datadog_operator_helm_values"></a> <a href="../../modules/datadog#input_datadog_operator_helm_values">datadog_operator_helm_values</a></td>
 <td>List of Datadog Operator values</td>
-<td><pre>list(object({<br>    name  = string<br>    value = string<br>  }))</pre></td>
-<td><pre>[<br>  {<br>    "name": "resources.requests.cpu",<br>    "value": "10m"<br>  },<br>  {<br>    "name": "resources.requests.memory",<br>    "value": "50Mi"<br>  }<br>]</pre></td>
+<td><pre>list(object({<br/>    name  = string<br/>    value = string<br/>  }))</pre></td>
+<td><pre>[<br/>  {<br/>    "name": "resources.requests.cpu",<br/>    "value": "10m"<br/>  },<br/>  {<br/>    "name": "resources.requests.memory",<br/>    "value": "50Mi"<br/>  }<br/>]</pre></td>
 <td style="text-align: center;">no</td>
 </tr>
 <tr>
@@ -1464,7 +1485,7 @@
 </table>
 <h2 id="outputs">Outputs<a class="headerlink" href="#outputs" title="Permanent link">&para;</a></h2>
 <p>No outputs.</p>
-<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- END_TF_DOCS -->
 
 <!-- BEGIN_TF_DOCS -->
 <h2 id="requirements_1">Requirements<a class="headerlink" href="#requirements_1" title="Permanent link">&para;</a></h2>
@@ -1616,7 +1637,7 @@
 </table>
 <h2 id="outputs_1">Outputs<a class="headerlink" href="#outputs_1" title="Permanent link">&para;</a></h2>
 <p>No outputs.</p>
-<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- END_TF_DOCS -->
 
 <!-- BEGIN_TF_DOCS -->
 <h2 id="requirements_2">Requirements<a class="headerlink" href="#requirements_2" title="Permanent link">&para;</a></h2>

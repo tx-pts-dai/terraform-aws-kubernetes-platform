@@ -117,7 +117,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#tamedia-kubernetes-as-a-service-kaas-terraform-module-alpha" class="md-skip">
+        <a href="#tamedia-kubernetes-as-a-service-kaas-terraform-module" class="md-skip">
           Skip to content
         </a>
       
@@ -493,6 +493,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#release-new-kubernetes-version" class="md-nav__link">
+    <span class="md-ellipsis">
+      Release new kubernetes version
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#usage" class="md-nav__link">
     <span class="md-ellipsis">
       Usage
@@ -505,6 +514,15 @@
   <a href="#explanation-and-description-of-interesting-use-cases" class="md-nav__link">
     <span class="md-ellipsis">
       Explanation and description of interesting use-cases
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#reloader" class="md-nav__link">
+    <span class="md-ellipsis">
+      Reloader
     </span>
   </a>
   
@@ -737,6 +755,27 @@
   
   <span class="md-ellipsis">
     Addon
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="modules/argocd/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Argocd
   </span>
   
 
@@ -1064,6 +1103,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#release-new-kubernetes-version" class="md-nav__link">
+    <span class="md-ellipsis">
+      Release new kubernetes version
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#usage" class="md-nav__link">
     <span class="md-ellipsis">
       Usage
@@ -1076,6 +1124,15 @@
   <a href="#explanation-and-description-of-interesting-use-cases" class="md-nav__link">
     <span class="md-ellipsis">
       Explanation and description of interesting use-cases
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#reloader" class="md-nav__link">
+    <span class="md-ellipsis">
+      Reloader
     </span>
   </a>
   
@@ -1220,7 +1277,7 @@
 
 
 <!-- BEGIN INCLUDE ../README.md -->
-<h1 id="tamedia-kubernetes-as-a-service-kaas-terraform-module-alpha">Tamedia Kubernetes as a Service (KaaS) Terraform Module (Alpha)<a class="headerlink" href="#tamedia-kubernetes-as-a-service-kaas-terraform-module-alpha" title="Permanent link">&para;</a></h1>
+<h1 id="tamedia-kubernetes-as-a-service-kaas-terraform-module"><a href="https://tx-pts-dai.github.io/terraform-aws-kubernetes-platform/">Tamedia Kubernetes as a Service (KaaS) Terraform Module</a><a class="headerlink" href="#tamedia-kubernetes-as-a-service-kaas-terraform-module" title="Permanent link">&para;</a></h1>
 <p>Opinionated batteries included Terraform module to deploy Kubernetes in AWS. Includes:</p>
 <p>Managed Addons:</p>
 <ul>
@@ -1231,26 +1288,29 @@
 </ul>
 <p>Core components (installed by default):</p>
 <ul>
-<li>Karpenter</li>
-<li>Metrics Server</li>
-<li>AWS Load Balancer Controller</li>
-<li>External DNS</li>
-<li>External Secrets</li>
-<li>Prometheus Operator</li>
-<li>Grafana</li>
-<li>Fluent Operator</li>
-<li>Fluentbit for Fargate</li>
+<li><a href="https://karpenter.sh/">Karpenter</a></li>
+<li><a href="https://github.com/kubernetes-sigs/metrics-server">Metrics Server</a></li>
+<li><a href="https://kubernetes-sigs.github.io/aws-load-balancer-controller/latest/">AWS Load Balancer Controller</a></li>
+<li><a href="https://github.com/kubernetes-sigs/external-dns">External DNS</a></li>
+<li><a href="https://external-secrets.io/latest/">External Secrets Operator</a></li>
+<li><a href="https://prometheus-operator.dev/docs/getting-started/introduction/">Prometheus Operator</a></li>
+<li><a href="https://grafana.com/">Grafana</a></li>
+<li><a href="https://github.com/fluent/fluent-operator">Fluent Operator</a></li>
+<li><a href="..">Fluentbit for Fargate</a></li>
+<li><a href="https://docs.stakater.com/reloader/">Reloader</a></li>
 </ul>
 <p>Additional components (optional):</p>
 <ul>
-<li>Cert Manager</li>
-<li>Ingress Nginx</li>
-<li>Downscaler</li>
+<li><a href="https://cert-manager.io/docs/">Cert Manager</a></li>
+<li><a href="https://kubernetes.github.io/ingress-nginx/">Ingress Nginx</a></li>
+<li><a href="..">Downscaler</a></li>
+<li><a href="https://argoproj.github.io/argo-cd/">ArgoCD</a></li>
 </ul>
 <p>Integrations (optional):</p>
 <ul>
 <li>Okta</li>
 <li>PagerDuty</li>
+<li>Slack</li>
 </ul>
 <h2 id="requirements">Requirements<a class="headerlink" href="#requirements" title="Permanent link">&para;</a></h2>
 <p>The module needs some resources to be deployed in order to operate correctly:</p>
@@ -1259,23 +1319,59 @@
 <li>AWSServiceRoleForEC2Spot</li>
 <li><a href="https://docs.aws.amazon.com/batch/latest/userguide/spot_fleet_IAM_role.html">AWSServiceRoleForEC2SpotFleet</a></li>
 </ul>
+<h2 id="release-new-kubernetes-version">Release new kubernetes version<a class="headerlink" href="#release-new-kubernetes-version" title="Permanent link">&para;</a></h2>
+<p><strong>important</strong>
+Each new kubernetes version needs it's own release. This is due to the fact that we should not skip kubernetes versions during a cluster upgrade.</p>
+<p>To release a new Kubernetes version, follow these steps:</p>
+<ol>
+<li><strong>Update the version file</strong>:</li>
+<li>Open the <code>K8S_VERSION</code> file located in the root of the repository.</li>
+<li>
+<p>Update the version number to the next Kubernetes version.</p>
+</li>
+<li>
+<p><strong>Commit the Changes</strong>:</p>
+</li>
+<li>
+<p>Commit the changes to the <code>K8S_VERSION</code> file with a meaningful commit message following the release proces. For example:
+     <div class="language-sh highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>git<span class="w"> </span>add<span class="w"> </span>K8S_VERSION
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;feat! update Kubernetes version to 1.30&quot;</span>
+</span></code></pre></div></p>
+</li>
+<li>
+<p><strong>Push the Changes</strong>:</p>
+</li>
+<li>
+<p>Push the changes to the main branch, the release workflow will automatically run. This workflow will:</p>
+<ul>
+<li>Read the updated Kubernetes version from the <code>K8S_VERSION</code> file.</li>
+<li>Determine the new module version based on the commit message.</li>
+<li>Create a new release with the updated module version and the kubernetes version as metadata. The format would be X.Y.Z+A.B where X.Y.Z is the module version and A.B is the kubenetes control plane version.</li>
+</ul>
+</li>
+<li>
+<p><strong>Verify the Release</strong>:</p>
+</li>
+<li>Check the <a href="https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/actions">GitHub Actions</a> page to ensure the release workflow completed successfully.</li>
+<li>Verify that the new module version is available in the <a href="https://registry.terraform.io/modules/tx-pts-dai/kubernetes-platform/aws">Terraform Registry</a>.</li>
+</ol>
 <h2 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">&para;</a></h2>
-<div class="language-tf highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kr">module</span><span class="w"> </span><span class="nv">&quot;k8s_platform&quot;</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">  </span><span class="na">source</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;tx-pts-dai/kubernetes-platform/aws&quot;</span>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="c1">  # Pin this module to a specific version to avoid breaking changes</span>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="c1">  # version = &quot;0.0.0&quot;</span>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">  </span><span class="na">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;example-platform&quot;</span>
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>
-</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">  </span><span class="nb">vpc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">    </span><span class="na">enabled</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">true</span>
-</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">  </span><span class="p">}</span>
-</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>
-</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="w">  </span><span class="nb">tags</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="w">    </span><span class="na">Environment</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;sandbox&quot;</span>
-</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="w">    </span><span class="na">GithubRepo</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;terraform-aws-kubernetes-platform&quot;</span>
-</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="w">  </span><span class="p">}</span>
-</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="p">}</span>
+<div class="language-tf highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kr">module</span><span class="w"> </span><span class="nv">&quot;k8s_platform&quot;</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">  </span><span class="na">source</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;tx-pts-dai/kubernetes-platform/aws&quot;</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="c1">  # Pin this module to a specific version to avoid breaking changes</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="c1">  # version = &quot;0.0.0&quot;</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">  </span><span class="na">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;example-platform&quot;</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">  </span><span class="nb">vpc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w">    </span><span class="na">enabled</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">true</span>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>
+</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="w">  </span><span class="nb">tags</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="w">    </span><span class="na">Environment</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;sandbox&quot;</span>
+</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="w">    </span><span class="na">GithubRepo</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;terraform-aws-kubernetes-platform&quot;</span>
+</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a><span class="p">}</span>
 </span></code></pre></div>
 <p>See the <a href="..#Examples">Examples below</a> for more use cases</p>
 <h2 id="explanation-and-description-of-interesting-use-cases">Explanation and description of interesting use-cases<a class="headerlink" href="#explanation-and-description-of-interesting-use-cases" title="Permanent link">&para;</a></h2>
@@ -1285,12 +1381,29 @@
 <li>To encourage standardization and common practices</li>
 <li>To ease maintenance</li>
 </ul>
+<h2 id="reloader">Reloader<a class="headerlink" href="#reloader" title="Permanent link">&para;</a></h2>
+<p>The <a href="https://github.com/stakater/Reloader">Stakater Reloader</a> is a Kubernetes controller that automatically watches for changes in ConfigMaps and Secrets and triggers rolling restarts of the associated deployments, statefulsets, or daemonsets when these configurations are updated. This functionality ensures that applications deployed within a Kubernetes cluster always reflect the latest configuration without manual intervention.</p>
+<p>When an application relies on configuration data or sensitive information stored in ConfigMaps or Secrets, and these resources are modified, Reloader automates the process of applying these changes by updating the relevant pods. Without Reloader, such changes would require a manual pod restart or redeployment to take effect.</p>
+<p>Reloader is deployed by default on the cluster but is used as on demand via annotations.</p>
+<p>Considering this kubernetes deployment and the required annotation:
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Deployment</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="nt">metadata</span><span class="p">:</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">foo</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">  </span><span class="nt">annotations</span><span class="p">:</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">    </span><span class="nt">reloader.stakater.com/auto</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;true&quot;</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="nt">spec</span><span class="p">:</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">  </span><span class="nt">template</span><span class="p">:</span>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">    </span><span class="nt">metadata</span><span class="p">:</span>
+</span></code></pre></div></p>
+<p>Reloader will now watch for updates and manage rolling restart of pods for this specific deployment.</p>
 <h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">&para;</a></h2>
 <ul>
 <li><a href="../examples/complete/">Complete</a> - Includes creation of VPC, k8s cluster, addons and all the optional features.</li>
-<li><a href="../examples/simple/">Simple</a> - Simplest EKS deployment with default VPC, addons, ... creation</li>
-<li><a href="../examples/lacework/">Lacework</a> - EKS deployment with Lacework integration</li>
 <li><a href="../examples/datadog/">Datadog</a> - EKS deployment with Datadog Operator integration</li>
+<li><a href="../examples/disable-addons/">Disable-Addons</a> - EKS + Karpenter deployment with all addons disabled</li>
+<li><a href="../examples/lacework/">Lacework</a> - EKS deployment with Lacework integration</li>
+<li><a href="../examples/network/">Network</a> - VPC deployment with custom subnets for kubernetes</li>
+<li><a href="../examples/simple/">Simple</a> - Simplest EKS deployment with default VPC, addons, ... creation</li>
 </ul>
 <h3 id="cleanup-example-deployments">Cleanup example deployments<a class="headerlink" href="#cleanup-example-deployments" title="Permanent link">&para;</a></h3>
 <p><a href="https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/actions/workflows/examples-cleanup.yaml">Destroy Workflow</a> - This manual workflow destroys deployed example deployments by selection the branch and the example to destroy.</p>
@@ -1309,7 +1422,7 @@
 <li>fix end of files</li>
 </ul>
 <p>as described in the <code>.pre-commit-config.yaml</code> file</p>
-<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- BEGIN_TF_DOCS -->
 <h2 id="requirements_1">Requirements<a class="headerlink" href="#requirements_1" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
@@ -1340,10 +1453,6 @@
 <td>&gt;= 2.27</td>
 </tr>
 <tr>
-<td><a name="requirement_null"></a> <a href="..#requirement_null">null</a></td>
-<td>&gt;= 3.0</td>
-</tr>
-<tr>
 <td><a name="requirement_time"></a> <a href="..#requirement_time">time</a></td>
 <td>&gt;= 0.11</td>
 </tr>
@@ -1361,6 +1470,10 @@
 <tr>
 <td><a name="provider_aws"></a> <a href="..#provider_aws">aws</a></td>
 <td>&gt;= 5.42.0</td>
+</tr>
+<tr>
+<td><a name="provider_kubernetes"></a> <a href="..#provider_kubernetes">kubernetes</a></td>
+<td>&gt;= 2.27</td>
 </tr>
 <tr>
 <td><a name="provider_time"></a> <a href="..#provider_time">time</a></td>
@@ -1381,12 +1494,22 @@
 <tr>
 <td><a name="module_acm"></a> <a href="..#module_acm">acm</a></td>
 <td>terraform-aws-modules/acm/aws</td>
-<td>5.0.1</td>
+<td>5.1.1</td>
 </tr>
 <tr>
 <td><a name="module_addons"></a> <a href="..#module_addons">addons</a></td>
 <td>aws-ia/eks-blueprints-addons/aws</td>
-<td>1.16.3</td>
+<td>1.20.0</td>
+</tr>
+<tr>
+<td><a name="module_amp"></a> <a href="..#module_amp">amp</a></td>
+<td>terraform-aws-modules/managed-service-prometheus/aws</td>
+<td>3.0.0</td>
+</tr>
+<tr>
+<td><a name="module_argocd"></a> <a href="..#module_argocd">argocd</a></td>
+<td>./modules/argocd</td>
+<td>n/a</td>
 </tr>
 <tr>
 <td><a name="module_cluster_secret_store"></a> <a href="..#module_cluster_secret_store">cluster_secret_store</a></td>
@@ -1401,12 +1524,12 @@
 <tr>
 <td><a name="module_ebs_csi_driver_irsa"></a> <a href="..#module_ebs_csi_driver_irsa">ebs_csi_driver_irsa</a></td>
 <td>terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks</td>
-<td>5.44.0</td>
+<td>5.54.0</td>
 </tr>
 <tr>
 <td><a name="module_eks"></a> <a href="..#module_eks">eks</a></td>
 <td>terraform-aws-modules/eks/aws</td>
-<td>20.23.0</td>
+<td>20.34.0</td>
 </tr>
 <tr>
 <td><a name="module_fluent_operator"></a> <a href="..#module_fluent_operator">fluent_operator</a></td>
@@ -1421,7 +1544,7 @@
 <tr>
 <td><a name="module_karpenter"></a> <a href="..#module_karpenter">karpenter</a></td>
 <td>terraform-aws-modules/eks/aws//modules/karpenter</td>
-<td>20.20.0</td>
+<td>20.34.0</td>
 </tr>
 <tr>
 <td><a name="module_karpenter_crds"></a> <a href="..#module_karpenter_crds">karpenter_crds</a></td>
@@ -1439,11 +1562,6 @@
 <td>n/a</td>
 </tr>
 <tr>
-<td><a name="module_managed_addons"></a> <a href="..#module_managed_addons">managed_addons</a></td>
-<td>aws-ia/eks-blueprints-addons/aws</td>
-<td>1.16.3</td>
-</tr>
-<tr>
 <td><a name="module_network"></a> <a href="..#module_network">network</a></td>
 <td>./modules/network</td>
 <td>n/a</td>
@@ -1459,12 +1577,27 @@
 <td>n/a</td>
 </tr>
 <tr>
+<td><a name="module_prometheus_irsa"></a> <a href="..#module_prometheus_irsa">prometheus_irsa</a></td>
+<td>terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks</td>
+<td>5.54.0</td>
+</tr>
+<tr>
 <td><a name="module_prometheus_operator_crds"></a> <a href="..#module_prometheus_operator_crds">prometheus_operator_crds</a></td>
 <td>./modules/addon</td>
 <td>n/a</td>
 </tr>
 <tr>
 <td><a name="module_prometheus_stack"></a> <a href="..#module_prometheus_stack">prometheus_stack</a></td>
+<td>./modules/addon</td>
+<td>n/a</td>
+</tr>
+<tr>
+<td><a name="module_reloader"></a> <a href="..#module_reloader">reloader</a></td>
+<td>./modules/addon</td>
+<td>n/a</td>
+</tr>
+<tr>
+<td><a name="module_slack_secrets"></a> <a href="..#module_slack_secrets">slack_secrets</a></td>
 <td>./modules/addon</td>
 <td>n/a</td>
 </tr>
@@ -1476,7 +1609,7 @@
 <tr>
 <td><a name="module_vpc_cni_irsa"></a> <a href="..#module_vpc_cni_irsa">vpc_cni_irsa</a></td>
 <td>terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks</td>
-<td>5.44.0</td>
+<td>5.54.0</td>
 </tr>
 </tbody>
 </table>
@@ -1502,11 +1635,15 @@
 <td>resource</td>
 </tr>
 <tr>
-<td><a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule">aws_security_group_rule.eks_control_plan_ingress</a></td>
+<td><a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule">aws_security_group_rule.eks_control_plane_ingress</a></td>
 <td>resource</td>
 </tr>
 <tr>
 <td><a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/subnet">aws_subnet.karpenter</a></td>
+<td>resource</td>
+</tr>
+<tr>
+<td><a href="https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/annotations">kubernetes_annotations.monitoring</a></td>
 <td>resource</td>
 </tr>
 <tr>
@@ -1561,8 +1698,15 @@
 <tbody>
 <tr>
 <td><a name="input_acm_certificate"></a> <a href="..#input_acm_certificate">acm_certificate</a></td>
-<td>ACM certificate configuration. If wildcard_certificates is true, all domains will include a wildcard prefix.</td>
-<td><pre>object({<br>    domain_name               = optional(string) # Overrides base_domain<br>    subject_alternative_names = optional(list(string), [])<br>    wildcard_certificates     = optional(bool, false)<br>    wait_for_validation       = optional(bool, false)<br>  })</pre></td>
+<td>ACM certificate configuration for the domain(s). Controls domain name, alternative domain names, wildcard configuration, and validation behavior.<br/>Options include:<br/>  - domain_name: Primary domain name for the certificate. If not provided, uses base_domain from other configuration.<br/>  - subject_alternative_names: List of additional domain names to include in the certificate.<br/>  - wildcard_certificates: When true, adds a wildcard prefix (*.) to all domains in the certificate.<br/>  - prepend_stack_id: When true, prepends the stack identifier to each domain name.<br/>  - wait_for_validation: When true, Terraform will wait for certificate validation to complete before proceeding.</td>
+<td><pre>object({<br/>    domain_name               = optional(string)<br/>    subject_alternative_names = optional(list(string), [])<br/>    wildcard_certificates     = optional(bool, false)<br/>    prepend_stack_id          = optional(bool, false)<br/>    wait_for_validation       = optional(bool, false)<br/>  })</pre></td>
+<td><code>{}</code></td>
+<td style="text-align: center;">no</td>
+</tr>
+<tr>
+<td><a name="input_argocd"></a> <a href="..#input_argocd">argocd</a></td>
+<td>Argo CD configurations</td>
+<td><code>any</code></td>
 <td><code>{}</code></td>
 <td style="text-align: center;">no</td>
 </tr>
@@ -1590,8 +1734,15 @@
 <tr>
 <td><a name="input_cluster_admins"></a> <a href="..#input_cluster_admins">cluster_admins</a></td>
 <td>Map of IAM roles to add as cluster admins. Only exact matching role names are returned</td>
-<td><pre>map(object({<br>    role_name         = string<br>    kubernetes_groups = optional(list(string))<br>  }))</pre></td>
+<td><pre>map(object({<br/>    role_name         = string<br/>    kubernetes_groups = optional(list(string))<br/>  }))</pre></td>
 <td><code>{}</code></td>
+<td style="text-align: center;">no</td>
+</tr>
+<tr>
+<td><a name="input_create_addons"></a> <a href="..#input_create_addons">create_addons</a></td>
+<td>Create the platform addons. if set to false, no addons will be created</td>
+<td><code>bool</code></td>
+<td><code>true</code></td>
 <td style="text-align: center;">no</td>
 </tr>
 <tr>
@@ -1611,6 +1762,20 @@
 <tr>
 <td><a name="input_enable_acm_certificate"></a> <a href="..#input_enable_acm_certificate">enable_acm_certificate</a></td>
 <td>Enable ACM certificate</td>
+<td><code>bool</code></td>
+<td><code>false</code></td>
+<td style="text-align: center;">no</td>
+</tr>
+<tr>
+<td><a name="input_enable_amp"></a> <a href="..#input_enable_amp">enable_amp</a></td>
+<td>Enable AWS Managed Prometheus</td>
+<td><code>bool</code></td>
+<td><code>false</code></td>
+<td style="text-align: center;">no</td>
+</tr>
+<tr>
+<td><a name="input_enable_argocd"></a> <a href="..#input_enable_argocd">enable_argocd</a></td>
+<td>Enable Argo CD</td>
 <td><code>bool</code></td>
 <td><code>false</code></td>
 <td style="text-align: center;">no</td>
@@ -1679,13 +1844,6 @@
 <td style="text-align: center;">no</td>
 </tr>
 <tr>
-<td><a name="input_enable_karpenter"></a> <a href="..#input_enable_karpenter">enable_karpenter</a></td>
-<td>Enable Karpenter</td>
-<td><code>bool</code></td>
-<td><code>true</code></td>
-<td style="text-align: center;">no</td>
-</tr>
-<tr>
 <td><a name="input_enable_metrics_server"></a> <a href="..#input_enable_metrics_server">enable_metrics_server</a></td>
 <td>Enable Metrics Server</td>
 <td><code>bool</code></td>
@@ -1711,6 +1869,20 @@
 <td>Enable Prometheus stack</td>
 <td><code>bool</code></td>
 <td><code>true</code></td>
+<td style="text-align: center;">no</td>
+</tr>
+<tr>
+<td><a name="input_enable_reloader"></a> <a href="..#input_enable_reloader">enable_reloader</a></td>
+<td>Enable Reloader</td>
+<td><code>bool</code></td>
+<td><code>true</code></td>
+<td style="text-align: center;">no</td>
+</tr>
+<tr>
+<td><a name="input_enable_slack"></a> <a href="..#input_enable_slack">enable_slack</a></td>
+<td>Enable Slack integration</td>
+<td><code>bool</code></td>
+<td><code>false</code></td>
 <td style="text-align: center;">no</td>
 </tr>
 <tr>
@@ -1743,8 +1915,8 @@
 </tr>
 <tr>
 <td><a name="input_fluent_log_annotation"></a> <a href="..#input_fluent_log_annotation">fluent_log_annotation</a></td>
-<td>Annotation to add to pods to get logs stored in cloudwatch</td>
-<td><pre>object({<br>    name  = optional(string, "kaas.tamedia.ch/logging")<br>    value = optional(string, "true")<br>  })</pre></td>
+<td>Pod Annotation required to enable fluent bit logging. Setting name to empty string will disable annotation requirement.</td>
+<td><pre>object({<br/>    name  = optional(string, "fluentbit.io/include")<br/>    value = optional(string, "true")<br/>  })</pre></td>
 <td><code>{}</code></td>
 <td style="text-align: center;">no</td>
 </tr>
@@ -1777,6 +1949,13 @@
 <td style="text-align: center;">no</td>
 </tr>
 <tr>
+<td><a name="input_metadata"></a> <a href="..#input_metadata">metadata</a></td>
+<td>Metadata for the platform</td>
+<td><pre>object({<br/>    environment = optional(string, "")<br/>    team        = optional(string, "")<br/>  })</pre></td>
+<td><code>{}</code></td>
+<td style="text-align: center;">no</td>
+</tr>
+<tr>
 <td><a name="input_metrics_server"></a> <a href="..#input_metrics_server">metrics_server</a></td>
 <td>Metrics Server configurations</td>
 <td><code>any</code></td>
@@ -1793,14 +1972,14 @@
 <tr>
 <td><a name="input_okta"></a> <a href="..#input_okta">okta</a></td>
 <td>Okta configurations</td>
-<td><pre>object({<br>    base_url                    = optional(string, "")<br>    secrets_manager_secret_name = optional(string, "")<br>    kubernetes_secret_name      = optional(string, "okta")<br>  })</pre></td>
+<td><pre>object({<br/>    base_url                    = optional(string, "")<br/>    secrets_manager_secret_name = optional(string, "")<br/>    kubernetes_secret_name      = optional(string, "okta")<br/>  })</pre></td>
 <td><code>{}</code></td>
 <td style="text-align: center;">no</td>
 </tr>
 <tr>
 <td><a name="input_pagerduty"></a> <a href="..#input_pagerduty">pagerduty</a></td>
 <td>PagerDuty configurations</td>
-<td><pre>object({<br>    secrets_manager_secret_name = optional(string, "")<br>    kubernetes_secret_name      = optional(string, "pagerduty")<br>  })</pre></td>
+<td><pre>object({<br/>    secrets_manager_secret_name = optional(string, "")<br/>    kubernetes_secret_name      = optional(string, "pagerduty")<br/>  })</pre></td>
 <td><code>{}</code></td>
 <td style="text-align: center;">no</td>
 </tr>
@@ -1808,6 +1987,20 @@
 <td><a name="input_prometheus_stack"></a> <a href="..#input_prometheus_stack">prometheus_stack</a></td>
 <td>Prometheus stack configurations</td>
 <td><code>any</code></td>
+<td><code>{}</code></td>
+<td style="text-align: center;">no</td>
+</tr>
+<tr>
+<td><a name="input_reloader"></a> <a href="..#input_reloader">reloader</a></td>
+<td>Reloader configurations</td>
+<td><code>any</code></td>
+<td><code>{}</code></td>
+<td style="text-align: center;">no</td>
+</tr>
+<tr>
+<td><a name="input_slack"></a> <a href="..#input_slack">slack</a></td>
+<td>Slack configurations</td>
+<td><pre>object({<br/>    secrets_manager_secret_name = optional(string, "")<br/>    kubernetes_secret_name      = optional(string, "slack")<br/>  })</pre></td>
 <td><code>{}</code></td>
 <td style="text-align: center;">no</td>
 </tr>
@@ -1837,16 +2030,24 @@
 </thead>
 <tbody>
 <tr>
+<td><a name="output_argocd"></a> <a href="..#output_argocd">argocd</a></td>
+<td>Map of attributes for the ArgoCD module</td>
+</tr>
+<tr>
 <td><a name="output_eks"></a> <a href="..#output_eks">eks</a></td>
 <td>Map of attributes for the EKS cluster</td>
 </tr>
 <tr>
+<td><a name="output_karpenter"></a> <a href="..#output_karpenter">karpenter</a></td>
+<td>Map of attributes for the Karpenter module</td>
+</tr>
+<tr>
 <td><a name="output_network"></a> <a href="..#output_network">network</a></td>
-<td>Map of attributes for the EKS cluster</td>
+<td>Map of attributes for the VPC module</td>
 </tr>
 </tbody>
 </table>
-<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- END_TF_DOCS -->
 
 <h2 id="authors">Authors<a class="headerlink" href="#authors" title="Permanent link">&para;</a></h2>
 <p>Module is maintained by <a href="https://github.com/AlfGot">Alfredo Gottardo</a>, <a href="https://github.com/Davidoutz">David Beauvererd</a>, <a href="https://github.com/DCamma">Davide Cammarata</a>, <a href="https://github.com/sgametrio">Demetrio Carrara</a>, <a href="https://github.com/rbapst-tamedia">Roland Bapst</a> and <a href="https://github.com/swibrow">Samuel Wibrow</a></p>

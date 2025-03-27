@@ -568,6 +568,27 @@
   
   
     <li class="md-nav__item">
+      <a href="../argocd/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Argocd
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../cloudflare/" class="md-nav__link">
         
   
@@ -1314,7 +1335,7 @@
 </ul>
 <h3 id="filtering-and-lookup">Filtering and Lookup<a class="headerlink" href="#filtering-and-lookup" title="Permanent link">&para;</a></h3>
 <p>The <code>filtered_parameters</code> local variable is used to filter parameters based on the stack name prefix. The <code>lookup</code> local variable creates a nested map of stack-specific parameters based on the provided lookup list. The <code>latest_stack_parameters</code> local variable identifies and retrieves parameters for the last created stack since we use timestamps in the stack names suffix.</p>
-<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- BEGIN_TF_DOCS -->
 <h2 id="requirements">Requirements<a class="headerlink" href="#requirements" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
@@ -1390,6 +1411,13 @@
 <td style="text-align: center;">no</td>
 </tr>
 <tr>
+<td><a name="input_create"></a> <a href="../../modules/ssm#input_create">create</a></td>
+<td>Create the SSM parameters</td>
+<td><code>bool</code></td>
+<td><code>true</code></td>
+<td style="text-align: center;">no</td>
+</tr>
+<tr>
 <td><a name="input_lookup"></a> <a href="../../modules/ssm#input_lookup">lookup</a></td>
 <td>List of parameters to Lookup</td>
 <td><code>list(any)</code></td>
@@ -1399,7 +1427,7 @@
 <tr>
 <td><a name="input_parameters"></a> <a href="../../modules/ssm#input_parameters">parameters</a></td>
 <td>Map of SSM parameters to create</td>
-<td><pre>map(object({<br>    name           = optional(string)<br>    type           = optional(string, "String")<br>    value          = optional(string)<br>    insecure_value = optional(string)<br>  }))</pre></td>
+<td><pre>map(object({<br/>    name           = optional(string)<br/>    type           = optional(string, "String")<br/>    value          = optional(string)<br/>    insecure_value = optional(string)<br/>  }))</pre></td>
 <td><code>{}</code></td>
 <td style="text-align: center;">no</td>
 </tr>
@@ -1448,23 +1476,23 @@
 </tr>
 <tr>
 <td><a name="output_latest_stack_parameters"></a> <a href="../../modules/ssm#output_latest_stack_parameters">latest_stack_parameters</a></td>
-<td>Latest stack parameters</td>
+<td>Latest created stack parameters</td>
 </tr>
 <tr>
 <td><a name="output_lookup"></a> <a href="../../modules/ssm#output_lookup">lookup</a></td>
-<td>Map of looked up parameters</td>
+<td>Map of parameters from filtered parameters containing only keys defined in lookup</td>
 </tr>
 <tr>
 <td><a name="output_parameters"></a> <a href="../../modules/ssm#output_parameters">parameters</a></td>
-<td>Parameters defined in SSM</td>
+<td>All parameters defined in SSM</td>
 </tr>
 <tr>
 <td><a name="output_stacks"></a> <a href="../../modules/ssm#output_stacks">stacks</a></td>
-<td>List of stacks defined in SSM</td>
+<td>List of stacks defined in SSM ordered by creation date (latest first)</td>
 </tr>
 </tbody>
 </table>
-<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- END_TF_DOCS -->
 
 <h2 id="contributions">Contributions<a class="headerlink" href="#contributions" title="Permanent link">&para;</a></h2>
 <p>Contributions to enhance the functionality and flexibility of this module are welcome. Please submit a pull request or open an issue to discuss any changes.</p>

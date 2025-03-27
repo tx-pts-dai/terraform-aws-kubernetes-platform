@@ -568,6 +568,27 @@
   
   
     <li class="md-nav__item">
+      <a href="../argocd/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Argocd
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../cloudflare/" class="md-nav__link">
         
   
@@ -1146,7 +1167,8 @@
 <!-- BEGIN INCLUDE ../../modules/network/README.md -->
 <h1 id="network-module">Network Module<a class="headerlink" href="#network-module" title="Permanent link">&para;</a></h1>
 <p>This module is a wrapper around the public VPC module with some additional configuration options suitable for the Tamedia platform.</p>
-<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<p>See the <a href="../../example/network">network example</a> how to use it and how to retrieve informations on the created resources from another stack.</p>
+<!-- BEGIN_TF_DOCS -->
 <h2 id="requirements">Requirements<a class="headerlink" href="#requirements" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
@@ -1199,7 +1221,7 @@
 <tr>
 <td><a name="module_vpc"></a> <a href="../../modules/network#module_vpc">vpc</a></td>
 <td>terraform-aws-modules/vpc/aws</td>
-<td>5.12.1</td>
+<td>5.19.0</td>
 </tr>
 </tbody>
 </table>
@@ -1276,7 +1298,7 @@
 <td><a name="input_subnet_configs"></a> <a href="../../modules/network#input_subnet_configs">subnet_configs</a></td>
 <td>List of networks objects with their name and size in bits. The order of the list should not change.</td>
 <td><code>list(map(number))</code></td>
-<td><pre>[<br>  {<br>    "public": 24<br>  },<br>  {<br>    "private": 24<br>  },<br>  {<br>    "intra": 26<br>  },<br>  {<br>    "database": 26<br>  },<br>  {<br>    "redshift": 26<br>  },<br>  {<br>    "karpenter": 22<br>  }<br>]</pre></td>
+<td><pre>[<br/>  {<br/>    "public": 24<br/>  },<br/>  {<br/>    "private": 24<br/>  },<br/>  {<br/>    "intra": 26<br/>  },<br/>  {<br/>    "database": 26<br/>  },<br/>  {<br/>    "redshift": 26<br/>  },<br/>  {<br/>    "karpenter": 22<br/>  }<br/>]</pre></td>
 <td style="text-align: center;">no</td>
 </tr>
 <tr>
@@ -1319,7 +1341,7 @@
 </tr>
 </tbody>
 </table>
-<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- END_TF_DOCS -->
 
 <!-- BEGIN_TF_DOCS -->
 <h2 id="requirements_1">Requirements<a class="headerlink" href="#requirements_1" title="Permanent link">&para;</a></h2>

@@ -568,6 +568,27 @@
   
   
     <li class="md-nav__item">
+      <a href="../argocd/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Argocd
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../cloudflare/" class="md-nav__link">
         
   
@@ -1038,7 +1059,7 @@
 <!-- BEGIN INCLUDE ../../modules/security-group/README.md -->
 <h1 id="security-group-module">Security Group Module<a class="headerlink" href="#security-group-module" title="Permanent link">&para;</a></h1>
 <p>This module creates a security group and rules.</p>
-<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- BEGIN_TF_DOCS -->
 <h2 id="requirements">Requirements<a class="headerlink" href="#requirements" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
@@ -1107,6 +1128,13 @@
 </thead>
 <tbody>
 <tr>
+<td><a name="input_create"></a> <a href="../../modules/security-group#input_create">create</a></td>
+<td>Create the security group.</td>
+<td><code>bool</code></td>
+<td><code>true</code></td>
+<td style="text-align: center;">no</td>
+</tr>
+<tr>
 <td><a name="input_description"></a> <a href="../../modules/security-group#input_description">description</a></td>
 <td>The description of the security group.</td>
 <td><code>string</code></td>
@@ -1116,14 +1144,14 @@
 <tr>
 <td><a name="input_egress_rules"></a> <a href="../../modules/security-group#input_egress_rules">egress_rules</a></td>
 <td>The egress rules for the security group.</td>
-<td><pre>map(object({<br>    type                     = string<br>    protocol                 = string<br>    from_port                = number<br>    to_port                  = number<br>    description              = optional(string)<br>    cidr_blocks              = optional(list(string))<br>    ipv6_cidr_blocks         = optional(list(string))<br>    prefix_list_ids          = optional(list(string))<br>    self                     = optional(bool)<br>    source_security_group_id = optional(string)<br>  }))</pre></td>
+<td><pre>map(object({<br/>    type                     = string<br/>    protocol                 = string<br/>    from_port                = number<br/>    to_port                  = number<br/>    description              = optional(string)<br/>    cidr_blocks              = optional(list(string))<br/>    ipv6_cidr_blocks         = optional(list(string))<br/>    prefix_list_ids          = optional(list(string))<br/>    self                     = optional(bool)<br/>    source_security_group_id = optional(string)<br/>  }))</pre></td>
 <td><code>{}</code></td>
 <td style="text-align: center;">no</td>
 </tr>
 <tr>
 <td><a name="input_ingress_rules"></a> <a href="../../modules/security-group#input_ingress_rules">ingress_rules</a></td>
 <td>The ingress rules for the security group.</td>
-<td><pre>map(object({<br>    type                     = string<br>    protocol                 = string<br>    from_port                = number<br>    to_port                  = number<br>    description              = optional(string)<br>    cidr_blocks              = optional(list(string))<br>    ipv6_cidr_blocks         = optional(list(string))<br>    prefix_list_ids          = optional(list(string))<br>    self                     = optional(bool)<br>    source_security_group_id = optional(string)<br>  }))</pre></td>
+<td><pre>map(object({<br/>    type                     = string<br/>    protocol                 = string<br/>    from_port                = number<br/>    to_port                  = number<br/>    description              = optional(string)<br/>    cidr_blocks              = optional(list(string))<br/>    ipv6_cidr_blocks         = optional(list(string))<br/>    prefix_list_ids          = optional(list(string))<br/>    self                     = optional(bool)<br/>    source_security_group_id = optional(string)<br/>  }))</pre></td>
 <td><code>{}</code></td>
 <td style="text-align: center;">no</td>
 </tr>
@@ -1152,7 +1180,7 @@
 </table>
 <h2 id="outputs">Outputs<a class="headerlink" href="#outputs" title="Permanent link">&para;</a></h2>
 <p>No outputs.</p>
-<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- END_TF_DOCS -->
 
 <!-- BEGIN_TF_DOCS -->
 

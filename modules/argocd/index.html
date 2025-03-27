@@ -12,22 +12,28 @@
         <meta name="author" content="DAI">
       
       
+        <link rel="canonical" href="https://tx-pts-dai.github.io/terraform-aws-kubernetes-platform/modules/argocd/">
       
       
+        <link rel="prev" href="../addon/">
       
-      <link rel="icon" href="/terraform-aws-kubernetes-platform/images/logo.ico">
+      
+        <link rel="next" href="../cloudflare/">
+      
+      
+      <link rel="icon" href="../../images/logo.ico">
       <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.21">
     
     
       
-        <title>Terraform AWS Kubernetes Platform</title>
+        <title>Argocd - Terraform AWS Kubernetes Platform</title>
       
     
     
-      <link rel="stylesheet" href="/terraform-aws-kubernetes-platform/assets/stylesheets/main.66ac8b77.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.66ac8b77.min.css">
       
         
-        <link rel="stylesheet" href="/terraform-aws-kubernetes-platform/assets/stylesheets/palette.06af60db.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
       
       
   
@@ -87,7 +93,7 @@
       
     
     
-    <script>__md_scope=new URL("/terraform-aws-kubernetes-platform/",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -112,6 +118,11 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
+        
+        <a href="#argocd" class="md-skip">
+          Skip to content
+        </a>
+      
     </div>
     <div data-md-component="announce">
       
@@ -124,9 +135,9 @@
 
 <header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="/terraform-aws-kubernetes-platform/." title="Terraform AWS Kubernetes Platform" class="md-header__button md-logo" aria-label="Terraform AWS Kubernetes Platform" data-md-component="logo">
+    <a href="../.." title="Terraform AWS Kubernetes Platform" class="md-header__button md-logo" aria-label="Terraform AWS Kubernetes Platform" data-md-component="logo">
       
-  <img src="/terraform-aws-kubernetes-platform/images/logo.ico" alt="logo">
+  <img src="../../images/logo.ico" alt="logo">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -143,7 +154,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              
+              Argocd
             
           </span>
         </div>
@@ -246,7 +257,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="/terraform-aws-kubernetes-platform/." class="md-tabs__link">
+        <a href="../.." class="md-tabs__link">
           
   
   Overview
@@ -262,7 +273,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="/terraform-aws-kubernetes-platform/getting-started/" class="md-tabs__link">
+      <a href="../../getting-started/" class="md-tabs__link">
         
   
     
@@ -277,11 +288,13 @@
         
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
-        <a href="/terraform-aws-kubernetes-platform/modules/addon/" class="md-tabs__link">
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../addon/" class="md-tabs__link">
           
   
   Submodules
@@ -299,7 +312,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="/terraform-aws-kubernetes-platform/examples/complete/" class="md-tabs__link">
+        <a href="../../examples/complete/" class="md-tabs__link">
           
   
   Examples
@@ -315,7 +328,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="/terraform-aws-kubernetes-platform/faq/" class="md-tabs__link">
+      <a href="../../faq/" class="md-tabs__link">
         
   
     
@@ -355,9 +368,9 @@
 
 <nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="/terraform-aws-kubernetes-platform/." title="Terraform AWS Kubernetes Platform" class="md-nav__button md-logo" aria-label="Terraform AWS Kubernetes Platform" data-md-component="logo">
+    <a href="../.." title="Terraform AWS Kubernetes Platform" class="md-nav__button md-logo" aria-label="Terraform AWS Kubernetes Platform" data-md-component="logo">
       
-  <img src="/terraform-aws-kubernetes-platform/images/logo.ico" alt="logo">
+  <img src="../../images/logo.ico" alt="logo">
 
     </a>
     Terraform AWS Kubernetes Platform
@@ -422,7 +435,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/terraform-aws-kubernetes-platform/." class="md-nav__link">
+      <a href="../.." class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -443,7 +456,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/terraform-aws-kubernetes-platform/patterns/" class="md-nav__link">
+      <a href="../../patterns/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -471,7 +484,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/terraform-aws-kubernetes-platform/getting-started/" class="md-nav__link">
+      <a href="../../getting-started/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -488,23 +501,28 @@
       
   
   
+    
   
   
+  
     
     
     
-      
-      
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
         
           
-          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
             
   
   <span class="md-ellipsis">
@@ -515,7 +533,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_3">
             <span class="md-nav__icon md-icon"></span>
             Submodules
@@ -529,7 +547,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/terraform-aws-kubernetes-platform/modules/addon/" class="md-nav__link">
+      <a href="../addon/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -547,10 +565,30 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="/terraform-aws-kubernetes-platform/modules/argocd/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Argocd
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   <span class="md-ellipsis">
@@ -559,6 +597,113 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      Examples
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#hub" class="md-nav__link">
+    <span class="md-ellipsis">
+      Hub
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#spoke" class="md-nav__link">
+    <span class="md-ellipsis">
+      Spoke
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      Requirements
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#providers" class="md-nav__link">
+    <span class="md-ellipsis">
+      Providers
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#modules" class="md-nav__link">
+    <span class="md-ellipsis">
+      Modules
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#resources" class="md-nav__link">
+    <span class="md-ellipsis">
+      Resources
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#inputs" class="md-nav__link">
+    <span class="md-ellipsis">
+      Inputs
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#outputs" class="md-nav__link">
+    <span class="md-ellipsis">
+      Outputs
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -571,7 +716,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/terraform-aws-kubernetes-platform/modules/cloudflare/" class="md-nav__link">
+      <a href="../cloudflare/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -592,7 +737,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/terraform-aws-kubernetes-platform/modules/datadog/" class="md-nav__link">
+      <a href="../datadog/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -613,7 +758,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/terraform-aws-kubernetes-platform/modules/lacework/" class="md-nav__link">
+      <a href="../lacework/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -634,7 +779,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/terraform-aws-kubernetes-platform/modules/network/" class="md-nav__link">
+      <a href="../network/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -655,7 +800,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/terraform-aws-kubernetes-platform/modules/security-group/" class="md-nav__link">
+      <a href="../security-group/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -676,7 +821,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/terraform-aws-kubernetes-platform/modules/ssm/" class="md-nav__link">
+      <a href="../ssm/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -742,7 +887,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/terraform-aws-kubernetes-platform/examples/complete/" class="md-nav__link">
+      <a href="../../examples/complete/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -763,7 +908,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/terraform-aws-kubernetes-platform/examples/simple/" class="md-nav__link">
+      <a href="../../examples/simple/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -784,7 +929,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/terraform-aws-kubernetes-platform/examples/lacework/" class="md-nav__link">
+      <a href="../../examples/lacework/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -805,7 +950,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/terraform-aws-kubernetes-platform/examples/datadog/" class="md-nav__link">
+      <a href="../../examples/datadog/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -833,7 +978,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/terraform-aws-kubernetes-platform/faq/" class="md-nav__link">
+      <a href="../../faq/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -863,6 +1008,103 @@
   
   
   
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      Examples
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#hub" class="md-nav__link">
+    <span class="md-ellipsis">
+      Hub
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#spoke" class="md-nav__link">
+    <span class="md-ellipsis">
+      Spoke
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      Requirements
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#providers" class="md-nav__link">
+    <span class="md-ellipsis">
+      Providers
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#modules" class="md-nav__link">
+    <span class="md-ellipsis">
+      Modules
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#resources" class="md-nav__link">
+    <span class="md-ellipsis">
+      Resources
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#inputs" class="md-nav__link">
+    <span class="md-ellipsis">
+      Inputs
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#outputs" class="md-nav__link">
+    <span class="md-ellipsis">
+      Outputs
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
   
 </nav>
                   </div>
@@ -874,8 +1116,300 @@
             <div class="md-content" data-md-component="content">
               <article class="md-content__inner md-typeset">
                 
-  <h1>404 - Not found</h1>
+                  
 
+  
+  
+
+
+<!-- BEGIN INCLUDE ../../modules/argocd/README.md -->
+<h1 id="argocd">ArgoCD<a class="headerlink" href="#argocd" title="Permanent link">&para;</a></h1>
+<p>This module deploys ArgoCD as either the hub or spoke controller. This will deploy the default ArgoCD Helm chart and all the necessary IAM roles and policies.</p>
+<h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">&para;</a></h2>
+<h3 id="hub">Hub<a class="headerlink" href="#hub" title="Permanent link">&para;</a></h3>
+<p>The hub is the controller that manages the spoke clusters. This is where the applications are defined and synced to the spoke clusters.</p>
+<div class="language-hcl highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kr">module</span><span class="w"> </span><span class="nv">&quot;hub&quot;</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">  </span><span class="na">source</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;./..&quot;</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">  </span><span class="na">enable_hub</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">true</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">  </span><span class="na">cluster_name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;example-cluster&quot;</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="p">}</span>
+</span></code></pre></div>
+<h3 id="spoke">Spoke<a class="headerlink" href="#spoke" title="Permanent link">&para;</a></h3>
+<p>The spoke is the controller that manages the applications on the cluster. This is where the applications are deployed and synced from the hub.</p>
+<div class="language-hcl highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kr">module</span><span class="w"> </span><span class="nv">&quot;spoke&quot;</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">  </span><span class="na">source</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;./..&quot;</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">  </span><span class="na">enable_spoke</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">true</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">  </span><span class="na">cluster_name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;example-cluster&quot;</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">  </span><span class="na">cluster_secret_suffix</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;sandbox&quot;</span>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="w">  </span><span class="na">hub_iam_role_arn</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;arn:aws:iam::123456789012:role/argocd-example-cluster-hub&quot;</span>
+</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="p">}</span>
+</span></code></pre></div>
+<!-- BEGIN_TF_DOCS -->
+<h2 id="requirements">Requirements<a class="headerlink" href="#requirements" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Version</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a name="requirement_terraform"></a> <a href="../../modules/argocd#requirement_terraform">terraform</a></td>
+<td>&gt;= 1.6</td>
+</tr>
+<tr>
+<td><a name="requirement_aws"></a> <a href="../../modules/argocd#requirement_aws">aws</a></td>
+<td>&gt;= 5.0</td>
+</tr>
+<tr>
+<td><a name="requirement_helm"></a> <a href="../../modules/argocd#requirement_helm">helm</a></td>
+<td>&gt;= 2.9</td>
+</tr>
+</tbody>
+</table>
+<h2 id="providers">Providers<a class="headerlink" href="#providers" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Version</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a name="provider_aws"></a> <a href="../../modules/argocd#provider_aws">aws</a></td>
+<td>&gt;= 5.0</td>
+</tr>
+</tbody>
+</table>
+<h2 id="modules">Modules<a class="headerlink" href="#modules" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Source</th>
+<th>Version</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a name="module_argocd"></a> <a href="../../modules/argocd#module_argocd">argocd</a></td>
+<td>../addon</td>
+<td>n/a</td>
+</tr>
+</tbody>
+</table>
+<h2 id="resources">Resources<a class="headerlink" href="#resources" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/eks_access_entry">aws_eks_access_entry.argocd_spoke</a></td>
+<td>resource</td>
+</tr>
+<tr>
+<td><a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/eks_access_policy_association">aws_eks_access_policy_association.argocd_spoke</a></td>
+<td>resource</td>
+</tr>
+<tr>
+<td><a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/eks_pod_identity_association">aws_eks_pod_identity_association.argocd_application_controller</a></td>
+<td>resource</td>
+</tr>
+<tr>
+<td><a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/eks_pod_identity_association">aws_eks_pod_identity_association.argocd_applicationset_controller</a></td>
+<td>resource</td>
+</tr>
+<tr>
+<td><a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/eks_pod_identity_association">aws_eks_pod_identity_association.argocd_server</a></td>
+<td>resource</td>
+</tr>
+<tr>
+<td><a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy">aws_iam_policy.argocd_controller</a></td>
+<td>resource</td>
+</tr>
+<tr>
+<td><a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role">aws_iam_role.argocd_controller</a></td>
+<td>resource</td>
+</tr>
+<tr>
+<td><a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role">aws_iam_role.argocd_spoke</a></td>
+<td>resource</td>
+</tr>
+<tr>
+<td><a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment">aws_iam_role_policy_attachment.argocd_controller</a></td>
+<td>resource</td>
+</tr>
+<tr>
+<td><a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/eks_cluster">aws_eks_cluster.cluster</a></td>
+<td>data source</td>
+</tr>
+<tr>
+<td><a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document">aws_iam_policy_document.argocd_controller</a></td>
+<td>data source</td>
+</tr>
+<tr>
+<td><a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document">aws_iam_policy_document.argocd_controller_assume_role</a></td>
+<td>data source</td>
+</tr>
+<tr>
+<td><a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document">aws_iam_policy_document.argocd_spoke</a></td>
+<td>data source</td>
+</tr>
+</tbody>
+</table>
+<h2 id="inputs">Inputs<a class="headerlink" href="#inputs" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Description</th>
+<th>Type</th>
+<th>Default</th>
+<th style="text-align: center;">Required</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a name="input_cluster_name"></a> <a href="../../modules/argocd#input_cluster_name">cluster_name</a></td>
+<td>Name of the EKS cluster</td>
+<td><code>string</code></td>
+<td>n/a</td>
+<td style="text-align: center;">yes</td>
+</tr>
+<tr>
+<td><a name="input_cluster_secret_labels"></a> <a href="../../modules/argocd#input_cluster_secret_labels">cluster_secret_labels</a></td>
+<td>Labels to add to the ArgoCD Cluster Secret</td>
+<td><code>map(string)</code></td>
+<td><code>{}</code></td>
+<td style="text-align: center;">no</td>
+</tr>
+<tr>
+<td><a name="input_cluster_secret_suffix"></a> <a href="../../modules/argocd#input_cluster_secret_suffix">cluster_secret_suffix</a></td>
+<td>Suffix to add to the ArgoCD Cluster Secret. This will show in the ArgoCD UI</td>
+<td><code>string</code></td>
+<td><code>""</code></td>
+<td style="text-align: center;">no</td>
+</tr>
+<tr>
+<td><a name="input_create"></a> <a href="../../modules/argocd#input_create">create</a></td>
+<td>Create the ArgoCD resources</td>
+<td><code>bool</code></td>
+<td><code>true</code></td>
+<td style="text-align: center;">no</td>
+</tr>
+<tr>
+<td><a name="input_enable_hub"></a> <a href="../../modules/argocd#input_enable_hub">enable_hub</a></td>
+<td>Enable ArgoCD Hub</td>
+<td><code>bool</code></td>
+<td><code>false</code></td>
+<td style="text-align: center;">no</td>
+</tr>
+<tr>
+<td><a name="input_enable_spoke"></a> <a href="../../modules/argocd#input_enable_spoke">enable_spoke</a></td>
+<td>Enable ArgoCD Spoke</td>
+<td><code>bool</code></td>
+<td><code>false</code></td>
+<td style="text-align: center;">no</td>
+</tr>
+<tr>
+<td><a name="input_helm_set"></a> <a href="../../modules/argocd#input_helm_set">helm_set</a></td>
+<td>Set values to pass to the Helm chart</td>
+<td><code>list(string)</code></td>
+<td><code>[]</code></td>
+<td style="text-align: center;">no</td>
+</tr>
+<tr>
+<td><a name="input_helm_values"></a> <a href="../../modules/argocd#input_helm_values">helm_values</a></td>
+<td>Values to pass to the Helm chart</td>
+<td><code>list(string)</code></td>
+<td><code>[]</code></td>
+<td style="text-align: center;">no</td>
+</tr>
+<tr>
+<td><a name="input_hub_iam_role_arn"></a> <a href="../../modules/argocd#input_hub_iam_role_arn">hub_iam_role_arn</a></td>
+<td>IAM Role ARN for ArgoCD Hub. This is required for spoke clusters</td>
+<td><code>string</code></td>
+<td><code>null</code></td>
+<td style="text-align: center;">no</td>
+</tr>
+<tr>
+<td><a name="input_hub_iam_role_name"></a> <a href="../../modules/argocd#input_hub_iam_role_name">hub_iam_role_name</a></td>
+<td>IAM Role Name for ArgoCD Hub. This is referenced by the Spoke clusters</td>
+<td><code>string</code></td>
+<td><code>"argocd-controller"</code></td>
+<td style="text-align: center;">no</td>
+</tr>
+<tr>
+<td><a name="input_namespace"></a> <a href="../../modules/argocd#input_namespace">namespace</a></td>
+<td>Namespace to deploy ArgoCD</td>
+<td><code>string</code></td>
+<td><code>"argocd"</code></td>
+<td style="text-align: center;">no</td>
+</tr>
+<tr>
+<td><a name="input_tags"></a> <a href="../../modules/argocd#input_tags">tags</a></td>
+<td>A map of tags to add to all resources</td>
+<td><code>map(string)</code></td>
+<td><code>{}</code></td>
+<td style="text-align: center;">no</td>
+</tr>
+</tbody>
+</table>
+<h2 id="outputs">Outputs<a class="headerlink" href="#outputs" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a name="output_cluster_name"></a> <a href="../../modules/argocd#output_cluster_name">cluster_name</a></td>
+<td>Name of the EKS cluster</td>
+</tr>
+<tr>
+<td><a name="output_cluster_secret_yaml"></a> <a href="../../modules/argocd#output_cluster_secret_yaml">cluster_secret_yaml</a></td>
+<td>ArgoCD cluster secret YAML configuration</td>
+</tr>
+<tr>
+<td><a name="output_hub_iam_role_arn"></a> <a href="../../modules/argocd#output_hub_iam_role_arn">hub_iam_role_arn</a></td>
+<td>IAM Role ARN for ArgoCD</td>
+</tr>
+<tr>
+<td><a name="output_spoke_iam_role_arn"></a> <a href="../../modules/argocd#output_spoke_iam_role_arn">spoke_iam_role_arn</a></td>
+<td>IAM Role ARN for ArgoCD Spoke</td>
+</tr>
+</tbody>
+</table>
+<!-- END_TF_DOCS -->
+
+<!-- END INCLUDE -->
+
+
+
+
+
+
+
+
+
+
+
+
+                
               </article>
             </div>
           
@@ -909,10 +1443,10 @@
     </div>
     
     
-    <script id="__config" type="application/json">{"base": "/terraform-aws-kubernetes-platform/", "features": ["navigation.tabs.sticky", "navigation.tabs", "content.code.copy"], "search": "/terraform-aws-kubernetes-platform/assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.tabs.sticky", "navigation.tabs", "content.code.copy"], "search": "../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="/terraform-aws-kubernetes-platform/assets/javascripts/bundle.a7c05c9e.min.js"></script>
+      <script src="../../assets/javascripts/bundle.a7c05c9e.min.js"></script>
       
     
   </body>
