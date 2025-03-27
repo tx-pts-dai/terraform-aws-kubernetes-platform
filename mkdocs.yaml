@@ -1,0 +1,100 @@
+# schema: https://squidfunk.github.io/mkdocs-material/
+site_name: Terraform AWS Kubernetes Platform
+site_description: Terraform module to provision a Kubernetes cluster on AWS
+docs_dir: docs/
+site_author: DAI
+site_url: https://tx-pts-dai.github.io/terraform-aws-kubernetes-platform/
+repo_name: terraform-aws-kubernetes-platform
+repo_url: https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform
+
+nav:
+  - Overview:
+      - Introduction: index.md
+      - patterns.md
+  - getting-started.md
+  - Submodules:
+      - modules/addon.md
+      - modules/argocd.md
+      - modules/cloudflare.md
+      - modules/datadog.md
+      - modules/lacework.md
+      - modules/network.md
+      - modules/security-group.md
+      - modules/ssm.md
+  - Examples:
+      - examples/complete.md
+      - examples/simple.md
+      - examples/lacework.md
+      - examples/datadog.md
+  - FAQ: faq.md
+
+theme:
+  name: material
+  logo: images/logo.ico
+  favicon: images/logo.ico
+  font:
+    text: ember
+  palette:
+    - scheme: default
+      primary: blue grey
+      accent: blue
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+
+    - scheme: slate
+      primary: blue grey
+      accent: blue
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  icon:
+    repo: fontawesome/brands/github
+    admonition:
+      note: octicons/tag-16
+      abstract: octicons/checklist-16
+      info: octicons/info-16
+      tip: octicons/squirrel-16
+      success: octicons/check-16
+      question: octicons/question-16
+      warning: octicons/alert-16
+      failure: octicons/x-circle-16
+      danger: octicons/zap-16
+      bug: octicons/bug-16
+      example: octicons/beaker-16
+      quote: octicons/quote-16
+  features:
+    - navigation.tabs.sticky
+    - navigation.tabs
+    - content.code.copy
+  highlightjs: true
+  hljs_languages:
+    - yaml
+    - json
+    - hcl
+
+plugins:
+  - include-markdown
+  - search:
+      lang:
+        - en
+  # - awesome-pages
+  - tags
+
+markdown_extensions:
+  - attr_list
+  - admonition
+  - codehilite
+  - footnotes
+  - md_in_html
+  - pymdownx.critic
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - toc:
+      permalink: true
