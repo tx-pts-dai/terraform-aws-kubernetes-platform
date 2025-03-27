@@ -125,12 +125,19 @@ module "k8s_platform" {
       }
     ]
   }
-
   aws_load_balancer_controller = {
     set = [
       {
         name  = "replicaCount"
         value = 1
+      },
+      {
+        name  = "enableServiceMonitor"
+        value = true
+      },
+      {
+        name  = "clusterSecretsPermissions.allowAllSecrets"
+        value = true # enables Okta integration by reading client id and secret from K8s secrets
       }
     ]
   }
@@ -142,7 +149,7 @@ module "k8s_platform" {
     secrets_manager_secret_name = "dai/platform/pagerduty"
   }
 
-  enable_okta = false
+  enable_okta = true
   okta = {
     base_url                    = "https://login.tx.group"
     secrets_manager_secret_name = "dai/platform/okta"
@@ -153,16 +160,17 @@ module "k8s_platform" {
     secrets_manager_secret_name = "dai/platform/slack"
   }
 
-  base_domain = "dai.tx.group"
+  base_domain = "dai-sandbox.tamedia.tech"
 
-  enable_acm_certificate = false
+  enable_acm_certificate = true
   acm_certificate = {
     subject_alternative_names = [
       "prometheus",
       "alertmanager",
       "grafana",
     ]
-    wildcard_certificates = false
+    prepend_stack_id      = true
+    wildcard_certificates = false # Don't create wildcards for test deployments since other stacks might use them and cause cleanup failures
   }
 
   fluent_log_annotation = {

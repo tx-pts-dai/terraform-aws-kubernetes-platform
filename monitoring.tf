@@ -281,7 +281,7 @@ module "prometheus_stack" {
         enabled: ${var.enable_okta}
         ingressClassName: alb
         hosts:
-        - ${local.id}.prometheus.${local.primary_acm_domain}
+        - ${local.id}-prometheus.${local.primary_acm_domain}
         paths:
           - /*
         annotations:
@@ -312,7 +312,7 @@ module "prometheus_stack" {
         enabled: ${var.enable_okta}
         ingressClassName: alb
         hosts:
-        - ${local.id}.alertmanager.${local.primary_acm_domain}
+        - ${local.id}-alertmanager.${local.primary_acm_domain}
         paths:
           - /*
         annotations:
@@ -454,7 +454,7 @@ module "grafana" {
       enabled: ${var.enable_okta}
       ingressClassName: alb
       hosts:
-        - ${local.id}.grafana.${local.primary_acm_domain}
+        - ${local.id}-grafana.${local.primary_acm_domain}
       annotations:
         alb.ingress.kubernetes.io/scheme: internet-facing
         alb.ingress.kubernetes.io/target-type: ip
@@ -465,8 +465,8 @@ module "grafana" {
     envFromSecret: ${local.grafana_secret_name}
     grafana.ini:
       server:
-        root_url: https://${local.id}.grafana.${local.primary_acm_domain}
-        domain: ${local.id}.grafana.${local.primary_acm_domain}
+        root_url: https://${local.id}-grafana.${local.primary_acm_domain}
+        domain: ${local.id}-grafana.${local.primary_acm_domain}
         serve_from_sub_path: true
         router_logging: true
         enforce_domain: true

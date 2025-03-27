@@ -93,7 +93,7 @@ module "addons" {
     role_name_prefix = false
 
     # renovate: datasource=helm depName=aws-load-balancer-controller registryUrl=https://aws.github.io/eks-charts
-    chart_version = "1.11.0"
+    chart_version = "1.12.0"
 
     wait = true
 
@@ -102,7 +102,7 @@ module "addons" {
       value = var.enable_prometheus_stack
       }, {
       name  = "clusterSecretsPermissions.allowAllSecrets"
-      value = "true" # enables Okta integration by reading client id and secret from K8s secrets
+      value = true # enables Okta integration by reading client id and secret from K8s secrets
     }]
   }, var.aws_load_balancer_controller)
 
