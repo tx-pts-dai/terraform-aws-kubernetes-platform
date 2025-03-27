@@ -1,4 +1,4 @@
-# Tamedia Kubernetes as a Service (KaaS) Terraform Module (Alpha)
+# [Tamedia Kubernetes as a Service (KaaS) Terraform Module](https://tx-pts-dai.github.io/terraform-aws-kubernetes-platform/)
 
 Opinionated batteries included Terraform module to deploy Kubernetes in AWS. Includes:
 
@@ -122,14 +122,17 @@ spec:
     metadata:
 ```
 
-Reloader will now watch for updates and manage rolling restats of pods for this specific deployment.
+Reloader will now watch for updates and manage rolling restart of pods for this specific deployment.
 
 ## Examples
 
 - [Complete](./examples/complete/) - Includes creation of VPC, k8s cluster, addons and all the optional features.
-- [Simple](./examples/simple/) - Simplest EKS deployment with default VPC, addons, ... creation
-- [Lacework](./examples/lacework/) - EKS deployment with Lacework integration
 - [Datadog](./examples/datadog/) - EKS deployment with Datadog Operator integration
+- [Disable-Addons](./examples/disable-addons/) - EKS + Karpenter deployment with all addons disabled
+- [Lacework](./examples/lacework/) - EKS deployment with Lacework integration
+- [Network](./examples/network/) - VPC deployment with custom subnets for kubernetes
+- [Simple](./examples/simple/) - Simplest EKS deployment with default VPC, addons, ... creation
+
 
 ### Cleanup example deployments
 

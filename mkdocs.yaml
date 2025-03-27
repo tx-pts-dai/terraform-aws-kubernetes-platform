@@ -9,17 +9,18 @@ repo_url: https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform
 
 nav:
   - Overview:
-    - Introduction: index.md
-    - patterns.md
+      - Introduction: index.md
+      - patterns.md
   - getting-started.md
   - Submodules:
-    - modules/addon.md
-    - modules/cloudflare.md
-    - modules/datadog.md
-    - modules/lacework.md
-    - modules/network.md
-    - modules/security-group.md
-    - modules/ssm.md
+      - modules/addon.md
+      - modules/argocd.md
+      - modules/cloudflare.md
+      - modules/datadog.md
+      - modules/lacework.md
+      - modules/network.md
+      - modules/security-group.md
+      - modules/ssm.md
   - Examples:
       - examples/complete.md
       - examples/simple.md
