@@ -64,11 +64,20 @@ variable "enable_acm_certificate" {
 }
 
 variable "acm_certificate" {
-  description = "ACM certificate configuration. If wildcard_certificates is true, all domains will include a wildcard prefix."
+  description = <<-EOT
+  ACM certificate configuration for the domain(s). Controls domain name, alternative domain names, wildcard configuration, and validation behavior.
+  Options include:
+    - domain_name: Primary domain name for the certificate. If not provided, uses base_domain from other configuration.
+    - subject_alternative_names: List of additional domain names to include in the certificate.
+    - wildcard_certificates: When true, adds a wildcard prefix (*.) to all domains in the certificate.
+    - prepend_stack_id: When true, prepends the stack identifier to each domain name.
+    - wait_for_validation: When true, Terraform will wait for certificate validation to complete before proceeding.
+  EOT
   type = object({
-    domain_name               = optional(string) # Overrides base_domain
+    domain_name               = optional(string)
     subject_alternative_names = optional(list(string), [])
     wildcard_certificates     = optional(bool, false)
+    prepend_stack_id          = optional(bool, false)
     wait_for_validation       = optional(bool, false)
   })
   default = {}

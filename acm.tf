@@ -1,10 +1,13 @@
 locals {
   primary_acm_domain = coalesce(var.acm_certificate.domain_name, var.base_domain)
-  acm_san = var.acm_certificate.wildcard_certificates ? concat(
-    ["*.${local.primary_acm_domain}"],
-    [for host in var.acm_certificate.subject_alternative_names : "*.${host}.${local.primary_acm_domain}"],
+  acm_san = concat(
+    (var.acm_certificate.wildcard_certificates ? concat(
+      ["*.${local.primary_acm_domain}"],
+      [for host in var.acm_certificate.subject_alternative_names : "*.${host}.${local.primary_acm_domain}"]) : []
+    ),
+    (var.acm_certificate.prepend_stack_id ? [for host in var.acm_certificate.subject_alternative_names : "${local.id}-${host}.${local.primary_acm_domain}"] : []),
     [for host in var.acm_certificate.subject_alternative_names : "${host}.${local.primary_acm_domain}"]
-  ) : [for host in var.acm_certificate.subject_alternative_names : "${host}.${local.primary_acm_domain}"]
+  )
 }
 
 data "aws_route53_zone" "base_domain_zone" {
