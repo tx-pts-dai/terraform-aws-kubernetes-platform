@@ -1,3 +1,9 @@
+variable "create" {
+  description = "Create the SSM parameters"
+  type        = bool
+  default     = true
+}
+
 variable "tags" {
   description = "Default tags to apply to all resources"
   type        = map(string)

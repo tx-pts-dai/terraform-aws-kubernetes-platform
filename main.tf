@@ -24,13 +24,17 @@ resource "time_static" "timestamp_id" {}
 # and this create a tags merge issue,
 
 locals {
-  id         = format("%08x", time_static.timestamp_id.unix)
-  name       = coalesce(var.name, replace(basename(path.root), "_", "-"))
+  id = format("%08x", time_static.timestamp_id.unix)
+
+  # This is not the best way to handle naming compatibility but its a simple approach to fix renovate PR deployments
+  name       = coalesce(replace(var.name, "/", "-"), replace(basename(path.root), "_", "-"))
   stack_name = "${local.name}-${local.id}"
 
   tags = merge(var.tags, {
     StackName = local.stack_name
   })
+
+  region = data.aws_region.current.name
 }
 
 ################################################################################
@@ -102,16 +106,37 @@ locals {
       }
     }
   } }
+  k8s_version = trimspace(file("${path.module}/K8S_VERSION"))
 }
 
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
-  version = "20.23.0"
+  version = "20.34.0"
 
   cluster_name                    = local.stack_name
-  cluster_version                 = try(var.eks.kubernetes_version, "1.29")
+  cluster_version                 = local.k8s_version
   cluster_endpoint_public_access  = try(var.eks.cluster_endpoint_public_access, true)
   cluster_endpoint_private_access = try(var.eks.cluster_endpoint_private_access, true)
+
+  cluster_addons = {
+    vpc-cni = {
+      most_recent = true
+      preserve    = true
+
+      service_account_role_arn = module.vpc_cni_irsa.iam_role_arn
+
+      configurationsi_values = {
+        env = {
+          ENABLE_PREFIX_DELEGATION = "true"
+        }
+      }
+    }
+
+    kube-proxy = {
+      most_recent = true
+      preserve    = true
+    }
+  }
 
   iam_role_name            = local.stack_name
   iam_role_use_name_prefix = false
@@ -143,7 +168,7 @@ module "eks" {
   tags = local.tags
 }
 
-# Allow all traffic from the VPC to the EKS control plane
+# Allows all traffic from the VPC to the EKS control plane
 locals {
   ingress_rules = {
     vpc_control_plane = {
@@ -165,7 +190,7 @@ locals {
   }
 }
 
-resource "aws_security_group_rule" "eks_control_plan_ingress" {
+resource "aws_security_group_rule" "eks_control_plane_ingress" {
   for_each = local.ingress_rules
 
   security_group_id = module.eks.cluster_primary_security_group_id
@@ -175,256 +200,46 @@ resource "aws_security_group_rule" "eks_control_plan_ingress" {
   from_port         = each.value.from_port
   to_port           = each.value.to_port
   cidr_blocks       = each.value.cidr_blocks
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 ################################################################################
-# Karpenter
-#
-# Track notes here for future reference e.g. reasons for certain decisions
-# - PROPOSAL: Karpenter NodePool and EC2NodeClass management: default resources are deployed with the module.
-#   Users can create additional resources by providing their own ones outside the module.
+# VPC CNI IAM Role for Service Accounts
 
-locals {
-  karpenter = {
-    subnet_cidrs = try(var.karpenter.subnet_cidrs, module.network.grouped_networks.karpenter)
+module "vpc_cni_irsa" {
+  source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
+  version = "5.54.0"
 
-    namespace               = try(var.karpenter.namespace, "kube-system")
-    chart_version           = try(var.karpenter.chart_version, "0.37.0")
-    replicas                = try(var.karpenter.replicas, 1)
-    service_monitor_enabled = try(var.karpenter.service_monitor_enabled, false)
-    pod_annotations         = try(var.karpenter.pod_annotations, {})
-    cpu_request             = try(var.karpenter.cpu_request, 0.25)
-    memory_request          = try(var.karpenter.memory_request, "256Mi")
-  }
+  role_name = "vpc-cni-${local.id}"
 
-  azs = slice(data.aws_availability_zones.available.names, 0, 3)
-}
+  attach_vpc_cni_policy = true
+  vpc_cni_enable_ipv4   = true
 
-resource "aws_subnet" "karpenter" {
-  count = length(local.karpenter.subnet_cidrs)
-
-  vpc_id            = local.vpc.vpc_id
-  cidr_block        = local.karpenter.subnet_cidrs[count.index]
-  availability_zone = element(local.azs, count.index)
-
-  tags = merge(local.tags, {
-    Name                     = "${module.eks.cluster_name}-karpenter-${element(local.azs, count.index)}"
-    "karpenter.sh/discovery" = module.eks.cluster_name
-  })
-}
-
-data "aws_route_tables" "private_route_tables" {
-  vpc_id = local.vpc.vpc_id
-
-  filter {
-    name   = "tag:Name"
-    values = ["*private*"]
-  }
-}
-
-resource "aws_route_table_association" "karpenter" {
-  count = length(local.karpenter.subnet_cidrs)
-
-  subnet_id      = aws_subnet.karpenter[count.index].id
-  route_table_id = try(data.aws_route_tables.private_route_tables.ids[count.index], data.aws_route_tables.private_route_tables.ids[0], "") # Depends on the number of Nat Gateways
-}
-
-module "karpenter_security_group" {
-  source = "./modules/security-group"
-
-  name        = "karpenter-default-${local.stack_name}"
-  description = "Karpenter default security group"
-
-  vpc_id = local.vpc.vpc_id
-
-  ingress_rules = {
-    self_all = {
-      type      = "ingress"
-      protocol  = "-1"
-      from_port = 0
-      to_port   = 65535
-      self      = true
+  oidc_providers = {
+    main = {
+      provider_arn               = module.eks.oidc_provider_arn
+      namespace_service_accounts = ["kube-system:aws-node"]
     }
-    control_plane_other = {
-      type                     = "ingress"
-      protocol                 = "TCP"
-      from_port                = 1025
-      to_port                  = 65535
-      source_security_group_id = module.eks.cluster_primary_security_group_id
-    }
-    vpc_all = {
-      type        = "ingress"
-      protocol    = "-1"
-      from_port   = 0
-      to_port     = 65535
-      cidr_blocks = [local.vpc.vpc_cidr]
-    }
-  }
-  egress_rules = {
-    all = {
-      type        = "egress"
-      protocol    = "-1"
-      from_port   = 0
-      to_port     = 0
-      cidr_blocks = ["0.0.0.0/0"]
-    }
-  }
-
-  tags = merge(local.tags, {
-    # Is this needed? AWS LB Controller uses this to add itself to the node security groups
-    "kubernetes.io/cluster/${local.stack_name}" = "owned"
-    "karpenter.sh/discovery"                    = local.stack_name
-  })
-}
-
-module "karpenter" {
-  source  = "terraform-aws-modules/eks/aws//modules/karpenter"
-  version = "20.23.0"
-
-  cluster_name                    = module.eks.cluster_name
-  enable_irsa                     = true
-  irsa_oidc_provider_arn          = module.eks.oidc_provider_arn
-  irsa_namespace_service_accounts = ["${local.karpenter.namespace}:karpenter"]
-  iam_role_name                   = "karpenter-${local.id}"
-  iam_role_use_name_prefix        = false
-
-  node_iam_role_name              = "karpenter-node-${local.id}"
-  node_iam_role_use_name_prefix   = false
-  node_iam_role_attach_cni_policy = false
-  node_iam_role_additional_policies = {
-    AmazonSSMManagedInstanceCore = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
   }
 
   tags = local.tags
 }
 
-module "karpenter_crds" {
-  source  = "aws-ia/eks-blueprints-addon/aws"
-  version = "1.1.1"
-
-  create = var.enable_karpenter_crds
-
-  name             = "karpenter-crd"
-  namespace        = local.karpenter.namespace
-  create_namespace = true
-  repository       = "oci://public.ecr.aws/karpenter"
-  chart            = "karpenter-crd"
-  chart_version    = local.karpenter.chart_version
-}
-
-resource "helm_release" "karpenter" {
-  name             = "karpenter"
-  namespace        = local.karpenter.namespace
-  create_namespace = true
-  repository       = "oci://public.ecr.aws/karpenter"
-  chart            = "karpenter"
-  version          = local.karpenter.chart_version
-  skip_crds        = var.enable_karpenter_crds
-  wait             = true
-
-  values = [
-    <<-EOT
-    logLevel: info
-    dnsPolicy: Default
-    replicas: "${local.karpenter.replicas}"
-    podAnnotations: ${jsonencode(local.karpenter.pod_annotations)}
-    controller:
-      resources:
-        requests:
-          cpu: ${local.karpenter.cpu_request}
-          memory: ${local.karpenter.memory_request}
-    serviceMonitor:
-      enabled: ${local.karpenter.service_monitor_enabled}
-    settings:
-      clusterName: ${module.eks.cluster_name}
-      clusterEndpoint: ${module.eks.cluster_endpoint}
-      interruptionQueue: ${module.karpenter.queue_name}
-    serviceAccount:
-      annotations:
-        eks.amazonaws.com/role-arn: ${module.karpenter.iam_role_arn}
-    EOT
-  ]
-}
-
-resource "kubectl_manifest" "karpenter_node_class" {
-  yaml_body = <<-YAML
-    apiVersion: karpenter.k8s.aws/v1beta1
-    kind: EC2NodeClass
-    metadata:
-      name: default
-    spec:
-      amiFamily: AL2
-      role: ${module.karpenter.node_iam_role_name}
-      subnetSelectorTerms:
-        - tags:
-            karpenter.sh/discovery: ${module.eks.cluster_name}
-      securityGroupSelectorTerms:
-        - tags:
-            karpenter.sh/discovery: ${module.eks.cluster_name}
-      tags:
-        karpenter.sh/discovery: ${module.eks.cluster_name}
-  YAML
-
-  depends_on = [
-    module.karpenter_crds
-  ]
-}
-
-resource "kubectl_manifest" "karpenter_node_pool" {
-  yaml_body = <<-YAML
-    apiVersion: karpenter.sh/v1beta1
-    kind: NodePool
-    metadata:
-      name: default
-    spec:
-      template:
-        spec:
-          nodeClassRef:
-            name: default
-          requirements:
-            - key: "karpenter.k8s.aws/instance-category"
-              operator: In
-              values: ["c", "m", "r", "t"]
-            - key: "karpenter.k8s.aws/instance-cpu"
-              operator: In
-              values: ["2", "4", "8", "16", "32"]
-            - key: "karpenter.k8s.aws/instance-hypervisor"
-              operator: In
-              values: ["nitro"]
-            - key: "karpenter.k8s.aws/instance-memory"
-              operator: Gt
-              values: ["1024"]
-            - key: "karpenter.sh/capacity-type"
-              operator: In
-              values: ["spot", "on-demand"]
-            - key: "karpenter.k8s.aws/instance-generation"
-              operator: Gt
-              values: ["2"]
-      limits:
-        cpu: 1000
-      disruption:
-        consolidationPolicy: WhenEmpty
-        consolidateAfter: 30s
-  YAML
-
-  depends_on = [
-    module.karpenter_crds
-  ]
-}
-
 resource "time_sleep" "wait_on_destroy" {
   depends_on = [
+    module.acm,
     module.eks,
     module.karpenter,
     module.karpenter_crds,
+    module.karpenter_release,
     module.karpenter_security_group,
     aws_subnet.karpenter,
     aws_route_table_association.karpenter,
-    helm_release.karpenter,
-    kubectl_manifest.karpenter_node_class,
-    kubectl_manifest.karpenter_node_pool,
   ]
 
-  # Sleep for 10 minutes to allow Karpenter to clean up resources
-  destroy_duration = "10m"
+  # Sleep for 5 minutes to allow Karpenter to clean up resources
+  destroy_duration = "5m"
 }

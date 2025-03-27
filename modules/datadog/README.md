@@ -15,7 +15,7 @@ module "datadog" {
   depends_on = [module.k8s_platform]
 }
 ```
-<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- BEGIN_TF_DOCS -->
 ## Requirements
 
 | Name | Version |
@@ -59,10 +59,10 @@ module "datadog" {
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | Name of the cluster | `string` | n/a | yes |
-| <a name="input_datadog"></a> [datadog](#input\_datadog) | Object of Datadog configurations | <pre>object({<br>    agent_api_key_name            = optional(string) # by default it uses the cluster name<br>    agent_app_key_name            = optional(string) # by default it uses the cluster name<br>    operator_chart_version        = optional(string)<br>    custom_resource_chart_version = optional(string)<br>  })</pre> | `{}` | no |
-| <a name="input_datadog_agent_helm_values"></a> [datadog\_agent\_helm\_values](#input\_datadog\_agent\_helm\_values) | List of Datadog Agent custom resource values. https://github.com/DataDog/datadog-operator/blob/main/docs/configuration.v2alpha1.md | <pre>list(object({<br>    name  = string<br>    value = string<br>  }))</pre> | `[]` | no |
-| <a name="input_datadog_agent_version_fargate"></a> [datadog\_agent\_version\_fargate](#input\_datadog\_agent\_version\_fargate) | Version of the datadog agent injected in Fargate | `string` | `"7.54.0"` | no |
-| <a name="input_datadog_operator_helm_values"></a> [datadog\_operator\_helm\_values](#input\_datadog\_operator\_helm\_values) | List of Datadog Operator values | <pre>list(object({<br>    name  = string<br>    value = string<br>  }))</pre> | <pre>[<br>  {<br>    "name": "resources.requests.cpu",<br>    "value": "10m"<br>  },<br>  {<br>    "name": "resources.requests.memory",<br>    "value": "50Mi"<br>  }<br>]</pre> | no |
+| <a name="input_datadog"></a> [datadog](#input\_datadog) | Object of Datadog configurations | <pre>object({<br/>    agent_api_key_name            = optional(string) # by default it uses the cluster name<br/>    agent_app_key_name            = optional(string) # by default it uses the cluster name<br/>    operator_chart_version        = optional(string)<br/>    custom_resource_chart_version = optional(string)<br/>  })</pre> | `{}` | no |
+| <a name="input_datadog_agent_helm_values"></a> [datadog\_agent\_helm\_values](#input\_datadog\_agent\_helm\_values) | List of Datadog Agent custom resource values. https://github.com/DataDog/datadog-operator/blob/main/docs/configuration.v2alpha1.md | <pre>list(object({<br/>    name  = string<br/>    value = string<br/>  }))</pre> | `[]` | no |
+| <a name="input_datadog_agent_version_fargate"></a> [datadog\_agent\_version\_fargate](#input\_datadog\_agent\_version\_fargate) | Version of the datadog agent injected in Fargate | `string` | `"7.57.2"` | no |
+| <a name="input_datadog_operator_helm_values"></a> [datadog\_operator\_helm\_values](#input\_datadog\_operator\_helm\_values) | List of Datadog Operator values | <pre>list(object({<br/>    name  = string<br/>    value = string<br/>  }))</pre> | <pre>[<br/>  {<br/>    "name": "resources.requests.cpu",<br/>    "value": "10m"<br/>  },<br/>  {<br/>    "name": "resources.requests.memory",<br/>    "value": "50Mi"<br/>  }<br/>]</pre> | no |
 | <a name="input_datadog_secret"></a> [datadog\_secret](#input\_datadog\_secret) | Name of the datadog secret in Secrets Manager | `string` | n/a | yes |
 | <a name="input_environment"></a> [environment](#input\_environment) | Name of the environment | `string` | n/a | yes |
 | <a name="input_namespace"></a> [namespace](#input\_namespace) | Namespace for Datadog resources | `string` | `"monitoring"` | no |
@@ -71,7 +71,7 @@ module "datadog" {
 ## Outputs
 
 No outputs.
-<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- END_TF_DOCS -->
 
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
@@ -120,7 +120,7 @@ No outputs.
 ## Outputs
 
 No outputs.
-<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- END_TF_DOCS -->
 
 <!-- BEGIN_TF_DOCS -->
 ## Requirements

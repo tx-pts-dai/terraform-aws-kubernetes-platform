@@ -1,19 +1,76 @@
-# Tamedia Kubernetes as a Service (KaaS) Module
+# Tamedia Kubernetes as a Service (KaaS) Terraform Module (Alpha)
 
-Batteries included module to deploy a Kubernetes cluster on AWS. Includes:
+Opinionated batteries included Terraform module to deploy Kubernetes in AWS. Includes:
 
-- Metrics server
-- AWS Load Balancer Controller
-- Karpenter
-- External DNS
-- External secrets
-- Log pods output with `var.logging_annotation` annotation to CloudWatch
+Managed Addons:
+
+- EBS CSI
+- VPC CNI
+- CoreDNS
+- KubeProxy
+
+Core components (installed by default):
+
+- [Karpenter](https://karpenter.sh/)
+- [Metrics Server](https://github.com/kubernetes-sigs/metrics-server)
+- [AWS Load Balancer Controller](https://kubernetes-sigs.github.io/aws-load-balancer-controller/latest/)
+- [External DNS](https://github.com/kubernetes-sigs/external-dns)
+- [External Secrets Operator](https://external-secrets.io/latest/)
+- [Prometheus Operator](https://prometheus-operator.dev/docs/getting-started/introduction/)
+- [Grafana](https://grafana.com/)
+- [Fluent Operator](https://github.com/fluent/fluent-operator)
+- [Fluentbit for Fargate]()
+- [Reloader](https://docs.stakater.com/reloader/)
+
+Additional components (optional):
+
+- [Cert Manager](https://cert-manager.io/docs/)
+- [Ingress Nginx](https://kubernetes.github.io/ingress-nginx/)
+- [Downscaler]()
+- [ArgoCD](https://argoproj.github.io/argo-cd/)
+
+Integrations (optional):
+
+- Okta
+- PagerDuty
+- Slack
 
 ## Requirements
 
 The module needs some resources to be deployed in order to operate correctly:
 
-- IAM Service-linked roles (`AWSServiceRoleForEC2Spot` and `AWSServiceRoleForEC2SpotFleet`) - [docs](https://docs.aws.amazon.com/batch/latest/userguide/spot_fleet_IAM_role.html)
+IAM service-linked roles
+
+- AWSServiceRoleForEC2Spot
+- [AWSServiceRoleForEC2SpotFleet](https://docs.aws.amazon.com/batch/latest/userguide/spot_fleet_IAM_role.html)
+
+## Release new kubernetes version
+**important**
+Each new kubernetes version needs it's own release. This is due to the fact that we should not skip kubernetes versions during a cluster upgrade.
+
+To release a new Kubernetes version, follow these steps:
+
+1. **Update the version file**:
+   - Open the `K8S_VERSION` file located in the root of the repository.
+   - Update the version number to the next Kubernetes version.
+
+2. **Commit the Changes**:
+   - Commit the changes to the `K8S_VERSION` file with a meaningful commit message following the release proces. For example:
+     ```sh
+     git add K8S_VERSION
+     git commit -m "feat! update Kubernetes version to 1.30"
+     ```
+
+3. **Push the Changes**:
+   - Push the changes to the main branch, the release workflow will automatically run. This workflow will:
+     - Read the updated Kubernetes version from the `K8S_VERSION` file.
+     - Determine the new module version based on the commit message.
+     - Create a new release with the updated module version and the kubernetes version as metadata. The format would be X.Y.Z+A.B where X.Y.Z is the module version and A.B is the kubenetes control plane version.
+
+4. **Verify the Release**:
+   - Check the [GitHub Actions](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/actions) page to ensure the release workflow completed successfully.
+   - Verify that the new module version is available in the [Terraform Registry](https://registry.terraform.io/modules/tx-pts-dai/kubernetes-platform/aws).
+
 
 ## Usage
 
@@ -45,6 +102,27 @@ Why this module?
 - To provide an AWS account with a K8s cluster with batteries included so that you can start deploying your workloads on a well-built foundation
 - To encourage standardization and common practices
 - To ease maintenance
+
+## Reloader
+The [Stakater Reloader](https://github.com/stakater/Reloader) is a Kubernetes controller that automatically watches for changes in ConfigMaps and Secrets and triggers rolling restarts of the associated deployments, statefulsets, or daemonsets when these configurations are updated. This functionality ensures that applications deployed within a Kubernetes cluster always reflect the latest configuration without manual intervention.
+
+When an application relies on configuration data or sensitive information stored in ConfigMaps or Secrets, and these resources are modified, Reloader automates the process of applying these changes by updating the relevant pods. Without Reloader, such changes would require a manual pod restart or redeployment to take effect.
+
+Reloader is deployed by default on the cluster but is used as on demand via annotations.
+
+Considering this kubernetes deployment and the required annotation:
+```yaml
+kind: Deployment
+metadata:
+  name: foo
+  annotations:
+    reloader.stakater.com/auto: "true"
+spec:
+  template:
+    metadata:
+```
+
+Reloader will now watch for updates and manage rolling restats of pods for this specific deployment.
 
 ## Examples
 
@@ -78,7 +156,7 @@ The `pre-commit` command will run:
 
 as described in the `.pre-commit-config.yaml` file
 
-<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- BEGIN_TF_DOCS -->
 ## Requirements
 
 | Name | Version |
@@ -95,25 +173,37 @@ as described in the `.pre-commit-config.yaml` file
 | Name | Version |
 |------|---------|
 | <a name="provider_aws"></a> [aws](#provider\_aws) | >= 5.42.0 |
-| <a name="provider_helm"></a> [helm](#provider\_helm) | >= 2.12 |
-| <a name="provider_kubectl"></a> [kubectl](#provider\_kubectl) | >= 2.0.2 |
+| <a name="provider_kubernetes"></a> [kubernetes](#provider\_kubernetes) | >= 2.27 |
 | <a name="provider_time"></a> [time](#provider\_time) | >= 0.11 |
 
 ## Modules
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_addons"></a> [addons](#module\_addons) | aws-ia/eks-blueprints-addons/aws | 1.16.3 |
+| <a name="module_acm"></a> [acm](#module\_acm) | terraform-aws-modules/acm/aws | 5.1.1 |
+| <a name="module_addons"></a> [addons](#module\_addons) | aws-ia/eks-blueprints-addons/aws | 1.19.0 |
+| <a name="module_amp"></a> [amp](#module\_amp) | terraform-aws-modules/managed-service-prometheus/aws | 3.0.0 |
+| <a name="module_argocd"></a> [argocd](#module\_argocd) | ./modules/argocd | n/a |
+| <a name="module_cluster_secret_store"></a> [cluster\_secret\_store](#module\_cluster\_secret\_store) | ./modules/addon | n/a |
 | <a name="module_downscaler"></a> [downscaler](#module\_downscaler) | tx-pts-dai/downscaler/kubernetes | 0.3.1 |
-| <a name="module_ebs_csi_driver_irsa"></a> [ebs\_csi\_driver\_irsa](#module\_ebs\_csi\_driver\_irsa) | terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks | 5.44.0 |
-| <a name="module_eks"></a> [eks](#module\_eks) | terraform-aws-modules/eks/aws | 20.23.0 |
-| <a name="module_fluentbit_irsa"></a> [fluentbit\_irsa](#module\_fluentbit\_irsa) | terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks | 5.44.0 |
-| <a name="module_karpenter"></a> [karpenter](#module\_karpenter) | terraform-aws-modules/eks/aws//modules/karpenter | 20.23.0 |
-| <a name="module_karpenter_crds"></a> [karpenter\_crds](#module\_karpenter\_crds) | aws-ia/eks-blueprints-addon/aws | 1.1.1 |
+| <a name="module_ebs_csi_driver_irsa"></a> [ebs\_csi\_driver\_irsa](#module\_ebs\_csi\_driver\_irsa) | terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks | 5.52.2 |
+| <a name="module_eks"></a> [eks](#module\_eks) | terraform-aws-modules/eks/aws | 20.31.6 |
+| <a name="module_fluent_operator"></a> [fluent\_operator](#module\_fluent\_operator) | ./modules/addon | n/a |
+| <a name="module_grafana"></a> [grafana](#module\_grafana) | ./modules/addon | n/a |
+| <a name="module_karpenter"></a> [karpenter](#module\_karpenter) | terraform-aws-modules/eks/aws//modules/karpenter | 20.31.6 |
+| <a name="module_karpenter_crds"></a> [karpenter\_crds](#module\_karpenter\_crds) | ./modules/addon | n/a |
+| <a name="module_karpenter_release"></a> [karpenter\_release](#module\_karpenter\_release) | ./modules/addon | n/a |
 | <a name="module_karpenter_security_group"></a> [karpenter\_security\_group](#module\_karpenter\_security\_group) | ./modules/security-group | n/a |
 | <a name="module_network"></a> [network](#module\_network) | ./modules/network | n/a |
+| <a name="module_okta_secrets"></a> [okta\_secrets](#module\_okta\_secrets) | ./modules/addon | n/a |
+| <a name="module_pagerduty_secrets"></a> [pagerduty\_secrets](#module\_pagerduty\_secrets) | ./modules/addon | n/a |
+| <a name="module_prometheus_irsa"></a> [prometheus\_irsa](#module\_prometheus\_irsa) | terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks | 5.52.2 |
+| <a name="module_prometheus_operator_crds"></a> [prometheus\_operator\_crds](#module\_prometheus\_operator\_crds) | ./modules/addon | n/a |
+| <a name="module_prometheus_stack"></a> [prometheus\_stack](#module\_prometheus\_stack) | ./modules/addon | n/a |
+| <a name="module_reloader"></a> [reloader](#module\_reloader) | ./modules/addon | n/a |
+| <a name="module_slack_secrets"></a> [slack\_secrets](#module\_slack\_secrets) | ./modules/addon | n/a |
 | <a name="module_ssm"></a> [ssm](#module\_ssm) | ./modules/ssm | n/a |
-| <a name="module_vpc_cni_irsa"></a> [vpc\_cni\_irsa](#module\_vpc\_cni\_irsa) | terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks | 5.44.0 |
+| <a name="module_vpc_cni_irsa"></a> [vpc\_cni\_irsa](#module\_vpc\_cni\_irsa) | terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks | 5.52.2 |
 
 ## Resources
 
@@ -122,16 +212,9 @@ as described in the `.pre-commit-config.yaml` file
 | [aws_cloudwatch_log_group.fluentbit](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
 | [aws_iam_policy.fluentbit](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_route_table_association.karpenter](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route_table_association) | resource |
-| [aws_security_group_rule.eks_control_plan_ingress](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
+| [aws_security_group_rule.eks_control_plane_ingress](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
 | [aws_subnet.karpenter](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/subnet) | resource |
-| [helm_release.fluent_operator](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
-| [helm_release.karpenter](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
-| [kubectl_manifest.fluentbit_cluster_filter_pipeline](https://registry.terraform.io/providers/alekc/kubectl/latest/docs/resources/manifest) | resource |
-| [kubectl_manifest.fluentbit_cluster_input_pipeline](https://registry.terraform.io/providers/alekc/kubectl/latest/docs/resources/manifest) | resource |
-| [kubectl_manifest.fluentbit_cluster_output_pipeline](https://registry.terraform.io/providers/alekc/kubectl/latest/docs/resources/manifest) | resource |
-| [kubectl_manifest.karpenter_node_class](https://registry.terraform.io/providers/alekc/kubectl/latest/docs/resources/manifest) | resource |
-| [kubectl_manifest.karpenter_node_pool](https://registry.terraform.io/providers/alekc/kubectl/latest/docs/resources/manifest) | resource |
-| [kubectl_manifest.secretsmanager_auth](https://registry.terraform.io/providers/alekc/kubectl/latest/docs/resources/manifest) | resource |
+| [kubernetes_annotations.monitoring](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/annotations) | resource |
 | [time_sleep.wait_on_destroy](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/sleep) | resource |
 | [time_static.timestamp_id](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/static) | resource |
 | [aws_availability_zones.available](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/availability_zones) | data source |
@@ -139,20 +222,57 @@ as described in the `.pre-commit-config.yaml` file
 | [aws_iam_roles.iam_cluster_admins](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_roles) | data source |
 | [aws_iam_roles.sso](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_roles) | data source |
 | [aws_region.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/region) | data source |
+| [aws_route53_zone.base_domain_zone](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/route53_zone) | data source |
 | [aws_route_tables.private_route_tables](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/route_tables) | data source |
 
 ## Inputs
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_addons"></a> [addons](#input\_addons) | Map of addon configurations | `any` | <pre>{<br>  "aws_load_balancer_controller": {<br>    "enabled": true<br>  },<br>  "cert_manager": {<br>    "enabled": false<br>  },<br>  "downscaler": {<br>    "enabled": false<br>  },<br>  "external_dns": {<br>    "enabled": true<br>  },<br>  "external_secrets": {<br>    "enabled": true<br>  },<br>  "fargate_fluentbit": {<br>    "enabled": true<br>  },<br>  "ingress_nginx": {<br>    "enabled": false<br>  },<br>  "kube_prometheus_stack": {<br>    "enabled": false<br>  },<br>  "metrics_server": {<br>    "enabled": true<br>  }<br>}</pre> | no |
-| <a name="input_cluster_admins"></a> [cluster\_admins](#input\_cluster\_admins) | Map of IAM roles to add as cluster admins. Only exact matching role names are returned | <pre>map(object({<br>    role_name         = string<br>    kubernetes_groups = optional(list(string))<br>  }))</pre> | `{}` | no |
+| <a name="input_acm_certificate"></a> [acm\_certificate](#input\_acm\_certificate) | ACM certificate configuration. If wildcard\_certificates is true, all domains will include a wildcard prefix. | <pre>object({<br/>    domain_name               = optional(string) # Overrides base_domain<br/>    subject_alternative_names = optional(list(string), [])<br/>    wildcard_certificates     = optional(bool, false)<br/>    wait_for_validation       = optional(bool, false)<br/>  })</pre> | `{}` | no |
+| <a name="input_argocd"></a> [argocd](#input\_argocd) | Argo CD configurations | `any` | `{}` | no |
+| <a name="input_aws_load_balancer_controller"></a> [aws\_load\_balancer\_controller](#input\_aws\_load\_balancer\_controller) | AWS Load Balancer Controller configurations | `any` | `{}` | no |
+| <a name="input_base_domain"></a> [base\_domain](#input\_base\_domain) | Base domain for the platform, used for ingress and ACM certificates | `string` | `"test"` | no |
+| <a name="input_cert_manager"></a> [cert\_manager](#input\_cert\_manager) | Cert Manager configurations | `any` | `{}` | no |
+| <a name="input_cluster_admins"></a> [cluster\_admins](#input\_cluster\_admins) | Map of IAM roles to add as cluster admins. Only exact matching role names are returned | <pre>map(object({<br/>    role_name         = string<br/>    kubernetes_groups = optional(list(string))<br/>  }))</pre> | `{}` | no |
+| <a name="input_create_addons"></a> [create\_addons](#input\_create\_addons) | Create the platform addons. if set to false, no addons will be created | `bool` | `true` | no |
+| <a name="input_downscaler"></a> [downscaler](#input\_downscaler) | Downscaler configurations | `any` | `{}` | no |
 | <a name="input_eks"></a> [eks](#input\_eks) | Map of EKS configurations | `any` | `{}` | no |
-| <a name="input_enable_karpenter_crds"></a> [enable\_karpenter\_crds](#input\_enable\_karpenter\_crds) | Enable Karpenter CRDs chart | `bool` | `true` | no |
-| <a name="input_karpenter"></a> [karpenter](#input\_karpenter) | Map of Karpenter configurations | `any` | `{}` | no |
-| <a name="input_logging_annotation"></a> [logging\_annotation](#input\_logging\_annotation) | Annotation kaas pods should have to get they logs stored in cloudwatch | <pre>object({<br>    name  = string<br>    value = string<br>  })</pre> | <pre>{<br>  "name": "kaas.tamedia.ch/logging",<br>  "value": "true"<br>}</pre> | no |
-| <a name="input_logging_retention_in_days"></a> [logging\_retention\_in\_days](#input\_logging\_retention\_in\_days) | How log to keep kaas logs in cloudwatch | `string` | `7` | no |
-| <a name="input_name"></a> [name](#input\_name) | The name of the platform | `string` | n/a | yes |
+| <a name="input_enable_acm_certificate"></a> [enable\_acm\_certificate](#input\_enable\_acm\_certificate) | Enable ACM certificate | `bool` | `false` | no |
+| <a name="input_enable_amp"></a> [enable\_amp](#input\_enable\_amp) | Enable AWS Managed Prometheus | `bool` | `false` | no |
+| <a name="input_enable_argocd"></a> [enable\_argocd](#input\_enable\_argocd) | Enable Argo CD | `bool` | `false` | no |
+| <a name="input_enable_aws_load_balancer_controller"></a> [enable\_aws\_load\_balancer\_controller](#input\_enable\_aws\_load\_balancer\_controller) | Enable AWS Load Balancer Controller | `bool` | `true` | no |
+| <a name="input_enable_cert_manager"></a> [enable\_cert\_manager](#input\_enable\_cert\_manager) | Enable Cert Manager | `bool` | `false` | no |
+| <a name="input_enable_downscaler"></a> [enable\_downscaler](#input\_enable\_downscaler) | Enable Downscaler | `bool` | `false` | no |
+| <a name="input_enable_external_dns"></a> [enable\_external\_dns](#input\_enable\_external\_dns) | Enable External DNS | `bool` | `true` | no |
+| <a name="input_enable_external_secrets"></a> [enable\_external\_secrets](#input\_enable\_external\_secrets) | Enable External Secrets | `bool` | `true` | no |
+| <a name="input_enable_fargate_fluentbit"></a> [enable\_fargate\_fluentbit](#input\_enable\_fargate\_fluentbit) | Enable Fargate Fluentbit | `bool` | `true` | no |
+| <a name="input_enable_fluent_operator"></a> [enable\_fluent\_operator](#input\_enable\_fluent\_operator) | Enable fluent operator | `bool` | `true` | no |
+| <a name="input_enable_grafana"></a> [enable\_grafana](#input\_enable\_grafana) | Enable Grafana | `bool` | `true` | no |
+| <a name="input_enable_ingress_nginx"></a> [enable\_ingress\_nginx](#input\_enable\_ingress\_nginx) | Enable Ingress Nginx | `bool` | `false` | no |
+| <a name="input_enable_metrics_server"></a> [enable\_metrics\_server](#input\_enable\_metrics\_server) | Enable Metrics Server | `bool` | `true` | no |
+| <a name="input_enable_okta"></a> [enable\_okta](#input\_enable\_okta) | Enable Okta integration | `bool` | `false` | no |
+| <a name="input_enable_pagerduty"></a> [enable\_pagerduty](#input\_enable\_pagerduty) | Enable PagerDuty integration | `bool` | `false` | no |
+| <a name="input_enable_prometheus_stack"></a> [enable\_prometheus\_stack](#input\_enable\_prometheus\_stack) | Enable Prometheus stack | `bool` | `true` | no |
+| <a name="input_enable_reloader"></a> [enable\_reloader](#input\_enable\_reloader) | Enable Reloader | `bool` | `true` | no |
+| <a name="input_enable_slack"></a> [enable\_slack](#input\_enable\_slack) | Enable Slack integration | `bool` | `false` | no |
+| <a name="input_external_dns"></a> [external\_dns](#input\_external\_dns) | External DNS configurations | `any` | `{}` | no |
+| <a name="input_external_secrets"></a> [external\_secrets](#input\_external\_secrets) | External Secrets configurations | `any` | `{}` | no |
+| <a name="input_fargate_fluentbit"></a> [fargate\_fluentbit](#input\_fargate\_fluentbit) | Fargate Fluentbit configurations | `any` | `{}` | no |
+| <a name="input_fluent_cloudwatch_retention_in_days"></a> [fluent\_cloudwatch\_retention\_in\_days](#input\_fluent\_cloudwatch\_retention\_in\_days) | Number of days to keep logs in cloudwatch | `string` | `"7"` | no |
+| <a name="input_fluent_log_annotation"></a> [fluent\_log\_annotation](#input\_fluent\_log\_annotation) | Pod Annotation required to enable fluent bit logging. Setting name to empty string will disable annotation requirement. | <pre>object({<br/>    name  = optional(string, "fluentbit.io/include")<br/>    value = optional(string, "true")<br/>  })</pre> | `{}` | no |
+| <a name="input_fluent_operator"></a> [fluent\_operator](#input\_fluent\_operator) | Fluent configurations | `any` | `{}` | no |
+| <a name="input_grafana"></a> [grafana](#input\_grafana) | Grafana configurations, used to override default configurations | `any` | `{}` | no |
+| <a name="input_ingress_nginx"></a> [ingress\_nginx](#input\_ingress\_nginx) | Ingress Nginx configurations | `any` | `{}` | no |
+| <a name="input_karpenter"></a> [karpenter](#input\_karpenter) | Karpenter configurations | `any` | `{}` | no |
+| <a name="input_metadata"></a> [metadata](#input\_metadata) | Metadata for the platform | <pre>object({<br/>    environment = optional(string, "")<br/>    team        = optional(string, "")<br/>  })</pre> | `{}` | no |
+| <a name="input_metrics_server"></a> [metrics\_server](#input\_metrics\_server) | Metrics Server configurations | `any` | `{}` | no |
+| <a name="input_name"></a> [name](#input\_name) | The name of the platform, a timestamp will be appended to this name to make the stack\_name. If not provided, the name of the directory will be used. | `string` | `""` | no |
+| <a name="input_okta"></a> [okta](#input\_okta) | Okta configurations | <pre>object({<br/>    base_url                    = optional(string, "")<br/>    secrets_manager_secret_name = optional(string, "")<br/>    kubernetes_secret_name      = optional(string, "okta")<br/>  })</pre> | `{}` | no |
+| <a name="input_pagerduty"></a> [pagerduty](#input\_pagerduty) | PagerDuty configurations | <pre>object({<br/>    secrets_manager_secret_name = optional(string, "")<br/>    kubernetes_secret_name      = optional(string, "pagerduty")<br/>  })</pre> | `{}` | no |
+| <a name="input_prometheus_stack"></a> [prometheus\_stack](#input\_prometheus\_stack) | Prometheus stack configurations | `any` | `{}` | no |
+| <a name="input_reloader"></a> [reloader](#input\_reloader) | Reloader configurations | `any` | `{}` | no |
+| <a name="input_slack"></a> [slack](#input\_slack) | Slack configurations | <pre>object({<br/>    secrets_manager_secret_name = optional(string, "")<br/>    kubernetes_secret_name      = optional(string, "slack")<br/>  })</pre> | `{}` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | Default tags to apply to all resources | `map(string)` | `{}` | no |
 | <a name="input_vpc"></a> [vpc](#input\_vpc) | Map of VPC configurations | `any` | `{}` | no |
 
@@ -160,9 +280,11 @@ as described in the `.pre-commit-config.yaml` file
 
 | Name | Description |
 |------|-------------|
+| <a name="output_argocd"></a> [argocd](#output\_argocd) | Map of attributes for the ArgoCD module |
 | <a name="output_eks"></a> [eks](#output\_eks) | Map of attributes for the EKS cluster |
-| <a name="output_network"></a> [network](#output\_network) | Map of attributes for the EKS cluster |
-<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+| <a name="output_karpenter"></a> [karpenter](#output\_karpenter) | Map of attributes for the Karpenter module |
+| <a name="output_network"></a> [network](#output\_network) | Map of attributes for the VPC module |
+<!-- END_TF_DOCS -->
 
 ## Authors
 
@@ -170,4 +292,4 @@ Module is maintained by [Alfredo Gottardo](https://github.com/AlfGot), [David Be
 
 ## License
 
-Apache 2 Licensed. See [LICENSE](< link to license file >) for full details.
+Apache 2 Licensed. See [LICENSE](LICENSE) for full details.

@@ -17,4 +17,5 @@ resource "cloudflare_record" "ns" {
   type    = "NS"
   value   = element(var.name_servers, count.index)
   ttl     = 3600
+
 }

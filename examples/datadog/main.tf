@@ -28,7 +28,7 @@ terraform {
     }
     time = {
       source  = "hashicorp/time"
-      version = "0.11.2"
+      version = "~> 0.11"
     }
   }
 }
@@ -100,7 +100,7 @@ module "k8s_platform" {
         {
           "karpenter" : {
             "init_config" : {},
-            "instances" : [{ "openmetrics_endpoint" : "http://%%host%%:8000/metrics" }]
+            "instances" : [{ "openmetrics_endpoint" : "http://%%host%%:8080/metrics" }]
           }
         }
       )
@@ -117,7 +117,6 @@ module "k8s_platform" {
       { private = 24 },
       { intra = 26 },
       { database = 26 },
-      { redshift = 26 },
       { karpenter = 22 }
     ]
   }
@@ -130,6 +129,18 @@ module "datadog" {
   datadog_secret = "dai/datadog/tamedia/keys"
   environment    = "sandbox"
   product_name   = "dai"
+
+  # Example: how to override specs in the Datadog Custom Resource
+  datadog_agent_helm_values = [
+    { name = "spec.features.apm.enabled", value = false },
+    { name = "spec.features.logCollection.enabled", value = false },
+    { name = "spec.override.clusterAgent.replicas", value = 3 }
+  ]
+
+  datadog_agent_version_fargate = "7.57.2" # github-releases/DataDog/datadog-agent
+  datadog = {
+    operator_chart_version = "1.8.1" # github-releases/DataDog/datadog-operator
+  }
 
   depends_on = [module.k8s_platform]
 }

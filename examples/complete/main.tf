@@ -26,6 +26,10 @@ terraform {
       source  = "hashicorp/kubernetes"
       version = "~> 2.27"
     }
+    cloudflare = {
+      source  = "cloudflare/cloudflare"
+      version = "~> 4.0"
+    }
   }
 }
 
@@ -98,20 +102,57 @@ module "k8s_platform" {
       { private = 24 },
       { intra = 26 },
       { database = 26 },
-      { redshift = 26 },
       { karpenter = 22 }
     ]
   }
 
-  addons = {
-    # Core addons
-    aws_load_balancer_controller = { enabled = true }
-    external_dns                 = { enabled = true }
-    external_secrets             = { enabled = true }
-    fargate_fluentbit            = { enabled = true }
-    metrics_server               = { enabled = true }
+  karpenter = {
+    root_volume_size = "8Gi"
+    data_volume_size = "80Gi"
+  }
 
-    # Optional addons
-    downscaler = { enabled = true }
+  enable_downscaler = true
+
+  enable_amp = true
+
+}
+data "aws_secretsmanager_secret_version" "cloudflare" {
+  secret_id = "dai/cloudflare/tamedia/apiToken"
+}
+
+provider "cloudflare" {
+  api_token = jsondecode(data.aws_secretsmanager_secret_version.cloudflare.secret_string)["apiToken"]
+}
+
+locals {
+  zones = {
+    "kaas-example.tamedia.tech" = {
+      comment = "DAI KaaS example complete"
+    }
+  }
+}
+
+# Manage DNS sub-domaisn in cloudflare and attach them to they parent in route53
+module "cloudflare" {
+  source = "../../modules/cloudflare"
+
+  for_each = local.zones
+
+  zone_name    = module.route53_zones[each.key].route53_zone_name[each.key]
+  comment      = "Managed by KAAS examples"
+  name_servers = [for i in range(4) : module.route53_zones[each.key].route53_zone_name_servers[each.key][i]]
+  account_id   = jsondecode(data.aws_secretsmanager_secret_version.cloudflare.secret_string)["accountId"]
+}
+
+module "route53_zones" {
+  source  = "terraform-aws-modules/route53/aws//modules/zones"
+  version = "2.11.1"
+
+  for_each = local.zones
+
+  zones = {
+    (each.key) = {
+      comment = each.value.comment
+    }
   }
 }

@@ -16,7 +16,7 @@ module "datadog_operator" {
   chart            = "datadog-operator"
   namespace        = var.namespace
   max_history      = 10
-  chart_version    = try(var.datadog.operator_chart_version, "1.8.1")
+  chart_version    = try(var.datadog.operator_chart_version, "1.8.1") # github-releases/DataDog/datadog-operator
   atomic           = true
   create_namespace = true
 
@@ -97,7 +97,7 @@ resource "helm_release" "datadog_secrets_fargate" {
 }
 
 ################################################################################
-# Datadog Agent
+# Datadog Agent - available specs options https://github.com/DataDog/datadog-operator/blob/main/docs/configuration.v2alpha1.md
 
 resource "helm_release" "datadog_agent" {
   name       = "datadog-agent"
@@ -127,8 +127,6 @@ resource "helm_release" "datadog_agent" {
           appSecret:
             secretName: datadog-keys
             keyName: app-key
-      agent:
-        properties:
       features:
         apm:
           enabled: true
@@ -171,6 +169,8 @@ resource "helm_release" "datadog_agent" {
                     app.kubernetes.io/name: karpenter
       override:
         clusterAgent:
+          priorityClassName: system-cluster-critical
+          replicas: 2
           containers:
             cluster-agent:
               resources:

@@ -10,9 +10,11 @@ on:
         type: choice
         options:
           - examples/complete
-          - examples/simple
-          - examples/lacework
           - examples/datadog
+          - examples/disable-addons
+          - examples/lacework
+          - examples/network
+          - examples/simple
 
 permissions:
   id-token: write
@@ -21,7 +23,7 @@ permissions:
 
 jobs:
   example_complete:
-    uses: tx-pts-dai/github-workflows/.github/workflows/tf-cleanup.yaml@v1
+    uses: DND-IT/github-workflows/.github/workflows/tf-cleanup.yaml@v2
     with:
       environment: examples
       tf_dir: ${{ inputs.tf_dir }}
