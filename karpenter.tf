@@ -139,6 +139,8 @@ module "karpenter_release" {
             team: ${var.metadata.team}
         EOT
       ]
+
+      set = try(var.karpenter.additional_helm_releases.karpenter_node_class.set, [])
     }
     karpenter_node_pool = {
       description   = "Karpenter NodePool Resource"
@@ -186,6 +188,8 @@ module "karpenter_release" {
             consolidateAfter: 1m
         EOT
       ]
+
+      set = try(var.karpenter.additional_helm_releases.karpenter_node_pool.set, [])
     }
   }
 
