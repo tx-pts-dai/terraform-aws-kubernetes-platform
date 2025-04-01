@@ -15,5 +15,5 @@ output "cluster_name" {
 
 output "cluster_secret_yaml" {
   description = "ArgoCD cluster secret YAML configuration"
-  value       = local.cluster_secret_yaml
+  value       = local.cluster_secret
 }
