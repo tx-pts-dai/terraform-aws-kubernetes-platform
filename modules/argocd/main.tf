@@ -176,6 +176,7 @@ module "argocd" {
 
   create = var.create && (var.enable_hub || var.enable_spoke)
 
+  name          = "argocd"
   chart         = "argo-cd"
   chart_version = "7.8.10"
   repository    = "https://argoproj.github.io/argo-helm"
