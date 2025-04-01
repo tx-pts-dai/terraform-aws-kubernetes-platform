@@ -72,6 +72,46 @@ locals {
   region = "eu-central-1"
 }
 
+data "aws_vpc" "this" {
+  filter {
+    name   = "tag:Name"
+    values = ["dai"]
+  }
+}
+
+data "aws_subnets" "private_subnets" {
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.this.id]
+  }
+
+  tags = {
+    Name = "*private*"
+  }
+}
+
+data "aws_subnets" "intra_subnets" {
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.this.id]
+  }
+
+  tags = {
+    Name = "*intra*"
+  }
+}
+
+data "aws_subnets" "karpenter_subnets" {
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.this.id]
+  }
+
+  tags = {
+    Name = "*karpenter*"
+  }
+}
+
 module "k8s_platform" {
   source = "../../"
 
@@ -97,18 +137,23 @@ module "k8s_platform" {
   }
 
   vpc = {
-    enabled = true
-    cidr    = "10.240.0.0/16"
-    max_az  = 3
-    subnet_configs = [
-      { public = 24 },
-      { private = 24 },
-      { intra = 26 },
-      { karpenter = 22 }
-    ]
+    enabled = false
+    # cidr    = "10.240.0.0/16"
+    # max_az  = 3
+    # subnet_configs = [
+    #   { public = 24 },
+    #   { private = 24 },
+    #   { intra = 26 },
+    #   { karpenter = 22 }
+    # ]
+    vpc_id          = data.aws_vpc.this.id
+    vpc_cidr        = data.aws_vpc.this.cidr_block
+    private_subnets = data.aws_subnets.private_subnets.ids
+    intra_subnets   = data.aws_subnets.intra_subnets.ids
   }
 
   karpenter = {
+    subnet_cidrs = data.aws_subnets.karpenter_subnets.ids
     set = [
       {
         name  = "replicas"
@@ -169,7 +214,7 @@ module "k8s_platform" {
       "alertmanager",
       "grafana",
     ]
-    prepend_stack_id      = true
+    prepend_stack_id      = false # Cannot be true for the initial deployment since the stack id is not known yet
     wildcard_certificates = false # Don't create wildcards for test deployments since other stacks might use them and cause cleanup failures
   }
 

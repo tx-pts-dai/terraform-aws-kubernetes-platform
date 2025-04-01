@@ -70,7 +70,7 @@ variable "acm_certificate" {
     - domain_name: Primary domain name for the certificate. If not provided, uses base_domain from other configuration.
     - subject_alternative_names: List of additional domain names to include in the certificate.
     - wildcard_certificates: When true, adds a wildcard prefix (*.) to all domains in the certificate.
-    - prepend_stack_id: When true, prepends the stack identifier to each domain name.
+    - prepend_stack_id: When true, prepends the stack identifier to each domain name. Only works after random_string is created.
     - wait_for_validation: When true, Terraform will wait for certificate validation to complete before proceeding.
   EOT
   type = object({
