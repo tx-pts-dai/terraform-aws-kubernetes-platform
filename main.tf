@@ -111,7 +111,7 @@ locals {
 
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
-  version = "20.34.0"
+  version = "20.35.0"
 
   cluster_name                    = local.stack_name
   cluster_version                 = local.k8s_version
@@ -211,7 +211,7 @@ resource "aws_security_group_rule" "eks_control_plane_ingress" {
 
 module "vpc_cni_irsa" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
-  version = "5.54.0"
+  version = "5.54.1"
 
   role_name = "vpc-cni-${local.id}"
 
