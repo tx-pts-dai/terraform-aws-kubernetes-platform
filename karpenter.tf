@@ -91,7 +91,8 @@ module "karpenter_release" {
     EOT
   ]
 
-  set = try(var.karpenter.set, [])
+  set      = try(var.karpenter.set, [])
+  set_list = try(var.karpenter.set_list, [])
 
   additional_delay_destroy_duration = "1m"
 
@@ -139,6 +140,9 @@ module "karpenter_release" {
             team: ${var.metadata.team}
         EOT
       ]
+
+      set      = try(var.karpenter.additional_helm_releases.karpenter_node_class.set, [])
+      set_list = try(var.karpenter.additional_helm_releases.karpenter_node_class.set_list, [])
     }
     karpenter_node_pool = {
       description   = "Karpenter NodePool Resource"
@@ -186,6 +190,9 @@ module "karpenter_release" {
             consolidateAfter: 1m
         EOT
       ]
+
+      set      = try(var.karpenter.additional_helm_releases.karpenter_node_pool.set, [])
+      set_list = try(var.karpenter.additional_helm_releases.karpenter_node_pool.set_list, [])
     }
   }
 

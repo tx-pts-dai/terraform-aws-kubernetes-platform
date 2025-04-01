@@ -115,6 +115,16 @@ module "k8s_platform" {
         value = 1
       }
     ]
+    additional_helm_releases = {
+      karpenter_node_pool = {
+        set_list = [
+          {
+            name  = "spec.template.spec.requirements[0].values"
+            value = ["t"]
+          }
+        ]
+      }
+    }
   }
 
   metrics_server = {
@@ -169,7 +179,7 @@ module "k8s_platform" {
       "alertmanager",
       "grafana",
     ]
-    prepend_stack_id      = true
+    prepend_stack_id      = false # Cannot be true for the initial deployment since the stack id is not known yet
     wildcard_certificates = false # Don't create wildcards for test deployments since other stacks might use them and cause cleanup failures
   }
 

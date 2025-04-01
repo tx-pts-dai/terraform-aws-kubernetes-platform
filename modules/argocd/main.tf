@@ -4,31 +4,35 @@ locals {
 
   full_cluster_name = join("-", [var.cluster_name, var.cluster_secret_suffix])
 
-  cluster_secret_yaml = <<-EOT
-    apiVersion: v1
-    kind: Secret
-    metadata:
-      name: cluster-${local.full_cluster_name}
-      namespace: ${var.namespace}
-      labels:
-        argocd.argoproj.io/secret-type: cluster
-        ${join("\n    ", [for k, v in var.cluster_secret_labels : "${k}: ${v}"])}
-    type: "Opaque"
-    stringData:
-      name: ${local.full_cluster_name}
-      server: ${data.aws_eks_cluster.cluster.endpoint}
-      config: |
+  cluster_secret = {
+    apiVersion = "v1"
+    kind       = "Secret"
+    metadata = {
+      name      = "cluster-${local.full_cluster_name}"
+      namespace = var.namespace
+      labels = merge(
         {
-          "tlsClientConfig": {
-            "insecure": false,
-            "caData": "${data.aws_eks_cluster.cluster.certificate_authority[0].data}"
-          },
-          "awsAuthConfig": {
-            "clusterName": "${var.cluster_name}",
-            "roleARN": "${local.iam_role_arn}"
-          }
+          "argocd.argoproj.io/secret-type" = "cluster"
+        },
+        var.cluster_secret_labels
+      )
+    }
+    type = "Opaque"
+    stringData = {
+      name   = local.full_cluster_name
+      server = data.aws_eks_cluster.cluster.endpoint
+      config = jsonencode({
+        tlsClientConfig = {
+          insecure = false
+          caData   = data.aws_eks_cluster.cluster.certificate_authority[0].data
         }
-  EOT
+        awsAuthConfig = {
+          clusterName = var.cluster_name
+          roleARN     = local.iam_role_arn
+        }
+      })
+    }
+  }
 }
 
 data "aws_eks_cluster" "cluster" {
@@ -172,6 +176,7 @@ module "argocd" {
 
   create = var.create && (var.enable_hub || var.enable_spoke)
 
+  name          = "argocd"
   chart         = "argo-cd"
   chart_version = "7.8.10"
   repository    = "https://argoproj.github.io/argo-helm"

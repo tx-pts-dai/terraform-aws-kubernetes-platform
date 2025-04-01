@@ -63,6 +63,16 @@ resource "helm_release" "this" {
     }
   }
 
+  dynamic "set_list" {
+    for_each = var.set_list
+
+    content {
+      name  = set_list.value.name
+      value = set_list.value.value
+    }
+
+  }
+
   dynamic "set" {
     for_each = { for k, v in toset(var.set_irsa_names) : k => v if var.create && var.create_role }
     iterator = each
