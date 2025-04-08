@@ -196,7 +196,7 @@ module "k8s_platform" {
     enable_hub   = true
     enable_spoke = true
 
-    hub_iam_role_name     = "argocd-controller-${module.k8s_platform.cluster_id}"
+    hub_iam_role_name     = "argocd-controller-tests-main"
     cluster_secret_suffix = "example"
     cluster_secret_labels = {
       team        = "example"
