@@ -190,12 +190,13 @@ module "k8s_platform" {
 
   enable_amp = false
 
-  enable_argocd = true
+  enable_argocd = false
 
   argocd = {
     enable_hub   = true
     enable_spoke = true
 
+    hub_iam_role_name     = "argocd-controller-${module.k8s_platform.cluster_id}"
     cluster_secret_suffix = "example"
     cluster_secret_labels = {
       team        = "example"
