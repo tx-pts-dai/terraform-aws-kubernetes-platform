@@ -287,7 +287,7 @@ module "prometheus_stack" {
         annotations:
           alb.ingress.kubernetes.io/scheme: internet-facing
           alb.ingress.kubernetes.io/target-type: ip
-          alb.ingress.kubernetes.io/group.name: ${local.stack_name}
+          alb.ingress.kubernetes.io/group.name: default
           alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80,"HTTPS":443}]'
           alb.ingress.kubernetes.io/ssl-redirect: '443'
           alb.ingress.kubernetes.io/healthcheck-path: /-/healthy
@@ -318,7 +318,7 @@ module "prometheus_stack" {
         annotations:
           alb.ingress.kubernetes.io/scheme: internet-facing
           alb.ingress.kubernetes.io/target-type: ip
-          alb.ingress.kubernetes.io/group.name: ${local.stack_name}
+          alb.ingress.kubernetes.io/group.name: default
           alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80,"HTTPS":443}]'
           alb.ingress.kubernetes.io/ssl-redirect: '443'
           alb.ingress.kubernetes.io/healthcheck-path: /-/healthy
@@ -458,7 +458,7 @@ module "grafana" {
       annotations:
         alb.ingress.kubernetes.io/scheme: internet-facing
         alb.ingress.kubernetes.io/target-type: ip
-        alb.ingress.kubernetes.io/group.name: ${local.stack_name}
+        alb.ingress.kubernetes.io/group.name: default
         alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80,"HTTPS":443}]'
         alb.ingress.kubernetes.io/ssl-redirect: '443'
         alb.ingress.kubernetes.io/healthcheck-path: /healthz
