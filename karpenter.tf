@@ -53,10 +53,6 @@ module "karpenter_crds" {
   create_namespace = true
 }
 
-# removed {
-#   from = "module.karpenter_release.additional_helm_releases.karpenter_node_class"
-# }
-
 module "karpenter_release" {
   source = "./modules/addon"
 
@@ -108,16 +104,14 @@ module "karpenter_release" {
   ]
 }
 
-module "karpenter_resources" {
-  source = "./modules/addon"
+data "helm_template" "karpenter_resources" {
+  name       = "karpenter-resources"
+  chart      = "karpenter-resources"
+  version    = "0.3.1"
+  repository = "https://dnd-it.github.io/helm-charts"
+  namespace  = local.karpenter.namespace
 
-  chart         = "karpenter-resources"
-  chart_version = "0.1.0" # github-releases/aws/karpenter-provider-aws
-  repository    = "https://dnd-it.github.io/helm-charts"
-  namespace     = local.karpenter.namespace
-  wait          = true
-
-  values = [
+  values = concat([
     <<-EOT
     global:
       role: ${module.karpenter.node_iam_role_name}
@@ -133,14 +127,25 @@ module "karpenter_resources" {
       default:
         enabled: true
     EOT
-  ]
+  ], try(var.karpenter.karpenter_resources.values, []))
 
-  set      = try(var.karpenter.karpenter_resources.set, [])
-  set_list = try(var.karpenter.karpenter_resources.set_list, [])
+  dynamic "set" {
+    for_each = try(var.karpenter.karpenter_resources.set, [])
 
-  depends_on = [
-    module.karpenter_release,
-  ]
+    content {
+      name  = set.value.name
+      value = set.value.value
+      type  = try(set.value.type, null)
+    }
+  }
+}
+
+resource "kubectl_manifest" "karpenter_resources" {
+  for_each = data.helm_template.karpenter_resources.manifests
+
+  yaml_body = each.value
+
+  depends_on = [module.karpenter_release]
 }
 
 ###############################################################################

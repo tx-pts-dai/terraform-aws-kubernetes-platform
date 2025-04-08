@@ -176,6 +176,8 @@ as described in the `.pre-commit-config.yaml` file
 | Name | Version |
 |------|---------|
 | <a name="provider_aws"></a> [aws](#provider\_aws) | >= 5.42.0 |
+| <a name="provider_helm"></a> [helm](#provider\_helm) | >= 2.12 |
+| <a name="provider_kubectl"></a> [kubectl](#provider\_kubectl) | >= 2.0.2 |
 | <a name="provider_kubernetes"></a> [kubernetes](#provider\_kubernetes) | >= 2.27 |
 | <a name="provider_time"></a> [time](#provider\_time) | >= 0.11 |
 
@@ -217,6 +219,7 @@ as described in the `.pre-commit-config.yaml` file
 | [aws_route_table_association.karpenter](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route_table_association) | resource |
 | [aws_security_group_rule.eks_control_plane_ingress](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
 | [aws_subnet.karpenter](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/subnet) | resource |
+| [kubectl_manifest.karpenter_resources](https://registry.terraform.io/providers/alekc/kubectl/latest/docs/resources/manifest) | resource |
 | [kubernetes_annotations.monitoring](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/annotations) | resource |
 | [time_sleep.wait_on_destroy](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/sleep) | resource |
 | [time_static.timestamp_id](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/static) | resource |
@@ -227,6 +230,7 @@ as described in the `.pre-commit-config.yaml` file
 | [aws_region.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/region) | data source |
 | [aws_route53_zone.base_domain_zone](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/route53_zone) | data source |
 | [aws_route_tables.private_route_tables](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/route_tables) | data source |
+| [helm_template.karpenter_resources](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/data-sources/template) | data source |
 
 ## Inputs
 
