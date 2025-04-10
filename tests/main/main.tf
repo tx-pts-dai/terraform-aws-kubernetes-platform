@@ -115,6 +115,18 @@ module "k8s_platform" {
         value = 1
       }
     ]
+    karpenter_resources = {
+      values = [
+        <<-EOT
+        nodePools:
+          default:
+            requirements:
+              - key: karpenter.k8s.aws/instance-category
+                operator: In
+                values: ["t"]
+        EOT
+      ]
+    }
   }
 
   metrics_server = {

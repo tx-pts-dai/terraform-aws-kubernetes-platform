@@ -13,9 +13,6 @@ locals {
     namespace = "kube-system"
     # TODO: move to helm value inputs
     pod_annotations = try(var.karpenter.pod_annotations, {})
-
-    root_volume_size = try(var.karpenter.root_volume_size, "4Gi")
-    data_volume_size = try(var.karpenter.data_volume_size, "20Gi")
   }
 
   azs = slice(data.aws_availability_zones.available.names, 0, 3)
@@ -64,7 +61,7 @@ module "karpenter_release" {
   skip_crds        = true
   wait             = true
 
-  values = [
+  values = concat([
     <<-EOT
     logLevel: info
     dnsPolicy: Default
@@ -88,7 +85,7 @@ module "karpenter_release" {
       annotations:
         eks.amazonaws.com/role-arn: ${module.karpenter.iam_role_arn}
     EOT
-  ]
+  ], try(var.karpenter.values, []))
 
   set      = try(var.karpenter.set, [])
   set_list = try(var.karpenter.set_list, [])
