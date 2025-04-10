@@ -141,7 +141,9 @@ data "helm_template" "karpenter_resources" {
 }
 
 resource "kubectl_manifest" "karpenter_resources" {
-  yaml_body = data.helm_template.karpenter_resources.manifest
+  for_each = data.helm_template.karpenter_resources.manifests
+
+  yaml_body = each.value
 
   depends_on = [module.karpenter_release]
 }

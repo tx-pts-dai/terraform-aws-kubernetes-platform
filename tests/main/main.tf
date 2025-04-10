@@ -115,16 +115,6 @@ module "k8s_platform" {
         value = 1
       }
     ]
-    additional_helm_releases = {
-      karpenter_node_pool = {
-        set_list = [
-          {
-            name  = "spec.template.spec.requirements[0].values"
-            value = ["t"]
-          }
-        ]
-      }
-    }
   }
 
   metrics_server = {
