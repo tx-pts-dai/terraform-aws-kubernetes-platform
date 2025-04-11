@@ -37,6 +37,10 @@
          <lastmod>2025-04-11</lastmod>
     </url>
     <url>
+         <loc>https://tx-pts-dai.github.io/terraform-aws-kubernetes-platform/examples/snippets/karpenter/</loc>
+         <lastmod>2025-04-11</lastmod>
+    </url>
+    <url>
          <loc>https://tx-pts-dai.github.io/terraform-aws-kubernetes-platform/modules/addon/</loc>
          <lastmod>2025-04-11</lastmod>
     </url>

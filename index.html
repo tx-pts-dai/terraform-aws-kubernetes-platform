@@ -1040,6 +1040,73 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_5" id="__nav_4_5_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Snippets
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_5">
+            <span class="md-nav__icon md-icon"></span>
+            Snippets
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="examples/snippets/karpenter/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Karpenter
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1472,6 +1539,14 @@ Each new kubernetes version needs it's own release. This is due to the fact that
 <td>&gt;= 5.42.0</td>
 </tr>
 <tr>
+<td><a name="provider_helm"></a> <a href="..#provider_helm">helm</a></td>
+<td>&gt;= 2.12</td>
+</tr>
+<tr>
+<td><a name="provider_kubectl"></a> <a href="..#provider_kubectl">kubectl</a></td>
+<td>&gt;= 2.0.2</td>
+</tr>
+<tr>
 <td><a name="provider_kubernetes"></a> <a href="..#provider_kubernetes">kubernetes</a></td>
 <td>&gt;= 2.27</td>
 </tr>
@@ -1499,7 +1574,7 @@ Each new kubernetes version needs it's own release. This is due to the fact that
 <tr>
 <td><a name="module_addons"></a> <a href="..#module_addons">addons</a></td>
 <td>aws-ia/eks-blueprints-addons/aws</td>
-<td>1.20.0</td>
+<td>1.21.0</td>
 </tr>
 <tr>
 <td><a name="module_amp"></a> <a href="..#module_amp">amp</a></td>
@@ -1524,12 +1599,12 @@ Each new kubernetes version needs it's own release. This is due to the fact that
 <tr>
 <td><a name="module_ebs_csi_driver_irsa"></a> <a href="..#module_ebs_csi_driver_irsa">ebs_csi_driver_irsa</a></td>
 <td>terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks</td>
-<td>5.54.0</td>
+<td>5.54.1</td>
 </tr>
 <tr>
 <td><a name="module_eks"></a> <a href="..#module_eks">eks</a></td>
 <td>terraform-aws-modules/eks/aws</td>
-<td>20.34.0</td>
+<td>20.35.0</td>
 </tr>
 <tr>
 <td><a name="module_fluent_operator"></a> <a href="..#module_fluent_operator">fluent_operator</a></td>
@@ -1544,7 +1619,7 @@ Each new kubernetes version needs it's own release. This is due to the fact that
 <tr>
 <td><a name="module_karpenter"></a> <a href="..#module_karpenter">karpenter</a></td>
 <td>terraform-aws-modules/eks/aws//modules/karpenter</td>
-<td>20.34.0</td>
+<td>20.35.0</td>
 </tr>
 <tr>
 <td><a name="module_karpenter_crds"></a> <a href="..#module_karpenter_crds">karpenter_crds</a></td>
@@ -1579,7 +1654,7 @@ Each new kubernetes version needs it's own release. This is due to the fact that
 <tr>
 <td><a name="module_prometheus_irsa"></a> <a href="..#module_prometheus_irsa">prometheus_irsa</a></td>
 <td>terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks</td>
-<td>5.54.0</td>
+<td>5.54.1</td>
 </tr>
 <tr>
 <td><a name="module_prometheus_operator_crds"></a> <a href="..#module_prometheus_operator_crds">prometheus_operator_crds</a></td>
@@ -1609,7 +1684,7 @@ Each new kubernetes version needs it's own release. This is due to the fact that
 <tr>
 <td><a name="module_vpc_cni_irsa"></a> <a href="..#module_vpc_cni_irsa">vpc_cni_irsa</a></td>
 <td>terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks</td>
-<td>5.54.0</td>
+<td>5.54.1</td>
 </tr>
 </tbody>
 </table>
@@ -1640,6 +1715,10 @@ Each new kubernetes version needs it's own release. This is due to the fact that
 </tr>
 <tr>
 <td><a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/subnet">aws_subnet.karpenter</a></td>
+<td>resource</td>
+</tr>
+<tr>
+<td><a href="https://registry.terraform.io/providers/alekc/kubectl/latest/docs/resources/manifest">kubectl_manifest.karpenter_resources</a></td>
 <td>resource</td>
 </tr>
 <tr>
@@ -1680,6 +1759,10 @@ Each new kubernetes version needs it's own release. This is due to the fact that
 </tr>
 <tr>
 <td><a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/route_tables">aws_route_tables.private_route_tables</a></td>
+<td>data source</td>
+</tr>
+<tr>
+<td><a href="https://registry.terraform.io/providers/hashicorp/helm/latest/docs/data-sources/template">helm_template.karpenter_resources</a></td>
 <td>data source</td>
 </tr>
 </tbody>
