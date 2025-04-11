@@ -26,6 +26,8 @@ nav:
       - examples/simple.md
       - examples/lacework.md
       - examples/datadog.md
+      - Snippets:
+          - examples/snippets/karpenter.md
   - FAQ: faq.md
 
 theme:
@@ -78,7 +80,6 @@ plugins:
   - search:
       lang:
         - en
-  # - awesome-pages
   - tags
 
 markdown_extensions:

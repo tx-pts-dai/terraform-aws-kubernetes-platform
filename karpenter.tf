@@ -13,9 +13,6 @@ locals {
     namespace = "kube-system"
     # TODO: move to helm value inputs
     pod_annotations = try(var.karpenter.pod_annotations, {})
-
-    root_volume_size = try(var.karpenter.root_volume_size, "4Gi")
-    data_volume_size = try(var.karpenter.data_volume_size, "20Gi")
   }
 
   azs = slice(data.aws_availability_zones.available.names, 0, 3)
@@ -53,7 +50,6 @@ module "karpenter_crds" {
   create_namespace = true
 }
 
-
 module "karpenter_release" {
   source = "./modules/addon"
 
@@ -65,7 +61,7 @@ module "karpenter_release" {
   skip_crds        = true
   wait             = true
 
-  values = [
+  values = concat([
     <<-EOT
     logLevel: info
     dnsPolicy: Default
@@ -89,112 +85,10 @@ module "karpenter_release" {
       annotations:
         eks.amazonaws.com/role-arn: ${module.karpenter.iam_role_arn}
     EOT
-  ]
+  ], try(var.karpenter.values, []))
 
   set      = try(var.karpenter.set, [])
   set_list = try(var.karpenter.set_list, [])
-
-  additional_delay_destroy_duration = "1m"
-
-  additional_helm_releases = {
-    karpenter_node_class = {
-      description   = "Karpenter NodeClass Resource"
-      chart         = "custom-resources"
-      chart_version = "0.1.2"
-      repository    = "https://dnd-it.github.io/helm-charts"
-
-      values = [
-        <<-EOT
-        apiVersion: karpenter.k8s.aws/v1
-        kind: EC2NodeClass
-        metadata:
-          name: default
-        spec:
-          # Required so containers can access node metadata
-          metadataOptions:
-            httpPutResponseHopLimit: 2
-          amiSelectorTerms:
-            - alias: bottlerocket@latest
-          role: ${module.karpenter.node_iam_role_name}
-          subnetSelectorTerms:
-            - tags:
-                karpenter.sh/discovery: ${module.eks.cluster_name}
-          securityGroupSelectorTerms:
-            - tags:
-                karpenter.sh/discovery: ${module.eks.cluster_name}
-          blockDeviceMappings:
-            - deviceName: /dev/xvda
-              ebs:
-                volumeSize: ${local.karpenter.root_volume_size}
-                volumeType: gp3
-                encrypted: true
-                deleteOnTermination: true
-            - deviceName: /dev/xvdb
-              ebs:
-                volumeSize: ${local.karpenter.data_volume_size}
-                volumeType: gp3
-                encrypted: true
-                deleteOnTermination: true
-          tags:
-            environment: ${var.metadata.environment}
-            team: ${var.metadata.team}
-        EOT
-      ]
-
-      set      = try(var.karpenter.additional_helm_releases.karpenter_node_class.set, [])
-      set_list = try(var.karpenter.additional_helm_releases.karpenter_node_class.set_list, [])
-    }
-    karpenter_node_pool = {
-      description   = "Karpenter NodePool Resource"
-      chart         = "custom-resources"
-      chart_version = "0.1.2"
-      repository    = "https://dnd-it.github.io/helm-charts"
-
-      values = [
-        <<-EOT
-        apiVersion: karpenter.sh/v1
-        kind: NodePool
-        metadata:
-          name: default
-        spec:
-          template:
-            spec:
-              nodeClassRef:
-                name: default
-                kind: EC2NodeClass
-                group: karpenter.k8s.aws
-              requirements:
-                - key: "karpenter.k8s.aws/instance-category"
-                  operator: In
-                  values: ["c", "m", "r", "t"]
-                - key: "karpenter.k8s.aws/instance-cpu"
-                  operator: In
-                  values: ["2", "4", "8", "16", "32"]
-                - key: "karpenter.k8s.aws/instance-hypervisor"
-                  operator: In
-                  values: ["nitro"]
-                - key: "karpenter.k8s.aws/instance-memory"
-                  operator: Gt
-                  values: ["2048"]
-                - key: "karpenter.sh/capacity-type"
-                  operator: In
-                  values: ["spot", "on-demand"]
-                - key: "karpenter.k8s.aws/instance-generation"
-                  operator: Gt
-                  values: ["2"]
-              expireAfter: 720h
-          limits:
-            cpu: "1000"
-          disruption:
-            consolidationPolicy: WhenEmptyOrUnderutilized
-            consolidateAfter: 1m
-        EOT
-      ]
-
-      set      = try(var.karpenter.additional_helm_releases.karpenter_node_pool.set, [])
-      set_list = try(var.karpenter.additional_helm_releases.karpenter_node_pool.set_list, [])
-    }
-  }
 
   depends_on = [
     # service monitor depends on prometheus operator CRDs
@@ -205,6 +99,50 @@ module "karpenter_release" {
     aws_subnet.karpenter,
     aws_route_table_association.karpenter
   ]
+}
+
+data "helm_template" "karpenter_resources" {
+  name       = "karpenter-resources"
+  chart      = "karpenter-resources"
+  version    = "0.3.1"
+  repository = "https://dnd-it.github.io/helm-charts"
+  namespace  = local.karpenter.namespace
+
+  values = concat([
+    <<-EOT
+    global:
+      role: ${module.karpenter.node_iam_role_name}
+      eksDiscovery:
+        enabled: true
+        clusterName: ${module.eks.cluster_name}
+
+    nodePools:
+      default:
+        enabled: true
+
+    ec2NodeClasses:
+      default:
+        enabled: true
+    EOT
+  ], try(var.karpenter.karpenter_resources.values, []))
+
+  dynamic "set" {
+    for_each = try(var.karpenter.karpenter_resources.set, [])
+
+    content {
+      name  = set.value.name
+      value = set.value.value
+      type  = try(set.value.type, null)
+    }
+  }
+}
+
+resource "kubectl_manifest" "karpenter_resources" {
+  for_each = data.helm_template.karpenter_resources.manifests
+
+  yaml_body = each.value
+
+  depends_on = [module.karpenter_release]
 }
 
 ###############################################################################

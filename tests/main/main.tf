@@ -115,15 +115,17 @@ module "k8s_platform" {
         value = 1
       }
     ]
-    additional_helm_releases = {
-      karpenter_node_pool = {
-        set_list = [
-          {
-            name  = "spec.template.spec.requirements[0].values"
-            value = ["t"]
-          }
-        ]
-      }
+    karpenter_resources = {
+      values = [
+        <<-EOT
+        nodePools:
+          default:
+            requirements:
+              - key: karpenter.k8s.aws/instance-category
+                operator: In
+                values: ["t"]
+        EOT
+      ]
     }
   }
 
@@ -190,12 +192,13 @@ module "k8s_platform" {
 
   enable_amp = false
 
-  enable_argocd = true
+  enable_argocd = false
 
   argocd = {
     enable_hub   = true
     enable_spoke = true
 
+    hub_iam_role_name     = "argocd-controller-tests-main"
     cluster_secret_suffix = "example"
     cluster_secret_labels = {
       team        = "example"
