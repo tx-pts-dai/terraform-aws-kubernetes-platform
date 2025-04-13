@@ -1,4 +1,6 @@
-# Helm release and IRSA integration
+# Helm release and IRSA integration [DEPRECATED]
+
+This module is deprecated and will be removed in a future release. EKS Pod Identity Agent (PIA) will be used instead or IRSA thus removing the need for this module.
 
 This module deploys a Helm release and configures the service account to use an IAM role for service accounts (IRSA).
 
