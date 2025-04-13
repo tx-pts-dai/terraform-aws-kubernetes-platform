@@ -184,29 +184,29 @@ as described in the `.pre-commit-config.yaml` file
 | Name | Source | Version |
 |------|--------|---------|
 | <a name="module_acm"></a> [acm](#module\_acm) | terraform-aws-modules/acm/aws | 5.1.1 |
-| <a name="module_addons"></a> [addons](#module\_addons) | aws-ia/eks-blueprints-addons/aws | 1.20.0 |
+| <a name="module_addons"></a> [addons](#module\_addons) | aws-ia/eks-blueprints-addons/aws | 1.21.0 |
 | <a name="module_amp"></a> [amp](#module\_amp) | terraform-aws-modules/managed-service-prometheus/aws | 3.0.0 |
 | <a name="module_argocd"></a> [argocd](#module\_argocd) | ./modules/argocd | n/a |
 | <a name="module_cluster_secret_store"></a> [cluster\_secret\_store](#module\_cluster\_secret\_store) | ./modules/addon | n/a |
 | <a name="module_downscaler"></a> [downscaler](#module\_downscaler) | tx-pts-dai/downscaler/kubernetes | 0.3.1 |
-| <a name="module_ebs_csi_driver_irsa"></a> [ebs\_csi\_driver\_irsa](#module\_ebs\_csi\_driver\_irsa) | terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks | 5.54.0 |
-| <a name="module_eks"></a> [eks](#module\_eks) | terraform-aws-modules/eks/aws | 20.34.0 |
+| <a name="module_ebs_csi_driver_irsa"></a> [ebs\_csi\_driver\_irsa](#module\_ebs\_csi\_driver\_irsa) | terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks | 5.54.1 |
+| <a name="module_eks"></a> [eks](#module\_eks) | terraform-aws-modules/eks/aws | 20.35.0 |
 | <a name="module_fluent_operator"></a> [fluent\_operator](#module\_fluent\_operator) | ./modules/addon | n/a |
 | <a name="module_grafana"></a> [grafana](#module\_grafana) | ./modules/addon | n/a |
-| <a name="module_karpenter"></a> [karpenter](#module\_karpenter) | terraform-aws-modules/eks/aws//modules/karpenter | 20.34.0 |
+| <a name="module_karpenter"></a> [karpenter](#module\_karpenter) | terraform-aws-modules/eks/aws//modules/karpenter | 20.35.0 |
 | <a name="module_karpenter_crds"></a> [karpenter\_crds](#module\_karpenter\_crds) | ./modules/addon | n/a |
 | <a name="module_karpenter_release"></a> [karpenter\_release](#module\_karpenter\_release) | ./modules/addon | n/a |
 | <a name="module_karpenter_security_group"></a> [karpenter\_security\_group](#module\_karpenter\_security\_group) | ./modules/security-group | n/a |
 | <a name="module_network"></a> [network](#module\_network) | ./modules/network | n/a |
 | <a name="module_okta_secrets"></a> [okta\_secrets](#module\_okta\_secrets) | ./modules/addon | n/a |
 | <a name="module_pagerduty_secrets"></a> [pagerduty\_secrets](#module\_pagerduty\_secrets) | ./modules/addon | n/a |
-| <a name="module_prometheus_irsa"></a> [prometheus\_irsa](#module\_prometheus\_irsa) | terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks | 5.54.0 |
+| <a name="module_prometheus_irsa"></a> [prometheus\_irsa](#module\_prometheus\_irsa) | terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks | 5.54.1 |
 | <a name="module_prometheus_operator_crds"></a> [prometheus\_operator\_crds](#module\_prometheus\_operator\_crds) | ./modules/addon | n/a |
 | <a name="module_prometheus_stack"></a> [prometheus\_stack](#module\_prometheus\_stack) | ./modules/addon | n/a |
 | <a name="module_reloader"></a> [reloader](#module\_reloader) | ./modules/addon | n/a |
 | <a name="module_slack_secrets"></a> [slack\_secrets](#module\_slack\_secrets) | ./modules/addon | n/a |
 | <a name="module_ssm"></a> [ssm](#module\_ssm) | ./modules/ssm | n/a |
-| <a name="module_vpc_cni_irsa"></a> [vpc\_cni\_irsa](#module\_vpc\_cni\_irsa) | terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks | 5.54.0 |
+| <a name="module_vpc_cni_irsa"></a> [vpc\_cni\_irsa](#module\_vpc\_cni\_irsa) | terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks | 5.54.1 |
 
 ## Resources
 
