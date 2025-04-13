@@ -154,14 +154,20 @@ module "k8s_platform" {
     ]
   }
 
-  enable_downscaler = true
+  # Disable monitoring stack to avoid dangling resources
+
+  enable_prometheus_stack = false
+  enable_grafana          = false
+  enable_fluent_operator  = false
+
+  enable_downscaler = false
 
   enable_pagerduty = false
   pagerduty = {
     secrets_manager_secret_name = "dai/platform/pagerduty"
   }
 
-  enable_okta = true
+  enable_okta = false
   okta = {
     base_url                    = "https://login.tx.group"
     secrets_manager_secret_name = "dai/platform/okta"
@@ -174,7 +180,7 @@ module "k8s_platform" {
 
   base_domain = "dai-sandbox.tamedia.tech"
 
-  enable_acm_certificate = true
+  enable_acm_certificate = false
   acm_certificate = {
     subject_alternative_names = [
       "prometheus",

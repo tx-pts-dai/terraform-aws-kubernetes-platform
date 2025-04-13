@@ -39,22 +39,21 @@ module "karpenter" {
   tags = local.tags
 }
 
-module "karpenter_crds" {
-  source = "./modules/addon"
-
+resource "helm_release" "karpenter_crd" {
+  name             = "karpenter-crd"
   chart            = "karpenter-crd"
-  chart_version    = "1.0.8" # github-releases/aws/karpenter-provider-aws
+  version          = "1.0.8"
   repository       = "oci://public.ecr.aws/karpenter"
   description      = "Karpenter CRDs"
   namespace        = local.karpenter.namespace
   create_namespace = true
 }
 
-module "karpenter_release" {
-  source = "./modules/addon"
 
+resource "helm_release" "karpenter_release" {
+  name             = "karpenter"
   chart            = "karpenter"
-  chart_version    = "1.0.8" # github-releases/aws/karpenter-provider-aws
+  version          = "1.0.8"
   repository       = "oci://public.ecr.aws/karpenter"
   namespace        = local.karpenter.namespace
   create_namespace = true
@@ -72,8 +71,6 @@ module "karpenter_release" {
         requests:
           cpu: 0.5
           memory: "512Mi"
-    serviceMonitor:
-      enabled: ${module.prometheus_operator_crds.create}
     settings:
       eksControlPlane: true
       clusterName: ${module.eks.cluster_name}
@@ -87,13 +84,18 @@ module "karpenter_release" {
     EOT
   ], try(var.karpenter.values, []))
 
-  set      = try(var.karpenter.set, [])
-  set_list = try(var.karpenter.set_list, [])
+  dynamic "set" {
+    for_each = try(var.karpenter.set, [])
+
+    content {
+      name  = set.value.name
+      value = set.value.value
+      type  = try(set.value.type, null)
+    }
+  }
 
   depends_on = [
-    # service monitor depends on prometheus operator CRDs
-    module.prometheus_operator_crds,
-    module.karpenter_crds,
+    helm_release.karpenter_crd,
     module.karpenter,
     module.karpenter_security_group,
     aws_subnet.karpenter,
@@ -101,7 +103,7 @@ module "karpenter_release" {
   ]
 }
 
-data "helm_template" "karpenter_resources" {
+resource "helm_release" "karpenter_resources" {
   name       = "karpenter-resources"
   chart      = "karpenter-resources"
   version    = "0.3.1"
@@ -135,14 +137,10 @@ data "helm_template" "karpenter_resources" {
       type  = try(set.value.type, null)
     }
   }
-}
 
-resource "kubectl_manifest" "karpenter_resources" {
-  for_each = data.helm_template.karpenter_resources.manifests
-
-  yaml_body = each.value
-
-  depends_on = [module.karpenter_release]
+  depends_on = [
+    helm_release.karpenter_release
+  ]
 }
 
 ###############################################################################
