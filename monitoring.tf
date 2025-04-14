@@ -537,8 +537,6 @@ module "grafana" {
               sigV4AuthType: default
               sigV4Region: ${local.region}
           %{endif}
-    serviceMonitor:
-      enabled: ${var.enable_prometheus_stack}
     EOT
   ]
 

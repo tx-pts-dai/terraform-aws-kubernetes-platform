@@ -98,9 +98,6 @@ module "addons" {
     wait = true
 
     set = [{
-      name  = "enableServiceMonitor"
-      value = var.enable_prometheus_stack
-      }, {
       name  = "clusterSecretsPermissions.allowAllSecrets"
       value = true # enables Okta integration by reading client id and secret from K8s secrets
       },
@@ -131,10 +128,6 @@ module "addons" {
     wait             = true
     role_name        = "external-secrets-${local.id}"
     role_name_prefix = false
-    set = [{
-      name  = "serviceMonitor.enabled"
-      value = var.enable_prometheus_stack
-    }]
   }, var.external_secrets)
 
   enable_fargate_fluentbit = var.enable_fargate_fluentbit

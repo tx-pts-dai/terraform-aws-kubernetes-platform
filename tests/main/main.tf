@@ -144,10 +144,6 @@ module "k8s_platform" {
         value = 1
       },
       {
-        name  = "enableServiceMonitor"
-        value = true
-      },
-      {
         name  = "clusterSecretsPermissions.allowAllSecrets"
         value = true # enables Okta integration by reading client id and secret from K8s secrets
       }

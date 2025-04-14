@@ -13,7 +13,7 @@ moved {
 
 moved {
   from = module.karpenter_release.helm_release.this[0]
-  to   = helm_release.karpenter
+  to   = helm_release.karpenter_release
 }
 
 # Remove the additional helm releases (ec2 node class and node pool) and the helm chart will take over
@@ -32,5 +32,5 @@ moved {
 
 moved {
   from = module.reloader.helm_release.this[0]
-  to   = helm_release.reloader
+  to   = helm_release.reloader[0]
 }

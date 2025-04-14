@@ -1,5 +1,5 @@
 locals {
-  primary_acm_domain = coalesce(var.acm_certificate.domain_name, var.base_domain)
+  primary_acm_domain = (var.acm_certificate.domain_name != null) || (var.base_domain != null) ? coalesce(var.acm_certificate.domain_name, var.base_domain) : ""
   acm_san = concat(
     (var.acm_certificate.wildcard_certificates ? concat(
       ["*.${local.primary_acm_domain}"],
