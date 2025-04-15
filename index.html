@@ -1501,7 +1501,7 @@ Each new kubernetes version needs it's own release. This is due to the fact that
 <tbody>
 <tr>
 <td><a name="requirement_terraform"></a> <a href="..#requirement_terraform">terraform</a></td>
-<td>&gt;= 1.6.0</td>
+<td>&gt;= 1.7.0</td>
 </tr>
 <tr>
 <td><a name="requirement_aws"></a> <a href="..#requirement_aws">aws</a></td>
@@ -1541,10 +1541,6 @@ Each new kubernetes version needs it's own release. This is due to the fact that
 <tr>
 <td><a name="provider_helm"></a> <a href="..#provider_helm">helm</a></td>
 <td>&gt;= 2.12</td>
-</tr>
-<tr>
-<td><a name="provider_kubectl"></a> <a href="..#provider_kubectl">kubectl</a></td>
-<td>&gt;= 2.0.2</td>
 </tr>
 <tr>
 <td><a name="provider_kubernetes"></a> <a href="..#provider_kubernetes">kubernetes</a></td>
@@ -1587,11 +1583,6 @@ Each new kubernetes version needs it's own release. This is due to the fact that
 <td>n/a</td>
 </tr>
 <tr>
-<td><a name="module_cluster_secret_store"></a> <a href="..#module_cluster_secret_store">cluster_secret_store</a></td>
-<td>./modules/addon</td>
-<td>n/a</td>
-</tr>
-<tr>
 <td><a name="module_downscaler"></a> <a href="..#module_downscaler">downscaler</a></td>
 <td>tx-pts-dai/downscaler/kubernetes</td>
 <td>0.3.1</td>
@@ -1620,16 +1611,6 @@ Each new kubernetes version needs it's own release. This is due to the fact that
 <td><a name="module_karpenter"></a> <a href="..#module_karpenter">karpenter</a></td>
 <td>terraform-aws-modules/eks/aws//modules/karpenter</td>
 <td>20.35.0</td>
-</tr>
-<tr>
-<td><a name="module_karpenter_crds"></a> <a href="..#module_karpenter_crds">karpenter_crds</a></td>
-<td>./modules/addon</td>
-<td>n/a</td>
-</tr>
-<tr>
-<td><a name="module_karpenter_release"></a> <a href="..#module_karpenter_release">karpenter_release</a></td>
-<td>./modules/addon</td>
-<td>n/a</td>
 </tr>
 <tr>
 <td><a name="module_karpenter_security_group"></a> <a href="..#module_karpenter_security_group">karpenter_security_group</a></td>
@@ -1663,11 +1644,6 @@ Each new kubernetes version needs it's own release. This is due to the fact that
 </tr>
 <tr>
 <td><a name="module_prometheus_stack"></a> <a href="..#module_prometheus_stack">prometheus_stack</a></td>
-<td>./modules/addon</td>
-<td>n/a</td>
-</tr>
-<tr>
-<td><a name="module_reloader"></a> <a href="..#module_reloader">reloader</a></td>
 <td>./modules/addon</td>
 <td>n/a</td>
 </tr>
@@ -1718,7 +1694,23 @@ Each new kubernetes version needs it's own release. This is due to the fact that
 <td>resource</td>
 </tr>
 <tr>
-<td><a href="https://registry.terraform.io/providers/alekc/kubectl/latest/docs/resources/manifest">kubectl_manifest.karpenter_resources</a></td>
+<td><a href="https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release">helm_release.cluster_secret_store</a></td>
+<td>resource</td>
+</tr>
+<tr>
+<td><a href="https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release">helm_release.karpenter_crd</a></td>
+<td>resource</td>
+</tr>
+<tr>
+<td><a href="https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release">helm_release.karpenter_release</a></td>
+<td>resource</td>
+</tr>
+<tr>
+<td><a href="https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release">helm_release.karpenter_resources</a></td>
+<td>resource</td>
+</tr>
+<tr>
+<td><a href="https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release">helm_release.reloader</a></td>
 <td>resource</td>
 </tr>
 <tr>
@@ -1761,10 +1753,6 @@ Each new kubernetes version needs it's own release. This is due to the fact that
 <td><a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/route_tables">aws_route_tables.private_route_tables</a></td>
 <td>data source</td>
 </tr>
-<tr>
-<td><a href="https://registry.terraform.io/providers/hashicorp/helm/latest/docs/data-sources/template">helm_template.karpenter_resources</a></td>
-<td>data source</td>
-</tr>
 </tbody>
 </table>
 <h2 id="inputs">Inputs<a class="headerlink" href="#inputs" title="Permanent link">&para;</a></h2>
@@ -1804,7 +1792,7 @@ Each new kubernetes version needs it's own release. This is due to the fact that
 <td><a name="input_base_domain"></a> <a href="..#input_base_domain">base_domain</a></td>
 <td>Base domain for the platform, used for ingress and ACM certificates</td>
 <td><code>string</code></td>
-<td><code>"test"</code></td>
+<td><code>null</code></td>
 <td style="text-align: center;">no</td>
 </tr>
 <tr>
@@ -1909,14 +1897,14 @@ Each new kubernetes version needs it's own release. This is due to the fact that
 <td><a name="input_enable_fluent_operator"></a> <a href="..#input_enable_fluent_operator">enable_fluent_operator</a></td>
 <td>Enable fluent operator</td>
 <td><code>bool</code></td>
-<td><code>true</code></td>
+<td><code>false</code></td>
 <td style="text-align: center;">no</td>
 </tr>
 <tr>
 <td><a name="input_enable_grafana"></a> <a href="..#input_enable_grafana">enable_grafana</a></td>
 <td>Enable Grafana</td>
 <td><code>bool</code></td>
-<td><code>true</code></td>
+<td><code>false</code></td>
 <td style="text-align: center;">no</td>
 </tr>
 <tr>
@@ -1951,7 +1939,7 @@ Each new kubernetes version needs it's own release. This is due to the fact that
 <td><a name="input_enable_prometheus_stack"></a> <a href="..#input_enable_prometheus_stack">enable_prometheus_stack</a></td>
 <td>Enable Prometheus stack</td>
 <td><code>bool</code></td>
-<td><code>true</code></td>
+<td><code>false</code></td>
 <td style="text-align: center;">no</td>
 </tr>
 <tr>
