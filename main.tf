@@ -211,7 +211,7 @@ resource "aws_security_group_rule" "eks_control_plane_ingress" {
 
 module "vpc_cni_irsa" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
-  version = "5.54.1"
+  version = "5.55.0"
 
   role_name = "vpc-cni-${local.id}"
 
