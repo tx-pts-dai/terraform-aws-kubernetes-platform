@@ -32,7 +32,7 @@ module "addons" {
   create_kubernetes_resources = var.create_addons
 
   create_delay_dependencies = [
-    module.karpenter_release.status
+    helm_release.karpenter_release.status
   ]
 
   # Arbitrary delay to wait for Karpenter to create nodes before creating managed addons to avoid an isssue
@@ -98,11 +98,12 @@ module "addons" {
     wait = true
 
     set = [{
-      name  = "enableServiceMonitor"
-      value = var.enable_prometheus_stack
-      }, {
       name  = "clusterSecretsPermissions.allowAllSecrets"
       value = true # enables Okta integration by reading client id and secret from K8s secrets
+      },
+      {
+        name  = "serviceMutatorWebhookConfig.failurePolicy"
+        value = "Ignore" # If this is not set to Ignore, bootstrapping a new cluster will fail
     }]
   }, var.aws_load_balancer_controller)
 
@@ -127,10 +128,6 @@ module "addons" {
     wait             = true
     role_name        = "external-secrets-${local.id}"
     role_name_prefix = false
-    set = [{
-      name  = "serviceMonitor.enabled"
-      value = var.enable_prometheus_stack
-    }]
   }, var.external_secrets)
 
   enable_fargate_fluentbit = var.enable_fargate_fluentbit
@@ -155,7 +152,10 @@ module "addons" {
   enable_ingress_nginx = var.enable_ingress_nginx
   ingress_nginx        = var.ingress_nginx
 
-  depends_on = [module.karpenter_release]
+  depends_on = [
+    helm_release.karpenter_release,
+    helm_release.karpenter_resources
+  ]
 }
 
 ################################################################################
@@ -181,17 +181,15 @@ module "downscaler" {
 ################################################################################
 # External Secrets Custom Resources
 # TODO: move external secrets to dedicated module
-module "cluster_secret_store" {
-  source = "./modules/addon"
+resource "helm_release" "cluster_secret_store" {
+  count = var.enable_external_secrets && var.create_addons ? 1 : 0
 
-  create = var.enable_external_secrets && var.create_addons
-
-  name          = "cluster-secret-store-aws-secretsmanager"
-  chart         = "custom-resources"
-  chart_version = "0.1.2"
-  repository    = "https://dnd-it.github.io/helm-charts"
-  description   = "External Secrets Cluster Secret Store for AWS Secrets Manager"
-  namespace     = "external-secrets"
+  name        = "cluster-secret-store-aws-secretsmanager"
+  chart       = "custom-resources"
+  version     = "0.1.2"
+  repository  = "https://dnd-it.github.io/helm-charts"
+  description = "External Secrets Cluster Secret Store for AWS Secrets Manager"
+  namespace   = "external-secrets"
 
   values = [
     <<-EOT
@@ -214,22 +212,29 @@ module "cluster_secret_store" {
 
 ################################################################################
 # Reloader
-module "reloader" {
-  source = "./modules/addon"
+resource "helm_release" "reloader" {
+  count = var.create_addons && var.enable_reloader ? 1 : 0
 
-  create = var.create_addons && var.enable_reloader
-
-  chart         = "reloader"
-  chart_version = "2.0.0"
-  repository    = "https://stakater.github.io/stakater-charts"
-  description   = "Reloader"
-  namespace     = "reloader"
+  name        = "reloader"
+  chart       = "reloader"
+  version     = "2.0.0"
+  repository  = "https://stakater.github.io/stakater-charts"
+  description = "Reloader"
+  namespace   = "reloader"
 
   create_namespace = true
 
   # https://github.com/stakater/Reloader/blob/master/deployments/kubernetes/chart/reloader/values.yaml
 
-  set = try(var.reloader.set, [])
+  dynamic "set" {
+    for_each = try(var.reloader.set, [])
+
+    content {
+      name  = set.value.name
+      value = set.value.value
+      type  = try(set.value.type, null)
+    }
+  }
 
   depends_on = [
     module.addons
@@ -257,4 +262,8 @@ module "argocd" {
 
   helm_values = try(var.argocd.helm_values, [])
   helm_set    = try(var.argocd.helm_set, [])
+
+  depends_on = [
+    module.addons
+  ]
 }

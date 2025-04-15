@@ -54,7 +54,7 @@ variable "cluster_admins" {
 variable "base_domain" {
   description = "Base domain for the platform, used for ingress and ACM certificates"
   type        = string
-  default     = "test"
+  default     = null
 }
 
 variable "enable_acm_certificate" {
@@ -216,7 +216,7 @@ variable "fargate_fluentbit" {
 variable "enable_fluent_operator" {
   description = "Enable fluent operator"
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "fluent_operator" {
@@ -244,7 +244,7 @@ variable "fluent_cloudwatch_retention_in_days" {
 variable "enable_prometheus_stack" {
   description = "Enable Prometheus stack"
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "prometheus_stack" {
@@ -262,7 +262,7 @@ variable "enable_amp" {
 variable "enable_grafana" {
   description = "Enable Grafana"
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "grafana" {
