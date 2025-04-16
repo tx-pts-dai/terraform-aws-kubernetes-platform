@@ -178,7 +178,7 @@ module "argocd" {
 
   name          = "argocd"
   chart         = "argo-cd"
-  chart_version = "7.8.10"
+  chart_version = "7.8.26"
   repository    = "https://argoproj.github.io/argo-helm"
   description   = "A Helm chart to install the ArgoCD"
   namespace     = var.namespace
