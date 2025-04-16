@@ -189,7 +189,7 @@ as described in the `.pre-commit-config.yaml` file
 | <a name="module_amp"></a> [amp](#module\_amp) | terraform-aws-modules/managed-service-prometheus/aws | 3.0.0 |
 | <a name="module_argocd"></a> [argocd](#module\_argocd) | ./modules/argocd | n/a |
 | <a name="module_downscaler"></a> [downscaler](#module\_downscaler) | tx-pts-dai/downscaler/kubernetes | 0.3.1 |
-| <a name="module_ebs_csi_driver_irsa"></a> [ebs\_csi\_driver\_irsa](#module\_ebs\_csi\_driver\_irsa) | terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks | 5.54.1 |
+| <a name="module_ebs_csi_driver_irsa"></a> [ebs\_csi\_driver\_irsa](#module\_ebs\_csi\_driver\_irsa) | terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks | 5.55.0 |
 | <a name="module_eks"></a> [eks](#module\_eks) | terraform-aws-modules/eks/aws | 20.35.0 |
 | <a name="module_fluent_operator"></a> [fluent\_operator](#module\_fluent\_operator) | ./modules/addon | n/a |
 | <a name="module_grafana"></a> [grafana](#module\_grafana) | ./modules/addon | n/a |
@@ -198,12 +198,12 @@ as described in the `.pre-commit-config.yaml` file
 | <a name="module_network"></a> [network](#module\_network) | ./modules/network | n/a |
 | <a name="module_okta_secrets"></a> [okta\_secrets](#module\_okta\_secrets) | ./modules/addon | n/a |
 | <a name="module_pagerduty_secrets"></a> [pagerduty\_secrets](#module\_pagerduty\_secrets) | ./modules/addon | n/a |
-| <a name="module_prometheus_irsa"></a> [prometheus\_irsa](#module\_prometheus\_irsa) | terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks | 5.54.1 |
+| <a name="module_prometheus_irsa"></a> [prometheus\_irsa](#module\_prometheus\_irsa) | terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks | 5.55.0 |
 | <a name="module_prometheus_operator_crds"></a> [prometheus\_operator\_crds](#module\_prometheus\_operator\_crds) | ./modules/addon | n/a |
 | <a name="module_prometheus_stack"></a> [prometheus\_stack](#module\_prometheus\_stack) | ./modules/addon | n/a |
 | <a name="module_slack_secrets"></a> [slack\_secrets](#module\_slack\_secrets) | ./modules/addon | n/a |
 | <a name="module_ssm"></a> [ssm](#module\_ssm) | ./modules/ssm | n/a |
-| <a name="module_vpc_cni_irsa"></a> [vpc\_cni\_irsa](#module\_vpc\_cni\_irsa) | terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks | 5.54.1 |
+| <a name="module_vpc_cni_irsa"></a> [vpc\_cni\_irsa](#module\_vpc\_cni\_irsa) | terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks | 5.55.0 |
 
 ## Resources
 
