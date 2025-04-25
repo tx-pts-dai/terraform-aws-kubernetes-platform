@@ -1406,8 +1406,15 @@
 </tr>
 <tr>
 <td><a name="input_hub_iam_role_arn"></a> <a href="../../modules/argocd#input_hub_iam_role_arn">hub_iam_role_arn</a></td>
-<td>IAM Role ARN for ArgoCD Hub. This is required for spoke clusters</td>
+<td>(Deprecated, use hub_iam_role_arns) IAM Role ARN for ArgoCD Hub. This is required for spoke clusters</td>
 <td><code>string</code></td>
+<td><code>null</code></td>
+<td style="text-align: center;">no</td>
+</tr>
+<tr>
+<td><a name="input_hub_iam_role_arns"></a> <a href="../../modules/argocd#input_hub_iam_role_arns">hub_iam_role_arns</a></td>
+<td>A list of ArgoCD Hub IAM Role ARNs, enabling hubs to access spoke clusters. This is required for spoke clusters.</td>
+<td><code>list(string)</code></td>
 <td><code>null</code></td>
 <td style="text-align: center;">no</td>
 </tr>
