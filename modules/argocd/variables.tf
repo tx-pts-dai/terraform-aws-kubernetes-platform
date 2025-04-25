@@ -39,8 +39,15 @@ variable "hub_iam_role_name" {
 }
 
 variable "hub_iam_role_arn" {
-  description = "IAM Role ARN for ArgoCD Hub. This is required for spoke clusters"
+  description = "(Deprecated, use hub_iam_role_arns) IAM Role ARN for ArgoCD Hub. This is required for spoke clusters"
   type        = string
+
+  default = null
+}
+
+variable "hub_iam_role_arns" {
+  description = "A list of ArgoCD Hub IAM Role ARNs, enabling hubs to access spoke clusters. This is required for spoke clusters."
+  type        = list(string)
 
   default = null
 }

@@ -87,7 +87,8 @@ module "spoke" {
 | <a name="input_enable_spoke"></a> [enable\_spoke](#input\_enable\_spoke) | Enable ArgoCD Spoke | `bool` | `false` | no |
 | <a name="input_helm_set"></a> [helm\_set](#input\_helm\_set) | Set values to pass to the Helm chart | `list(string)` | `[]` | no |
 | <a name="input_helm_values"></a> [helm\_values](#input\_helm\_values) | Values to pass to the Helm chart | `list(string)` | `[]` | no |
-| <a name="input_hub_iam_role_arn"></a> [hub\_iam\_role\_arn](#input\_hub\_iam\_role\_arn) | IAM Role ARN for ArgoCD Hub. This is required for spoke clusters | `string` | `null` | no |
+| <a name="input_hub_iam_role_arn"></a> [hub\_iam\_role\_arn](#input\_hub\_iam\_role\_arn) | (Deprecated, use hub\_iam\_role\_arns) IAM Role ARN for ArgoCD Hub. This is required for spoke clusters | `string` | `null` | no |
+| <a name="input_hub_iam_role_arns"></a> [hub\_iam\_role\_arns](#input\_hub\_iam\_role\_arns) | A list of ArgoCD Hub IAM Role ARNs, enabling hubs to access spoke clusters. This is required for spoke clusters. | `list(string)` | `null` | no |
 | <a name="input_hub_iam_role_name"></a> [hub\_iam\_role\_name](#input\_hub\_iam\_role\_name) | IAM Role Name for ArgoCD Hub. This is referenced by the Spoke clusters | `string` | `"argocd-controller"` | no |
 | <a name="input_namespace"></a> [namespace](#input\_namespace) | Namespace to deploy ArgoCD | `string` | `"argocd"` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | A map of tags to add to all resources | `map(string)` | `{}` | no |

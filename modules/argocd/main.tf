@@ -123,7 +123,17 @@ resource "aws_eks_pod_identity_association" "argocd_server" {
 
 ##################### ArgoCD Spoke ###########################################
 locals {
-  hub_iam_role_arn = var.create && var.enable_spoke ? (var.hub_iam_role_arn != null ? var.hub_iam_role_arn : (var.enable_hub ? aws_iam_role.argocd_controller[0].arn : null)) : null
+  # Remove this when the variable hub_iam_role_arn is deprecated
+  hub_iam_role_arn_list = distinct(flatten([
+    var.hub_iam_role_arns != null ? var.hub_iam_role_arns : [],
+    var.hub_iam_role_arn != null ? [var.hub_iam_role_arn] : []
+  ]))
+
+  hub_iam_role_arns = var.create && var.enable_spoke ? (
+    length(local.hub_iam_role_arn_list) > 0 ? local.hub_iam_role_arn_list : (
+      var.enable_hub ? [aws_iam_role.argocd_controller[0].arn] : []
+    )
+  ) : []
 }
 
 data "aws_iam_policy_document" "argocd_spoke" {
@@ -133,7 +143,7 @@ data "aws_iam_policy_document" "argocd_spoke" {
     actions = ["sts:AssumeRole", "sts:TagSession"]
     principals {
       type        = "AWS"
-      identifiers = [local.hub_iam_role_arn]
+      identifiers = local.hub_iam_role_arns
     }
   }
 }
