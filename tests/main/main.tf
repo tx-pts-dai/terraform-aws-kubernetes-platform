@@ -194,13 +194,15 @@ module "k8s_platform" {
 
   enable_amp = false
 
-  enable_argocd = false
+  enable_argocd = true
 
   argocd = {
-    enable_hub   = true
+    enable_hub   = false
     enable_spoke = true
 
-    hub_iam_role_name     = "argocd-controller-tests-main"
+    # hub_iam_role_name = "argocd-controller-tests-main"
+    hub_iam_role_arns = ["arn:aws:iam::911453050078:role/argocd-controller"]
+
     cluster_secret_suffix = "example"
     cluster_secret_labels = {
       team        = "example"
