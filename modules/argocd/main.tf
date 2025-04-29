@@ -121,6 +121,36 @@ resource "aws_eks_pod_identity_association" "argocd_server" {
   tags = var.tags
 }
 
+resource "helm_release" "argocd" {
+  count = var.create && var.enable_hub ? 1 : 0
+
+  name             = "argocd"
+  description      = "A Helm chart to install the ArgoCD"
+  chart            = "argo-cd"
+  version          = "7.8.26"
+  repository       = "https://argoproj.github.io/argo-helm"
+  namespace        = var.namespace
+  wait             = true
+  create_namespace = true
+
+  # https://github.com/argoproj/argo-helm/blob/main/charts/argo-cd/values.yaml
+  values = var.helm_values
+
+  dynamic "set" {
+    for_each = try(var.helm_set, [])
+
+    content {
+      name  = set.value.name
+      value = set.value.value
+      type  = try(set.value.type, null)
+    }
+  }
+
+  depends_on = [
+    aws_iam_role.argocd_controller
+  ]
+}
+
 ##################### ArgoCD Spoke ###########################################
 locals {
   # Remove this when the variable hub_iam_role_arn is deprecated
@@ -180,25 +210,3 @@ resource "aws_eks_access_policy_association" "argocd_spoke" {
   }
 }
 ##################### ArgoCD Helm Chart ######################################
-
-module "argocd" {
-  source = "../addon"
-
-  create = var.create && (var.enable_hub || var.enable_spoke)
-
-  name          = "argocd"
-  chart         = "argo-cd"
-  chart_version = "7.8.26"
-  repository    = "https://argoproj.github.io/argo-helm"
-  description   = "A Helm chart to install the ArgoCD"
-  namespace     = var.namespace
-  wait          = true
-
-  create_namespace = true
-
-  # https://github.com/argoproj/argo-helm/blob/main/charts/argo-cd/values.yaml
-  values = var.helm_values
-  set    = var.helm_set
-
-  tags = var.tags
-}
