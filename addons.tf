@@ -256,6 +256,7 @@ module "argocd" {
 
   hub_iam_role_name = try(var.argocd.hub_iam_role_name, "argocd-controller")
   hub_iam_role_arn  = try(var.argocd.hub_iam_role_arn, null)
+  hub_iam_role_arns = try(var.argocd.hub_iam_role_arns, null)
 
   cluster_secret_suffix = try(var.argocd.cluster_secret_suffix, "")
   cluster_secret_labels = try(var.argocd.cluster_secret_labels, {})
