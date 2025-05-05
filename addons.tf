@@ -88,7 +88,7 @@ module "addons" {
 
   # TODO: aws lb controller should be one of the last things deleted, so ing objects can be cleaned up
   enable_aws_load_balancer_controller = var.enable_aws_load_balancer_controller && var.create_addons
-  aws_load_balancer_controller = merge({
+  aws_load_balancer_controller = {
     role_name        = "aws-load-balancer-controller-${local.id}"
     role_name_prefix = false
 
@@ -97,53 +97,64 @@ module "addons" {
 
     wait = true
 
-    set = [{
-      name  = "clusterSecretsPermissions.allowAllSecrets"
-      value = true # enables Okta integration by reading client id and secret from K8s secrets
-      },
-      {
-        name  = "serviceMutatorWebhookConfig.failurePolicy"
-        value = "Ignore" # If this is not set to Ignore, bootstrapping a new cluster will fail
-    }]
-  }, var.aws_load_balancer_controller)
+    values = concat([
+      <<-EOT
+      clusterSecretsPermissions:
+        allowAllSecrets: true
+      serviceMutatorWebhookConfig:
+        failurePolicy: Ignore
+      EOT
+    ], try(var.aws_load_balancer_controller.values, []))
+
+    set = try(var.aws_load_balancer_controller.set, [])
+  }
 
   enable_external_dns = var.enable_external_dns && var.create_addons
   external_dns_route53_zone_arns = [
     "arn:aws:route53:::hostedzone/*",
   ]
-  external_dns = merge({
+  external_dns = {
     role_name        = "external-dns-${local.id}"
     role_name_prefix = false
-    set = [{
+
+    values = try(var.external_dns.values, [])
+    set = concat([{
       name  = "policy"
       value = "sync" # allows deletion of dns records
       }, {
       name  = "txtOwnerId"
       value = local.stack_name # avoid conflicts on the same hosted zone
-    }]
-  }, var.external_dns)
+    }], try(var.external_dns.set, []))
+  }
 
   enable_external_secrets = var.enable_external_secrets && var.create_addons
-  external_secrets = merge({
+  external_secrets = {
     wait             = true
     role_name        = "external-secrets-${local.id}"
     role_name_prefix = false
-  }, var.external_secrets)
+
+    values = try(var.external_secrets.values, [])
+    set    = try(var.external_secrets.set, [])
+  }
 
   enable_fargate_fluentbit = var.enable_fargate_fluentbit
-  fargate_fluentbit = merge({
+  fargate_fluentbit = {
     fargate_fluentbit_cw_log_group_name = "/aws/eks/${module.eks.cluster_name}/fargate"
     role_name                           = "fargate-fluentbit-${local.id}"
     role_name_prefix                    = false
-  }, var.fargate_fluentbit)
+
+    values = try(var.fargate_fluentbit.values, [])
+    set    = try(var.fargate_fluentbit.set, [])
+  }
 
   enable_metrics_server = var.enable_metrics_server && var.create_addons
-  metrics_server = merge({
-    set = [{
-      name : "replicas",
-      value : 2,
-    }]
-  }, var.metrics_server)
+  metrics_server = {
+    values = try(var.metrics_server.values, [])
+    set = concat([{
+      name  = "replicas",
+      value = 2,
+    }], try(var.metrics_server.set, []))
+  }
 
   # Alternative Ingress
   enable_cert_manager = var.enable_cert_manager

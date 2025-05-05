@@ -143,10 +143,10 @@ module "k8s_platform" {
         name  = "replicaCount"
         value = 1
       },
-      {
-        name  = "clusterSecretsPermissions.allowAllSecrets"
-        value = true # enables Okta integration by reading client id and secret from K8s secrets
-      }
+      # {
+      #   name  = "clusterSecretsPermissions.allowAllSecrets"
+      #   value = true # enables Okta integration by reading client id and secret from K8s secrets
+      # }
     ]
   }
 
@@ -194,7 +194,7 @@ module "k8s_platform" {
 
   enable_amp = false
 
-  enable_argocd = true
+  enable_argocd = false
 
   argocd = {
     enable_hub   = false
