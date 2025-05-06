@@ -127,7 +127,7 @@ resource "helm_release" "argocd" {
   name             = "argocd"
   description      = "A Helm chart to install the ArgoCD"
   chart            = "argo-cd"
-  version          = "7.8.26"
+  version          = "7.9.1"
   repository       = "https://argoproj.github.io/argo-helm"
   namespace        = var.namespace
   wait             = true
