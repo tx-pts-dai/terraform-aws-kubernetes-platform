@@ -1,12 +1,12 @@
 terraform {
-  required_version = ">= 1.7.0"
+  required_version = ">= 1.11"
 
   backend "s3" {
     bucket               = "tf-state-911453050078"
     key                  = "examples/datadog.tfstate"
     workspace_key_prefix = "terraform-aws-kubernetes-platform"
     region               = "eu-central-1"
-    dynamodb_table       = "terraform-lock"
+    use_lockfile         = true
   }
 
   required_providers {
@@ -95,18 +95,23 @@ module "k8s_platform" {
   }
 
   karpenter = {
-    pod_annotations = {
-      "ad.datadoghq.com/controller.checks" = jsonencode(
-        {
-          "karpenter" : {
-            "init_config" : {},
-            "instances" : [{ "openmetrics_endpoint" : "http://%%host%%:8080/metrics" }]
-          }
-        }
-      )
-    }
-    memory_request = "768Mi"
+    values = [
+      <<-YAML
+      podAnnotations:
+        "ad.datadoghq.com/controller.checks": |
+          karpenter:
+            init_config: {}
+            instances:
+              - openmetrics_endpoint: http://%%host%%:8080/metrics
+      controller:
+        resources:
+          requests:
+            cpu: 0.5
+            memory: "768Mi"
+      YAML
+    ]
   }
+
 
   vpc = {
     enabled = true
@@ -130,16 +135,42 @@ module "datadog" {
   environment    = "sandbox"
   product_name   = "dai"
 
-  # Example: how to override specs in the Datadog Custom Resource
-  datadog_agent_helm_values = [
-    { name = "spec.features.apm.enabled", value = false },
-    { name = "spec.features.logCollection.enabled", value = false },
-    { name = "spec.override.clusterAgent.replicas", value = 3 }
-  ]
+  datadog_operator = {
+    chart_version = "2.9.1"
 
-  datadog_agent_version_fargate = "7.57.2" # github-releases/DataDog/datadog-agent
-  datadog = {
-    operator_chart_version = "1.8.1" # github-releases/DataDog/datadog-operator
+    values = [
+      <<-YAML
+      remoteConfiguration:
+        enabled: true
+      YAML
+    ]
+
+
+  }
+
+  # Example: how to override specs in the Datadog Custom Resource
+  datadog_agent = {
+    values = [
+      <<-YAML
+      spec:
+        override:
+          clusterAgent:
+            replicas: 1
+      YAML
+    ]
+
+    set = [
+      {
+        name  = "spec.features.apm.enabled",
+        value = false
+      },
+      {
+        name  = "spec.features.logCollection.enabled",
+        value = false
+      },
+    ]
+
+    agent_version_fargate = "7.57.2"
   }
 
   depends_on = [module.k8s_platform]

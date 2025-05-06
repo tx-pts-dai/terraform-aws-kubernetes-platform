@@ -9,48 +9,21 @@ variable "cluster_name" {
   type        = string
 }
 
-
 variable "environment" {
   description = "Name of the environment"
   type        = string
 }
 
-variable "datadog" {
-  description = "Object of Datadog configurations"
-  type = object({
-    agent_api_key_name            = optional(string) # by default it uses the cluster name
-    agent_app_key_name            = optional(string) # by default it uses the cluster name
-    operator_chart_version        = optional(string)
-    custom_resource_chart_version = optional(string)
-  })
-  default = {}
+variable "datadog_operator" {
+  description = "Datadog Operator configurations"
+  type        = any
+  default     = {}
 }
 
-variable "datadog_agent_helm_values" {
-  description = "List of Datadog Agent custom resource values. https://github.com/DataDog/datadog-operator/blob/main/docs/configuration.v2alpha1.md"
-  type = list(object({
-    name  = string
-    value = string
-  }))
-  default = []
-}
-
-variable "datadog_operator_helm_values" {
-  description = "List of Datadog Operator values"
-  type = list(object({
-    name  = string
-    value = string
-  }))
-  default = [
-    {
-      name  = "resources.requests.cpu"
-      value = "10m"
-    },
-    {
-      name  = "resources.requests.memory"
-      value = "50Mi"
-    },
-  ]
+variable "datadog_agent" {
+  description = "Datadog Agent configurations"
+  type        = any
+  default     = {}
 }
 
 variable "datadog_secret" {
