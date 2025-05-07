@@ -6,7 +6,7 @@ resource "helm_release" "datadog_operator" {
   chart            = "datadog-operator"
   namespace        = var.namespace
   max_history      = 3
-  version          = try(var.datadog_operator.chart_version, "2.9.2") # github-releases/DataDog/datadog-operator
+  version          = var.datadog_operator_helm_version
   atomic           = true
   cleanup_on_fail  = true
   create_namespace = true
@@ -52,10 +52,10 @@ resource "helm_release" "datadog_operator" {
       allowReadAllResources: true
 
     YAML
-  ], try(var.datadog_operator.values, []))
+  ], var.datadog_operator_helm_values)
 
   dynamic "set" {
-    for_each = try(var.datadog_operator.set, [])
+    for_each = var.datadog_operator_helm_set
 
     content {
       name  = set.value.name
@@ -79,6 +79,7 @@ resource "helm_release" "datadog_secrets" {
   chart            = "custom-resources"
   version          = "0.1.2"
   namespace        = var.namespace
+  max_history      = 3
   create_namespace = true
 
   values = [
@@ -109,11 +110,12 @@ resource "helm_release" "datadog_secrets" {
 }
 
 resource "helm_release" "datadog_secrets_fargate" {
-  name       = "datadog-secrets-fargate"
-  repository = "https://dnd-it.github.io/helm-charts"
-  chart      = "custom-resources"
-  version    = "0.1.2"
-  namespace  = "kube-system"
+  name        = "datadog-secrets-fargate"
+  repository  = "https://dnd-it.github.io/helm-charts"
+  chart       = "custom-resources"
+  version     = "0.1.2"
+  namespace   = "kube-system"
+  max_history = 3
 
   values = [
     <<-YAML
@@ -146,11 +148,12 @@ resource "helm_release" "datadog_secrets_fargate" {
 # Datadog Agent - available specs options https://github.com/DataDog/datadog-operator/blob/main/docs/configuration.v2alpha1.md
 
 resource "helm_release" "datadog_agent" {
-  name       = "datadog-agent"
-  repository = "https://dnd-it.github.io/helm-charts"
-  chart      = "custom-resources"
-  version    = "0.1.2"
-  namespace  = var.namespace
+  name        = "datadog-agent"
+  repository  = "https://dnd-it.github.io/helm-charts"
+  chart       = "custom-resources"
+  version     = "0.1.2"
+  namespace   = var.namespace
+  max_history = 3
 
   values = concat([
     <<-YAML
@@ -189,7 +192,7 @@ resource "helm_release" "datadog_agent" {
             registry: public.ecr.aws/datadog
             image:
               name: agent
-              tag: ${var.datadog_agent_version_fargate}
+              tag: 7
             provider: fargate
             profiles:
               - env:
@@ -243,10 +246,10 @@ resource "helm_release" "datadog_agent" {
                 limits:
                   memory: 100Mi
   YAML
-  ], try(var.datadog_agent.values, []))
+  ], var.datadog_agent_helm_values)
 
   dynamic "set" {
-    for_each = try(var.datadog_agent.set, [])
+    for_each = var.datadog_agent_helm_set
 
     content {
       name  = set.value.name

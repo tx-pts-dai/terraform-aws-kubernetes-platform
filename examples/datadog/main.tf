@@ -135,43 +135,37 @@ module "datadog" {
   environment    = "sandbox"
   product_name   = "dai"
 
-  datadog_operator = {
-    chart_version = "2.9.1"
-
-    values = [
-      <<-YAML
-      remoteConfiguration:
-        enabled: true
-      YAML
-    ]
+  datadog_operator_helm_values = [
+    <<-YAML
+    remoteConfiguration:
+      enabled: true
+    YAML
+  ]
 
 
-  }
+  datadog_operator_helm_set = [
+    {
+      name  = "replicas"
+      value = 2
+    }
+  ]
 
   # Example: how to override specs in the Datadog Custom Resource
-  datadog_agent = {
-    values = [
-      <<-YAML
-      spec:
-        override:
-          clusterAgent:
-            replicas: 1
-      YAML
-    ]
+  datadog_agent_helm_values = [
+    <<-YAML
+    spec:
+      override:
+        clusterAgent:
+          replicas: 1
+    YAML
+  ]
 
-    set = [
-      {
-        name  = "spec.features.apm.enabled",
-        value = false
-      },
-      {
-        name  = "spec.features.logCollection.enabled",
-        value = false
-      },
-    ]
-
-    agent_version_fargate = "7.57.2"
-  }
+  datadog_agent_helm_set = [
+    {
+      name  = "spec.features.admissionController.agentSidecarInjection.image.tag",
+      value = "7.57.2"
+    }
+  ]
 
   depends_on = [module.k8s_platform]
 }
