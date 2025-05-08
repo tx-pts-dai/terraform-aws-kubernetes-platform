@@ -1,13 +1,13 @@
+variable "cluster_name" {
+  description = "Name of the EKS cluster"
+  type        = string
+}
+
 variable "create" {
   description = "Create the ArgoCD resources"
   type        = bool
 
   default = true
-}
-
-variable "cluster_name" {
-  description = "Name of the EKS cluster"
-  type        = string
 }
 
 variable "tags" {
@@ -59,18 +59,11 @@ variable "namespace" {
   default = "argocd"
 }
 
-variable "cluster_secret_labels" {
-  description = "Labels to add to the ArgoCD Cluster Secret"
-  type        = map(string)
-
-  default = {}
-}
-
-variable "cluster_secret_suffix" {
-  description = "Suffix to add to the ArgoCD Cluster Secret. This will show in the ArgoCD UI"
+variable "helm_version" {
+  description = "Version of the Helm chart to install"
   type        = string
 
-  default = ""
+  default = "7.8.26" # renovate: datasource=helm depName=argo-cd repositoryUrl=https://argoproj.github.io/argo-helm
 }
 
 variable "helm_values" {
@@ -82,7 +75,10 @@ variable "helm_values" {
 
 variable "helm_set" {
   description = "Set values to pass to the Helm chart"
-  type        = list(string)
+  type = list(object({
+    name  = string
+    value = string
+  }))
 
   default = []
 }

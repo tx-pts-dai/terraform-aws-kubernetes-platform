@@ -8,6 +8,7 @@
 
 locals {
   karpenter = {
+    # TODO: Remove this when the network module is deprecated
     subnet_cidrs = try(var.karpenter.subnet_cidrs, module.network.grouped_networks.karpenter)
 
     namespace = "kube-system"
@@ -79,10 +80,10 @@ resource "helm_release" "karpenter_release" {
       annotations:
         eks.amazonaws.com/role-arn: ${module.karpenter.iam_role_arn}
     EOT
-  ], try(var.karpenter.values, []))
+  ], var.karpenter_helm_values)
 
   dynamic "set" {
-    for_each = try(var.karpenter.set, [])
+    for_each = var.karpenter_helm_set
 
     content {
       name  = set.value.name
@@ -123,10 +124,10 @@ resource "helm_release" "karpenter_resources" {
       default:
         enabled: true
     EOT
-  ], try(var.karpenter.karpenter_resources.values, []))
+  ], var.karpenter_resources_helm_values)
 
   dynamic "set" {
-    for_each = try(var.karpenter.karpenter_resources.set, [])
+    for_each = var.karpenter_resources_helm_set
 
     content {
       name  = set.value.name

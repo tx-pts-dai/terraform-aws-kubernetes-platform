@@ -260,20 +260,17 @@ module "argocd" {
   create = var.create_addons && var.enable_argocd
 
   cluster_name = module.eks.cluster_name
-  namespace    = try(var.argocd.namespace, "argocd")
+  namespace    = var.argocd.namespace
 
-  enable_hub   = try(var.argocd.enable_hub, false)
-  enable_spoke = try(var.argocd.enable_spoke, false)
+  enable_hub   = var.argocd.enable_hub
+  enable_spoke = var.argocd.enable_spoke
 
-  hub_iam_role_name = try(var.argocd.hub_iam_role_name, "argocd-controller")
-  hub_iam_role_arn  = try(var.argocd.hub_iam_role_arn, null)
-  hub_iam_role_arns = try(var.argocd.hub_iam_role_arns, null)
+  hub_iam_role_name = var.argocd.hub_iam_role_name
+  hub_iam_role_arn  = var.argocd.hub_iam_role_arn
+  hub_iam_role_arns = var.argocd.hub_iam_role_arns
 
-  cluster_secret_suffix = try(var.argocd.cluster_secret_suffix, "")
-  cluster_secret_labels = try(var.argocd.cluster_secret_labels, {})
-
-  helm_values = try(var.argocd.helm_values, [])
-  helm_set    = try(var.argocd.helm_set, [])
+  helm_values = var.argocd.helm_values
+  helm_set    = var.argocd.helm_set
 
   depends_on = [
     module.addons
