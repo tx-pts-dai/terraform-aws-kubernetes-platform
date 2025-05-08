@@ -108,26 +108,22 @@ module "k8s_platform" {
     ]
   }
 
-  karpenter = {
-    set = [
-      {
-        name  = "replicas"
-        value = 1
-      }
-    ]
-    karpenter_resources = {
-      values = [
-        <<-EOT
-        nodePools:
-          default:
-            requirements:
-              - key: karpenter.k8s.aws/instance-category
-                operator: In
-                values: ["t"]
-        EOT
-      ]
+  karpenter_helm_set = [
+    {
+      name  = "replicas"
+      value = 1
     }
-  }
+  ]
+  karpenter_resources_helm_values = [
+    <<-EOT
+    nodePools:
+      default:
+        requirements:
+          - key: karpenter.k8s.aws/instance-category
+            operator: In
+            values: ["t"]
+    EOT
+  ]
 
   metrics_server = {
     set = [
@@ -194,19 +190,13 @@ module "k8s_platform" {
 
   enable_amp = false
 
-  enable_argocd = false
+  enable_argocd = true
 
   argocd = {
-    enable_hub   = false
-    enable_spoke = true
-
+    # enable_hub        = true
     # hub_iam_role_name = "argocd-controller-tests-main"
-    hub_iam_role_arns = ["arn:aws:iam::911453050078:role/argocd-controller"]
 
-    cluster_secret_suffix = "example"
-    cluster_secret_labels = {
-      team        = "example"
-      environment = "example"
-    }
+    enable_spoke      = true
+    hub_iam_role_arns = ["arn:aws:iam::911453050078:role/argocd-controller"]
   }
 }
