@@ -245,7 +245,7 @@ module "prometheus_stack" {
   create = var.create_addons && var.enable_prometheus_stack
 
   chart         = "kube-prometheus-stack"
-  chart_version = "70.5.0"
+  chart_version = "70.10.0"
   repository    = "https://prometheus-community.github.io/helm-charts"
   description   = "Prometheus Stack"
   namespace     = local.monitoring_namespace
@@ -440,7 +440,7 @@ module "grafana" {
   create = var.create_addons && var.enable_grafana
 
   chart         = "grafana"
-  chart_version = "8.12.0"
+  chart_version = "8.15.0"
   repository    = "https://grafana.github.io/helm-charts"
   description   = "Grafana"
   namespace     = local.monitoring_namespace
