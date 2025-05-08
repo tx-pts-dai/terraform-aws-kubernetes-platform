@@ -1,20 +1,50 @@
-# Datadog
+# Datadog Operator
 
 Deploy the Datadog Operator and the Datadog Agent
 
 ```hcl
 module "datadog" {
-  source  = "tx-pts-dai/kubernetes-platform/aws//modules/datadog"
-  version = ...
+  source = "../../modules/datadog"
 
-  cluster_name   = module.k8s_platform.eks.cluster_name
-  datadog_secret = "secret-name"
-  environment    = "sandbox"
-  product_name   = "my-product"
+  cluster_name   = "my-cluster"
+  datadog_secret = "secretsmanager/secret/namespace"
+  environment    = "example"
+  product_name   = "dai"
 
-  depends_on = [module.k8s_platform]
+  datadog_operator_helm_values = {
+    values = [
+      <<-YAML
+      remoteConfiguration:
+        enabled: true
+      YAML
+    ]
+  }
+
+  datadog_operator_helm_set = [
+    {
+      name  = "replicas"
+      value = 2
+    }
+  ]
+
+  datadog_agent_helm_values = [
+    <<-YAML
+    spec:
+      override:
+        clusterAgent:
+          replicas: 1
+    YAML
+  ]
+
+  datadog_agent_helm_set = [
+    {
+      name  = "spec.features.admissionController.agentSidecarInjection.image.tag",
+      value = "7.57.2"
+    }
+  ]
 }
 ```
+
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 
@@ -38,15 +68,14 @@ module "datadog" {
 
 ## Modules
 
-| Name | Source | Version |
-|------|--------|---------|
-| <a name="module_datadog_operator"></a> [datadog\_operator](#module\_datadog\_operator) | aws-ia/eks-blueprints-addon/aws | >= 1.0 |
+No modules.
 
 ## Resources
 
 | Name | Type |
 |------|------|
 | [helm_release.datadog_agent](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
+| [helm_release.datadog_operator](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
 | [helm_release.datadog_secrets](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
 | [helm_release.datadog_secrets_fargate](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
 | [kubectl_manifest.fargate_cluster_role](https://registry.terraform.io/providers/alekc/kubectl/latest/docs/resources/manifest) | resource |
@@ -59,10 +88,11 @@ module "datadog" {
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | Name of the cluster | `string` | n/a | yes |
-| <a name="input_datadog"></a> [datadog](#input\_datadog) | Object of Datadog configurations | <pre>object({<br/>    agent_api_key_name            = optional(string) # by default it uses the cluster name<br/>    agent_app_key_name            = optional(string) # by default it uses the cluster name<br/>    operator_chart_version        = optional(string)<br/>    custom_resource_chart_version = optional(string)<br/>  })</pre> | `{}` | no |
-| <a name="input_datadog_agent_helm_values"></a> [datadog\_agent\_helm\_values](#input\_datadog\_agent\_helm\_values) | List of Datadog Agent custom resource values. https://github.com/DataDog/datadog-operator/blob/main/docs/configuration.v2alpha1.md | <pre>list(object({<br/>    name  = string<br/>    value = string<br/>  }))</pre> | `[]` | no |
-| <a name="input_datadog_agent_version_fargate"></a> [datadog\_agent\_version\_fargate](#input\_datadog\_agent\_version\_fargate) | Version of the datadog agent injected in Fargate | `string` | `"7.57.2"` | no |
-| <a name="input_datadog_operator_helm_values"></a> [datadog\_operator\_helm\_values](#input\_datadog\_operator\_helm\_values) | List of Datadog Operator values | <pre>list(object({<br/>    name  = string<br/>    value = string<br/>  }))</pre> | <pre>[<br/>  {<br/>    "name": "resources.requests.cpu",<br/>    "value": "10m"<br/>  },<br/>  {<br/>    "name": "resources.requests.memory",<br/>    "value": "50Mi"<br/>  }<br/>]</pre> | no |
+| <a name="input_datadog_agent_helm_set"></a> [datadog\_agent\_helm\_set](#input\_datadog\_agent\_helm\_set) | List of Datadog Agent custom resource set values | <pre>list(object({<br/>    name  = string<br/>    value = string<br/>  }))</pre> | `[]` | no |
+| <a name="input_datadog_agent_helm_values"></a> [datadog\_agent\_helm\_values](#input\_datadog\_agent\_helm\_values) | List of Datadog Agent custom resource values | `list(string)` | `[]` | no |
+| <a name="input_datadog_operator_helm_set"></a> [datadog\_operator\_helm\_set](#input\_datadog\_operator\_helm\_set) | List of Datadog Operator Helm set values | <pre>list(object({<br/>    name  = string<br/>    value = string<br/>  }))</pre> | `[]` | no |
+| <a name="input_datadog_operator_helm_values"></a> [datadog\_operator\_helm\_values](#input\_datadog\_operator\_helm\_values) | List of Datadog Operator Helm values | `list(string)` | `[]` | no |
+| <a name="input_datadog_operator_helm_version"></a> [datadog\_operator\_helm\_version](#input\_datadog\_operator\_helm\_version) | Version of the datadog operator chart | `string` | `"2.9.2"` | no |
 | <a name="input_datadog_secret"></a> [datadog\_secret](#input\_datadog\_secret) | Name of the datadog secret in Secrets Manager | `string` | n/a | yes |
 | <a name="input_environment"></a> [environment](#input\_environment) | Name of the environment | `string` | n/a | yes |
 | <a name="input_namespace"></a> [namespace](#input\_namespace) | Namespace for Datadog resources | `string` | `"monitoring"` | no |

@@ -11,8 +11,6 @@ locals {
     subnet_cidrs = try(var.karpenter.subnet_cidrs, module.network.grouped_networks.karpenter)
 
     namespace = "kube-system"
-    # TODO: move to helm value inputs
-    pod_annotations = try(var.karpenter.pod_annotations, {})
   }
 
   azs = slice(data.aws_availability_zones.available.names, 0, 3)
@@ -65,7 +63,6 @@ resource "helm_release" "karpenter_release" {
     logLevel: info
     dnsPolicy: Default
     replicas: 2
-    podAnnotations: ${jsonencode(local.karpenter.pod_annotations)}
     controller:
       resources:
         requests:
