@@ -119,7 +119,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#datadog" class="md-skip">
+        <a href="#datadog-operator" class="md-skip">
           Skip to content
         </a>
       
@@ -1340,19 +1340,48 @@
 
 
 <!-- BEGIN INCLUDE ../../modules/datadog/README.md -->
-<h1 id="datadog">Datadog<a class="headerlink" href="#datadog" title="Permanent link">&para;</a></h1>
+<h1 id="datadog-operator">Datadog Operator<a class="headerlink" href="#datadog-operator" title="Permanent link">&para;</a></h1>
 <p>Deploy the Datadog Operator and the Datadog Agent</p>
 <div class="language-hcl highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kr">module</span><span class="w"> </span><span class="nv">&quot;datadog&quot;</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">  </span><span class="na">source</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;tx-pts-dai/kubernetes-platform/aws//modules/datadog&quot;</span>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">  </span><span class="na">version</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">...</span>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">  </span><span class="na">cluster_name</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="nv">module.k8s_platform.eks.cluster_name</span>
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">  </span><span class="na">datadog_secret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;secret-name&quot;</span>
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">  </span><span class="na">environment</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;sandbox&quot;</span>
-</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">  </span><span class="na">product_name</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;my-product&quot;</span>
-</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>
-</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">  </span><span class="na">depends_on</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="nv">module.k8s_platform</span><span class="p">]</span>
-</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="p">}</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">  </span><span class="na">source</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;../../modules/datadog&quot;</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">  </span><span class="na">cluster_name</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;my-cluster&quot;</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">  </span><span class="na">datadog_secret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;secretsmanager/secret/namespace&quot;</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">  </span><span class="na">environment</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;example&quot;</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">  </span><span class="na">product_name</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;dai&quot;</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">  </span><span class="nb">datadog_operator_helm_values</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">    </span><span class="na">values</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="w">      </span><span class="o">&lt;&lt;-</span><span class="dl">YAML</span>
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="sh">      remoteConfiguration:</span>
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="sh">        enabled: true</span>
+</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="dl">      YAML</span>
+</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="w">    </span><span class="p">]</span>
+</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>
+</span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="w">  </span><span class="na">datadog_operator_helm_set</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a><span class="w">    </span><span class="p">{</span>
+</span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a><span class="w">      </span><span class="na">name</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;replicas&quot;</span>
+</span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a><span class="w">      </span><span class="na">value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">2</span>
+</span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-0-23"><a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a><span class="w">  </span><span class="p">]</span>
+</span><span id="__span-0-24"><a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a>
+</span><span id="__span-0-25"><a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a><span class="w">  </span><span class="na">datadog_agent_helm_values</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-0-26"><a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a><span class="w">    </span><span class="o">&lt;&lt;-</span><span class="dl">YAML</span>
+</span><span id="__span-0-27"><a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a><span class="sh">    spec:</span>
+</span><span id="__span-0-28"><a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a><span class="sh">      override:</span>
+</span><span id="__span-0-29"><a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a><span class="sh">        clusterAgent:</span>
+</span><span id="__span-0-30"><a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a><span class="sh">          replicas: 1</span>
+</span><span id="__span-0-31"><a id="__codelineno-0-31" name="__codelineno-0-31" href="#__codelineno-0-31"></a><span class="dl">    YAML</span>
+</span><span id="__span-0-32"><a id="__codelineno-0-32" name="__codelineno-0-32" href="#__codelineno-0-32"></a><span class="w">  </span><span class="p">]</span>
+</span><span id="__span-0-33"><a id="__codelineno-0-33" name="__codelineno-0-33" href="#__codelineno-0-33"></a>
+</span><span id="__span-0-34"><a id="__codelineno-0-34" name="__codelineno-0-34" href="#__codelineno-0-34"></a><span class="w">  </span><span class="na">datadog_agent_helm_set</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-0-35"><a id="__codelineno-0-35" name="__codelineno-0-35" href="#__codelineno-0-35"></a><span class="w">    </span><span class="p">{</span>
+</span><span id="__span-0-36"><a id="__codelineno-0-36" name="__codelineno-0-36" href="#__codelineno-0-36"></a><span class="w">      </span><span class="na">name</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;spec.features.admissionController.agentSidecarInjection.image.tag&quot;</span><span class="p">,</span>
+</span><span id="__span-0-37"><a id="__codelineno-0-37" name="__codelineno-0-37" href="#__codelineno-0-37"></a><span class="w">      </span><span class="na">value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;7.57.2&quot;</span>
+</span><span id="__span-0-38"><a id="__codelineno-0-38" name="__codelineno-0-38" href="#__codelineno-0-38"></a><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-0-39"><a id="__codelineno-0-39" name="__codelineno-0-39" href="#__codelineno-0-39"></a><span class="w">  </span><span class="p">]</span>
+</span><span id="__span-0-40"><a id="__codelineno-0-40" name="__codelineno-0-40" href="#__codelineno-0-40"></a><span class="p">}</span>
 </span></code></pre></div>
 <!-- BEGIN_TF_DOCS -->
 <h2 id="requirements">Requirements<a class="headerlink" href="#requirements" title="Permanent link">&para;</a></h2>
@@ -1418,22 +1447,7 @@
 </tbody>
 </table>
 <h2 id="modules">Modules<a class="headerlink" href="#modules" title="Permanent link">&para;</a></h2>
-<table>
-<thead>
-<tr>
-<th>Name</th>
-<th>Source</th>
-<th>Version</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><a name="module_datadog_operator"></a> <a href="../../modules/datadog#module_datadog_operator">datadog_operator</a></td>
-<td>aws-ia/eks-blueprints-addon/aws</td>
-<td>&gt;= 1.0</td>
-</tr>
-</tbody>
-</table>
+<p>No modules.</p>
 <h2 id="resources">Resources<a class="headerlink" href="#resources" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
@@ -1445,6 +1459,10 @@
 <tbody>
 <tr>
 <td><a href="https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release">helm_release.datadog_agent</a></td>
+<td>resource</td>
+</tr>
+<tr>
+<td><a href="https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release">helm_release.datadog_operator</a></td>
 <td>resource</td>
 </tr>
 <tr>
@@ -1493,31 +1511,38 @@
 <td style="text-align: center;">yes</td>
 </tr>
 <tr>
-<td><a name="input_datadog"></a> <a href="../../modules/datadog#input_datadog">datadog</a></td>
-<td>Object of Datadog configurations</td>
-<td><pre>object({<br/>    agent_api_key_name            = optional(string) # by default it uses the cluster name<br/>    agent_app_key_name            = optional(string) # by default it uses the cluster name<br/>    operator_chart_version        = optional(string)<br/>    custom_resource_chart_version = optional(string)<br/>  })</pre></td>
-<td><code>{}</code></td>
-<td style="text-align: center;">no</td>
-</tr>
-<tr>
-<td><a name="input_datadog_agent_helm_values"></a> <a href="../../modules/datadog#input_datadog_agent_helm_values">datadog_agent_helm_values</a></td>
-<td>List of Datadog Agent custom resource values. https://github.com/DataDog/datadog-operator/blob/main/docs/configuration.v2alpha1.md</td>
+<td><a name="input_datadog_agent_helm_set"></a> <a href="../../modules/datadog#input_datadog_agent_helm_set">datadog_agent_helm_set</a></td>
+<td>List of Datadog Agent custom resource set values</td>
 <td><pre>list(object({<br/>    name  = string<br/>    value = string<br/>  }))</pre></td>
 <td><code>[]</code></td>
 <td style="text-align: center;">no</td>
 </tr>
 <tr>
-<td><a name="input_datadog_agent_version_fargate"></a> <a href="../../modules/datadog#input_datadog_agent_version_fargate">datadog_agent_version_fargate</a></td>
-<td>Version of the datadog agent injected in Fargate</td>
-<td><code>string</code></td>
-<td><code>"7.57.2"</code></td>
+<td><a name="input_datadog_agent_helm_values"></a> <a href="../../modules/datadog#input_datadog_agent_helm_values">datadog_agent_helm_values</a></td>
+<td>List of Datadog Agent custom resource values</td>
+<td><code>list(string)</code></td>
+<td><code>[]</code></td>
+<td style="text-align: center;">no</td>
+</tr>
+<tr>
+<td><a name="input_datadog_operator_helm_set"></a> <a href="../../modules/datadog#input_datadog_operator_helm_set">datadog_operator_helm_set</a></td>
+<td>List of Datadog Operator Helm set values</td>
+<td><pre>list(object({<br/>    name  = string<br/>    value = string<br/>  }))</pre></td>
+<td><code>[]</code></td>
 <td style="text-align: center;">no</td>
 </tr>
 <tr>
 <td><a name="input_datadog_operator_helm_values"></a> <a href="../../modules/datadog#input_datadog_operator_helm_values">datadog_operator_helm_values</a></td>
-<td>List of Datadog Operator values</td>
-<td><pre>list(object({<br/>    name  = string<br/>    value = string<br/>  }))</pre></td>
-<td><pre>[<br/>  {<br/>    "name": "resources.requests.cpu",<br/>    "value": "10m"<br/>  },<br/>  {<br/>    "name": "resources.requests.memory",<br/>    "value": "50Mi"<br/>  }<br/>]</pre></td>
+<td>List of Datadog Operator Helm values</td>
+<td><code>list(string)</code></td>
+<td><code>[]</code></td>
+<td style="text-align: center;">no</td>
+</tr>
+<tr>
+<td><a name="input_datadog_operator_helm_version"></a> <a href="../../modules/datadog#input_datadog_operator_helm_version">datadog_operator_helm_version</a></td>
+<td>Version of the datadog operator chart</td>
+<td><code>string</code></td>
+<td><code>"2.9.2"</code></td>
 <td style="text-align: center;">no</td>
 </tr>
 <tr>
