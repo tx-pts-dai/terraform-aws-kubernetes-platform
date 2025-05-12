@@ -105,8 +105,6 @@ module "spoke" {
 
   cluster_name = module.k8s_platform.eks.cluster_name
 
-  cluster_secret_suffix = "sandbox"
-
   hub_iam_role_arn = module.hub.hub_iam_role_arn
 
   hub_iam_role_arns = ["arn:aws:iam::123456789012:role/another-role"]

@@ -131,8 +131,40 @@ variable "slack" {
 
 ################################################################################
 # Core Addons - Installed by default
+
+variable "karpenter_helm_values" {
+  description = "List of Karpenter Helm values"
+  type        = list(string)
+  default     = []
+}
+
+variable "karpenter_helm_set" {
+  description = "List of Karpenter Helm set values"
+  type = list(object({
+    name  = string
+    value = string
+  }))
+  default = []
+}
+
+variable "karpenter_resources_helm_values" {
+  description = "List of Karpenter Resources Helm values"
+  type        = list(string)
+  default     = []
+}
+
+variable "karpenter_resources_helm_set" {
+  description = "List of Karpenter Resources Helm set values"
+  type = list(object({
+    name  = string
+    value = string
+  }))
+  default = []
+}
+
+# TODO: Remove when the network module is deprecated
 variable "karpenter" {
-  description = "Karpenter configurations"
+  description = "[Deprecated] Karpenter configurations"
   type        = any
   default     = {}
 }
@@ -318,6 +350,26 @@ variable "enable_argocd" {
 
 variable "argocd" {
   description = "Argo CD configurations"
-  type        = any
-  default     = {}
+  type = object({
+    # Hub specific
+    enable_hub        = optional(bool, false)
+    namespace         = optional(string, "argocd")
+    hub_iam_role_name = optional(string, "argocd-controller")
+
+    helm_values = optional(list(string), [])
+    helm_set = optional(list(object({
+      name  = string
+      value = string
+    })), [])
+
+    # Spoke specific
+    enable_spoke = optional(bool, false)
+
+    hub_iam_role_arn  = optional(string, null)
+    hub_iam_role_arns = optional(list(string), null)
+
+    # Common
+    tags = optional(map(string), {})
+  })
+  default = {}
 }
