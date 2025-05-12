@@ -192,7 +192,7 @@ resource "helm_release" "datadog_agent" {
             registry: public.ecr.aws/datadog
             image:
               name: agent
-              tag: 7
+              tag: "7"
             provider: fargate
             profiles:
               - env:
