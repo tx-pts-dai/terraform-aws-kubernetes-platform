@@ -1349,20 +1349,6 @@
 <td style="text-align: center;">yes</td>
 </tr>
 <tr>
-<td><a name="input_cluster_secret_labels"></a> <a href="../../modules/argocd#input_cluster_secret_labels">cluster_secret_labels</a></td>
-<td>Labels to add to the ArgoCD Cluster Secret</td>
-<td><code>map(string)</code></td>
-<td><code>{}</code></td>
-<td style="text-align: center;">no</td>
-</tr>
-<tr>
-<td><a name="input_cluster_secret_suffix"></a> <a href="../../modules/argocd#input_cluster_secret_suffix">cluster_secret_suffix</a></td>
-<td>Suffix to add to the ArgoCD Cluster Secret. This will show in the ArgoCD UI</td>
-<td><code>string</code></td>
-<td><code>""</code></td>
-<td style="text-align: center;">no</td>
-</tr>
-<tr>
 <td><a name="input_create"></a> <a href="../../modules/argocd#input_create">create</a></td>
 <td>Create the ArgoCD resources</td>
 <td><code>bool</code></td>
@@ -1386,7 +1372,7 @@
 <tr>
 <td><a name="input_helm_set"></a> <a href="../../modules/argocd#input_helm_set">helm_set</a></td>
 <td>Set values to pass to the Helm chart</td>
-<td><code>list(string)</code></td>
+<td><pre>list(object({<br/>    name  = string<br/>    value = string<br/>  }))</pre></td>
 <td><code>[]</code></td>
 <td style="text-align: center;">no</td>
 </tr>
@@ -1395,6 +1381,13 @@
 <td>Values to pass to the Helm chart</td>
 <td><code>list(string)</code></td>
 <td><code>[]</code></td>
+<td style="text-align: center;">no</td>
+</tr>
+<tr>
+<td><a name="input_helm_version"></a> <a href="../../modules/argocd#input_helm_version">helm_version</a></td>
+<td>Version of the Helm chart to install</td>
+<td><code>string</code></td>
+<td><code>"7.8.26"</code></td>
 <td style="text-align: center;">no</td>
 </tr>
 <tr>
@@ -1446,10 +1439,6 @@
 <tr>
 <td><a name="output_cluster_name"></a> <a href="../../modules/argocd#output_cluster_name">cluster_name</a></td>
 <td>Name of the EKS cluster</td>
-</tr>
-<tr>
-<td><a name="output_cluster_secret_yaml"></a> <a href="../../modules/argocd#output_cluster_secret_yaml">cluster_secret_yaml</a></td>
-<td>ArgoCD cluster secret YAML configuration</td>
 </tr>
 <tr>
 <td><a name="output_hub_iam_role_arn"></a> <a href="../../modules/argocd#output_hub_iam_role_arn">hub_iam_role_arn</a></td>

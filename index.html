@@ -1777,7 +1777,7 @@ Each new kubernetes version needs it's own release. This is due to the fact that
 <tr>
 <td><a name="input_argocd"></a> <a href="..#input_argocd">argocd</a></td>
 <td>Argo CD configurations</td>
-<td><code>any</code></td>
+<td><pre>object({<br/>    # Hub specific<br/>    enable_hub        = optional(bool, false)<br/>    namespace         = optional(string, "argocd")<br/>    hub_iam_role_name = optional(string, "argocd-controller")<br/><br/>    helm_values = optional(list(string), [])<br/>    helm_set = optional(list(object({<br/>      name  = string<br/>      value = string<br/>    })), [])<br/><br/>    # Spoke specific<br/>    enable_spoke = optional(bool, false)<br/><br/>    hub_iam_role_arn  = optional(string, null)<br/>    hub_iam_role_arns = optional(list(string), null)<br/><br/>    # Common<br/>    tags = optional(map(string), {})<br/>  })</pre></td>
 <td><code>{}</code></td>
 <td style="text-align: center;">no</td>
 </tr>
@@ -2014,9 +2014,37 @@ Each new kubernetes version needs it's own release. This is due to the fact that
 </tr>
 <tr>
 <td><a name="input_karpenter"></a> <a href="..#input_karpenter">karpenter</a></td>
-<td>Karpenter configurations</td>
+<td>[Deprecated] Karpenter configurations</td>
 <td><code>any</code></td>
 <td><code>{}</code></td>
+<td style="text-align: center;">no</td>
+</tr>
+<tr>
+<td><a name="input_karpenter_helm_set"></a> <a href="..#input_karpenter_helm_set">karpenter_helm_set</a></td>
+<td>List of Karpenter Helm set values</td>
+<td><pre>list(object({<br/>    name  = string<br/>    value = string<br/>  }))</pre></td>
+<td><code>[]</code></td>
+<td style="text-align: center;">no</td>
+</tr>
+<tr>
+<td><a name="input_karpenter_helm_values"></a> <a href="..#input_karpenter_helm_values">karpenter_helm_values</a></td>
+<td>List of Karpenter Helm values</td>
+<td><code>list(string)</code></td>
+<td><code>[]</code></td>
+<td style="text-align: center;">no</td>
+</tr>
+<tr>
+<td><a name="input_karpenter_resources_helm_set"></a> <a href="..#input_karpenter_resources_helm_set">karpenter_resources_helm_set</a></td>
+<td>List of Karpenter Resources Helm set values</td>
+<td><pre>list(object({<br/>    name  = string<br/>    value = string<br/>  }))</pre></td>
+<td><code>[]</code></td>
+<td style="text-align: center;">no</td>
+</tr>
+<tr>
+<td><a name="input_karpenter_resources_helm_values"></a> <a href="..#input_karpenter_resources_helm_values">karpenter_resources_helm_values</a></td>
+<td>List of Karpenter Resources Helm values</td>
+<td><code>list(string)</code></td>
+<td><code>[]</code></td>
 <td style="text-align: center;">no</td>
 </tr>
 <tr>
