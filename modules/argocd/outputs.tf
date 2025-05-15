@@ -12,8 +12,3 @@ output "cluster_name" {
   description = "Name of the EKS cluster"
   value       = var.cluster_name
 }
-
-output "cluster_secret_yaml" {
-  description = "ArgoCD cluster secret YAML configuration"
-  value       = yamlencode(local.cluster_secret)
-}

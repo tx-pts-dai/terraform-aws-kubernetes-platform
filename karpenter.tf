@@ -8,11 +8,10 @@
 
 locals {
   karpenter = {
+    # TODO: Remove this when the network module is deprecated
     subnet_cidrs = try(var.karpenter.subnet_cidrs, module.network.grouped_networks.karpenter)
 
     namespace = "kube-system"
-    # TODO: move to helm value inputs
-    pod_annotations = try(var.karpenter.pod_annotations, {})
   }
 
   azs = slice(data.aws_availability_zones.available.names, 0, 3)
@@ -20,7 +19,7 @@ locals {
 
 module "karpenter" {
   source  = "terraform-aws-modules/eks/aws//modules/karpenter"
-  version = "20.35.0"
+  version = "20.36.0"
 
   cluster_name                    = module.eks.cluster_name
   enable_irsa                     = true
@@ -42,7 +41,7 @@ module "karpenter" {
 resource "helm_release" "karpenter_crd" {
   name             = "karpenter-crd"
   chart            = "karpenter-crd"
-  version          = "1.3.3"
+  version          = "1.4.0"
   repository       = "oci://public.ecr.aws/karpenter"
   description      = "Karpenter CRDs"
   namespace        = local.karpenter.namespace
@@ -53,7 +52,7 @@ resource "helm_release" "karpenter_crd" {
 resource "helm_release" "karpenter_release" {
   name             = "karpenter"
   chart            = "karpenter"
-  version          = "1.3.3"
+  version          = "1.4.0"
   repository       = "oci://public.ecr.aws/karpenter"
   namespace        = local.karpenter.namespace
   create_namespace = true
@@ -65,7 +64,6 @@ resource "helm_release" "karpenter_release" {
     logLevel: info
     dnsPolicy: Default
     replicas: 2
-    podAnnotations: ${jsonencode(local.karpenter.pod_annotations)}
     controller:
       resources:
         requests:
@@ -82,10 +80,10 @@ resource "helm_release" "karpenter_release" {
       annotations:
         eks.amazonaws.com/role-arn: ${module.karpenter.iam_role_arn}
     EOT
-  ], try(var.karpenter.values, []))
+  ], var.karpenter_helm_values)
 
   dynamic "set" {
-    for_each = try(var.karpenter.set, [])
+    for_each = var.karpenter_helm_set
 
     content {
       name  = set.value.name
@@ -106,7 +104,7 @@ resource "helm_release" "karpenter_release" {
 resource "helm_release" "karpenter_resources" {
   name       = "karpenter-resources"
   chart      = "karpenter-resources"
-  version    = "0.3.1"
+  version    = "0.3.2"
   repository = "https://dnd-it.github.io/helm-charts"
   namespace  = local.karpenter.namespace
 
@@ -126,10 +124,10 @@ resource "helm_release" "karpenter_resources" {
       default:
         enabled: true
     EOT
-  ], try(var.karpenter.karpenter_resources.values, []))
+  ], var.karpenter_resources_helm_values)
 
   dynamic "set" {
-    for_each = try(var.karpenter.karpenter_resources.set, [])
+    for_each = var.karpenter_resources_helm_set
 
     content {
       name  = set.value.name

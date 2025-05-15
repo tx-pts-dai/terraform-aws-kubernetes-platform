@@ -1,36 +1,86 @@
 # Datadog Operator
-
-locals {
-  datadog_site = "datadoghq.eu"
-  datadog_operator_helm_values = concat(
-    [{ name = "site", value = local.datadog_site }],
-  var.datadog_operator_helm_values)
-}
-module "datadog_operator" {
-  source  = "aws-ia/eks-blueprints-addon/aws"
-  version = ">= 1.0"
-
+resource "helm_release" "datadog_operator" {
   name             = "datadog-operator"
   repository       = "https://helm.datadoghq.com"
   description      = "Open source Kubernetes Operator that enables you to deploy and configure the Datadog Agent in a Kubernetes environment"
   chart            = "datadog-operator"
   namespace        = var.namespace
-  max_history      = 10
-  chart_version    = try(var.datadog.operator_chart_version, "1.8.1") # github-releases/DataDog/datadog-operator
+  max_history      = 3
+  version          = var.datadog_operator_helm_version
   atomic           = true
+  cleanup_on_fail  = true
   create_namespace = true
 
-  set = local.datadog_operator_helm_values
+  values = concat([
+    <<-YAML
+    clusterName: ${var.cluster_name}
+    site: datadoghq.eu
+
+    apiKeyExistingSecret: datadog-keys
+    appKeyExistingSecret: datadog-keys
+
+    datadogAgent:
+      enabled: true
+    datadogDashboard:
+      enabled: true
+    datadogGenericResource:
+      enabled: true
+    datadogMonitor:
+      enabled: true
+    remoteConfiguration:
+      enabled: true
+
+    datadogCRDs:
+      crds:
+        datadogAgents: true
+        datadogMetrics: true
+        datadogPodAutoscalers: true
+        datadogMonitors: true
+        datadogSLOs: false
+        datadogDashboards: true
+        datadogGenericResources: true
+
+    resources:
+      requests:
+        cpu: 50m
+        memory: 128Mi
+
+    watchNamespaces:
+      - ""
+
+    clusterRole:
+      allowReadAllResources: true
+
+    YAML
+  ], var.datadog_operator_helm_values)
+
+  dynamic "set" {
+    for_each = var.datadog_operator_helm_set
+
+    content {
+      name  = set.value.name
+      value = set.value.value
+      type  = try(set.value.type, null)
+    }
+  }
+
+  depends_on = [
+    helm_release.datadog_secrets,
+  ]
+
 }
 
 ################################################################################
 # Datadog Secret - ExternalSecrets for both monitoring and kube-system NS
 
 resource "helm_release" "datadog_secrets" {
-  name       = "datadog-secrets"
-  repository = "https://dnd-it.github.io/helm-charts"
-  chart      = "custom-resources"
-  version    = try(var.datadog.custom_resource_chart_version, null)
+  name             = "datadog-secrets"
+  repository       = "https://dnd-it.github.io/helm-charts"
+  chart            = "custom-resources"
+  version          = "0.1.2"
+  namespace        = var.namespace
+  max_history      = 3
+  create_namespace = true
 
   values = [
     <<-YAML
@@ -38,7 +88,6 @@ resource "helm_release" "datadog_secrets" {
     kind: ExternalSecret
     metadata:
       name: datadog-keys
-      namespace: ${var.namespace}
     spec:
       refreshInterval: 1m0s
       secretStoreRef:
@@ -56,16 +105,17 @@ resource "helm_release" "datadog_secrets" {
         remoteRef:
           key: ${var.datadog_secret}
           property: DD_APP_KEY
-  YAML
+    YAML
   ]
-  depends_on = [module.datadog_operator]
 }
 
 resource "helm_release" "datadog_secrets_fargate" {
-  name       = "datadog-secrets-fargate"
-  repository = "https://dnd-it.github.io/helm-charts"
-  chart      = "custom-resources"
-  version    = try(var.datadog.custom_resource_chart_version, null)
+  name        = "datadog-secrets-fargate"
+  repository  = "https://dnd-it.github.io/helm-charts"
+  chart       = "custom-resources"
+  version     = "0.1.2"
+  namespace   = "kube-system"
+  max_history = 3
 
   values = [
     <<-YAML
@@ -73,7 +123,6 @@ resource "helm_release" "datadog_secrets_fargate" {
     kind: ExternalSecret
     metadata:
       name: datadog-keys
-      namespace: kube-system
     spec:
       refreshInterval: 1m0s
       secretStoreRef:
@@ -91,31 +140,31 @@ resource "helm_release" "datadog_secrets_fargate" {
         remoteRef:
           key: ${var.datadog_secret}
           property: DD_APP_KEY
-  YAML
+    YAML
   ]
-  depends_on = [module.datadog_operator]
 }
 
 ################################################################################
 # Datadog Agent - available specs options https://github.com/DataDog/datadog-operator/blob/main/docs/configuration.v2alpha1.md
 
 resource "helm_release" "datadog_agent" {
-  name       = "datadog-agent"
-  repository = "https://dnd-it.github.io/helm-charts"
-  chart      = "custom-resources"
-  version    = try(var.datadog.custom_resource_chart_version, null)
+  name        = "datadog-agent"
+  repository  = "https://dnd-it.github.io/helm-charts"
+  chart       = "custom-resources"
+  version     = "0.1.2"
+  namespace   = var.namespace
+  max_history = 3
 
-  values = [
+  values = concat([
     <<-YAML
     apiVersion: datadoghq.com/v2alpha1
     kind: DatadogAgent
     metadata:
       name: datadog-agent
-      namespace: ${var.namespace}
     spec:
       global:
         clusterName: ${var.cluster_name}
-        site: ${local.datadog_site}
+        site: datadoghq.eu
         tags:
           - "cluster:${var.cluster_name}"
           - "env:${var.environment}-${var.product_name}"
@@ -143,7 +192,7 @@ resource "helm_release" "datadog_agent" {
             registry: public.ecr.aws/datadog
             image:
               name: agent
-              tag: ${var.datadog_agent_version_fargate}
+              tag: "7"
             provider: fargate
             profiles:
               - env:
@@ -197,18 +246,24 @@ resource "helm_release" "datadog_agent" {
                 limits:
                   memory: 100Mi
   YAML
-  ]
+  ], var.datadog_agent_helm_values)
 
   dynamic "set" {
-    for_each = var.datadog_agent_helm_values
+    for_each = var.datadog_agent_helm_set
+
     content {
       name  = set.value.name
       value = set.value.value
       type  = try(set.value.type, null)
     }
   }
-  # Dependency on the eternal secrets, otherwise it will fail
-  depends_on = [module.datadog_operator, helm_release.datadog_secrets, helm_release.datadog_secrets_fargate]
+
+  # Dependency on the external secrets, otherwise it will fail
+  depends_on = [
+    helm_release.datadog_operator,
+    helm_release.datadog_secrets,
+    helm_release.datadog_secrets_fargate,
+  ]
 }
 
 # Delays the annotations until the Datadog Agent is ready
@@ -218,6 +273,7 @@ resource "time_sleep" "this" {
     helm_values = sha256(join("", helm_release.datadog_agent.values))
   }
 }
+
 resource "kubernetes_annotations" "this" {
   api_version = "apps/v1"
   kind        = "Deployment"
