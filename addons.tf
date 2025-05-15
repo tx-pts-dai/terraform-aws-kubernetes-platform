@@ -228,7 +228,7 @@ resource "helm_release" "reloader" {
 
   name        = "reloader"
   chart       = "reloader"
-  version     = "2.0.0"
+  version     = "2.1.3"
   repository  = "https://stakater.github.io/stakater-charts"
   description = "Reloader"
   namespace   = "reloader"
