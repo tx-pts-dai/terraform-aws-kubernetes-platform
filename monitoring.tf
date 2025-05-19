@@ -245,7 +245,7 @@ module "prometheus_stack" {
   create = var.create_addons && var.enable_prometheus_stack
 
   chart         = "kube-prometheus-stack"
-  chart_version = "72.4.0"
+  chart_version = "72.5.1"
   repository    = "https://prometheus-community.github.io/helm-charts"
   description   = "Prometheus Stack"
   namespace     = local.monitoring_namespace
