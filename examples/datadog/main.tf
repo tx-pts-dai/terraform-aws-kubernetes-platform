@@ -151,9 +151,14 @@ module "datadog" {
   ]
 
   # Example: how to override specs in the Datadog Custom Resource
+  # How to update the number of clusterAgent replicas and enable datadog agent as external metrics server
   datadog_agent_helm_values = [
     <<-YAML
     spec:
+      features:
+        externalMetricsServer:
+          enabled: true
+          useDatadogMetrics: true
       override:
         clusterAgent:
           replicas: 1

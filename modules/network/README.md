@@ -23,7 +23,7 @@ See the [network example](../../example/network) how to use it and how to retrie
 | Name | Source | Version |
 |------|--------|---------|
 | <a name="module_ssm"></a> [ssm](#module\_ssm) | ./../ssm | n/a |
-| <a name="module_vpc"></a> [vpc](#module\_vpc) | terraform-aws-modules/vpc/aws | 5.19.0 |
+| <a name="module_vpc"></a> [vpc](#module\_vpc) | terraform-aws-modules/vpc/aws | 5.21.0 |
 
 ## Resources
 
