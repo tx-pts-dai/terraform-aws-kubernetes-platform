@@ -20,14 +20,14 @@ permissions:
 jobs:
   example_disable_addons_deploy:
     if: github.event_name == 'pull_request' && github.event.action != 'closed'
-    uses: DND-IT/github-workflows/.github/workflows/tf-feature.yaml@v2
+    uses: DND-IT/github-workflows/.github/workflows/tf-feature.yaml@v3
     with:
       environment: examples
       tf_dir: examples/disable-addons
 
   example_disabled_addons_destroy:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
-    uses: DND-IT/github-workflows/.github/workflows/tf-cleanup.yaml@v2
+    uses: DND-IT/github-workflows/.github/workflows/tf-cleanup.yaml@v3
     with:
       environment: examples
       tf_dir: examples/disable-addons
