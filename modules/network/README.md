@@ -10,13 +10,13 @@ See the [network example](../../example/network) how to use it and how to retrie
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.3.2 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 5.42.0 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 5.42 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 5.42.0 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | ~> 5.42 |
 
 ## Modules
 
