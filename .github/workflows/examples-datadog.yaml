@@ -1,0 +1,33 @@
+name: Module Example - Datadog
+
+on:
+  pull_request:
+    paths:
+      - examples/datadog/*.tf
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - closed
+    branches-ignore:
+      - renovate/*
+
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
+
+jobs:
+  example_datadog_deploy:
+    if: github.event_name == 'pull_request' && github.event.action != 'closed'
+    uses: DND-IT/github-workflows/.github/workflows/tf-feature.yaml@v3
+    with:
+      environment: examples
+      tf_dir: examples/datadog
+
+  example_datadog_destroy:
+    if: github.event_name == 'pull_request' && github.event.action == 'closed'
+    uses: DND-IT/github-workflows/.github/workflows/tf-cleanup.yaml@v3
+    with:
+      environment: examples
+      tf_dir: examples/datadog
