@@ -1,16 +1,6 @@
 name: Module Example - Complete
 
 on:
-  pull_request:
-    paths:
-      - examples/complete/*.tf
-    types:
-      - opened
-      - synchronize
-      - reopened
-      - closed
-    branches-ignore:
-      - renovate/*
 
 permissions:
   id-token: write

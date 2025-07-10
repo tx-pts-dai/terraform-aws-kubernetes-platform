@@ -1,16 +1,6 @@
 name: Module Example - Disable Addons
 
 on:
-  pull_request:
-    paths:
-      - examples/disable-addons/*.tf
-    types:
-      - opened
-      - synchronize
-      - reopened
-      - closed
-    branches-ignore:
-      - renovate/*
 
 permissions:
   id-token: write

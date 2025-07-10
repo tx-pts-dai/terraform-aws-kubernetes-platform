@@ -1,16 +1,6 @@
 name: Module Example - Network
 
 on:
-  pull_request:
-    paths:
-      - examples/network/*.tf
-    types:
-      - opened
-      - synchronize
-      - reopened
-      - closed
-    branches-ignore:
-      - renovate/*
 
 permissions:
   id-token: write

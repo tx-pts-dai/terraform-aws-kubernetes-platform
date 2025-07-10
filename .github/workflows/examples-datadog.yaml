@@ -1,16 +1,6 @@
 name: Module Example - Datadog
 
 on:
-  pull_request:
-    paths:
-      - examples/datadog/*.tf
-    types:
-      - opened
-      - synchronize
-      - reopened
-      - closed
-    branches-ignore:
-      - renovate/*
 
 permissions:
   id-token: write

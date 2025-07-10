@@ -1,16 +1,6 @@
 name: Module Example - Simple
 
 on:
-  pull_request:
-    paths:
-      - examples/simple/*.tf
-    types:
-      - opened
-      - synchronize
-      - reopened
-      - closed
-    branches-ignore:
-      - renovate/*
 
 permissions:
   id-token: write

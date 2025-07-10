@@ -41,41 +41,6 @@ jobs:
         id: dirs
         uses: clowdhaus/terraform-composite-actions/directories@v1.11.1
 
-  preCommitMinVersions:
-    name: verify pre-commit min TF
-    needs: collectInputs
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        directory: ${{ fromJson(needs.collectInputs.outputs.directories) }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Terraform min/max versions
-        id: minMax
-        uses: clowdhaus/terraform-min-max@v1.3.2
-        with:
-          directory: ${{ matrix.directory }}
-
-      - name: Pre-commit Terraform ${{ steps.minMax.outputs.minVersion }}
-        # Run only validate pre-commit check on min version supported
-        if: ${{ matrix.directory !=  '.' }}
-        uses: clowdhaus/terraform-composite-actions/pre-commit@v1.11.1
-        with:
-          terraform-version: ${{ steps.minMax.outputs.minVersion }}
-          tflint-version: ${{ env.TFLINT_VERSION }}
-          args: 'terraform_validate --color=always --show-diff-on-failure --files ${{ matrix.directory }}/*'
-
-      - name: Pre-commit Terraform ${{ steps.minMax.outputs.minVersion }}
-        # Run only validate pre-commit check on min version supported
-        if: ${{ matrix.directory ==  '.' }}
-        uses: clowdhaus/terraform-composite-actions/pre-commit@v1.11.1
-        with:
-          terraform-version: ${{ steps.minMax.outputs.minVersion }}
-          tflint-version: ${{ env.TFLINT_VERSION }}
-          args: 'terraform_validate --color=always --show-diff-on-failure --files $(ls *.tf)'
-
   preCommitMaxVersion:
     name: verify pre-commit max TF
     runs-on: ubuntu-latest

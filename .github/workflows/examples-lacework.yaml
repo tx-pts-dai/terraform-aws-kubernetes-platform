@@ -1,16 +1,6 @@
 name: Module Example - Lacework
 
 on:
-  pull_request:
-    paths:
-      - examples/lacework/*.tf
-    types:
-      - opened
-      - synchronize
-      - reopened
-      - closed
-    branches-ignore:
-      - renovate/*
 
 permissions:
   id-token: write
