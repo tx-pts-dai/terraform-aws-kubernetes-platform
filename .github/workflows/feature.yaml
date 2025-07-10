@@ -1,20 +1,20 @@
 name: Feature Branch Test
 
 on:
-  pull_request:
-    paths:
-      - "*.tf"
-      - "modules/**/*.tf"
-      - "tests/**/*.tf"
-      - "files/helm/**/*.yaml"
-      - "K8S_VERSION"
-    types:
-      - opened
-      - synchronize
-      - reopened
-      - closed
-    branches:
-      - main
+  # pull_request:
+  #   paths:
+  #     - "*.tf"
+  #     - "modules/**/*.tf"
+  #     - "tests/**/*.tf"
+  #     - "files/helm/**/*.yaml"
+  #     - "K8S_VERSION"
+  #   types:
+  #     - opened
+  #     - synchronize
+  #     - reopened
+  #     - closed
+  #   branches:
+  #     - main
 
   workflow_dispatch:
 
