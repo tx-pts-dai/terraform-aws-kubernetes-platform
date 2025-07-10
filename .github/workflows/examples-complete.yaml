@@ -1,0 +1,24 @@
+name: Module Example - Complete
+
+on:
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
+
+jobs:
+  example_complete_deploy:
+    if: github.event_name == 'pull_request' && github.event.action != 'closed'
+    uses: DND-IT/github-workflows/.github/workflows/tf-feature.yaml@v3
+    with:
+      environment: examples
+      tf_dir: examples/complete
+
+  example_complete_destroy:
+    if: github.event_name == 'pull_request' && github.event.action == 'closed'
+    uses: DND-IT/github-workflows/.github/workflows/tf-cleanup.yaml@v3
+    with:
+      environment: examples
+      tf_dir: examples/complete
