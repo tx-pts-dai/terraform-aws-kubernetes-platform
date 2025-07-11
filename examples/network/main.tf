@@ -5,14 +5,15 @@ terraform {
     bucket               = "tf-state-911453050078"
     key                  = "examples/network.tfstate"
     workspace_key_prefix = "terraform-aws-kubernetes-platform"
-    dynamodb_table       = "terraform-lock"
+    use_lockfile         = true
     region               = "eu-central-1"
+    encrypt              = true
   }
 
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 5.0"
+      version = "~> 6.0"
     }
   }
 }
