@@ -27,7 +27,7 @@ module "ebs_csi_driver_irsa" {
 
 module "addons" {
   source  = "aws-ia/eks-blueprints-addons/aws"
-  version = "1.21.0"
+  version = "1.21.1"
 
   create_kubernetes_resources = var.create_addons
 
