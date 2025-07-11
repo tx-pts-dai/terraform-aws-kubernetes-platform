@@ -165,8 +165,8 @@ as described in the `.pre-commit-config.yaml` file
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.7.0 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 5.42 |
-| <a name="requirement_helm"></a> [helm](#requirement\_helm) | ~> 2.12 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 5.42 |
+| <a name="requirement_helm"></a> [helm](#requirement\_helm) | >= 2.12, < 3.0.0 |
 | <a name="requirement_kubectl"></a> [kubectl](#requirement\_kubectl) | >= 2.0.2 |
 | <a name="requirement_kubernetes"></a> [kubernetes](#requirement\_kubernetes) | >= 2.27 |
 | <a name="requirement_time"></a> [time](#requirement\_time) | >= 0.11 |
@@ -175,8 +175,8 @@ as described in the `.pre-commit-config.yaml` file
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | ~> 5.42 |
-| <a name="provider_helm"></a> [helm](#provider\_helm) | ~> 2.12 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 5.42 |
+| <a name="provider_helm"></a> [helm](#provider\_helm) | >= 2.12, < 3.0.0 |
 | <a name="provider_kubernetes"></a> [kubernetes](#provider\_kubernetes) | >= 2.27 |
 | <a name="provider_time"></a> [time](#provider\_time) | >= 0.11 |
 
@@ -185,12 +185,12 @@ as described in the `.pre-commit-config.yaml` file
 | Name | Source | Version |
 |------|--------|---------|
 | <a name="module_acm"></a> [acm](#module\_acm) | terraform-aws-modules/acm/aws | 5.1.1 |
-| <a name="module_addons"></a> [addons](#module\_addons) | aws-ia/eks-blueprints-addons/aws | 1.21.0 |
+| <a name="module_addons"></a> [addons](#module\_addons) | aws-ia/eks-blueprints-addons/aws | 1.21.1 |
 | <a name="module_amp"></a> [amp](#module\_amp) | terraform-aws-modules/managed-service-prometheus/aws | 3.0.0 |
 | <a name="module_argocd"></a> [argocd](#module\_argocd) | ./modules/argocd | n/a |
 | <a name="module_downscaler"></a> [downscaler](#module\_downscaler) | tx-pts-dai/downscaler/kubernetes | 0.3.1 |
 | <a name="module_ebs_csi_driver_irsa"></a> [ebs\_csi\_driver\_irsa](#module\_ebs\_csi\_driver\_irsa) | terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks | 5.55.0 |
-| <a name="module_eks"></a> [eks](#module\_eks) | terraform-aws-modules/eks/aws | 20.36.0 |
+| <a name="module_eks"></a> [eks](#module\_eks) | terraform-aws-modules/eks/aws | 20.37.1 |
 | <a name="module_fluent_operator"></a> [fluent\_operator](#module\_fluent\_operator) | ./modules/addon | n/a |
 | <a name="module_grafana"></a> [grafana](#module\_grafana) | ./modules/addon | n/a |
 | <a name="module_karpenter"></a> [karpenter](#module\_karpenter) | terraform-aws-modules/eks/aws//modules/karpenter | 20.36.0 |

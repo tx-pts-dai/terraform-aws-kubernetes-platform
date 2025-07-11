@@ -5,8 +5,9 @@ terraform {
     bucket               = "tf-state-911453050078"
     key                  = "examples/complete.tfstate"
     workspace_key_prefix = "terraform-aws-kubernetes-platform"
-    dynamodb_table       = "terraform-lock"
+    use_lockfile         = true
     region               = "eu-central-1"
+    encrypt              = true
   }
 
   required_providers {
@@ -146,7 +147,7 @@ module "cloudflare" {
 
 module "route53_zones" {
   source  = "terraform-aws-modules/route53/aws//modules/zones"
-  version = "2.11.1"
+  version = "5.0.0"
 
   for_each = local.zones
 

@@ -5,8 +5,9 @@ terraform {
     bucket               = "tf-state-911453050078"
     key                  = "examples/datadog.tfstate"
     workspace_key_prefix = "terraform-aws-kubernetes-platform"
-    region               = "eu-central-1"
     use_lockfile         = true
+    region               = "eu-central-1"
+    encrypt              = true
   }
 
   required_providers {

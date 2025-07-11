@@ -51,8 +51,8 @@ module "datadog" {
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.3.2 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 5.0 |
-| <a name="requirement_helm"></a> [helm](#requirement\_helm) | ~> 2.6 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 5.0 |
+| <a name="requirement_helm"></a> [helm](#requirement\_helm) | >= 2.6, < 3.0.0 |
 | <a name="requirement_kubectl"></a> [kubectl](#requirement\_kubectl) | >= 2.0.2 |
 | <a name="requirement_kubernetes"></a> [kubernetes](#requirement\_kubernetes) | >= 2.27 |
 | <a name="requirement_time"></a> [time](#requirement\_time) | >= 0.11.0 |
@@ -61,7 +61,7 @@ module "datadog" {
 
 | Name | Version |
 |------|---------|
-| <a name="provider_helm"></a> [helm](#provider\_helm) | ~> 2.6 |
+| <a name="provider_helm"></a> [helm](#provider\_helm) | >= 2.6, < 3.0.0 |
 | <a name="provider_kubectl"></a> [kubectl](#provider\_kubectl) | >= 2.0.2 |
 | <a name="provider_kubernetes"></a> [kubernetes](#provider\_kubernetes) | >= 2.27 |
 | <a name="provider_time"></a> [time](#provider\_time) | >= 0.11.0 |
