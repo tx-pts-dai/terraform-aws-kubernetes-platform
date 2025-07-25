@@ -64,7 +64,7 @@ module "fluent_operator" {
   create = var.create_addons && var.enable_fluent_operator
 
   chart         = "fluent-operator"
-  chart_version = "3.3.0"
+  chart_version = "3.4.2"
   repository    = "https://fluent.github.io/helm-charts"
   description   = "Fluent Operator"
   namespace     = local.monitoring_namespace
@@ -227,7 +227,7 @@ module "prometheus_operator_crds" {
   create = var.create_addons && var.enable_prometheus_stack
 
   chart         = "prometheus-operator-crds"
-  chart_version = "20.0.0"
+  chart_version = "20.0.3"
   repository    = "https://prometheus-community.github.io/helm-charts"
   description   = "Prometheus Operator CRDs"
   namespace     = local.monitoring_namespace
@@ -245,7 +245,7 @@ module "prometheus_stack" {
   create = var.create_addons && var.enable_prometheus_stack
 
   chart         = "kube-prometheus-stack"
-  chart_version = "72.4.0"
+  chart_version = "72.9.1"
   repository    = "https://prometheus-community.github.io/helm-charts"
   description   = "Prometheus Stack"
   namespace     = local.monitoring_namespace
@@ -440,7 +440,7 @@ module "grafana" {
   create = var.create_addons && var.enable_grafana
 
   chart         = "grafana"
-  chart_version = "9.0.0"
+  chart_version = "9.3.0"
   repository    = "https://grafana.github.io/helm-charts"
   description   = "Grafana"
   namespace     = local.monitoring_namespace
