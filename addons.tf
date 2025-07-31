@@ -93,7 +93,7 @@ module "addons" {
     role_name_prefix = false
 
     # renovate: datasource=helm depName=aws-load-balancer-controller registryUrl=https://aws.github.io/eks-charts
-    chart_version = "1.12.0"
+    chart_version = "1.13.3"
 
     wait = true
 
@@ -129,6 +129,10 @@ module "addons" {
 
   enable_external_secrets = var.enable_external_secrets && var.create_addons
   external_secrets = {
+
+    # renovate: datasource=helm depName=external-secrets registryUrl=https://charts.external-secrets.io
+    chart_version = "0.16.2"
+
     wait             = true
     role_name        = "external-secrets-${local.id}"
     role_name_prefix = false
