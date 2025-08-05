@@ -73,14 +73,32 @@ locals {
   region = "eu-central-1"
 }
 
+module "network" {
+  source = "../../modules/network"
+
+  stack_name = "ex-complete"
+
+  cidr     = "10.251.0.0/16"
+  az_count = 3
+
+  subnet_configs = [
+    { public = 24 },
+    { private = 24 },
+    { intra = 24 },
+    { kubernetes = 22 }
+  ]
+
+  tags = {
+    Environment = "sandbox"
+    GithubRepo  = "terraform-aws-kubernetes-platform"
+    GithubOrg   = "tx-pts-dai"
+  }
+}
+
 module "k8s_platform" {
   source = "../../"
 
   name = "ex-simple"
-
-  vpc = {
-    enabled = true
-  }
 
   cluster_admins = {
     cicd = {
@@ -88,9 +106,16 @@ module "k8s_platform" {
     }
   }
 
-  enable_prometheus_stack = false
-  enable_grafana          = false
-  enable_fluent_operator  = false
+  vpc = {
+    vpc_id          = module.network.vpc.vpc_id
+    vpc_cidr        = module.network.vpc.vpc_cidr_block
+    private_subnets = module.network.vpc.private_subnets
+    intra_subnets   = module.network.vpc.intra_subnets
+  }
+
+  karpenter = {
+    subnet_cidrs = module.network.grouped_networks.kubernetes
+  }
 
   tags = {
     Environment = "sandbox"

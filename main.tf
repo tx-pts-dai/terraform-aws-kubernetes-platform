@@ -13,7 +13,9 @@ data "aws_availability_zones" "available" {}
 
 # ID based on epoch timestamp for creating unique resources. Note: This is only
 # generated on apply and is static for the life of the stack.
-resource "time_static" "timestamp_id" {}
+resource "time_static" "timestamp_id" {
+  count = var.enable_timestamp_id ? 1 : 0
+}
 
 ################################################################################
 # Common locals
@@ -24,44 +26,17 @@ resource "time_static" "timestamp_id" {}
 # and this create a tags merge issue,
 
 locals {
-  id = format("%08x", time_static.timestamp_id.unix)
+  id = var.enable_timestamp_id ? format("%08x", time_static.timestamp_id[0].unix) : null
 
   # This is not the best way to handle naming compatibility but its a simple approach to fix renovate PR deployments
   name       = coalesce(replace(var.name, "/", "-"), replace(basename(path.root), "_", "-"))
-  stack_name = "${local.name}-${local.id}"
+  stack_name = local.id != null ? "${local.name}-${local.id}" : local.name
 
   tags = merge(var.tags, {
     StackName = local.stack_name
   })
 
   region = data.aws_region.current.name
-}
-
-################################################################################
-# VPC
-#
-# Notes
-# The module should support passing in a vpc or creating one.
-# If passing in a vpc, the module should support creating subnets.
-
-# VPC  Resources
-locals {
-  vpc = {
-    vpc_id          = try(var.vpc.vpc_id, module.network.vpc.vpc_id)
-    vpc_cidr        = try(var.vpc.vpc_cidr, module.network.cidr)
-    private_subnets = try(var.vpc.private_subnets, module.network.vpc.private_subnets)
-    intra_subnets   = try(var.vpc.intra_subnets, module.network.vpc.intra_subnets)
-  }
-}
-
-module "network" {
-  source = "./modules/network"
-
-  create_vpc = try(var.vpc.enabled, false)
-
-  stack_name = local.stack_name
-
-  tags = local.tags
 }
 
 ################################################################################
@@ -141,9 +116,9 @@ module "eks" {
   iam_role_name            = local.stack_name
   iam_role_use_name_prefix = false
 
-  vpc_id                   = local.vpc.vpc_id
-  subnet_ids               = local.vpc.private_subnets
-  control_plane_subnet_ids = local.vpc.intra_subnets
+  vpc_id                   = var.vpc.vpc_id
+  subnet_ids               = var.vpc.private_subnets
+  control_plane_subnet_ids = var.vpc.intra_subnets
 
   create_cluster_security_group = false
   create_node_security_group    = false
@@ -158,7 +133,7 @@ module "eks" {
           labels    = { "app.kubernetes.io/name" = "karpenter" }
         },
       ]
-      iam_role_name            = "karpenter-fargate-${local.id}"
+      iam_role_name            = "karpenter-fargate-${local.stack_name}"
       iam_role_use_name_prefix = false
     }
   }
@@ -177,7 +152,7 @@ locals {
       protocol    = "tcp"
       from_port   = 443
       to_port     = 443
-      cidr_blocks = [local.vpc.vpc_cidr]
+      cidr_blocks = [var.vpc.vpc_cidr]
     }
     vpc_other = {
       description = "Allow all traffic from the VPC to EKS managed workloads 1025-65535"
@@ -185,7 +160,7 @@ locals {
       protocol    = "-1"
       from_port   = 1025
       to_port     = 65535
-      cidr_blocks = [local.vpc.vpc_cidr]
+      cidr_blocks = [var.vpc.vpc_cidr]
     }
   }
 }
@@ -213,7 +188,7 @@ module "vpc_cni_irsa" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
   version = "5.55.0"
 
-  role_name = "vpc-cni-${local.id}"
+  role_name = "vpc-cni-${local.stack_name}"
 
   attach_vpc_cni_policy = true
   vpc_cni_enable_ipv4   = true

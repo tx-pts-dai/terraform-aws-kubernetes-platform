@@ -11,7 +11,7 @@ module "ebs_csi_driver_irsa" {
 
   create_role = var.create_addons
 
-  role_name = "ebs-csi-driver-${local.id}"
+  role_name = "ebs-csi-driver-${local.stack_name}"
 
   attach_ebs_csi_policy = true
 
@@ -89,7 +89,7 @@ module "addons" {
   # TODO: aws lb controller should be one of the last things deleted, so ing objects can be cleaned up
   enable_aws_load_balancer_controller = var.enable_aws_load_balancer_controller && var.create_addons
   aws_load_balancer_controller = {
-    role_name        = "aws-load-balancer-controller-${local.id}"
+    role_name        = "aws-load-balancer-controller-${local.stack_name}"
     role_name_prefix = false
 
     # renovate: datasource=helm depName=aws-load-balancer-controller registryUrl=https://aws.github.io/eks-charts
@@ -114,7 +114,7 @@ module "addons" {
     "arn:aws:route53:::hostedzone/*",
   ]
   external_dns = {
-    role_name        = "external-dns-${local.id}"
+    role_name        = "external-dns-${local.stack_name}"
     role_name_prefix = false
 
     values = try(var.external_dns.values, [])
@@ -134,7 +134,7 @@ module "addons" {
     chart_version = "0.16.2"
 
     wait             = true
-    role_name        = "external-secrets-${local.id}"
+    role_name        = "external-secrets-${local.stack_name}"
     role_name_prefix = false
 
     values = try(var.external_secrets.values, [])
@@ -144,7 +144,7 @@ module "addons" {
   enable_fargate_fluentbit = var.enable_fargate_fluentbit
   fargate_fluentbit = {
     fargate_fluentbit_cw_log_group_name = "/aws/eks/${module.eks.cluster_name}/fargate"
-    role_name                           = "fargate-fluentbit-${local.id}"
+    role_name                           = "fargate-fluentbit-${local.stack_name}"
     role_name_prefix                    = false
 
     values = try(var.fargate_fluentbit.values, [])

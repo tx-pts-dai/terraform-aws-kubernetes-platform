@@ -5,7 +5,7 @@ output "eks" {
 
 output "vpc" {
   description = "vpc module outputs"
-  value       = module.k8s_platform.network
+  value       = module.network
 }
 
 output "argocd" {

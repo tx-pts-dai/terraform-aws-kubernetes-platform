@@ -72,6 +72,28 @@ locals {
   region = "eu-central-1"
 }
 
+module "network" {
+  source = "../../modules/network"
+
+  stack_name = "tests-main"
+
+  cidr     = "10.251.0.0/16"
+  az_count = 3
+
+  subnet_configs = [
+    { public = 24 },
+    { private = 24 },
+    { intra = 24 },
+    { kubernetes = 22 }
+  ]
+
+  tags = {
+    Environment = "sandbox"
+    GithubRepo  = "terraform-aws-kubernetes-platform"
+    GithubOrg   = "tx-pts-dai"
+  }
+}
+
 module "k8s_platform" {
   source = "../../"
 
@@ -85,11 +107,6 @@ module "k8s_platform" {
     }
   }
 
-  metadata = {
-    environment = "sandbox"
-    team        = "dai"
-  }
-
   tags = {
     Environment = "sandbox"
     GithubRepo  = "terraform-aws-kubernetes-platform"
@@ -97,15 +114,14 @@ module "k8s_platform" {
   }
 
   vpc = {
-    enabled = true
-    cidr    = "10.240.0.0/16"
-    max_az  = 3
-    subnet_configs = [
-      { public = 24 },
-      { private = 24 },
-      { intra = 26 },
-      { karpenter = 22 }
-    ]
+    vpc_id          = module.network.vpc.vpc_id
+    vpc_cidr        = module.network.vpc.vpc_cidr_block
+    private_subnets = module.network.vpc.private_subnets
+    intra_subnets   = module.network.vpc.intra_subnets
+  }
+
+  karpenter = {
+    subnet_cidrs = module.network.grouped_networks.kubernetes
   }
 
   karpenter_helm_set = [
@@ -146,49 +162,18 @@ module "k8s_platform" {
     ]
   }
 
-  # Disable monitoring stack to avoid dangling resources
-
-  enable_prometheus_stack = false
-  enable_grafana          = false
-  enable_fluent_operator  = false
-
   enable_downscaler = false
-
-  enable_pagerduty = false
-  pagerduty = {
-    secrets_manager_secret_name = "dai/platform/pagerduty"
-  }
-
-  enable_okta = false
-  okta = {
-    base_url                    = "https://login.tx.group"
-    secrets_manager_secret_name = "dai/platform/okta"
-  }
-
-  enable_slack = false
-  slack = {
-    secrets_manager_secret_name = "dai/platform/slack"
-  }
 
   base_domain = "dai-sandbox.tamedia.tech"
 
   enable_acm_certificate = false
   acm_certificate = {
     subject_alternative_names = [
-      "prometheus",
-      "alertmanager",
-      "grafana",
+      "argocd"
     ]
     prepend_stack_id      = false # Cannot be true for the initial deployment since the stack id is not known yet
     wildcard_certificates = false # Don't create wildcards for test deployments since other stacks might use them and cause cleanup failures
   }
-
-  fluent_log_annotation = {
-    name  = ""
-    value = ""
-  }
-
-  enable_amp = false
 
   enable_argocd = true
 

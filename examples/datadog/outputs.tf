@@ -3,9 +3,9 @@ output "eks" {
   value       = module.k8s_platform.eks
 }
 
-output "vpc" {
-  description = "vpc module outputs"
-  value       = module.k8s_platform.network
+output "network" {
+  description = "network module outputs"
+  value       = module.network
 }
 
 output "zconfigure_kubectl" {

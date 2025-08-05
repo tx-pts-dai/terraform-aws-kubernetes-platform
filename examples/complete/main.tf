@@ -77,6 +77,28 @@ locals {
   region = "eu-central-1"
 }
 
+module "network" {
+  source = "../../modules/network"
+
+  stack_name = "ex-complete"
+
+  cidr     = "10.251.0.0/16"
+  az_count = 3
+
+  subnet_configs = [
+    { public = 24 },
+    { private = 24 },
+    { intra = 24 },
+    { kubernetes = 22 }
+  ]
+
+  tags = {
+    Environment = "sandbox"
+    GithubRepo  = "terraform-aws-kubernetes-platform"
+    GithubOrg   = "tx-pts-dai"
+  }
+}
+
 module "k8s_platform" {
   source = "../../"
 
@@ -95,26 +117,19 @@ module "k8s_platform" {
   }
 
   vpc = {
-    enabled = true
-    cidr    = "10.0.0.0/16"
-    max_az  = 3
-    subnet_configs = [
-      { public = 24 },
-      { private = 24 },
-      { intra = 26 },
-      { database = 26 },
-      { karpenter = 22 }
-    ]
+    vpc_id          = module.network.vpc.vpc_id
+    vpc_cidr        = module.network.vpc.vpc_cidr_block
+    private_subnets = module.network.vpc.private_subnets
+    intra_subnets   = module.network.vpc.intra_subnets
   }
 
   karpenter = {
+    subnet_cidrs     = module.network.grouped_networks.kubernetes
     root_volume_size = "8Gi"
     data_volume_size = "80Gi"
   }
 
   enable_downscaler = true
-
-  enable_amp = true
 
 }
 data "aws_secretsmanager_secret_version" "cloudflare" {
