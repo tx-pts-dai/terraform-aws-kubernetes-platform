@@ -89,8 +89,8 @@ module "addons" {
   # TODO: aws lb controller should be one of the last things deleted, so ing objects can be cleaned up
   enable_aws_load_balancer_controller = var.enable_aws_load_balancer_controller && var.create_addons
   aws_load_balancer_controller = {
-    role_name        = "aws-lb-ctrl-${local.stack_name}"
-    role_name_prefix = false
+    role_name            = "lb-controller-${local.stack_name}"
+    role_name_use_prefix = false
 
     # renovate: datasource=helm depName=aws-load-balancer-controller registryUrl=https://aws.github.io/eks-charts
     chart_version = "1.13.3"
