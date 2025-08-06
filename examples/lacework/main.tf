@@ -141,6 +141,13 @@ module "k8s_platform" {
     intra_subnets   = data.aws_subnets.intra_subnets.ids
   }
 
+  karpenter_resources_helm_set = [
+    {
+      name  = "global.eksDiscovery.clusterName"
+      value = "shared"
+    }
+  ]
+
   tags = {
     Environment = "sandbox"
     GithubRepo  = "terraform-aws-kubernetes-platform"

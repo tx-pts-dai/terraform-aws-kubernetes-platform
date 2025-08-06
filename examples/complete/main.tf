@@ -123,10 +123,15 @@ module "k8s_platform" {
     intra_subnets   = module.network.vpc.intra_subnets
   }
 
+  # karpenter_resources_helm_set = [
+  #   {
+  #     name  = "global.eksDiscovery.clusterName"
+  #     value = "shared"
+  #   }
+  # ]
+
   karpenter = {
-    subnet_cidrs     = module.network.grouped_networks.kubernetes
-    root_volume_size = "8Gi"
-    data_volume_size = "80Gi"
+    subnet_cidrs = module.network.grouped_networks.kubernetes
   }
 
   enable_downscaler = true
