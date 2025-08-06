@@ -73,25 +73,34 @@ locals {
   region = "eu-central-1"
 }
 
-module "network" {
-  source = "../../modules/network"
+data "aws_vpc" "default" {
+  filter {
+    name   = "tag:Name"
+    values = ["central"]
+  }
+}
 
-  stack_name = "ex-complete"
+data "aws_subnets" "private_subnets" {
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.default.id]
+  }
 
-  cidr     = "10.251.0.0/16"
-  az_count = 3
+  filter {
+    name   = "tag:Name"
+    values = ["*private*"]
+  }
+}
 
-  subnet_configs = [
-    { public = 24 },
-    { private = 24 },
-    { intra = 24 },
-    { kubernetes = 22 }
-  ]
+data "aws_subnets" "intra_subnets" {
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.default.id]
+  }
 
-  tags = {
-    Environment = "sandbox"
-    GithubRepo  = "terraform-aws-kubernetes-platform"
-    GithubOrg   = "tx-pts-dai"
+  filter {
+    name   = "tag:Name"
+    values = ["*intra*"]
   }
 }
 
@@ -107,14 +116,10 @@ module "k8s_platform" {
   }
 
   vpc = {
-    vpc_id          = module.network.vpc.vpc_id
-    vpc_cidr        = module.network.vpc.vpc_cidr_block
-    private_subnets = module.network.vpc.private_subnets
-    intra_subnets   = module.network.vpc.intra_subnets
-  }
-
-  karpenter = {
-    subnet_cidrs = module.network.grouped_networks.kubernetes
+    vpc_id          = data.aws_vpc.default.id
+    vpc_cidr        = data.aws_vpc.default.cidr_block
+    private_subnets = data.aws_subnets.private_subnets.ids
+    intra_subnets   = data.aws_subnets.intra_subnets.ids
   }
 
   create_addons = false
