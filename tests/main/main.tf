@@ -148,6 +148,12 @@ module "k8s_platform" {
           - key: karpenter.k8s.aws/instance-category
             operator: In
             values: ["t"]
+          - key: "karpenter.k8s.aws/instance-memory"
+            operator: Gt
+            values: ["2048"]
+          - key: "karpenter.sh/capacity-type"
+            operator: In
+            values: ["spot", "on-demand"]
     EOT
   ]
 

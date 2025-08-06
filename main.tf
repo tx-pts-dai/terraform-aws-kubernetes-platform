@@ -42,6 +42,8 @@ locals {
 ################################################################################
 # EKS Cluster
 data "aws_iam_roles" "sso" {
+  count = var.enable_sso_admin_auto_discovery ? 1 : 0
+
   name_regex  = "AWSReservedSSO_AWSAdministratorAccess_.*"
   path_prefix = local.sso_path_prefix
 }
@@ -54,9 +56,9 @@ data "aws_iam_roles" "iam_cluster_admins" {
 
 locals {
   sso_path_prefix = "/aws-reserved/sso.amazonaws.com/"
-  sso_cluster_admin = length(data.aws_iam_roles.sso.arns) == 1 ? {
+  sso_cluster_admin = var.enable_sso_admin_auto_discovery && length(data.aws_iam_roles.sso) > 0 && length(data.aws_iam_roles.sso[0].arns) == 1 ? {
     sso = {
-      role_arn = tolist(data.aws_iam_roles.sso.arns)[0]
+      role_arn = tolist(data.aws_iam_roles.sso[0].arns)[0]
     }
   } : {}
 

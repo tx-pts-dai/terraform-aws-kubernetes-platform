@@ -73,28 +73,6 @@ locals {
   region = "eu-central-1"
 }
 
-# module "network" {
-#   source = "../../modules/network"
-
-#   stack_name = "ex-simple"
-
-#   cidr     = "10.251.0.0/16"
-#   az_count = 3
-
-#   subnet_configs = [
-#     { public = 24 },
-#     { private = 24 },
-#     { intra = 24 },
-#     { kubernetes = 22 }
-#   ]
-
-#   tags = {
-#     Environment = "sandbox"
-#     GithubRepo  = "terraform-aws-kubernetes-platform"
-#     GithubOrg   = "tx-pts-dai"
-#   }
-# }
-
 data "aws_vpc" "default" {
   filter {
     name   = "tag:Name"
@@ -146,7 +124,7 @@ module "k8s_platform" {
 
   karpenter_resources_helm_set = [
     {
-      name  = "global.eksDiscovery.clusterName"
+      name  = "global.eksDiscovery.tags.subnets.karpenter\\.sh/discovery"
       value = "shared"
     }
   ]

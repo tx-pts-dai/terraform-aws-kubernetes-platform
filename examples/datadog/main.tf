@@ -127,13 +127,6 @@ module "k8s_platform" {
     intra_subnets   = data.aws_subnets.intra_subnets.ids
   }
 
-  karpenter_resources_helm_set = [
-    {
-      name  = "global.eksDiscovery.clusterName"
-      value = "shared"
-    }
-  ]
-
   karpenter_helm_values = [
     <<-YAML
       podAnnotations:
@@ -148,6 +141,13 @@ module "k8s_platform" {
             cpu: 0.5
             memory: "768Mi"
       YAML
+  ]
+
+  karpenter_resources_helm_set = [
+    {
+      name  = "global.eksDiscovery.tags.subnets.karpenter\\.sh/discovery"
+      value = "shared"
+    }
   ]
 
   tags = {

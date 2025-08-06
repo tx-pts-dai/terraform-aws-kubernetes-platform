@@ -124,11 +124,10 @@ module "k8s_platform" {
 
   karpenter_resources_helm_set = [
     {
-      name  = "global.eksDiscovery.clusterName"
+      name  = "global.eksDiscovery.tags.subnets.karpenter\\.sh/discovery"
       value = "shared"
     }
   ]
-
   create_addons = false
 
   tags = {

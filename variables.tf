@@ -49,6 +49,12 @@ variable "cluster_admins" {
   default = {}
 }
 
+variable "enable_sso_admin_auto_discovery" {
+  description = "Enable automatic discovery of SSO admin roles. When disabled, only explicitly defined cluster_admins are used."
+  type        = bool
+  default     = true
+}
+
 ################################################################################
 # Integrations
 

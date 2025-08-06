@@ -89,9 +89,9 @@ resource "helm_release" "karpenter_release" {
   }
 
   depends_on = [
-    helm_release.karpenter_crd,
     module.karpenter,
     module.karpenter_security_group,
+    helm_release.karpenter_crd,
     aws_subnet.karpenter,
     aws_route_table_association.karpenter
   ]
@@ -132,6 +132,7 @@ resource "helm_release" "karpenter_resources" {
   }
 
   depends_on = [
+    helm_release.karpenter_crd,
     helm_release.karpenter_release
   ]
 }
