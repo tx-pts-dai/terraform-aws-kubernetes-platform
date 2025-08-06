@@ -86,6 +86,7 @@ variable "acm_certificate" {
 
 ################################################################################
 # Core Addons - Installed by default
+# For compatibility with older versions of the module, the karpenter variable is optional
 variable "karpenter" {
   description = "Karpenter configurations"
   type = object({
