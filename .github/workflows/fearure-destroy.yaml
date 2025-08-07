@@ -16,6 +16,10 @@ permissions:
   contents: read
   pull-requests: write
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   destroy_feature:
     uses: DND-IT/github-workflows/.github/workflows/tf-cleanup.yaml@v3

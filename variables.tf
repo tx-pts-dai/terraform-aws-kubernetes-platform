@@ -1,12 +1,3 @@
-variable "metadata" {
-  description = "Metadata for the platform"
-  type = object({
-    environment = optional(string, "")
-    team        = optional(string, "")
-  })
-  default = {}
-}
-
 variable "create_addons" {
   description = "Create the platform addons. if set to false, no addons will be created"
   type        = bool
@@ -19,17 +10,27 @@ variable "name" {
   default     = ""
 }
 
+variable "enable_timestamp_id" {
+  description = "Disable the timestamp-based ID generation. When true, uses a static ID instead of timestamp."
+  type        = bool
+  default     = true
+}
+
 variable "tags" {
   description = "Default tags to apply to all resources"
   type        = map(string)
   default     = {}
 }
 
-# TODO: Split out into dedicated variables
 variable "vpc" {
-  description = "Map of VPC configurations"
-  type        = any
-  default     = {}
+  description = "VPC configurations"
+  type = object({
+    vpc_id          = optional(string)
+    vpc_cidr        = optional(string)
+    private_subnets = optional(list(string))
+    intra_subnets   = optional(list(string))
+  })
+  default = {}
 }
 
 # TODO: Split out into dedicated variables
@@ -46,6 +47,12 @@ variable "cluster_admins" {
     kubernetes_groups = optional(list(string))
   }))
   default = {}
+}
+
+variable "enable_sso_admin_auto_discovery" {
+  description = "Enable automatic discovery of SSO admin roles. When disabled, only explicitly defined cluster_admins are used."
+  type        = bool
+  default     = true
 }
 
 ################################################################################
@@ -83,54 +90,16 @@ variable "acm_certificate" {
   default = {}
 }
 
-variable "enable_okta" {
-  description = "Enable Okta integration"
-  type        = bool
-  default     = false
-}
-
-variable "okta" {
-  description = "Okta configurations"
-  type = object({
-    base_url                    = optional(string, "")
-    secrets_manager_secret_name = optional(string, "")
-    kubernetes_secret_name      = optional(string, "okta")
-  })
-  default = {}
-}
-
-variable "enable_pagerduty" {
-  description = "Enable PagerDuty integration"
-  type        = bool
-  default     = false
-}
-
-variable "pagerduty" {
-  description = "PagerDuty configurations"
-  type = object({
-    secrets_manager_secret_name = optional(string, "")
-    kubernetes_secret_name      = optional(string, "pagerduty")
-  })
-  default = {}
-}
-
-variable "enable_slack" {
-  description = "Enable Slack integration"
-  type        = bool
-  default     = false
-}
-
-variable "slack" {
-  description = "Slack configurations"
-  type = object({
-    secrets_manager_secret_name = optional(string, "")
-    kubernetes_secret_name      = optional(string, "slack")
-  })
-  default = {}
-}
-
 ################################################################################
 # Core Addons - Installed by default
+# For compatibility with older versions of the module, the karpenter variable is optional
+variable "karpenter" {
+  description = "Karpenter configurations"
+  type = object({
+    subnet_cidrs = optional(list(string), [])
+  })
+  default = {}
+}
 
 variable "karpenter_helm_values" {
   description = "List of Karpenter Helm values"
@@ -162,9 +131,14 @@ variable "karpenter_resources_helm_set" {
   default = []
 }
 
-# TODO: Remove when the network module is deprecated
-variable "karpenter" {
-  description = "[Deprecated] Karpenter configurations"
+variable "enable_fargate_fluentbit" {
+  description = "Enable Fargate Fluentbit"
+  type        = bool
+  default     = true
+}
+
+variable "fargate_fluentbit" {
+  description = "Fargate Fluentbit configurations"
   type        = any
   default     = {}
 }
@@ -225,80 +199,6 @@ variable "enable_reloader" {
 
 variable "reloader" {
   description = "Reloader configurations"
-  type        = any
-  default     = {}
-}
-
-
-################################################################################
-# Logging and Monitoring
-
-variable "enable_fargate_fluentbit" {
-  description = "Enable Fargate Fluentbit"
-  type        = bool
-  default     = true
-}
-
-variable "fargate_fluentbit" {
-  description = "Fargate Fluentbit configurations"
-  type        = any
-  default     = {}
-}
-
-variable "enable_fluent_operator" {
-  description = "Enable fluent operator"
-  type        = bool
-  default     = false
-}
-
-variable "fluent_operator" {
-  description = "Fluent configurations"
-  type        = any
-  default     = {}
-}
-
-variable "fluent_log_annotation" {
-  description = "Pod Annotation required to enable fluent bit logging. Setting name to empty string will disable annotation requirement."
-  type = object({
-    name  = optional(string, "fluentbit.io/include")
-    value = optional(string, "true")
-  })
-  default = {}
-}
-
-variable "fluent_cloudwatch_retention_in_days" {
-  description = "Number of days to keep logs in cloudwatch"
-  type        = string
-  default     = "7"
-
-}
-
-variable "enable_prometheus_stack" {
-  description = "Enable Prometheus stack"
-  type        = bool
-  default     = false
-}
-
-variable "prometheus_stack" {
-  description = "Prometheus stack configurations"
-  type        = any
-  default     = {}
-}
-
-variable "enable_amp" {
-  description = "Enable AWS Managed Prometheus"
-  type        = bool
-  default     = false
-}
-
-variable "enable_grafana" {
-  description = "Enable Grafana"
-  type        = bool
-  default     = false
-}
-
-variable "grafana" {
-  description = "Grafana configurations, used to override default configurations"
   type        = any
   default     = {}
 }

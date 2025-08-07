@@ -17,6 +17,10 @@ permissions:
   contents: read
   pull-requests: write
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   example_datadog_deploy:
     if: github.event_name == 'pull_request' && github.event.action != 'closed'

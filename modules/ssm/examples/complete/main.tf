@@ -5,7 +5,7 @@ terraform {
     bucket               = "tf-state-911453050078"
     key                  = "ssm/examples/complete.tfstate"
     workspace_key_prefix = "terraform-aws-kubernetes-platform"
-    dynamodb_table       = "terraform-lock"
+    use_lockfile         = true
     region               = "eu-central-1"
   }
 
