@@ -1543,10 +1543,6 @@ Each new kubernetes version needs it's own release. This is due to the fact that
 <td>&gt;= 2.12, &lt; 3.0.0</td>
 </tr>
 <tr>
-<td><a name="provider_kubernetes"></a> <a href="..#provider_kubernetes">kubernetes</a></td>
-<td>&gt;= 2.27</td>
-</tr>
-<tr>
 <td><a name="provider_time"></a> <a href="..#provider_time">time</a></td>
 <td>&gt;= 0.11</td>
 </tr>
@@ -1573,11 +1569,6 @@ Each new kubernetes version needs it's own release. This is due to the fact that
 <td>1.21.1</td>
 </tr>
 <tr>
-<td><a name="module_amp"></a> <a href="..#module_amp">amp</a></td>
-<td>terraform-aws-modules/managed-service-prometheus/aws</td>
-<td>3.0.0</td>
-</tr>
-<tr>
 <td><a name="module_argocd"></a> <a href="..#module_argocd">argocd</a></td>
 <td>./modules/argocd</td>
 <td>n/a</td>
@@ -1598,16 +1589,6 @@ Each new kubernetes version needs it's own release. This is due to the fact that
 <td>20.37.1</td>
 </tr>
 <tr>
-<td><a name="module_fluent_operator"></a> <a href="..#module_fluent_operator">fluent_operator</a></td>
-<td>./modules/addon</td>
-<td>n/a</td>
-</tr>
-<tr>
-<td><a name="module_grafana"></a> <a href="..#module_grafana">grafana</a></td>
-<td>./modules/addon</td>
-<td>n/a</td>
-</tr>
-<tr>
 <td><a name="module_karpenter"></a> <a href="..#module_karpenter">karpenter</a></td>
 <td>terraform-aws-modules/eks/aws//modules/karpenter</td>
 <td>20.36.0</td>
@@ -1615,41 +1596,6 @@ Each new kubernetes version needs it's own release. This is due to the fact that
 <tr>
 <td><a name="module_karpenter_security_group"></a> <a href="..#module_karpenter_security_group">karpenter_security_group</a></td>
 <td>./modules/security-group</td>
-<td>n/a</td>
-</tr>
-<tr>
-<td><a name="module_network"></a> <a href="..#module_network">network</a></td>
-<td>./modules/network</td>
-<td>n/a</td>
-</tr>
-<tr>
-<td><a name="module_okta_secrets"></a> <a href="..#module_okta_secrets">okta_secrets</a></td>
-<td>./modules/addon</td>
-<td>n/a</td>
-</tr>
-<tr>
-<td><a name="module_pagerduty_secrets"></a> <a href="..#module_pagerduty_secrets">pagerduty_secrets</a></td>
-<td>./modules/addon</td>
-<td>n/a</td>
-</tr>
-<tr>
-<td><a name="module_prometheus_irsa"></a> <a href="..#module_prometheus_irsa">prometheus_irsa</a></td>
-<td>terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks</td>
-<td>5.55.0</td>
-</tr>
-<tr>
-<td><a name="module_prometheus_operator_crds"></a> <a href="..#module_prometheus_operator_crds">prometheus_operator_crds</a></td>
-<td>./modules/addon</td>
-<td>n/a</td>
-</tr>
-<tr>
-<td><a name="module_prometheus_stack"></a> <a href="..#module_prometheus_stack">prometheus_stack</a></td>
-<td>./modules/addon</td>
-<td>n/a</td>
-</tr>
-<tr>
-<td><a name="module_slack_secrets"></a> <a href="..#module_slack_secrets">slack_secrets</a></td>
-<td>./modules/addon</td>
 <td>n/a</td>
 </tr>
 <tr>
@@ -1673,14 +1619,6 @@ Each new kubernetes version needs it's own release. This is due to the fact that
 </tr>
 </thead>
 <tbody>
-<tr>
-<td><a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group">aws_cloudwatch_log_group.fluentbit</a></td>
-<td>resource</td>
-</tr>
-<tr>
-<td><a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy">aws_iam_policy.fluentbit</a></td>
-<td>resource</td>
-</tr>
 <tr>
 <td><a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route_table_association">aws_route_table_association.karpenter</a></td>
 <td>resource</td>
@@ -1714,10 +1652,6 @@ Each new kubernetes version needs it's own release. This is due to the fact that
 <td>resource</td>
 </tr>
 <tr>
-<td><a href="https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/annotations">kubernetes_annotations.monitoring</a></td>
-<td>resource</td>
-</tr>
-<tr>
 <td><a href="https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/sleep">time_sleep.wait_on_destroy</a></td>
 <td>resource</td>
 </tr>
@@ -1727,10 +1661,6 @@ Each new kubernetes version needs it's own release. This is due to the fact that
 </tr>
 <tr>
 <td><a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/availability_zones">aws_availability_zones.available</a></td>
-<td>data source</td>
-</tr>
-<tr>
-<td><a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document">aws_iam_policy_document.fluentbit</a></td>
 <td>data source</td>
 </tr>
 <tr>
@@ -1838,13 +1768,6 @@ Each new kubernetes version needs it's own release. This is due to the fact that
 <td style="text-align: center;">no</td>
 </tr>
 <tr>
-<td><a name="input_enable_amp"></a> <a href="..#input_enable_amp">enable_amp</a></td>
-<td>Enable AWS Managed Prometheus</td>
-<td><code>bool</code></td>
-<td><code>false</code></td>
-<td style="text-align: center;">no</td>
-</tr>
-<tr>
 <td><a name="input_enable_argocd"></a> <a href="..#input_enable_argocd">enable_argocd</a></td>
 <td>Enable Argo CD</td>
 <td><code>bool</code></td>
@@ -1894,20 +1817,6 @@ Each new kubernetes version needs it's own release. This is due to the fact that
 <td style="text-align: center;">no</td>
 </tr>
 <tr>
-<td><a name="input_enable_fluent_operator"></a> <a href="..#input_enable_fluent_operator">enable_fluent_operator</a></td>
-<td>Enable fluent operator</td>
-<td><code>bool</code></td>
-<td><code>false</code></td>
-<td style="text-align: center;">no</td>
-</tr>
-<tr>
-<td><a name="input_enable_grafana"></a> <a href="..#input_enable_grafana">enable_grafana</a></td>
-<td>Enable Grafana</td>
-<td><code>bool</code></td>
-<td><code>false</code></td>
-<td style="text-align: center;">no</td>
-</tr>
-<tr>
 <td><a name="input_enable_ingress_nginx"></a> <a href="..#input_enable_ingress_nginx">enable_ingress_nginx</a></td>
 <td>Enable Ingress Nginx</td>
 <td><code>bool</code></td>
@@ -1922,27 +1831,6 @@ Each new kubernetes version needs it's own release. This is due to the fact that
 <td style="text-align: center;">no</td>
 </tr>
 <tr>
-<td><a name="input_enable_okta"></a> <a href="..#input_enable_okta">enable_okta</a></td>
-<td>Enable Okta integration</td>
-<td><code>bool</code></td>
-<td><code>false</code></td>
-<td style="text-align: center;">no</td>
-</tr>
-<tr>
-<td><a name="input_enable_pagerduty"></a> <a href="..#input_enable_pagerduty">enable_pagerduty</a></td>
-<td>Enable PagerDuty integration</td>
-<td><code>bool</code></td>
-<td><code>false</code></td>
-<td style="text-align: center;">no</td>
-</tr>
-<tr>
-<td><a name="input_enable_prometheus_stack"></a> <a href="..#input_enable_prometheus_stack">enable_prometheus_stack</a></td>
-<td>Enable Prometheus stack</td>
-<td><code>bool</code></td>
-<td><code>false</code></td>
-<td style="text-align: center;">no</td>
-</tr>
-<tr>
 <td><a name="input_enable_reloader"></a> <a href="..#input_enable_reloader">enable_reloader</a></td>
 <td>Enable Reloader</td>
 <td><code>bool</code></td>
@@ -1950,10 +1838,17 @@ Each new kubernetes version needs it's own release. This is due to the fact that
 <td style="text-align: center;">no</td>
 </tr>
 <tr>
-<td><a name="input_enable_slack"></a> <a href="..#input_enable_slack">enable_slack</a></td>
-<td>Enable Slack integration</td>
+<td><a name="input_enable_sso_admin_auto_discovery"></a> <a href="..#input_enable_sso_admin_auto_discovery">enable_sso_admin_auto_discovery</a></td>
+<td>Enable automatic discovery of SSO admin roles. When disabled, only explicitly defined cluster_admins are used.</td>
 <td><code>bool</code></td>
-<td><code>false</code></td>
+<td><code>true</code></td>
+<td style="text-align: center;">no</td>
+</tr>
+<tr>
+<td><a name="input_enable_timestamp_id"></a> <a href="..#input_enable_timestamp_id">enable_timestamp_id</a></td>
+<td>Disable the timestamp-based ID generation. When true, uses a static ID instead of timestamp.</td>
+<td><code>bool</code></td>
+<td><code>true</code></td>
 <td style="text-align: center;">no</td>
 </tr>
 <tr>
@@ -1978,34 +1873,6 @@ Each new kubernetes version needs it's own release. This is due to the fact that
 <td style="text-align: center;">no</td>
 </tr>
 <tr>
-<td><a name="input_fluent_cloudwatch_retention_in_days"></a> <a href="..#input_fluent_cloudwatch_retention_in_days">fluent_cloudwatch_retention_in_days</a></td>
-<td>Number of days to keep logs in cloudwatch</td>
-<td><code>string</code></td>
-<td><code>"7"</code></td>
-<td style="text-align: center;">no</td>
-</tr>
-<tr>
-<td><a name="input_fluent_log_annotation"></a> <a href="..#input_fluent_log_annotation">fluent_log_annotation</a></td>
-<td>Pod Annotation required to enable fluent bit logging. Setting name to empty string will disable annotation requirement.</td>
-<td><pre>object({<br/>    name  = optional(string, "fluentbit.io/include")<br/>    value = optional(string, "true")<br/>  })</pre></td>
-<td><code>{}</code></td>
-<td style="text-align: center;">no</td>
-</tr>
-<tr>
-<td><a name="input_fluent_operator"></a> <a href="..#input_fluent_operator">fluent_operator</a></td>
-<td>Fluent configurations</td>
-<td><code>any</code></td>
-<td><code>{}</code></td>
-<td style="text-align: center;">no</td>
-</tr>
-<tr>
-<td><a name="input_grafana"></a> <a href="..#input_grafana">grafana</a></td>
-<td>Grafana configurations, used to override default configurations</td>
-<td><code>any</code></td>
-<td><code>{}</code></td>
-<td style="text-align: center;">no</td>
-</tr>
-<tr>
 <td><a name="input_ingress_nginx"></a> <a href="..#input_ingress_nginx">ingress_nginx</a></td>
 <td>Ingress Nginx configurations</td>
 <td><code>any</code></td>
@@ -2014,8 +1881,8 @@ Each new kubernetes version needs it's own release. This is due to the fact that
 </tr>
 <tr>
 <td><a name="input_karpenter"></a> <a href="..#input_karpenter">karpenter</a></td>
-<td>[Deprecated] Karpenter configurations</td>
-<td><code>any</code></td>
+<td>Karpenter configurations</td>
+<td><pre>object({<br/>    subnet_cidrs = optional(list(string), [])<br/>  })</pre></td>
 <td><code>{}</code></td>
 <td style="text-align: center;">no</td>
 </tr>
@@ -2048,13 +1915,6 @@ Each new kubernetes version needs it's own release. This is due to the fact that
 <td style="text-align: center;">no</td>
 </tr>
 <tr>
-<td><a name="input_metadata"></a> <a href="..#input_metadata">metadata</a></td>
-<td>Metadata for the platform</td>
-<td><pre>object({<br/>    environment = optional(string, "")<br/>    team        = optional(string, "")<br/>  })</pre></td>
-<td><code>{}</code></td>
-<td style="text-align: center;">no</td>
-</tr>
-<tr>
 <td><a name="input_metrics_server"></a> <a href="..#input_metrics_server">metrics_server</a></td>
 <td>Metrics Server configurations</td>
 <td><code>any</code></td>
@@ -2069,37 +1929,9 @@ Each new kubernetes version needs it's own release. This is due to the fact that
 <td style="text-align: center;">no</td>
 </tr>
 <tr>
-<td><a name="input_okta"></a> <a href="..#input_okta">okta</a></td>
-<td>Okta configurations</td>
-<td><pre>object({<br/>    base_url                    = optional(string, "")<br/>    secrets_manager_secret_name = optional(string, "")<br/>    kubernetes_secret_name      = optional(string, "okta")<br/>  })</pre></td>
-<td><code>{}</code></td>
-<td style="text-align: center;">no</td>
-</tr>
-<tr>
-<td><a name="input_pagerduty"></a> <a href="..#input_pagerduty">pagerduty</a></td>
-<td>PagerDuty configurations</td>
-<td><pre>object({<br/>    secrets_manager_secret_name = optional(string, "")<br/>    kubernetes_secret_name      = optional(string, "pagerduty")<br/>  })</pre></td>
-<td><code>{}</code></td>
-<td style="text-align: center;">no</td>
-</tr>
-<tr>
-<td><a name="input_prometheus_stack"></a> <a href="..#input_prometheus_stack">prometheus_stack</a></td>
-<td>Prometheus stack configurations</td>
-<td><code>any</code></td>
-<td><code>{}</code></td>
-<td style="text-align: center;">no</td>
-</tr>
-<tr>
 <td><a name="input_reloader"></a> <a href="..#input_reloader">reloader</a></td>
 <td>Reloader configurations</td>
 <td><code>any</code></td>
-<td><code>{}</code></td>
-<td style="text-align: center;">no</td>
-</tr>
-<tr>
-<td><a name="input_slack"></a> <a href="..#input_slack">slack</a></td>
-<td>Slack configurations</td>
-<td><pre>object({<br/>    secrets_manager_secret_name = optional(string, "")<br/>    kubernetes_secret_name      = optional(string, "slack")<br/>  })</pre></td>
 <td><code>{}</code></td>
 <td style="text-align: center;">no</td>
 </tr>
@@ -2112,8 +1944,8 @@ Each new kubernetes version needs it's own release. This is due to the fact that
 </tr>
 <tr>
 <td><a name="input_vpc"></a> <a href="..#input_vpc">vpc</a></td>
-<td>Map of VPC configurations</td>
-<td><code>any</code></td>
+<td>VPC configurations</td>
+<td><pre>object({<br/>    vpc_id          = optional(string)<br/>    vpc_cidr        = optional(string)<br/>    private_subnets = optional(list(string))<br/>    intra_subnets   = optional(list(string))<br/>  })</pre></td>
 <td><code>{}</code></td>
 <td style="text-align: center;">no</td>
 </tr>
@@ -2139,10 +1971,6 @@ Each new kubernetes version needs it's own release. This is due to the fact that
 <tr>
 <td><a name="output_karpenter"></a> <a href="..#output_karpenter">karpenter</a></td>
 <td>Map of attributes for the Karpenter module</td>
-</tr>
-<tr>
-<td><a name="output_network"></a> <a href="..#output_network">network</a></td>
-<td>Map of attributes for the VPC module</td>
 </tr>
 </tbody>
 </table>
