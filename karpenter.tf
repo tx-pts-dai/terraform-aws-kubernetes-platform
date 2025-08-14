@@ -22,10 +22,10 @@ module "karpenter" {
   enable_irsa                     = true
   irsa_oidc_provider_arn          = module.eks.oidc_provider_arn
   irsa_namespace_service_accounts = ["${local.karpenter.namespace}:karpenter"]
-  iam_role_name                   = "karpenter-${local.stack_name}"
+  iam_role_name                   = "karpenter-${local.id}"
   iam_role_use_name_prefix        = false
 
-  node_iam_role_name              = "karpenter-node-${local.stack_name}"
+  node_iam_role_name              = "karpenter-node-${local.id}"
   node_iam_role_use_name_prefix   = false
   node_iam_role_attach_cni_policy = false
   node_iam_role_additional_policies = {
