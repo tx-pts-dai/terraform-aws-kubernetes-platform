@@ -26,11 +26,11 @@ resource "time_static" "timestamp_id" {
 # and this create a tags merge issue,
 
 locals {
-  id = var.enable_timestamp_id ? format("%08x", time_static.timestamp_id[0].unix) : null
+  id = var.enable_timestamp_id ? format("%08x", time_static.timestamp_id[0].unix) : local.name
 
   # This is not the best way to handle naming compatibility but its a simple approach to fix renovate PR deployments
   name       = coalesce(replace(var.name, "/", "-"), replace(basename(path.root), "_", "-"))
-  stack_name = local.id != null ? "${local.name}-${local.id}" : local.name
+  stack_name = local.id != local.name ? "${local.name}-${local.id}" : local.name
 
   tags = merge(var.tags, {
     StackName = local.stack_name
@@ -135,7 +135,7 @@ module "eks" {
           labels    = { "app.kubernetes.io/name" = "karpenter" }
         },
       ]
-      iam_role_name            = "karpenter-fargate-${local.stack_name}"
+      iam_role_name            = "karpenter-fargate-${local.id}"
       iam_role_use_name_prefix = false
     }
   }
@@ -190,7 +190,7 @@ module "vpc_cni_irsa" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
   version = "5.55.0"
 
-  role_name = "vpc-cni-${local.stack_name}"
+  role_name = "vpc-cni-${local.id}"
 
   attach_vpc_cni_policy = true
   vpc_cni_enable_ipv4   = true
