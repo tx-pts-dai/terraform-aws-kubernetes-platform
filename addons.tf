@@ -7,7 +7,7 @@
 
 module "ebs_csi_driver_irsa" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
-  version = "5.55.0"
+  version = "5.60.0"
 
   create_role = var.create_addons
 
@@ -27,7 +27,7 @@ module "ebs_csi_driver_irsa" {
 
 module "addons" {
   source  = "aws-ia/eks-blueprints-addons/aws"
-  version = "1.21.1"
+  version = "1.22.0"
 
   create_kubernetes_resources = var.create_addons
 
@@ -232,7 +232,7 @@ resource "helm_release" "reloader" {
 
   name        = "reloader"
   chart       = "reloader"
-  version     = "2.1.3"
+  version     = "2.2.0"
   repository  = "https://stakater.github.io/stakater-charts"
   description = "Reloader"
   namespace   = "reloader"
