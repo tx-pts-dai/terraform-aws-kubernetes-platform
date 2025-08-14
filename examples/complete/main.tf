@@ -77,6 +77,37 @@ locals {
   region = "eu-central-1"
 }
 
+data "aws_vpc" "default" {
+  filter {
+    name   = "tag:Name"
+    values = ["central"]
+  }
+}
+
+data "aws_subnets" "private_subnets" {
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.default.id]
+  }
+
+  filter {
+    name   = "tag:Name"
+    values = ["*private*"]
+  }
+}
+
+data "aws_subnets" "intra_subnets" {
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.default.id]
+  }
+
+  filter {
+    name   = "tag:Name"
+    values = ["*intra*"]
+  }
+}
+
 module "k8s_platform" {
   source = "../../"
 
@@ -95,26 +126,20 @@ module "k8s_platform" {
   }
 
   vpc = {
-    enabled = true
-    cidr    = "10.0.0.0/16"
-    max_az  = 3
-    subnet_configs = [
-      { public = 24 },
-      { private = 24 },
-      { intra = 26 },
-      { database = 26 },
-      { karpenter = 22 }
-    ]
+    vpc_id          = data.aws_vpc.default.id
+    vpc_cidr        = data.aws_vpc.default.cidr_block
+    private_subnets = data.aws_subnets.private_subnets.ids
+    intra_subnets   = data.aws_subnets.intra_subnets.ids
   }
 
-  karpenter = {
-    root_volume_size = "8Gi"
-    data_volume_size = "80Gi"
-  }
+  karpenter_resources_helm_set = [
+    {
+      name  = "global.eksDiscovery.tags.subnets.karpenter\\.sh/discovery"
+      value = "shared"
+    }
+  ]
 
   enable_downscaler = true
-
-  enable_amp = true
 
 }
 data "aws_secretsmanager_secret_version" "cloudflare" {
@@ -133,7 +158,7 @@ locals {
   }
 }
 
-# Manage DNS sub-domaisn in cloudflare and attach them to they parent in route53
+# Manage DNS sub-domains in cloudflare and attach them to they parent in route53
 module "cloudflare" {
   source = "../../modules/cloudflare"
 

@@ -72,6 +72,37 @@ locals {
   region = "eu-central-1"
 }
 
+data "aws_vpc" "default" {
+  filter {
+    name   = "tag:Name"
+    values = ["central"]
+  }
+}
+
+data "aws_subnets" "private_subnets" {
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.default.id]
+  }
+
+  filter {
+    name   = "tag:Name"
+    values = ["*private*"]
+  }
+}
+
+data "aws_subnets" "intra_subnets" {
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.default.id]
+  }
+
+  filter {
+    name   = "tag:Name"
+    values = ["*intra*"]
+  }
+}
+
 module "k8s_platform" {
   source = "../../"
 
@@ -85,11 +116,6 @@ module "k8s_platform" {
     }
   }
 
-  metadata = {
-    environment = "sandbox"
-    team        = "dai"
-  }
-
   tags = {
     Environment = "sandbox"
     GithubRepo  = "terraform-aws-kubernetes-platform"
@@ -97,15 +123,10 @@ module "k8s_platform" {
   }
 
   vpc = {
-    enabled = true
-    cidr    = "10.240.0.0/16"
-    max_az  = 3
-    subnet_configs = [
-      { public = 24 },
-      { private = 24 },
-      { intra = 26 },
-      { karpenter = 22 }
-    ]
+    vpc_id          = data.aws_vpc.default.id
+    vpc_cidr        = data.aws_vpc.default.cidr_block
+    private_subnets = data.aws_subnets.private_subnets.ids
+    intra_subnets   = data.aws_subnets.intra_subnets.ids
   }
 
   karpenter_helm_set = [
@@ -116,12 +137,23 @@ module "k8s_platform" {
   ]
   karpenter_resources_helm_values = [
     <<-EOT
+    global:
+      eksDiscovery:
+        tags:
+          subnets:
+            karpenter.sh/discovery: "shared"
     nodePools:
       default:
         requirements:
           - key: karpenter.k8s.aws/instance-category
             operator: In
             values: ["t"]
+          - key: "karpenter.k8s.aws/instance-memory"
+            operator: Gt
+            values: ["2048"]
+          - key: "karpenter.sh/capacity-type"
+            operator: In
+            values: ["spot", "on-demand"]
     EOT
   ]
 
@@ -146,49 +178,18 @@ module "k8s_platform" {
     ]
   }
 
-  # Disable monitoring stack to avoid dangling resources
-
-  enable_prometheus_stack = false
-  enable_grafana          = false
-  enable_fluent_operator  = false
-
   enable_downscaler = false
-
-  enable_pagerduty = false
-  pagerduty = {
-    secrets_manager_secret_name = "dai/platform/pagerduty"
-  }
-
-  enable_okta = false
-  okta = {
-    base_url                    = "https://login.tx.group"
-    secrets_manager_secret_name = "dai/platform/okta"
-  }
-
-  enable_slack = false
-  slack = {
-    secrets_manager_secret_name = "dai/platform/slack"
-  }
 
   base_domain = "dai-sandbox.tamedia.tech"
 
   enable_acm_certificate = false
   acm_certificate = {
     subject_alternative_names = [
-      "prometheus",
-      "alertmanager",
-      "grafana",
+      "argocd"
     ]
     prepend_stack_id      = false # Cannot be true for the initial deployment since the stack id is not known yet
     wildcard_certificates = false # Don't create wildcards for test deployments since other stacks might use them and cause cleanup failures
   }
-
-  fluent_log_annotation = {
-    name  = ""
-    value = ""
-  }
-
-  enable_amp = false
 
   enable_argocd = true
 

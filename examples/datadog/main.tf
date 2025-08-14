@@ -78,6 +78,37 @@ locals {
   region = "eu-central-1"
 }
 
+data "aws_vpc" "default" {
+  filter {
+    name   = "tag:Name"
+    values = ["central"]
+  }
+}
+
+data "aws_subnets" "private_subnets" {
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.default.id]
+  }
+
+  filter {
+    name   = "tag:Name"
+    values = ["*private*"]
+  }
+}
+
+data "aws_subnets" "intra_subnets" {
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.default.id]
+  }
+
+  filter {
+    name   = "tag:Name"
+    values = ["*intra*"]
+  }
+}
+
 module "k8s_platform" {
   source = "../../"
 
@@ -89,15 +120,15 @@ module "k8s_platform" {
     }
   }
 
-  tags = {
-    Environment = "sandbox"
-    GithubRepo  = "terraform-aws-kubernetes-platform"
-    GithubOrg   = "tx-pts-dai"
+  vpc = {
+    vpc_id          = data.aws_vpc.default.id
+    vpc_cidr        = data.aws_vpc.default.cidr_block
+    private_subnets = data.aws_subnets.private_subnets.ids
+    intra_subnets   = data.aws_subnets.intra_subnets.ids
   }
 
-  karpenter = {
-    values = [
-      <<-YAML
+  karpenter_helm_values = [
+    <<-YAML
       podAnnotations:
         "ad.datadoghq.com/controller.checks": |
           karpenter:
@@ -110,21 +141,19 @@ module "k8s_platform" {
             cpu: 0.5
             memory: "768Mi"
       YAML
-    ]
-  }
+  ]
 
+  karpenter_resources_helm_set = [
+    {
+      name  = "global.eksDiscovery.tags.subnets.karpenter\\.sh/discovery"
+      value = "shared"
+    }
+  ]
 
-  vpc = {
-    enabled = true
-    cidr    = "10.0.0.0/16"
-    max_az  = 3
-    subnet_configs = [
-      { public = 24 },
-      { private = 24 },
-      { intra = 26 },
-      { database = 26 },
-      { karpenter = 22 }
-    ]
+  tags = {
+    Environment = "sandbox"
+    GithubRepo  = "terraform-aws-kubernetes-platform"
+    GithubOrg   = "tx-pts-dai"
   }
 }
 

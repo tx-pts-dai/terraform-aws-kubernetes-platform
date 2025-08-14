@@ -3,11 +3,6 @@ output "eks" {
   value       = module.k8s_platform.eks
 }
 
-output "vpc" {
-  description = "vpc module outputs"
-  value       = module.k8s_platform.network
-}
-
 output "argocd" {
   description = "ArgoCD module outputs"
   value       = module.k8s_platform.argocd
