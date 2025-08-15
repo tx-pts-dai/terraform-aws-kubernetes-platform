@@ -18,7 +18,7 @@ data "aws_route53_zone" "base_domain_zone" {
 
 module "acm" {
   source  = "terraform-aws-modules/acm/aws"
-  version = "5.2.0"
+  version = "6.1.0"
 
   count = var.create_addons && var.enable_acm_certificate ? 1 : 0
 
