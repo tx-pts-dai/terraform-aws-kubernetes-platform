@@ -1,4 +1,4 @@
-.PHONY: clean check-amtool test-slack test-pagerduty
+.PHONY: clean check-amtool test-slack test-pagerduty terraform-init
 
 clean:
 	@read -p "Are you sure you want to delete all .terraform.lock.hcl files and .terraform directories? (y/n) " confirm; \
@@ -22,3 +22,11 @@ test-pagerduty: check-amtool
 
 test-alertmanager-templates: test-slack test-pagerduty
 	@echo "\n\nAll templates passed."
+
+terraform-init:
+	@echo "Initializing Terraform in all example and module directories..."
+	@for dir in $$(find examples -name "*.tf" -exec dirname {} \; | sort -u) $$(find modules -name "*.tf" -exec dirname {} \; | sort -u); do \
+		echo "\nInitializing Terraform in $$dir..."; \
+		(cd $$dir && terraform init -backend=false) || echo "Failed to initialize $$dir"; \
+	done
+	@echo "\nTerraform initialization complete."
