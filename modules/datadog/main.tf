@@ -84,7 +84,7 @@ resource "helm_release" "datadog_secrets" {
 
   values = [
     <<-YAML
-    apiVersion: external-secrets.io/v1beta1
+    apiVersion: external-secrets.io/v1
     kind: ExternalSecret
     metadata:
       name: datadog-keys
@@ -119,7 +119,7 @@ resource "helm_release" "datadog_secrets_fargate" {
 
   values = [
     <<-YAML
-    apiVersion: external-secrets.io/v1beta1
+    apiVersion: external-secrets.io/v1
     kind: ExternalSecret
     metadata:
       name: datadog-keys

@@ -10,6 +10,18 @@ variable "create_addons" {
   default     = true
 }
 
+variable "create_addon_roles" {
+  description = "Create addon IRSA roles. If set to false, no addon roles will be created"
+  type        = bool
+  default     = true
+}
+
+variable "create_addon_pod_identity_roles" {
+  description = "Create addon pod identities roles. If set to true, all roles will be created"
+  type        = bool
+  default     = false
+}
+
 variable "name" {
   description = "The name of the platform, a timestamp will be appended to this name to make the stack_name. If not provided, the name of the directory will be used."
   type        = string
@@ -211,31 +223,6 @@ variable "reloader" {
 
 ################################################################################
 # Additional Addons - Not installed by default
-
-variable "enable_cert_manager" {
-  description = "Enable Cert Manager"
-  type        = bool
-  default     = false
-}
-
-variable "cert_manager" {
-  description = "Cert Manager configurations"
-  type        = any
-  default     = {}
-}
-
-variable "enable_ingress_nginx" {
-  description = "Enable Ingress Nginx"
-  type        = bool
-  default     = false
-}
-
-variable "ingress_nginx" {
-  description = "Ingress Nginx configurations"
-  type        = any
-  default     = {}
-}
-
 variable "enable_downscaler" {
   description = "Enable Downscaler"
   type        = bool

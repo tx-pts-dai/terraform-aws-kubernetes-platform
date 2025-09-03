@@ -10,6 +10,7 @@ locals {
   azs = slice(data.aws_availability_zones.available.names, 0, 3)
 }
 
+# https://github.com/terraform-aws-modules/terraform-aws-eks/blob/master/modules/karpenter/policy.tf
 data "aws_iam_policy_document" "karpenter_controller" {
   statement {
     sid = "AllowScopedEC2InstanceAccessActions"
@@ -587,7 +588,6 @@ module "karpenter_security_group" {
   }
 
   tags = merge(local.tags, {
-    # Is this needed? AWS LB Controller uses this to add itself to the node security groups
     "kubernetes.io/cluster/${local.stack_name}" = "owned"
     "karpenter.sh/discovery"                    = local.stack_name
   })

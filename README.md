@@ -165,7 +165,7 @@ as described in the `.pre-commit-config.yaml` file
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.7.0 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 6.0 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 6.9 |
 | <a name="requirement_helm"></a> [helm](#requirement\_helm) | >= 2.12, < 3.0.0 |
 | <a name="requirement_kubectl"></a> [kubectl](#requirement\_kubectl) | >= 2.0.2 |
 | <a name="requirement_kubernetes"></a> [kubernetes](#requirement\_kubernetes) | >= 2.27 |
@@ -175,7 +175,7 @@ as described in the `.pre-commit-config.yaml` file
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 6.0 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 6.9 |
 | <a name="provider_helm"></a> [helm](#provider\_helm) | >= 2.12, < 3.0.0 |
 | <a name="provider_time"></a> [time](#provider\_time) | >= 0.11 |
 
@@ -187,12 +187,18 @@ as described in the `.pre-commit-config.yaml` file
 | <a name="module_addons"></a> [addons](#module\_addons) | aws-ia/eks-blueprints-addons/aws | 1.22.0 |
 | <a name="module_argocd"></a> [argocd](#module\_argocd) | ./modules/argocd | n/a |
 | <a name="module_aws_ebs_csi_pod_identity"></a> [aws\_ebs\_csi\_pod\_identity](#module\_aws\_ebs\_csi\_pod\_identity) | terraform-aws-modules/eks-pod-identity/aws | 2.0.0 |
+| <a name="module_aws_gateway_controller_pod_identity"></a> [aws\_gateway\_controller\_pod\_identity](#module\_aws\_gateway\_controller\_pod\_identity) | terraform-aws-modules/eks-pod-identity/aws | 2.0.0 |
+| <a name="module_aws_lb_controller_pod_identity"></a> [aws\_lb\_controller\_pod\_identity](#module\_aws\_lb\_controller\_pod\_identity) | terraform-aws-modules/eks-pod-identity/aws | 2.0.0 |
 | <a name="module_downscaler"></a> [downscaler](#module\_downscaler) | tx-pts-dai/downscaler/kubernetes | 0.3.1 |
+| <a name="module_ebs_csi_driver_irsa"></a> [ebs\_csi\_driver\_irsa](#module\_ebs\_csi\_driver\_irsa) | terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts | 6.2.1 |
 | <a name="module_eks"></a> [eks](#module\_eks) | terraform-aws-modules/eks/aws | 21.1.5 |
+| <a name="module_external_dns_pod_identity"></a> [external\_dns\_pod\_identity](#module\_external\_dns\_pod\_identity) | terraform-aws-modules/eks-pod-identity/aws | 2.0.0 |
+| <a name="module_external_secrets_pod_identity"></a> [external\_secrets\_pod\_identity](#module\_external\_secrets\_pod\_identity) | terraform-aws-modules/eks-pod-identity/aws | 2.0.0 |
 | <a name="module_karpenter"></a> [karpenter](#module\_karpenter) | terraform-aws-modules/eks/aws//modules/karpenter | 21.1.5 |
 | <a name="module_karpenter_irsa"></a> [karpenter\_irsa](#module\_karpenter\_irsa) | terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts | 6.2.1 |
 | <a name="module_karpenter_security_group"></a> [karpenter\_security\_group](#module\_karpenter\_security\_group) | ./modules/security-group | n/a |
 | <a name="module_ssm"></a> [ssm](#module\_ssm) | ./modules/ssm | n/a |
+| <a name="module_vpc_cni_irsa"></a> [vpc\_cni\_irsa](#module\_vpc\_cni\_irsa) | terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts | 6.2.1 |
 
 ## Resources
 
@@ -226,20 +232,19 @@ as described in the `.pre-commit-config.yaml` file
 | <a name="input_argocd"></a> [argocd](#input\_argocd) | Argo CD configurations | <pre>object({<br/>    # Hub specific<br/>    enable_hub        = optional(bool, false)<br/>    namespace         = optional(string, "argocd")<br/>    hub_iam_role_name = optional(string, "argocd-controller")<br/><br/>    helm_values = optional(list(string), [])<br/>    helm_set = optional(list(object({<br/>      name  = string<br/>      value = string<br/>    })), [])<br/><br/>    # Spoke specific<br/>    enable_spoke = optional(bool, false)<br/><br/>    hub_iam_role_arn  = optional(string, null)<br/>    hub_iam_role_arns = optional(list(string), null)<br/><br/>    # Common<br/>    tags = optional(map(string), {})<br/>  })</pre> | `{}` | no |
 | <a name="input_aws_load_balancer_controller"></a> [aws\_load\_balancer\_controller](#input\_aws\_load\_balancer\_controller) | AWS Load Balancer Controller configurations | `any` | `{}` | no |
 | <a name="input_base_domain"></a> [base\_domain](#input\_base\_domain) | Base domain for the platform, used for ingress and ACM certificates | `string` | `null` | no |
-| <a name="input_cert_manager"></a> [cert\_manager](#input\_cert\_manager) | Cert Manager configurations | `any` | `{}` | no |
 | <a name="input_cluster_admins"></a> [cluster\_admins](#input\_cluster\_admins) | Map of IAM roles to add as cluster admins. Only exact matching role names are returned | <pre>map(object({<br/>    role_name         = string<br/>    kubernetes_groups = optional(list(string))<br/>  }))</pre> | `{}` | no |
+| <a name="input_create_addon_pod_identity_roles"></a> [create\_addon\_pod\_identity\_roles](#input\_create\_addon\_pod\_identity\_roles) | Create addon pod identities roles. If set to true, all roles will be created | `bool` | `false` | no |
+| <a name="input_create_addon_roles"></a> [create\_addon\_roles](#input\_create\_addon\_roles) | Create addon IRSA roles. If set to false, no addon roles will be created | `bool` | `true` | no |
 | <a name="input_create_addons"></a> [create\_addons](#input\_create\_addons) | Create the platform addons. if set to false, no addons will be created | `bool` | `true` | no |
 | <a name="input_downscaler"></a> [downscaler](#input\_downscaler) | Downscaler configurations | `any` | `{}` | no |
 | <a name="input_eks"></a> [eks](#input\_eks) | Map of EKS configurations | `any` | `{}` | no |
 | <a name="input_enable_acm_certificate"></a> [enable\_acm\_certificate](#input\_enable\_acm\_certificate) | Enable ACM certificate | `bool` | `false` | no |
 | <a name="input_enable_argocd"></a> [enable\_argocd](#input\_enable\_argocd) | Enable Argo CD | `bool` | `false` | no |
 | <a name="input_enable_aws_load_balancer_controller"></a> [enable\_aws\_load\_balancer\_controller](#input\_enable\_aws\_load\_balancer\_controller) | Enable AWS Load Balancer Controller | `bool` | `true` | no |
-| <a name="input_enable_cert_manager"></a> [enable\_cert\_manager](#input\_enable\_cert\_manager) | Enable Cert Manager | `bool` | `false` | no |
 | <a name="input_enable_downscaler"></a> [enable\_downscaler](#input\_enable\_downscaler) | Enable Downscaler | `bool` | `false` | no |
 | <a name="input_enable_external_dns"></a> [enable\_external\_dns](#input\_enable\_external\_dns) | Enable External DNS | `bool` | `true` | no |
 | <a name="input_enable_external_secrets"></a> [enable\_external\_secrets](#input\_enable\_external\_secrets) | Enable External Secrets | `bool` | `true` | no |
 | <a name="input_enable_fargate_fluentbit"></a> [enable\_fargate\_fluentbit](#input\_enable\_fargate\_fluentbit) | Enable Fargate Fluentbit | `bool` | `true` | no |
-| <a name="input_enable_ingress_nginx"></a> [enable\_ingress\_nginx](#input\_enable\_ingress\_nginx) | Enable Ingress Nginx | `bool` | `false` | no |
 | <a name="input_enable_metrics_server"></a> [enable\_metrics\_server](#input\_enable\_metrics\_server) | Enable Metrics Server | `bool` | `true` | no |
 | <a name="input_enable_reloader"></a> [enable\_reloader](#input\_enable\_reloader) | Enable Reloader | `bool` | `true` | no |
 | <a name="input_enable_sso_admin_auto_discovery"></a> [enable\_sso\_admin\_auto\_discovery](#input\_enable\_sso\_admin\_auto\_discovery) | Enable automatic discovery of SSO admin roles. When disabled, only explicitly defined cluster\_admins are used. | `bool` | `true` | no |
@@ -247,7 +252,6 @@ as described in the `.pre-commit-config.yaml` file
 | <a name="input_external_dns"></a> [external\_dns](#input\_external\_dns) | External DNS configurations | `any` | `{}` | no |
 | <a name="input_external_secrets"></a> [external\_secrets](#input\_external\_secrets) | External Secrets configurations | `any` | `{}` | no |
 | <a name="input_fargate_fluentbit"></a> [fargate\_fluentbit](#input\_fargate\_fluentbit) | Fargate Fluentbit configurations | `any` | `{}` | no |
-| <a name="input_ingress_nginx"></a> [ingress\_nginx](#input\_ingress\_nginx) | Ingress Nginx configurations | `any` | `{}` | no |
 | <a name="input_karpenter"></a> [karpenter](#input\_karpenter) | Karpenter configurations | <pre>object({<br/>    subnet_cidrs = optional(list(string), [])<br/>  })</pre> | `{}` | no |
 | <a name="input_karpenter_helm_set"></a> [karpenter\_helm\_set](#input\_karpenter\_helm\_set) | List of Karpenter Helm set values | <pre>list(object({<br/>    name  = string<br/>    value = string<br/>  }))</pre> | `[]` | no |
 | <a name="input_karpenter_helm_values"></a> [karpenter\_helm\_values](#input\_karpenter\_helm\_values) | List of Karpenter Helm values | `list(string)` | `[]` | no |

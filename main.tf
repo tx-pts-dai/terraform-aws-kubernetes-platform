@@ -103,19 +103,53 @@ module "eks" {
       most_recent = true
       preserve    = true
 
-      # service_account_role_arn = module.vpc_cni_irsa.iam_role_arn
+      service_account_role_arn = module.vpc_cni_irsa.arn
 
-      configurationsi_values = {
-        env = {
-          ENABLE_PREFIX_DELEGATION = "true"
-        }
-      }
+      configuration_values = jsonencode({ env = { ENABLE_PREFIX_DELEGATION = "true" } })
     }
 
     kube-proxy = {
       most_recent = true
       preserve    = true
     }
+
+    eks-pod-identity-agent = {
+      before_compute = true
+
+      most_recent = true
+      preserve    = true
+
+      timeouts = {
+        create = "3m"
+        delete = "3m"
+      }
+    }
+
+    # coredns = {
+    #   before_compute = true
+
+    #   most_recent = true
+    #   preserve    = false
+
+    #   timeouts = {
+    #     create = "3m"
+    #     delete = "3m"
+    #   }
+    # }
+
+    # aws-ebs-csi-driver = {
+    #   before_compute = true
+
+    #   most_recent = true
+    #   preserve    = false
+
+    #   pod_identity_association = [{
+    #     role_arn        = module.aws_ebs_csi_pod_identity.iam_role_arn
+    #     service_account = "ebs-csi-controller-sa"
+    #   }]
+    # }
+
+
   }
 
   iam_role_name            = local.stack_name
@@ -189,24 +223,25 @@ resource "aws_security_group_rule" "eks_control_plane_ingress" {
 ################################################################################
 # VPC CNI IAM Role for Service Accounts
 
-# module "vpc_cni_irsa" {
-#   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
-#   version = "5.60.0"
+module "vpc_cni_irsa" {
+  source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts"
+  version = "6.2.1"
 
-#   role_name = "vpc-cni-${local.id}"
+  name            = "vpc-cni-${local.id}"
+  use_name_prefix = false
 
-#   attach_vpc_cni_policy = true
-#   vpc_cni_enable_ipv4   = true
+  attach_vpc_cni_policy = true
+  vpc_cni_enable_ipv4   = true
 
-#   oidc_providers = {
-#     main = {
-#       provider_arn               = module.eks.oidc_provider_arn
-#       namespace_service_accounts = ["kube-system:aws-node"]
-#     }
-#   }
+  oidc_providers = {
+    main = {
+      provider_arn               = module.eks.oidc_provider_arn
+      namespace_service_accounts = ["kube-system:aws-node"]
+    }
+  }
 
-#   tags = local.tags
-# }
+  tags = local.tags
+}
 
 resource "time_sleep" "wait_on_destroy" {
   depends_on = [

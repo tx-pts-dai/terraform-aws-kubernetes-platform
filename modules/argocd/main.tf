@@ -172,4 +172,3 @@ resource "aws_eks_access_policy_association" "argocd_spoke" {
     type = "cluster"
   }
 }
-##################### ArgoCD Helm Chart ######################################
