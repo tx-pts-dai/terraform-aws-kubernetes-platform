@@ -4,21 +4,21 @@
 
 ################################################################################
 # EBS CSI Controller IAM Role for Service Accounts
+module "aws_ebs_csi_pod_identity" {
+  source  = "terraform-aws-modules/eks-pod-identity/aws"
+  version = "2.0.0"
 
-module "ebs_csi_driver_irsa" {
-  source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
-  version = "5.60.0"
+  create = var.create_addons
 
-  create_role = var.create_addons
+  name = "aws-ebs-csi"
 
-  role_name = "ebs-csi-driver-${local.id}"
+  attach_aws_ebs_csi_policy = true
 
-  attach_ebs_csi_policy = true
-
-  oidc_providers = {
+  associations = {
     main = {
-      provider_arn               = module.eks.oidc_provider_arn
-      namespace_service_accounts = ["kube-system:ebs-csi-controller-sa"]
+      cluster_name    = module.eks.cluster_name
+      namespace       = "kube-system"
+      service_account = "ebs-csi-controller-sa"
     }
   }
 
@@ -59,7 +59,7 @@ module "addons" {
       most_recent = true
       preserve    = false
 
-      service_account_role_arn = module.ebs_csi_driver_irsa.iam_role_arn
+      service_account_role_arn = module.aws_ebs_csi_pod_identity.iam_role_arn
 
       configurations = {
         replicaCount = 1

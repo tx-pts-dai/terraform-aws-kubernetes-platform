@@ -10,6 +10,7 @@
 
 data "aws_region" "current" {}
 data "aws_availability_zones" "available" {}
+data "aws_caller_identity" "current" {}
 
 # ID based on epoch timestamp for creating unique resources. Note: This is only
 # generated on apply and is static for the life of the stack.
@@ -36,7 +37,8 @@ locals {
     StackName = local.stack_name
   })
 
-  region = data.aws_region.current.name
+  region     = data.aws_region.current.region
+  account_id = data.aws_caller_identity.current.account_id
 }
 
 ################################################################################
@@ -88,19 +90,20 @@ locals {
 
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
-  version = "20.37.2"
+  version = "21.1.5"
 
-  cluster_name                    = local.stack_name
-  cluster_version                 = local.k8s_version
-  cluster_endpoint_public_access  = try(var.eks.cluster_endpoint_public_access, true)
-  cluster_endpoint_private_access = try(var.eks.cluster_endpoint_private_access, true)
+  name                    = local.stack_name
+  kubernetes_version      = local.k8s_version
+  endpoint_public_access  = try(var.eks.cluster_endpoint_public_access, true)
+  endpoint_private_access = try(var.eks.cluster_endpoint_private_access, true)
+  authentication_mode     = "API"
 
-  cluster_addons = {
+  addons = {
     vpc-cni = {
       most_recent = true
       preserve    = true
 
-      service_account_role_arn = module.vpc_cni_irsa.iam_role_arn
+      # service_account_role_arn = module.vpc_cni_irsa.iam_role_arn
 
       configurationsi_values = {
         env = {
@@ -122,8 +125,8 @@ module "eks" {
   subnet_ids               = var.vpc.private_subnets
   control_plane_subnet_ids = var.vpc.intra_subnets
 
-  create_cluster_security_group = false
-  create_node_security_group    = false
+  create_security_group      = false
+  create_node_security_group = false
 
   enable_cluster_creator_admin_permissions = try(var.eks.enable_cluster_creator_admin_permissions, false)
 
@@ -186,24 +189,24 @@ resource "aws_security_group_rule" "eks_control_plane_ingress" {
 ################################################################################
 # VPC CNI IAM Role for Service Accounts
 
-module "vpc_cni_irsa" {
-  source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
-  version = "5.60.0"
+# module "vpc_cni_irsa" {
+#   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
+#   version = "5.60.0"
 
-  role_name = "vpc-cni-${local.id}"
+#   role_name = "vpc-cni-${local.id}"
 
-  attach_vpc_cni_policy = true
-  vpc_cni_enable_ipv4   = true
+#   attach_vpc_cni_policy = true
+#   vpc_cni_enable_ipv4   = true
 
-  oidc_providers = {
-    main = {
-      provider_arn               = module.eks.oidc_provider_arn
-      namespace_service_accounts = ["kube-system:aws-node"]
-    }
-  }
+#   oidc_providers = {
+#     main = {
+#       provider_arn               = module.eks.oidc_provider_arn
+#       namespace_service_accounts = ["kube-system:aws-node"]
+#     }
+#   }
 
-  tags = local.tags
-}
+#   tags = local.tags
+# }
 
 resource "time_sleep" "wait_on_destroy" {
   depends_on = [

@@ -1,3 +1,9 @@
+variable "region" {
+  description = "AWS region to use"
+  type        = string
+  default     = null
+}
+
 variable "create_addons" {
   description = "Create the platform addons. if set to false, no addons will be created"
   type        = bool

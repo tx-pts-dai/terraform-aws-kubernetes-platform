@@ -165,7 +165,7 @@ as described in the `.pre-commit-config.yaml` file
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.7.0 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 5.42 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 6.0 |
 | <a name="requirement_helm"></a> [helm](#requirement\_helm) | >= 2.12, < 3.0.0 |
 | <a name="requirement_kubectl"></a> [kubectl](#requirement\_kubectl) | >= 2.0.2 |
 | <a name="requirement_kubernetes"></a> [kubernetes](#requirement\_kubernetes) | >= 2.27 |
@@ -175,7 +175,7 @@ as described in the `.pre-commit-config.yaml` file
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 5.42 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 6.0 |
 | <a name="provider_helm"></a> [helm](#provider\_helm) | >= 2.12, < 3.0.0 |
 | <a name="provider_time"></a> [time](#provider\_time) | >= 0.11 |
 
@@ -183,21 +183,22 @@ as described in the `.pre-commit-config.yaml` file
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_acm"></a> [acm](#module\_acm) | terraform-aws-modules/acm/aws | 5.2.0 |
+| <a name="module_acm"></a> [acm](#module\_acm) | terraform-aws-modules/acm/aws | 6.1.0 |
 | <a name="module_addons"></a> [addons](#module\_addons) | aws-ia/eks-blueprints-addons/aws | 1.22.0 |
 | <a name="module_argocd"></a> [argocd](#module\_argocd) | ./modules/argocd | n/a |
+| <a name="module_aws_ebs_csi_pod_identity"></a> [aws\_ebs\_csi\_pod\_identity](#module\_aws\_ebs\_csi\_pod\_identity) | terraform-aws-modules/eks-pod-identity/aws | 2.0.0 |
 | <a name="module_downscaler"></a> [downscaler](#module\_downscaler) | tx-pts-dai/downscaler/kubernetes | 0.3.1 |
-| <a name="module_ebs_csi_driver_irsa"></a> [ebs\_csi\_driver\_irsa](#module\_ebs\_csi\_driver\_irsa) | terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks | 5.60.0 |
-| <a name="module_eks"></a> [eks](#module\_eks) | terraform-aws-modules/eks/aws | 20.37.2 |
-| <a name="module_karpenter"></a> [karpenter](#module\_karpenter) | terraform-aws-modules/eks/aws//modules/karpenter | 20.37.2 |
+| <a name="module_eks"></a> [eks](#module\_eks) | terraform-aws-modules/eks/aws | 21.1.5 |
+| <a name="module_karpenter"></a> [karpenter](#module\_karpenter) | terraform-aws-modules/eks/aws//modules/karpenter | 21.1.5 |
+| <a name="module_karpenter_irsa"></a> [karpenter\_irsa](#module\_karpenter\_irsa) | terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts | 6.2.1 |
 | <a name="module_karpenter_security_group"></a> [karpenter\_security\_group](#module\_karpenter\_security\_group) | ./modules/security-group | n/a |
 | <a name="module_ssm"></a> [ssm](#module\_ssm) | ./modules/ssm | n/a |
-| <a name="module_vpc_cni_irsa"></a> [vpc\_cni\_irsa](#module\_vpc\_cni\_irsa) | terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks | 5.60.0 |
 
 ## Resources
 
 | Name | Type |
 |------|------|
+| [aws_iam_policy.karpenter_controller](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_route_table_association.karpenter](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route_table_association) | resource |
 | [aws_security_group_rule.eks_control_plane_ingress](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
 | [aws_subnet.karpenter](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/subnet) | resource |
@@ -209,6 +210,8 @@ as described in the `.pre-commit-config.yaml` file
 | [time_sleep.wait_on_destroy](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/sleep) | resource |
 | [time_static.timestamp_id](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/static) | resource |
 | [aws_availability_zones.available](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/availability_zones) | data source |
+| [aws_caller_identity.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/caller_identity) | data source |
+| [aws_iam_policy_document.karpenter_controller](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_roles.iam_cluster_admins](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_roles) | data source |
 | [aws_iam_roles.sso](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_roles) | data source |
 | [aws_region.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/region) | data source |
@@ -252,6 +255,7 @@ as described in the `.pre-commit-config.yaml` file
 | <a name="input_karpenter_resources_helm_values"></a> [karpenter\_resources\_helm\_values](#input\_karpenter\_resources\_helm\_values) | List of Karpenter Resources Helm values | `list(string)` | `[]` | no |
 | <a name="input_metrics_server"></a> [metrics\_server](#input\_metrics\_server) | Metrics Server configurations | `any` | `{}` | no |
 | <a name="input_name"></a> [name](#input\_name) | The name of the platform, a timestamp will be appended to this name to make the stack\_name. If not provided, the name of the directory will be used. | `string` | `""` | no |
+| <a name="input_region"></a> [region](#input\_region) | AWS region to use | `string` | `null` | no |
 | <a name="input_reloader"></a> [reloader](#input\_reloader) | Reloader configurations | `any` | `{}` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | Default tags to apply to all resources | `map(string)` | `{}` | no |
 | <a name="input_vpc"></a> [vpc](#input\_vpc) | VPC configurations | <pre>object({<br/>    vpc_id          = optional(string)<br/>    vpc_cidr        = optional(string)<br/>    private_subnets = optional(list(string))<br/>    intra_subnets   = optional(list(string))<br/>  })</pre> | `{}` | no |
