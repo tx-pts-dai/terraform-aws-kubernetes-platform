@@ -126,6 +126,7 @@ module "ebs_csi_driver_irsa" {
   create = var.create_addons
 
   name            = "ebs-csi-driver-${local.id}"
+  policy_name     = "ebs-csi-driver-${local.id}"
   use_name_prefix = false
 
   attach_ebs_csi_policy = true
