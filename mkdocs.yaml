@@ -13,7 +13,6 @@ nav:
       - patterns.md
   - getting-started.md
   - Submodules:
-      - modules/addon.md
       - modules/argocd.md
       - modules/cloudflare.md
       - modules/datadog.md
