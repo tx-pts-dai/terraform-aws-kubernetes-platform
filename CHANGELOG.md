@@ -1,3 +1,12 @@
+# v4.0.0
+
+**Breaking Changes:**
+
+- **AWS Provider Version**: The AWS provider version has been updated to `6.9.0`
+
+
+
+
 # v3.0.0
 
 **Breaking Changes:**

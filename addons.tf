@@ -3,15 +3,131 @@
 #
 
 ################################################################################
-# EBS CSI Controller IAM Role for Service Accounts
+# Pod Identity Roles
+#
+module "aws_ebs_csi_pod_identity" {
+  source  = "terraform-aws-modules/eks-pod-identity/aws"
+  version = "2.0.0"
 
+  create = var.create_addon_pod_identity_roles
+
+  name            = "aws-ebs-csi-${local.id}"
+  use_name_prefix = false
+
+  attach_aws_ebs_csi_policy = true
+
+  associations = {
+    controller = {
+      cluster_name    = module.eks.cluster_name
+      namespace       = "kube-system"
+      service_account = "ebs-csi-controller-sa"
+    }
+    node = {
+      cluster_name    = module.eks.cluster_name
+      namespace       = "kube-system"
+      service_account = "ebs-csi-node-sa"
+    }
+  }
+
+  tags = local.tags
+}
+
+module "aws_gateway_controller_pod_identity" {
+  source  = "terraform-aws-modules/eks-pod-identity/aws"
+  version = "2.0.0"
+
+  create = var.create_addon_pod_identity_roles
+
+  name            = "aws-ebs-csi-${local.id}"
+  use_name_prefix = false
+
+  attach_aws_gateway_controller_policy = true
+
+  associations = {
+    controller = {
+      cluster_name    = module.eks.cluster_name
+      namespace       = "kube-system"
+      service_account = "aws-gateway-api-controller"
+    }
+  }
+
+  tags = local.tags
+}
+
+module "aws_lb_controller_pod_identity" {
+  source  = "terraform-aws-modules/eks-pod-identity/aws"
+  version = "2.0.0"
+
+  create = var.create_addon_pod_identity_roles
+
+  name            = "aws-lb-controller-${local.id}"
+  use_name_prefix = false
+
+  attach_aws_lb_controller_policy = true
+
+  associations = {
+    controller = {
+      cluster_name    = module.eks.cluster_name
+      namespace       = "kube-system"
+      service_account = "aws-loadbalancer-controller"
+    }
+  }
+}
+
+module "external_dns_pod_identity" {
+  source  = "terraform-aws-modules/eks-pod-identity/aws"
+  version = "2.0.0"
+
+  create = var.create_addon_pod_identity_roles
+
+  name            = "external-dns-${local.id}"
+  use_name_prefix = false
+
+  attach_external_dns_policy    = true
+  external_dns_hosted_zone_arns = ["*"]
+
+  associations = {
+    controller = {
+      cluster_name    = module.eks.cluster_name
+      namespace       = "external-dns"
+      service_account = "external-dns"
+    }
+  }
+}
+
+module "external_secrets_pod_identity" {
+  source  = "terraform-aws-modules/eks-pod-identity/aws"
+  version = "2.0.0"
+
+  create = var.create_addon_pod_identity_roles
+
+  name            = "external-secrets-${local.id}"
+  use_name_prefix = false
+
+  attach_external_secrets_policy = true
+
+  associations = {
+    controller = {
+      cluster_name    = module.eks.cluster_name
+      namespace       = "external-secrets"
+      service_account = "external-secrets"
+    }
+  }
+}
+
+################################################################################
+# Addons
+
+# Required for Managed EBS CSI Driver
 module "ebs_csi_driver_irsa" {
-  source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
-  version = "5.60.0"
+  source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts"
+  version = "6.2.1"
 
-  create_role = var.create_addons
+  create = var.create_addons
 
-  role_name = "ebs-csi-driver-${local.id}"
+  name            = "ebs-csi-driver-${local.id}"
+  policy_name     = "ebs-csi-driver-${local.id}"
+  use_name_prefix = false
 
   attach_ebs_csi_policy = true
 
@@ -59,36 +175,23 @@ module "addons" {
       most_recent = true
       preserve    = false
 
-      service_account_role_arn = module.ebs_csi_driver_irsa.iam_role_arn
-
       configurations = {
         replicaCount = 1
       }
 
-      timeouts = {
-        create = "3m"
-        delete = "3m"
-      }
-    }
-
-    eks-pod-identity-agent = {
-      most_recent = true
-      preserve    = false
-
-      configurations = {
-        replicaCount = 2
-      }
+      service_account_role_arn = module.ebs_csi_driver_irsa.arn
 
       timeouts = {
         create = "3m"
         delete = "3m"
       }
     }
+
   }
 
-  # TODO: aws lb controller should be one of the last things deleted, so ing objects can be cleaned up
   enable_aws_load_balancer_controller = var.enable_aws_load_balancer_controller && var.create_addons
   aws_load_balancer_controller = {
+    create_role          = var.create_addon_roles
     role_name            = "lb-controller-${local.id}"
     role_name_use_prefix = false
 
@@ -114,6 +217,7 @@ module "addons" {
     "arn:aws:route53:::hostedzone/*",
   ]
   external_dns = {
+    create_role      = var.create_addon_roles
     role_name        = "external-dns-${local.id}"
     role_name_prefix = false
 
@@ -129,11 +233,12 @@ module "addons" {
 
   enable_external_secrets = var.enable_external_secrets && var.create_addons
   external_secrets = {
-
     # renovate: datasource=helm depName=external-secrets registryUrl=https://charts.external-secrets.io
     chart_version = "0.16.2"
 
-    wait             = true
+    wait = true
+
+    create_role      = var.create_addon_roles
     role_name        = "external-secrets-${local.id}"
     role_name_prefix = false
 
@@ -159,13 +264,6 @@ module "addons" {
       value = 2,
     }], try(var.metrics_server.set, []))
   }
-
-  # Alternative Ingress
-  enable_cert_manager = var.enable_cert_manager
-  cert_manager        = var.cert_manager
-
-  enable_ingress_nginx = var.enable_ingress_nginx
-  ingress_nginx        = var.ingress_nginx
 
   depends_on = [
     helm_release.karpenter_release,
@@ -208,7 +306,7 @@ resource "helm_release" "cluster_secret_store" {
 
   values = [
     <<-EOT
-    apiVersion: external-secrets.io/v1beta1
+    apiVersion: external-secrets.io/v1
     kind: ClusterSecretStore
     metadata:
       name: aws-secretsmanager
