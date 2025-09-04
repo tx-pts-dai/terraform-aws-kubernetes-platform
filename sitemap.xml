@@ -2,74 +2,74 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://tx-pts-dai.github.io/terraform-aws-kubernetes-platform/</loc>
-         <lastmod>2025-08-27</lastmod>
+         <lastmod>2025-09-04</lastmod>
     </url>
     <url>
          <loc>https://tx-pts-dai.github.io/terraform-aws-kubernetes-platform/faq/</loc>
-         <lastmod>2025-08-27</lastmod>
+         <lastmod>2025-09-04</lastmod>
     </url>
     <url>
          <loc>https://tx-pts-dai.github.io/terraform-aws-kubernetes-platform/getting-started/</loc>
-         <lastmod>2025-08-27</lastmod>
+         <lastmod>2025-09-04</lastmod>
     </url>
     <url>
          <loc>https://tx-pts-dai.github.io/terraform-aws-kubernetes-platform/patterns/</loc>
-         <lastmod>2025-08-27</lastmod>
+         <lastmod>2025-09-04</lastmod>
     </url>
     <url>
          <loc>https://tx-pts-dai.github.io/terraform-aws-kubernetes-platform/examples/argocd/</loc>
-         <lastmod>2025-08-27</lastmod>
+         <lastmod>2025-09-04</lastmod>
     </url>
     <url>
          <loc>https://tx-pts-dai.github.io/terraform-aws-kubernetes-platform/examples/complete/</loc>
-         <lastmod>2025-08-27</lastmod>
+         <lastmod>2025-09-04</lastmod>
     </url>
     <url>
          <loc>https://tx-pts-dai.github.io/terraform-aws-kubernetes-platform/examples/datadog/</loc>
-         <lastmod>2025-08-27</lastmod>
+         <lastmod>2025-09-04</lastmod>
     </url>
     <url>
          <loc>https://tx-pts-dai.github.io/terraform-aws-kubernetes-platform/examples/lacework/</loc>
-         <lastmod>2025-08-27</lastmod>
+         <lastmod>2025-09-04</lastmod>
     </url>
     <url>
          <loc>https://tx-pts-dai.github.io/terraform-aws-kubernetes-platform/examples/simple/</loc>
-         <lastmod>2025-08-27</lastmod>
+         <lastmod>2025-09-04</lastmod>
     </url>
     <url>
          <loc>https://tx-pts-dai.github.io/terraform-aws-kubernetes-platform/examples/snippets/karpenter/</loc>
-         <lastmod>2025-08-27</lastmod>
+         <lastmod>2025-09-04</lastmod>
     </url>
     <url>
          <loc>https://tx-pts-dai.github.io/terraform-aws-kubernetes-platform/modules/addon/</loc>
-         <lastmod>2025-08-27</lastmod>
+         <lastmod>2025-09-04</lastmod>
     </url>
     <url>
          <loc>https://tx-pts-dai.github.io/terraform-aws-kubernetes-platform/modules/argocd/</loc>
-         <lastmod>2025-08-27</lastmod>
+         <lastmod>2025-09-04</lastmod>
     </url>
     <url>
          <loc>https://tx-pts-dai.github.io/terraform-aws-kubernetes-platform/modules/cloudflare/</loc>
-         <lastmod>2025-08-27</lastmod>
+         <lastmod>2025-09-04</lastmod>
     </url>
     <url>
          <loc>https://tx-pts-dai.github.io/terraform-aws-kubernetes-platform/modules/datadog/</loc>
-         <lastmod>2025-08-27</lastmod>
+         <lastmod>2025-09-04</lastmod>
     </url>
     <url>
          <loc>https://tx-pts-dai.github.io/terraform-aws-kubernetes-platform/modules/lacework/</loc>
-         <lastmod>2025-08-27</lastmod>
+         <lastmod>2025-09-04</lastmod>
     </url>
     <url>
          <loc>https://tx-pts-dai.github.io/terraform-aws-kubernetes-platform/modules/network/</loc>
-         <lastmod>2025-08-27</lastmod>
+         <lastmod>2025-09-04</lastmod>
     </url>
     <url>
          <loc>https://tx-pts-dai.github.io/terraform-aws-kubernetes-platform/modules/security-group/</loc>
-         <lastmod>2025-08-27</lastmod>
+         <lastmod>2025-09-04</lastmod>
     </url>
     <url>
          <loc>https://tx-pts-dai.github.io/terraform-aws-kubernetes-platform/modules/ssm/</loc>
-         <lastmod>2025-08-27</lastmod>
+         <lastmod>2025-09-04</lastmod>
     </url>
 </urlset>
