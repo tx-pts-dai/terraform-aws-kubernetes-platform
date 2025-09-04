@@ -69,7 +69,7 @@ module "aws_lb_controller_pod_identity" {
     controller = {
       cluster_name    = module.eks.cluster_name
       namespace       = "kube-system"
-      service_account = "aws-load-balancer-controller"
+      service_account = "aws-loadbalancer-controller"
     }
   }
 }
