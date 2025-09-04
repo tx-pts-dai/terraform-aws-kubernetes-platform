@@ -373,6 +373,7 @@ module "karpenter_irsa" {
   version = "6.2.1"
 
   name            = "karpenter-controller-${local.id}"
+  policy_name     = "karpenter-controller-${local.id}"
   use_name_prefix = false
 
   policies = {

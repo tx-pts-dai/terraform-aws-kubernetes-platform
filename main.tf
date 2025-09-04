@@ -124,32 +124,6 @@ module "eks" {
         delete = "3m"
       }
     }
-
-    # coredns = {
-    #   before_compute = true
-
-    #   most_recent = true
-    #   preserve    = false
-
-    #   timeouts = {
-    #     create = "3m"
-    #     delete = "3m"
-    #   }
-    # }
-
-    # aws-ebs-csi-driver = {
-    #   before_compute = true
-
-    #   most_recent = true
-    #   preserve    = false
-
-    #   pod_identity_association = [{
-    #     role_arn        = module.aws_ebs_csi_pod_identity.iam_role_arn
-    #     service_account = "ebs-csi-controller-sa"
-    #   }]
-    # }
-
-
   }
 
   iam_role_name            = local.stack_name
@@ -228,6 +202,7 @@ module "vpc_cni_irsa" {
   version = "6.2.1"
 
   name            = "vpc-cni-${local.id}"
+  policy_name     = "vpc-cni-${local.id}"
   use_name_prefix = false
 
   attach_vpc_cni_policy = true
