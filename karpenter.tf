@@ -415,7 +415,7 @@ module "karpenter" {
 resource "helm_release" "karpenter_crd" {
   name             = "karpenter-crd"
   chart            = "karpenter-crd"
-  version          = "1.6.2"
+  version          = "1.6.3"
   repository       = "oci://public.ecr.aws/karpenter"
   description      = "Karpenter CRDs"
   namespace        = local.karpenter.namespace
@@ -425,7 +425,7 @@ resource "helm_release" "karpenter_crd" {
 resource "helm_release" "karpenter_release" {
   name             = "karpenter"
   chart            = "karpenter"
-  version          = "1.6.2"
+  version          = "1.6.3"
   repository       = "oci://public.ecr.aws/karpenter"
   namespace        = local.karpenter.namespace
   create_namespace = true
