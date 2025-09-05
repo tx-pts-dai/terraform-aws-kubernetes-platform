@@ -74,6 +74,22 @@ variable "enable_sso_admin_auto_discovery" {
 }
 
 ################################################################################
+# Extra EKS Addons
+################################################################################
+
+variable "extra_cluster_addons" {
+  description = "Map of cluster addon configurations to enable for the cluster. Addon name can be the map keys or set with `name`. Addons are created after karpenter resources"
+  type        = any
+  default     = {}
+}
+
+variable "extra_cluster_addons_timeouts" {
+  description = "Create, update, and delete timeout configurations for the cluster addons"
+  type        = map(string)
+  default     = {}
+}
+
+################################################################################
 # Integrations
 
 variable "base_domain" {

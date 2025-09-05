@@ -1,6 +1,48 @@
 ################################################################################
 # EKS Addons
 #
+# Create addons after Karpenter resources to avoid dependency issues
+locals {
+  cluster_addons = {
+    coredns = {
+      # Only manage addon here when addons module is disabled
+      create      = var.create_addons == false
+      most_recent = true
+      preserve    = false
+
+      configuration_values = jsonencode({ env = { ENABLE_PREFIX_DELEGATION = "true" } })
+    }
+
+    aws-ebs-csi-driver = {
+      # Only manage addon here when addons module is disabled
+      create      = var.create_addons == false
+      most_recent = true
+      preserve    = false
+
+      configuration_values     = jsonencode({ replicaCount = 1 })
+      service_account_role_arn = module.ebs_csi_driver_irsa.arn
+    }
+  }
+
+  extra_cluster_addons = merge(local.cluster_addons, var.extra_cluster_addons)
+}
+
+module "eks_addons" {
+  source = "./modules/eks-addons"
+
+  cluster_name       = module.eks.cluster_name
+  kubernetes_version = module.eks.cluster_version
+
+  cluster_addons          = local.extra_cluster_addons
+  cluster_addons_timeouts = var.extra_cluster_addons_timeouts
+
+  depends_on = [
+    module.eks,
+    helm_release.karpenter_release
+  ]
+
+  tags = var.tags
+}
 
 ################################################################################
 # Pod Identity Roles

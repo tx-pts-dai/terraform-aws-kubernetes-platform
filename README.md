@@ -193,6 +193,7 @@ as described in the `.pre-commit-config.yaml` file
 | <a name="module_downscaler"></a> [downscaler](#module\_downscaler) | tx-pts-dai/downscaler/kubernetes | 0.3.1 |
 | <a name="module_ebs_csi_driver_irsa"></a> [ebs\_csi\_driver\_irsa](#module\_ebs\_csi\_driver\_irsa) | terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts | 6.2.1 |
 | <a name="module_eks"></a> [eks](#module\_eks) | terraform-aws-modules/eks/aws | 21.1.5 |
+| <a name="module_eks_addons"></a> [eks\_addons](#module\_eks\_addons) | ./modules/eks-addons | n/a |
 | <a name="module_external_dns_pod_identity"></a> [external\_dns\_pod\_identity](#module\_external\_dns\_pod\_identity) | terraform-aws-modules/eks-pod-identity/aws | 2.0.0 |
 | <a name="module_external_secrets_pod_identity"></a> [external\_secrets\_pod\_identity](#module\_external\_secrets\_pod\_identity) | terraform-aws-modules/eks-pod-identity/aws | 2.0.0 |
 | <a name="module_karpenter"></a> [karpenter](#module\_karpenter) | terraform-aws-modules/eks/aws//modules/karpenter | 21.1.5 |
@@ -255,6 +256,8 @@ as described in the `.pre-commit-config.yaml` file
 | <a name="input_enable_timestamp_id"></a> [enable\_timestamp\_id](#input\_enable\_timestamp\_id) | Disable the timestamp-based ID generation. When true, uses a static ID instead of timestamp. | `bool` | `true` | no |
 | <a name="input_external_dns"></a> [external\_dns](#input\_external\_dns) | External DNS configurations | `any` | `{}` | no |
 | <a name="input_external_secrets"></a> [external\_secrets](#input\_external\_secrets) | External Secrets configurations | `any` | `{}` | no |
+| <a name="input_extra_cluster_addons"></a> [extra\_cluster\_addons](#input\_extra\_cluster\_addons) | Map of cluster addon configurations to enable for the cluster. Addon name can be the map keys or set with `name`. Addons are created after karpenter resources | `any` | `{}` | no |
+| <a name="input_extra_cluster_addons_timeouts"></a> [extra\_cluster\_addons\_timeouts](#input\_extra\_cluster\_addons\_timeouts) | Create, update, and delete timeout configurations for the cluster addons | `map(string)` | `{}` | no |
 | <a name="input_fargate_fluentbit"></a> [fargate\_fluentbit](#input\_fargate\_fluentbit) | Fargate Fluentbit configurations | `any` | `{}` | no |
 | <a name="input_karpenter"></a> [karpenter](#input\_karpenter) | Karpenter configurations | <pre>object({<br/>    subnet_cidrs = optional(list(string), [])<br/>  })</pre> | `{}` | no |
 | <a name="input_karpenter_helm_set"></a> [karpenter\_helm\_set](#input\_karpenter\_helm\_set) | List of Karpenter Helm set values | <pre>list(object({<br/>    name  = string<br/>    value = string<br/>  }))</pre> | `[]` | no |
