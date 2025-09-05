@@ -123,8 +123,6 @@ module "ebs_csi_driver_irsa" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts"
   version = "6.2.1"
 
-  create = var.create_addons
-
   name            = "ebs-csi-driver-${local.id}"
   policy_name     = "ebs-csi-driver-${local.id}"
   use_name_prefix = false
@@ -359,7 +357,7 @@ resource "helm_release" "reloader" {
 module "argocd" {
   source = "./modules/argocd"
 
-  create = var.create_addons && var.enable_argocd
+  create = var.enable_argocd
 
   cluster_name = module.eks.cluster_name
   namespace    = var.argocd.namespace
@@ -377,4 +375,78 @@ module "argocd" {
   depends_on = [
     module.addons
   ]
+}
+
+################################################################################
+# AWS for Fluent-bit
+locals {
+  aws_for_fluentbit_service_account   = "aws-for-fluent-bit"
+  aws_for_fluentbit_cw_log_group_name = "/aws/eks/${module.eks.cluster_name}/aws-fluentbit-logs"
+  aws_for_fluentbit_namespace         = "kube-system"
+}
+
+resource "aws_iam_policy" "aws_for_fluentbit" {
+  name   = "aws-for-fluentbit-${local.id}"
+  policy = data.aws_iam_policy_document.aws_for_fluentbit.json
+}
+
+module "aws_for_fluentbit_irsa" {
+  source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts"
+  version = "6.2.1"
+
+  name            = "aws-for-fluentbit-${local.id}"
+  use_name_prefix = false
+
+  create_policy = false
+  policies = {
+    controller = aws_iam_policy.aws_for_fluentbit.arn
+  }
+
+  oidc_providers = {
+    main = {
+      provider_arn               = module.eks.oidc_provider_arn
+      namespace_service_accounts = ["${local.aws_for_fluentbit_namespace}:${local.aws_for_fluentbit_service_account}"]
+    }
+  }
+
+  tags = local.tags
+}
+
+resource "aws_cloudwatch_log_group" "aws_for_fluentbit" {
+  name = local.aws_for_fluentbit_cw_log_group_name
+
+  retention_in_days = 90
+  skip_destroy      = false
+
+  tags = local.tags
+}
+
+data "aws_iam_policy_document" "aws_for_fluentbit" {
+  statement {
+    sid    = "PutLogEvents"
+    effect = "Allow"
+    resources = [
+      "arn:aws:logs:${local.region}:${local.account_id}:log-group:${local.aws_for_fluentbit_cw_log_group_name}:log-stream:*",
+    ]
+
+    actions = [
+      "logs:PutLogEvents"
+    ]
+  }
+
+  statement {
+    sid    = "CreateCWLogs"
+    effect = "Allow"
+    resources = [
+      "arn:aws:logs:${local.region}:${local.account_id}:log-group:${local.aws_for_fluentbit_cw_log_group_name}:*",
+    ]
+
+    actions = [
+      "logs:CreateLogGroup",
+      "logs:CreateLogStream",
+      "logs:DescribeLogGroups",
+      "logs:DescribeLogStreams",
+      "logs:PutRetentionPolicy",
+    ]
+  }
 }
