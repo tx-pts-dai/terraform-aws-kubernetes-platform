@@ -106,7 +106,7 @@ data "aws_subnets" "intra_subnets" {
 module "k8s_platform" {
   source = "../../"
 
-  create_addons = true
+  create_addons = false
 
   name = "tests-main"
 
