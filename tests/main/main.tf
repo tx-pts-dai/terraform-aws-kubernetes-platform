@@ -106,8 +106,6 @@ data "aws_subnets" "intra_subnets" {
 module "k8s_platform" {
   source = "../../"
 
-  create_addons = false
-
   name = "tests-main"
 
   cluster_admins = {
@@ -156,29 +154,6 @@ module "k8s_platform" {
             values: ["spot", "on-demand"]
     EOT
   ]
-
-  metrics_server = {
-    set = [
-      {
-        name  = "replicas"
-        value = 1
-      }
-    ]
-  }
-  aws_load_balancer_controller = {
-    set = [
-      {
-        name  = "replicaCount"
-        value = 1
-      },
-      # {
-      #   name  = "clusterSecretsPermissions.allowAllSecrets"
-      #   value = true # enables Okta integration by reading client id and secret from K8s secrets
-      # }
-    ]
-  }
-
-  enable_downscaler = false
 
   base_domain = "dai-sandbox.tamedia.tech"
 

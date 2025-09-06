@@ -5,7 +5,7 @@
 data "aws_eks_addon_version" "this" {
   for_each = { for k, v in var.cluster_addons : k => v if v.create }
 
-  addon_name         = try(each.value.name, each.key)
+  addon_name         = coalesce(each.value.name, each.key)
   kubernetes_version = var.kubernetes_version
   most_recent        = each.value.most_recent
 }
@@ -14,7 +14,7 @@ resource "aws_eks_addon" "this" {
   for_each = { for k, v in var.cluster_addons : k => v if v.create }
 
   cluster_name = var.cluster_name
-  addon_name   = try(each.value.name, each.key)
+  addon_name   = coalesce(each.value.name, each.key)
 
   addon_version        = coalesce(each.value.addon_version, data.aws_eks_addon_version.this[each.key].version)
   configuration_values = each.value.configuration_values

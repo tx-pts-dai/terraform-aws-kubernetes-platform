@@ -19,7 +19,7 @@ variable "create_addon_roles" {
 variable "create_addon_pod_identity_roles" {
   description = "Create addon pod identities roles. If set to true, all roles will be created"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "name" {
@@ -43,12 +43,11 @@ variable "tags" {
 variable "vpc" {
   description = "VPC configurations"
   type = object({
-    vpc_id          = optional(string)
-    vpc_cidr        = optional(string)
-    private_subnets = optional(list(string))
-    intra_subnets   = optional(list(string))
+    vpc_id          = string
+    vpc_cidr        = string
+    private_subnets = list(string)
+    intra_subnets   = list(string)
   })
-  default = {}
 }
 
 # TODO: Split out into dedicated variables
@@ -177,18 +176,6 @@ variable "fargate_fluentbit" {
   default     = {}
 }
 
-variable "enable_metrics_server" {
-  description = "Enable Metrics Server"
-  type        = bool
-  default     = true
-}
-
-variable "metrics_server" {
-  description = "Metrics Server configurations"
-  type        = any
-  default     = {}
-}
-
 variable "enable_aws_load_balancer_controller" {
   description = "Enable AWS Load Balancer Controller"
   type        = bool
@@ -225,31 +212,8 @@ variable "external_secrets" {
   default     = {}
 }
 
-variable "enable_reloader" {
-  description = "Enable Reloader"
-  type        = bool
-  default     = true
-}
-
-variable "reloader" {
-  description = "Reloader configurations"
-  type        = any
-  default     = {}
-}
-
 ################################################################################
 # Additional Addons - Not installed by default
-variable "enable_downscaler" {
-  description = "Enable Downscaler"
-  type        = bool
-  default     = false
-}
-
-variable "downscaler" {
-  description = "Downscaler configurations"
-  type        = any
-  default     = {}
-}
 
 variable "enable_argocd" {
   description = "Enable Argo CD"
