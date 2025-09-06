@@ -138,10 +138,8 @@ module "k8s_platform" {
       value = "shared"
     }
   ]
-
-  enable_downscaler = true
-
 }
+
 data "aws_secretsmanager_secret_version" "cloudflare" {
   secret_id = "dai/cloudflare/tamedia/apiToken"
 }

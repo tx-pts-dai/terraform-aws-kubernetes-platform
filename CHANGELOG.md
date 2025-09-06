@@ -1,11 +1,22 @@
+# v5.0.0
+
+**Breaking Changes:**
+
+- **Addons Module Disabled**: Kubernetes resources have been disabled and will be uninstalled. They're required to be installed externally. IRAS Roles will be removed in the next major version.
+- **Reloader Module Removed**: The Reloader module has been removed. It's required to be installed externally.
+- **Downscaler Module Removed**: The Downscaler module has been removed. It's required to be installed externally.
+- **Metrics Server Removed**: The Metrics Server has been removed. It's required to be installed externally.
+
+**Features:**
+
+- Pod Identity Roles enabled by default
+- EKS Addons submodule added to support managed addons after Karpenter Resources have been created
+
 # v4.0.0
 
 **Breaking Changes:**
 
 - **AWS Provider Version**: The AWS provider version has been updated to `6.9.0`
-
-
-
 
 # v3.0.0
 

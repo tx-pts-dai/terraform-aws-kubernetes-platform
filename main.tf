@@ -100,6 +100,8 @@ module "eks" {
 
   addons = {
     vpc-cni = {
+      before_compute = true
+
       most_recent = true
       preserve    = true
 
@@ -109,6 +111,8 @@ module "eks" {
     }
 
     kube-proxy = {
+      before_compute = true
+
       most_recent = true
       preserve    = true
     }
