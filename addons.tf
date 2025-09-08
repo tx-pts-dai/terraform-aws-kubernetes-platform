@@ -241,16 +241,6 @@ module "addons" {
     values = try(var.external_secrets.values, [])
     set    = try(var.external_secrets.set, [])
   }
-
-  enable_fargate_fluentbit = var.enable_fargate_fluentbit
-  fargate_fluentbit = {
-    fargate_fluentbit_cw_log_group_name = "/aws/eks/${module.eks.cluster_name}/fargate"
-    role_name                           = "fargate-fluentbit-${local.id}"
-    role_name_prefix                    = false
-
-    values = try(var.fargate_fluentbit.values, [])
-    set    = try(var.fargate_fluentbit.set, [])
-  }
 }
 
 

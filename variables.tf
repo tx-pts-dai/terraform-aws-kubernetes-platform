@@ -170,12 +170,6 @@ variable "enable_fargate_fluentbit" {
   default     = true
 }
 
-variable "fargate_fluentbit" {
-  description = "Fargate Fluentbit configurations"
-  type        = any
-  default     = {}
-}
-
 variable "enable_aws_load_balancer_controller" {
   description = "Enable AWS Load Balancer Controller"
   type        = bool
