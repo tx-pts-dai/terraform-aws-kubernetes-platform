@@ -169,10 +169,10 @@ module "k8s_platform" {
   enable_argocd = true
 
   argocd = {
-    # enable_hub        = true
-    # hub_iam_role_name = "argocd-controller-tests-main"
-
-    enable_spoke      = true
-    hub_iam_role_arns = ["arn:aws:iam::911453050078:role/argocd-controller"]
+    enable_spoke = true
+    hub_iam_role_arns = [
+      "arn:aws:iam::730335665754:role/argocd-controller",
+      "arn:aws:iam::911453050078:role/argocd-controller"
+    ]
   }
 }
