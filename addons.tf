@@ -7,6 +7,14 @@ locals {
     coredns = {
       most_recent = true
       preserve    = false
+
+      configuration_values = jsonencode({
+        autoScaling = {
+          enabled     = true
+          minReplicas = 2
+          maxReplicas = 10
+        }
+      })
     }
 
     aws-ebs-csi-driver = {
