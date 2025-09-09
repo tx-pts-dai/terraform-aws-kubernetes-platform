@@ -79,8 +79,9 @@ module "aws_ebs_csi_pod_identity" {
 
   create = var.create_addon_pod_identity_roles
 
-  name            = "aws-ebs-csi-pod-identity-${local.id}"
-  use_name_prefix = false
+  name                    = "aws-ebs-csi-pod-identity-${local.id}"
+  aws_ebs_csi_policy_name = "aws-ebs-csi-pod-identity-${local.id}"
+  use_name_prefix         = false
 
   attach_aws_ebs_csi_policy = true
 
@@ -93,8 +94,9 @@ module "aws_gateway_controller_pod_identity" {
 
   create = var.create_addon_pod_identity_roles
 
-  name            = "aws-gateway-controller-pod-identity-${local.id}"
-  use_name_prefix = false
+  name                               = "aws-gateway-controller-pod-identity-${local.id}"
+  aws_gateway_controller_policy_name = "aws-gateway-controller-pod-identity-${local.id}"
+  use_name_prefix                    = false
 
   attach_aws_gateway_controller_policy = true
 
@@ -115,8 +117,9 @@ module "aws_lb_controller_pod_identity" {
 
   create = var.create_addon_pod_identity_roles
 
-  name            = "aws-lb-controller-pod-identity-${local.id}"
-  use_name_prefix = false
+  name                          = "aws-lb-controller-pod-identity-${local.id}"
+  aws_lb_controller_policy_name = "aws-lb-controller-pod-identity-${local.id}"
+  use_name_prefix               = false
 
   attach_aws_lb_controller_policy = true
 
@@ -135,8 +138,9 @@ module "external_dns_pod_identity" {
 
   create = var.create_addon_pod_identity_roles
 
-  name            = "external-dns-pod-identity-${local.id}"
-  use_name_prefix = false
+  name                     = "external-dns-pod-identity-${local.id}"
+  external_dns_policy_name = "external-dns-pod-identity-${local.id}"
+  use_name_prefix          = false
 
   attach_external_dns_policy    = true
   external_dns_hosted_zone_arns = ["*"]
@@ -156,8 +160,9 @@ module "external_secrets_pod_identity" {
 
   create = var.create_addon_pod_identity_roles
 
-  name            = "external-secrets-pod-identity-${local.id}"
-  use_name_prefix = false
+  name                         = "external-secrets-pod-identity-${local.id}"
+  external_secrets_policy_name = "external-secrets-pod-identity-${local.id}"
+  use_name_prefix              = false
 
   attach_external_secrets_policy = true
 
