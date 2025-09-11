@@ -1,6 +1,6 @@
 # [Tamedia Kubernetes as a Service (KaaS) Terraform Module](https://tx-pts-dai.github.io/terraform-aws-kubernetes-platform/)
 
-Opinionated batteries included Terraform module to deploy Kubernetes in AWS. Includes:
+Opinionated Terraform module to deploy Kubernetes in AWS. Includes:
 
 Managed Addons:
 
@@ -9,31 +9,10 @@ Managed Addons:
 - CoreDNS
 - KubeProxy
 
-Core components (installed by default):
+Components (installed by default):
 
 - [Karpenter](https://karpenter.sh/)
-- [Metrics Server](https://github.com/kubernetes-sigs/metrics-server)
-- [AWS Load Balancer Controller](https://kubernetes-sigs.github.io/aws-load-balancer-controller/latest/)
-- [External DNS](https://github.com/kubernetes-sigs/external-dns)
-- [External Secrets Operator](https://external-secrets.io/latest/)
-- [Prometheus Operator](https://prometheus-operator.dev/docs/getting-started/introduction/)
-- [Grafana](https://grafana.com/)
-- [Fluent Operator](https://github.com/fluent/fluent-operator)
-- [Fluentbit for Fargate]()
-- [Reloader](https://docs.stakater.com/reloader/)
-
-Additional components (optional):
-
-- [Cert Manager](https://cert-manager.io/docs/)
-- [Ingress Nginx](https://kubernetes.github.io/ingress-nginx/)
-- [Downscaler]()
 - [ArgoCD](https://argoproj.github.io/argo-cd/)
-
-Integrations (optional):
-
-- Okta
-- PagerDuty
-- Slack
 
 ## Requirements
 
@@ -43,6 +22,32 @@ IAM service-linked roles
 
 - AWSServiceRoleForEC2Spot
 - [AWSServiceRoleForEC2SpotFleet](https://docs.aws.amazon.com/batch/latest/userguide/spot_fleet_IAM_role.html)
+
+## Usage
+
+```tf
+module "k8s_platform" {
+  source = "tx-pts-dai/kubernetes-platform/aws"
+  # Pin this module to a specific version to avoid breaking changes
+  # version = "0.0.0"
+
+  name = "example-platform"
+
+  vpc = {
+    vpc_id          = "vpc-12345678"
+    vpc_cidr        = "10.0.0.0/16"
+    private_subnets = ["10.0.1.0/24", "10.0.2.0/24"]
+    intra_subnets   = ["10.0.3.0/24"]
+  }
+
+  tags = {
+    Environment = "sandbox"
+    GithubRepo  = "terraform-aws-kubernetes-platform"
+  }
+}
+```
+
+See the [Examples below](#Examples) for more use cases
 
 ## Release new kubernetes version
 **important**
@@ -72,29 +77,6 @@ To release a new Kubernetes version, follow these steps:
    - Verify that the new module version is available in the [Terraform Registry](https://registry.terraform.io/modules/tx-pts-dai/kubernetes-platform/aws).
 
 
-## Usage
-
-```tf
-module "k8s_platform" {
-  source = "tx-pts-dai/kubernetes-platform/aws"
-  # Pin this module to a specific version to avoid breaking changes
-  # version = "0.0.0"
-
-  name = "example-platform"
-
-  vpc = {
-    enabled = true
-  }
-
-  tags = {
-    Environment = "sandbox"
-    GithubRepo  = "terraform-aws-kubernetes-platform"
-  }
-}
-```
-
-See the [Examples below](#Examples) for more use cases
-
 ## Explanation and description of interesting use-cases
 
 Why this module?
@@ -103,44 +85,18 @@ Why this module?
 - To encourage standardization and common practices
 - To ease maintenance
 
-## Reloader
-The [Stakater Reloader](https://github.com/stakater/Reloader) is a Kubernetes controller that automatically watches for changes in ConfigMaps and Secrets and triggers rolling restarts of the associated deployments, statefulsets, or daemonsets when these configurations are updated. This functionality ensures that applications deployed within a Kubernetes cluster always reflect the latest configuration without manual intervention.
-
-When an application relies on configuration data or sensitive information stored in ConfigMaps or Secrets, and these resources are modified, Reloader automates the process of applying these changes by updating the relevant pods. Without Reloader, such changes would require a manual pod restart or redeployment to take effect.
-
-Reloader is deployed by default on the cluster but is used as on demand via annotations.
-
-Considering this kubernetes deployment and the required annotation:
-```yaml
-kind: Deployment
-metadata:
-  name: foo
-  annotations:
-    reloader.stakater.com/auto: "true"
-spec:
-  template:
-    metadata:
-```
-
-Reloader will now watch for updates and manage rolling restart of pods for this specific deployment.
-
 ## Examples
 
 - [Complete](./examples/complete/) - Includes creation of VPC, k8s cluster, addons and all the optional features.
 - [Datadog](./examples/datadog/) - EKS deployment with Datadog Operator integration
-- [Disable-Addons](./examples/disable-addons/) - EKS + Karpenter deployment with all addons disabled
 - [Lacework](./examples/lacework/) - EKS deployment with Lacework integration
 - [Network](./examples/network/) - VPC deployment with custom subnets for kubernetes
-- [Simple](./examples/simple/) - Simplest EKS deployment with default VPC, addons, ... creation
-
 
 ### Cleanup example deployments
 
 [Destroy Workflow](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/actions/workflows/examples-cleanup.yaml) - This manual workflow destroys deployed example deployments by selection the branch and the example to destroy.
 
 ## Contributing
-
-< issues and contribution guidelines for public modules >
 
 ### Pre-Commit
 
