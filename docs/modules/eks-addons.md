@@ -1,3 +1,3 @@
 {%
-   include-markdown "../../modules/addon/README.md"
+   include-markdown "../../modules/eks-addons/README.md"
 %}
