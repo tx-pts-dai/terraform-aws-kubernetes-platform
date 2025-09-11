@@ -12,6 +12,7 @@ nav:
       - Introduction: index.md
       - patterns.md
   - getting-started.md
+  - argocd-addons-migration.md
   - Submodules:
       - modules/argocd.md
       - modules/cloudflare.md
@@ -20,9 +21,10 @@ nav:
       - modules/network.md
       - modules/security-group.md
       - modules/ssm.md
+      - modules/eks-addons.md
   - Examples:
       - examples/complete.md
-      - examples/simple.md
+      - examples/argocd.md
       - examples/lacework.md
       - examples/datadog.md
       - Snippets:
