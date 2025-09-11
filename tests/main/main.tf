@@ -106,8 +106,6 @@ data "aws_subnets" "intra_subnets" {
 module "k8s_platform" {
   source = "../../"
 
-  create_addons = true
-
   name = "tests-main"
 
   cluster_admins = {
@@ -157,29 +155,6 @@ module "k8s_platform" {
     EOT
   ]
 
-  metrics_server = {
-    set = [
-      {
-        name  = "replicas"
-        value = 1
-      }
-    ]
-  }
-  aws_load_balancer_controller = {
-    set = [
-      {
-        name  = "replicaCount"
-        value = 1
-      },
-      # {
-      #   name  = "clusterSecretsPermissions.allowAllSecrets"
-      #   value = true # enables Okta integration by reading client id and secret from K8s secrets
-      # }
-    ]
-  }
-
-  enable_downscaler = false
-
   base_domain = "dai-sandbox.tamedia.tech"
 
   enable_acm_certificate = false
@@ -194,10 +169,10 @@ module "k8s_platform" {
   enable_argocd = true
 
   argocd = {
-    # enable_hub        = true
-    # hub_iam_role_name = "argocd-controller-tests-main"
-
-    enable_spoke      = true
-    hub_iam_role_arns = ["arn:aws:iam::911453050078:role/argocd-controller"]
+    enable_spoke = true
+    hub_iam_role_arns = [
+      "arn:aws:iam::730335665754:role/argocd-controller",
+      "arn:aws:iam::911453050078:role/argocd-controller"
+    ]
   }
 }

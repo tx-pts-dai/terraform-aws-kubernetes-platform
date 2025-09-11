@@ -373,9 +373,9 @@ module "karpenter_irsa" {
   version = "6.2.1"
 
   name            = "karpenter-controller-${local.id}"
-  policy_name     = "karpenter-controller-${local.id}"
   use_name_prefix = false
 
+  create_policy = false
   policies = {
     controller = aws_iam_policy.karpenter_controller.arn
   }

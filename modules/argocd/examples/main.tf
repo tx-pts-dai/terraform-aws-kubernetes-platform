@@ -77,13 +77,15 @@ module "k8s_platform" {
   }
 
   vpc = {
-    enabled = true
-    cidr    = "10.0.0.0/16"
-    max_az  = 3
-    subnet_configs = [
-      { public = 24 },
-      { private = 24 },
-      { intra = 26 },
+    vpc_id   = "vpc-12345678"
+    vpc_cidr = "10.0.0.0/16"
+    private_subnets = [
+      "subnet-12345678",
+      "subnet-23456789",
+    ]
+    intra_subnets = [
+      "subnet-34567890",
+      "subnet-45678901",
     ]
   }
 

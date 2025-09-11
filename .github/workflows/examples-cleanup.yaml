@@ -11,10 +11,8 @@ on:
         options:
           - examples/complete
           - examples/datadog
-          - examples/disable-addons
           - examples/lacework
           - examples/network
-          - examples/simple
 
 permissions:
   id-token: write

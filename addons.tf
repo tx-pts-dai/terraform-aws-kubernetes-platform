@@ -1,6 +1,82 @@
 ################################################################################
 # EKS Addons
 #
+# Create addons after Karpenter resources to avoid dependency issues
+locals {
+  cluster_addons = {
+    coredns = {
+      most_recent = true
+      preserve    = false
+
+      configuration_values = jsonencode({
+        autoScaling = {
+          enabled     = true
+          minReplicas = 2
+          maxReplicas = 10
+        }
+      })
+    }
+
+    aws-ebs-csi-driver = {
+      most_recent = true
+      preserve    = false
+
+      configuration_values = jsonencode({
+        controller = {
+          replicaCount = 1
+        }
+      })
+
+      service_account_role_arn = module.ebs_csi_driver_irsa.arn
+      # Removing the IRSA role  does not work
+      # BUG: https://github.com/hashicorp/terraform-provider-aws/issues/30645
+      # pod_identity_association = [{
+      #   role_arn        = module.aws_ebs_csi_pod_identity.iam_role_arn
+      #   service_account = "ebs-csi-controller-sa"
+      # }]
+    }
+  }
+
+  extra_cluster_addons = merge(local.cluster_addons, var.extra_cluster_addons)
+}
+
+# Required for Managed EBS CSI Driver
+module "ebs_csi_driver_irsa" {
+  source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts"
+  version = "6.2.1"
+
+  name            = "ebs-csi-driver-${local.id}"
+  policy_name     = "ebs-csi-driver-${local.id}"
+  use_name_prefix = false
+
+  attach_ebs_csi_policy = true
+
+  oidc_providers = {
+    main = {
+      provider_arn               = module.eks.oidc_provider_arn
+      namespace_service_accounts = ["kube-system:ebs-csi-controller-sa"]
+    }
+  }
+
+  tags = local.tags
+}
+
+module "eks_addons" {
+  source = "./modules/eks-addons"
+
+  cluster_name       = module.eks.cluster_name
+  kubernetes_version = module.eks.cluster_version
+
+  cluster_addons          = local.extra_cluster_addons
+  cluster_addons_timeouts = var.extra_cluster_addons_timeouts
+
+  tags = var.tags
+
+  depends_on = [
+    helm_release.karpenter_release,
+    helm_release.karpenter_resources
+  ]
+}
 
 ################################################################################
 # Pod Identity Roles
@@ -11,23 +87,11 @@ module "aws_ebs_csi_pod_identity" {
 
   create = var.create_addon_pod_identity_roles
 
-  name            = "aws-ebs-csi-${local.id}"
-  use_name_prefix = false
+  name                    = "aws-ebs-csi-pod-identity-${local.id}"
+  aws_ebs_csi_policy_name = "aws-ebs-csi-pod-identity-${local.id}"
+  use_name_prefix         = false
 
   attach_aws_ebs_csi_policy = true
-
-  associations = {
-    controller = {
-      cluster_name    = module.eks.cluster_name
-      namespace       = "kube-system"
-      service_account = "ebs-csi-controller-sa"
-    }
-    node = {
-      cluster_name    = module.eks.cluster_name
-      namespace       = "kube-system"
-      service_account = "ebs-csi-node-sa"
-    }
-  }
 
   tags = local.tags
 }
@@ -38,8 +102,9 @@ module "aws_gateway_controller_pod_identity" {
 
   create = var.create_addon_pod_identity_roles
 
-  name            = "aws-ebs-csi-${local.id}"
-  use_name_prefix = false
+  name                               = "aws-gateway-controller-pod-identity-${local.id}"
+  aws_gateway_controller_policy_name = "aws-gateway-controller-pod-identity-${local.id}"
+  use_name_prefix                    = false
 
   attach_aws_gateway_controller_policy = true
 
@@ -60,8 +125,9 @@ module "aws_lb_controller_pod_identity" {
 
   create = var.create_addon_pod_identity_roles
 
-  name            = "aws-lb-controller-${local.id}"
-  use_name_prefix = false
+  name                          = "aws-lb-controller-pod-identity-${local.id}"
+  aws_lb_controller_policy_name = "aws-lb-controller-pod-identity-${local.id}"
+  use_name_prefix               = false
 
   attach_aws_lb_controller_policy = true
 
@@ -80,8 +146,9 @@ module "external_dns_pod_identity" {
 
   create = var.create_addon_pod_identity_roles
 
-  name            = "external-dns-${local.id}"
-  use_name_prefix = false
+  name                     = "external-dns-pod-identity-${local.id}"
+  external_dns_policy_name = "external-dns-pod-identity-${local.id}"
+  use_name_prefix          = false
 
   attach_external_dns_policy    = true
   external_dns_hosted_zone_arns = ["*"]
@@ -101,8 +168,9 @@ module "external_secrets_pod_identity" {
 
   create = var.create_addon_pod_identity_roles
 
-  name            = "external-secrets-${local.id}"
-  use_name_prefix = false
+  name                         = "external-secrets-pod-identity-${local.id}"
+  external_secrets_policy_name = "external-secrets-pod-identity-${local.id}"
+  use_name_prefix              = false
 
   attach_external_secrets_policy = true
 
@@ -117,77 +185,19 @@ module "external_secrets_pod_identity" {
 
 ################################################################################
 # Addons
-
-# Required for Managed EBS CSI Driver
-module "ebs_csi_driver_irsa" {
-  source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts"
-  version = "6.2.1"
-
-  create = var.create_addons
-
-  name            = "ebs-csi-driver-${local.id}"
-  policy_name     = "ebs-csi-driver-${local.id}"
-  use_name_prefix = false
-
-  attach_ebs_csi_policy = true
-
-  oidc_providers = {
-    main = {
-      provider_arn               = module.eks.oidc_provider_arn
-      namespace_service_accounts = ["kube-system:ebs-csi-controller-sa"]
-    }
-  }
-
-  tags = local.tags
-}
-
+# Will be completely removed in the next major version
 module "addons" {
   source  = "aws-ia/eks-blueprints-addons/aws"
   version = "1.22.0"
 
-  create_kubernetes_resources = var.create_addons
-
-  create_delay_dependencies = [
-    helm_release.karpenter_release.status
-  ]
-
-  # Arbitrary delay to wait for Karpenter to create nodes before creating managed addons to avoid an isssue
-  # where the managed addons are created before the nodes are ready and they fail
-  create_delay_duration = "3m"
+  # Addons module is deprecated in favour of argocd managed addons
+  # kubernetes resources need to be removed first and then iam roles due to circular dependencies
+  create_kubernetes_resources = false
 
   cluster_name      = module.eks.cluster_name
   cluster_endpoint  = module.eks.cluster_endpoint
   cluster_version   = module.eks.cluster_version
   oidc_provider_arn = module.eks.oidc_provider_arn
-
-  eks_addons = {
-    coredns = {
-      most_recent = true
-      preserve    = false
-
-      timeouts = {
-        create = "3m"
-        delete = "3m"
-      }
-    }
-
-    aws-ebs-csi-driver = {
-      most_recent = true
-      preserve    = false
-
-      configurations = {
-        replicaCount = 1
-      }
-
-      service_account_role_arn = module.ebs_csi_driver_irsa.arn
-
-      timeouts = {
-        create = "3m"
-        delete = "3m"
-      }
-    }
-
-  }
 
   enable_aws_load_balancer_controller = var.enable_aws_load_balancer_controller && var.create_addons
   aws_load_balancer_controller = {
@@ -195,7 +205,6 @@ module "addons" {
     role_name            = "lb-controller-${local.id}"
     role_name_use_prefix = false
 
-    # renovate: datasource=helm depName=aws-load-balancer-controller registryUrl=https://aws.github.io/eks-charts
     chart_version = "1.13.3"
 
     wait = true
@@ -245,121 +254,16 @@ module "addons" {
     values = try(var.external_secrets.values, [])
     set    = try(var.external_secrets.set, [])
   }
-
-  enable_fargate_fluentbit = var.enable_fargate_fluentbit
-  fargate_fluentbit = {
-    fargate_fluentbit_cw_log_group_name = "/aws/eks/${module.eks.cluster_name}/fargate"
-    role_name                           = "fargate-fluentbit-${local.id}"
-    role_name_prefix                    = false
-
-    values = try(var.fargate_fluentbit.values, [])
-    set    = try(var.fargate_fluentbit.set, [])
-  }
-
-  enable_metrics_server = var.enable_metrics_server && var.create_addons
-  metrics_server = {
-    values = try(var.metrics_server.values, [])
-    set = concat([{
-      name  = "replicas",
-      value = 2,
-    }], try(var.metrics_server.set, []))
-  }
-
-  depends_on = [
-    helm_release.karpenter_release,
-    helm_release.karpenter_resources
-  ]
 }
 
-################################################################################
-# Kube Downscaler
 
-module "downscaler" {
-  source  = "tx-pts-dai/downscaler/kubernetes"
-  version = "0.3.1"
-
-  count = var.enable_downscaler && var.create_addons ? 1 : 0
-
-  image_version = try(var.downscaler.image_version, "23.2.0")
-  dry_run       = try(var.downscaler.dry_run, false)
-  custom_args   = try(var.downscaler.custom_args, [])
-  node_selector = try(var.downscaler.node_selector, {})
-  tolerations   = try(var.downscaler.tolerations, [])
-
-  depends_on = [
-    module.addons
-  ]
-}
-
-################################################################################
-# External Secrets Custom Resources
-# TODO: move external secrets to dedicated module
-resource "helm_release" "cluster_secret_store" {
-  count = var.enable_external_secrets && var.create_addons ? 1 : 0
-
-  name        = "cluster-secret-store-aws-secretsmanager"
-  chart       = "custom-resources"
-  version     = "0.1.2"
-  repository  = "https://dnd-it.github.io/helm-charts"
-  description = "External Secrets Cluster Secret Store for AWS Secrets Manager"
-  namespace   = "external-secrets"
-
-  values = [
-    <<-EOT
-    apiVersion: external-secrets.io/v1
-    kind: ClusterSecretStore
-    metadata:
-      name: aws-secretsmanager
-    spec:
-      provider:
-        aws:
-          service: SecretsManager
-          region: ${local.region}
-    EOT
-  ]
-
-  depends_on = [
-    module.addons
-  ]
-}
-
-################################################################################
-# Reloader
-resource "helm_release" "reloader" {
-  count = var.create_addons && var.enable_reloader ? 1 : 0
-
-  name        = "reloader"
-  chart       = "reloader"
-  version     = "2.2.2"
-  repository  = "https://stakater.github.io/stakater-charts"
-  description = "Reloader"
-  namespace   = "reloader"
-
-  create_namespace = true
-
-  # https://github.com/stakater/Reloader/blob/master/deployments/kubernetes/chart/reloader/values.yaml
-
-  dynamic "set" {
-    for_each = try(var.reloader.set, [])
-
-    content {
-      name  = set.value.name
-      value = set.value.value
-      type  = try(set.value.type, null)
-    }
-  }
-
-  depends_on = [
-    module.addons
-  ]
-}
 
 ################################################################################
 # ArgoCD
 module "argocd" {
   source = "./modules/argocd"
 
-  create = var.create_addons && var.enable_argocd
+  create = var.enable_argocd
 
   cluster_name = module.eks.cluster_name
   namespace    = var.argocd.namespace
@@ -373,8 +277,118 @@ module "argocd" {
 
   helm_values = var.argocd.helm_values
   helm_set    = var.argocd.helm_set
+}
 
-  depends_on = [
-    module.addons
-  ]
+################################################################################
+# Fargate Fluent-bit
+locals {
+  fargate_fluentbit_cw_log_group_name   = "/aws/eks/${module.eks.cluster_name}/fargate"
+  fargate_fluentbit_cwlog_stream_prefix = "fargate-logs-"
+  fargate_fluentbit_policy_name         = "${module.eks.cluster_name}-fargate-fluentbit-logs"
+}
+
+resource "aws_cloudwatch_log_group" "fargate_fluentbit" {
+  count = var.enable_fargate_fluentbit ? 1 : 0
+
+  name              = local.fargate_fluentbit_cw_log_group_name
+  retention_in_days = 90
+  skip_destroy      = false
+  tags              = local.tags
+}
+
+resource "aws_iam_policy" "fargate_fluentbit" {
+  count = var.enable_fargate_fluentbit ? 1 : 0
+
+  name   = local.fargate_fluentbit_policy_name
+  policy = data.aws_iam_policy_document.fargate_fluentbit[0].json
+}
+
+data "aws_iam_policy_document" "fargate_fluentbit" {
+  count = var.enable_fargate_fluentbit ? 1 : 0
+
+  statement {
+    sid = "PutLogEvents"
+    actions = [
+      "logs:CreateLogStream",
+      "logs:CreateLogGroup",
+      "logs:DescribeLogStreams",
+      "logs:PutLogEvents"
+    ]
+    resources = [
+      "${aws_cloudwatch_log_group.fargate_fluentbit[0].arn}:*",
+      "${aws_cloudwatch_log_group.fargate_fluentbit[0].arn}:logstream:*"
+    ]
+  }
+}
+# Help on Fargate Logging with Fluentbit and CloudWatch
+# https://docs.aws.amazon.com/eks/latest/userguide/fargate-logging.html
+resource "kubernetes_namespace_v1" "aws_observability" {
+  count = var.enable_fargate_fluentbit ? 1 : 0
+
+  metadata {
+    name = "aws-observability"
+
+    labels = {
+      aws-observability = "enabled"
+    }
+  }
+}
+
+# fluent-bit-cloudwatch value as the name of the CloudWatch log group that is automatically created as soon as your apps start logging
+resource "kubernetes_config_map_v1" "aws_logging" {
+  count = var.enable_fargate_fluentbit ? 1 : 0
+
+  metadata {
+    name      = "aws-logging"
+    namespace = kubernetes_namespace_v1.aws_observability[0].id
+  }
+
+  data = {
+    "parsers.conf" = (
+      <<-EOT
+        [PARSER]
+          Name crio
+          Format Regex
+          Regex ^(?<time>[^ ]+) (?<stream>stdout|stderr) (?<logtag>P|F) (?<log>.*)$
+          Time_Key    time
+          Time_Format %Y-%m-%dT%H:%M:%S.%L%z
+          Time_Keep On
+      EOT
+    )
+    "filters.conf" = (
+      <<-EOT
+        [FILTER]
+          Name parser
+          Match *
+          Key_name log
+          Parser crio
+        [FILTER]
+          Name kubernetes
+          Match kube.*
+          Merge_Log On
+          Keep_Log Off
+          Buffer_Size 0
+          Kube_Meta_Cache_TTL 300s
+      EOT
+    )
+    "output.conf" = (
+      <<-EOT
+        [OUTPUT]
+              Name cloudwatch
+              Match kube.*
+              region ${local.region}
+              log_group_name ${aws_cloudwatch_log_group.fargate_fluentbit[0].name}
+              log_stream_prefix ${local.fargate_fluentbit_cwlog_stream_prefix}
+              auto_create_group true
+        [OUTPUT]
+              Name cloudwatch_logs
+              Match *
+              region ${local.region}
+              log_group_name ${aws_cloudwatch_log_group.fargate_fluentbit[0].name}
+              log_stream_prefix fargate-logs-fluent-bit-
+              auto_create_group true
+
+      EOT
+    )
+  }
 }
