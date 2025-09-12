@@ -172,7 +172,10 @@ module "external_secrets_pod_identity" {
   external_secrets_policy_name = "external-secrets-pod-identity-${local.id}"
   use_name_prefix              = false
 
-  attach_external_secrets_policy = true
+  attach_external_secrets_policy        = true
+  external_secrets_create_permission    = true
+  external_secrets_ssm_parameter_arns   = ["*"]
+  external_secrets_secrets_manager_arns = ["*"]
 
   associations = {
     controller = {
