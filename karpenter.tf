@@ -478,7 +478,7 @@ resource "helm_release" "karpenter_release" {
 resource "helm_release" "karpenter_resources" {
   name       = "karpenter-resources"
   chart      = "karpenter-resources"
-  version    = "1.0.0"
+  version    = "1.0.1"
   repository = "https://dnd-it.github.io/helm-charts"
   namespace  = local.karpenter.namespace
 
