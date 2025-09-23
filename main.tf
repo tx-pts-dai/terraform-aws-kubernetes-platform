@@ -5,7 +5,7 @@
 #
 # main.tf
 # This file is the entrypoint for the TKaaS module. It is responsible for
-# orchestrating the creation of the Kubernetes cluster and Karpenter resources.
+# orchestrating the creation of the Kubernetes cluster.
 ################################################################################
 
 data "aws_region" "current" {}
@@ -254,5 +254,5 @@ resource "time_sleep" "wait_on_destroy" {
   ]
 
   # Sleep for 5 minutes to allow Karpenter to clean up resources
-  destroy_duration = "5m"
+  destroy_duration = "1m"
 }
