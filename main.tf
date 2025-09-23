@@ -20,12 +20,6 @@ resource "time_static" "timestamp_id" {
 
 ################################################################################
 # Common locals
-#
-# Tidy up the naming here to be more consistent
-# TODO: what happens if you dont pass a k8s version to the eks module. do you get latest?
-# TODO: we cannot use the random id in the tags since it only gets generated after the resource is created
-# and this create a tags merge issue,
-
 locals {
   id = var.enable_timestamp_id ? format("%08x", time_static.timestamp_id[0].unix) : local.name
 
@@ -43,38 +37,16 @@ locals {
 
 ################################################################################
 # EKS Cluster
-data "aws_iam_roles" "sso" {
-  count = var.enable_sso_admin_auto_discovery ? 1 : 0
-
-  name_regex  = "AWSReservedSSO_AWSAdministratorAccess_.*"
-  path_prefix = local.sso_path_prefix
-}
-
-data "aws_iam_roles" "iam_cluster_admins" {
-  for_each = var.cluster_admins
-
-  name_regex = "^${each.value.role_name}$"
-}
-
 locals {
-  sso_path_prefix = "/aws-reserved/sso.amazonaws.com/"
-  sso_cluster_admin = var.enable_sso_admin_auto_discovery && length(data.aws_iam_roles.sso) > 0 && length(data.aws_iam_roles.sso[0].arns) == 1 ? {
-    sso = {
-      role_arn = tolist(data.aws_iam_roles.sso[0].arns)[0]
-    }
-  } : {}
-
-  iam_cluster_admins = { for k, v in var.cluster_admins : k => {
-    role_arn          = tolist(data.aws_iam_roles.iam_cluster_admins[k].arns)[0]
-    kubernetes_groups = try(v.kubernetes_groups, null)
+  cluster_admin_arns = { for k, v in var.cluster_admins : k => {
+    role_arn          = v.role_arn != null ? v.role_arn : "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${v.role_name}"
+    kubernetes_groups = v.kubernetes_groups
   } }
 
-  cluster_admins = merge(local.sso_cluster_admin, local.iam_cluster_admins)
-
-  access_entries = { for k, v in local.cluster_admins : k => {
+  access_entries = { for k, v in local.cluster_admin_arns : k => {
     principal_arn     = v.role_arn
     type              = "STANDARD"
-    kubernetes_groups = try(v.kubernetes_groups, null)
+    kubernetes_groups = v.kubernetes_groups
 
     policy_associations = {
       admin = {
@@ -85,6 +57,7 @@ locals {
       }
     }
   } }
+
   k8s_version = trimspace(file("${path.module}/K8S_VERSION"))
 }
 

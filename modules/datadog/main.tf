@@ -54,94 +54,57 @@ resource "helm_release" "datadog_operator" {
     YAML
   ], var.datadog_operator_helm_values)
 
-  dynamic "set" {
-    for_each = var.datadog_operator_helm_set
+  set = var.datadog_operator_helm_set
 
-    content {
-      name  = set.value.name
-      value = set.value.value
-      type  = try(set.value.type, null)
-    }
-  }
-
-  depends_on = [
-    helm_release.datadog_secrets,
-  ]
-
+  depends_on = [kubernetes_secret.datadog_keys]
 }
 
 ################################################################################
-# Datadog Secret - ExternalSecrets for both monitoring and kube-system NS
-
-resource "helm_release" "datadog_secrets" {
-  name             = "datadog-secrets"
-  repository       = "https://dnd-it.github.io/helm-charts"
-  chart            = "custom-resources"
-  version          = "0.1.2"
-  namespace        = var.namespace
-  max_history      = 3
-  create_namespace = true
-
-  values = [
-    <<-YAML
-    apiVersion: external-secrets.io/v1
-    kind: ExternalSecret
-    metadata:
-      name: datadog-keys
-    spec:
-      refreshInterval: 1m0s
-      secretStoreRef:
-        name: aws-secretsmanager
-        kind: ClusterSecretStore
-      target:
-        name: datadog-keys
-        creationPolicy: Owner
-      data:
-      - secretKey: api-key
-        remoteRef:
-          key: ${var.datadog_secret}
-          property: DD_API_KEY
-      - secretKey: app-key
-        remoteRef:
-          key: ${var.datadog_secret}
-          property: DD_APP_KEY
-    YAML
-  ]
+# Datadog Secrets
+resource "kubernetes_namespace_v1" "datadog" {
+  metadata {
+    name = var.namespace
+  }
 }
 
-resource "helm_release" "datadog_secrets_fargate" {
-  name        = "datadog-secrets-fargate"
-  repository  = "https://dnd-it.github.io/helm-charts"
-  chart       = "custom-resources"
-  version     = "0.1.2"
-  namespace   = "kube-system"
-  max_history = 3
+data "aws_secretsmanager_secret" "datadog" {
+  name = var.datadog_secret
+}
 
-  values = [
-    <<-YAML
-    apiVersion: external-secrets.io/v1
-    kind: ExternalSecret
-    metadata:
-      name: datadog-keys
-    spec:
-      refreshInterval: 1m0s
-      secretStoreRef:
-        name: aws-secretsmanager
-        kind: ClusterSecretStore
-      target:
-        name: datadog-keys
-        creationPolicy: Owner
-      data:
-      - secretKey: api-key
-        remoteRef:
-          key: ${var.datadog_secret}
-          property: DD_API_KEY
-      - secretKey: app-key
-        remoteRef:
-          key: ${var.datadog_secret}
-          property: DD_APP_KEY
-    YAML
-  ]
+data "aws_secretsmanager_secret_version" "datadog" {
+  secret_id = data.aws_secretsmanager_secret.datadog.id
+}
+
+locals {
+  datadog_secret = jsondecode(data.aws_secretsmanager_secret_version.datadog.secret_string)
+}
+
+resource "kubernetes_secret" "datadog_keys" {
+  metadata {
+    name      = "datadog-keys"
+    namespace = kubernetes_namespace_v1.datadog.metadata[0].name
+  }
+
+  data = {
+    "api-key" = local.datadog_secret["DD_API_KEY"]
+    "app-key" = local.datadog_secret["DD_APP_KEY"]
+  }
+
+  type = "Opaque"
+}
+
+resource "kubernetes_secret" "datadog_keys_fargate" {
+  metadata {
+    name      = "datadog-keys"
+    namespace = "kube-system"
+  }
+
+  data = {
+    "api-key" = local.datadog_secret["DD_API_KEY"]
+    "app-key" = local.datadog_secret["DD_APP_KEY"]
+  }
+
+  type = "Opaque"
 }
 
 ################################################################################
@@ -248,21 +211,12 @@ resource "helm_release" "datadog_agent" {
   YAML
   ], var.datadog_agent_helm_values)
 
-  dynamic "set" {
-    for_each = var.datadog_agent_helm_set
+  set = var.datadog_agent_helm_set
 
-    content {
-      name  = set.value.name
-      value = set.value.value
-      type  = try(set.value.type, null)
-    }
-  }
-
-  # Dependency on the external secrets, otherwise it will fail
   depends_on = [
     helm_release.datadog_operator,
-    helm_release.datadog_secrets,
-    helm_release.datadog_secrets_fargate,
+    kubernetes_secret.datadog_keys,
+    kubernetes_secret.datadog_keys_fargate
   ]
 }
 

@@ -99,15 +99,7 @@ resource "helm_release" "argocd" {
   # https://github.com/argoproj/argo-helm/blob/main/charts/argo-cd/values.yaml
   values = var.helm_values
 
-  dynamic "set" {
-    for_each = var.helm_set
-
-    content {
-      name  = set.value.name
-      value = set.value.value
-      type  = try(set.value.type, null)
-    }
-  }
+  set = var.helm_set
 
   depends_on = [
     aws_iam_role.argocd_controller

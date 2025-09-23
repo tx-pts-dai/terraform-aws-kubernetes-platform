@@ -455,15 +455,7 @@ resource "helm_release" "karpenter_release" {
     EOT
   ], var.karpenter_helm_values)
 
-  dynamic "set" {
-    for_each = var.karpenter_helm_set
-
-    content {
-      name  = set.value.name
-      value = set.value.value
-      type  = try(set.value.type, null)
-    }
-  }
+  set = var.karpenter_helm_set
 
   depends_on = [
     module.karpenter_irsa,
@@ -499,15 +491,7 @@ resource "helm_release" "karpenter_resources" {
     EOT
   ], var.karpenter_resources_helm_values)
 
-  dynamic "set" {
-    for_each = var.karpenter_resources_helm_set
-
-    content {
-      name  = set.value.name
-      value = set.value.value
-      type  = try(set.value.type, null)
-    }
-  }
+  set = var.karpenter_resources_helm_set
 
   depends_on = [
     helm_release.karpenter_crd,

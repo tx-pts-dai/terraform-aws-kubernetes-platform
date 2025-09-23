@@ -78,6 +78,7 @@ variable "helm_set" {
   type = list(object({
     name  = string
     value = string
+    type  = optional(string)
   }))
 
   default = []
