@@ -37,13 +37,31 @@ locals {
 
 ################################################################################
 # EKS Cluster
+data "aws_iam_roles" "sso_admin" {
+  count = var.enable_sso_admin_auto_discovery ? 1 : 0
+
+  name_regex  = "AWSReservedSSO_AWSAdministratorAccess_.*"
+  path_prefix = "/aws-reserved/sso.amazonaws.com/"
+}
+
 locals {
   cluster_admin_arns = { for k, v in var.cluster_admins : k => {
     role_arn          = v.role_arn != null ? v.role_arn : "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${v.role_name}"
     kubernetes_groups = v.kubernetes_groups
   } }
 
-  access_entries = { for k, v in local.cluster_admin_arns : k => {
+  sso_admin_arns = var.enable_sso_admin_auto_discovery ? try(tolist(data.aws_iam_roles.sso_admin[0].arns), []) : []
+
+  sso_admin = length(local.sso_admin_arns) == 1 ? {
+    sso_admin = {
+      role_arn          = local.sso_admin_arns[0]
+      kubernetes_groups = null
+    }
+  } : {}
+
+  all_admins = merge(local.sso_admin, local.cluster_admin_arns)
+
+  access_entries = { for k, v in local.all_admins : k => {
     principal_arn     = v.role_arn
     type              = "STANDARD"
     kubernetes_groups = v.kubernetes_groups
@@ -57,8 +75,8 @@ locals {
       }
     }
   } }
-
   k8s_version = trimspace(file("${path.module}/K8S_VERSION"))
+
 }
 
 module "eks" {
@@ -80,7 +98,19 @@ module "eks" {
 
       service_account_role_arn = module.vpc_cni_irsa.arn
 
-      configuration_values = jsonencode({ env = { ENABLE_PREFIX_DELEGATION = "true" } })
+      # TODO: https://github.com/hashicorp/terraform-provider-aws/issues/30645
+      # pod_identity_association = [
+      #   {
+      #     role_arn        = module.aws_vpc_cni_pod_identity.iam_role_arn
+      #     service_account = "aws-node"
+      #   }
+      # ]
+
+      configuration_values = jsonencode({
+        env = {
+          ENABLE_PREFIX_DELEGATION = "true"
+        }
+      })
     }
 
     kube-proxy = {
@@ -137,7 +167,7 @@ module "eks" {
 locals {
   ingress_rules = {
     vpc_control_plane = {
-      description = "Allow all traffic from the VPC to EKS managed workfloads over HTTPS"
+      description = "Allow all traffic from the VPC to EKS managed workloads over HTTPS"
       type        = "ingress"
       protocol    = "tcp"
       from_port   = 443
@@ -173,6 +203,21 @@ resource "aws_security_group_rule" "eks_control_plane_ingress" {
 
 ################################################################################
 # VPC CNI IAM Role for Service Accounts
+module "aws_vpc_cni_pod_identity" {
+  source  = "terraform-aws-modules/eks-pod-identity/aws"
+  version = "2.0.0"
+
+  name                    = "aws-vpc-cni-pod-identity-${local.id}"
+  aws_vpc_cni_policy_name = "aws-vpc-cni-pod-identity-${local.id}"
+  use_name_prefix         = false
+
+  attach_aws_vpc_cni_policy = true
+  aws_vpc_cni_enable_ipv4   = true
+  aws_vpc_cni_enable_ipv6   = true
+
+  tags = local.tags
+}
+
 
 module "vpc_cni_irsa" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts"
@@ -184,6 +229,7 @@ module "vpc_cni_irsa" {
 
   attach_vpc_cni_policy = true
   vpc_cni_enable_ipv4   = true
+  vpc_cni_enable_ipv6   = true
 
   oidc_providers = {
     main = {
