@@ -1,3 +1,11 @@
+# v6.0.0
+
+**Breaking Changes:**
+
+- **Helm Provider Version**: The Helm provider version has been updated to `3.0.2`.
+- **Addons Module Removed**: The entire addons module has been removed. All Kubernetes addons must now be installed and managed externally.
+- **Simplified Examples**: Removed `simple` and `disable-addons` examples as they are no longer relevant with the addons module removal.
+
 # v5.0.0
 
 **Breaking Changes:**

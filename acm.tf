@@ -11,7 +11,7 @@ locals {
 }
 
 data "aws_route53_zone" "base_domain_zone" {
-  count = var.create_addons && var.enable_acm_certificate ? 1 : 0
+  count = var.enable_acm_certificate ? 1 : 0
 
   name = local.primary_acm_domain
 }
@@ -20,7 +20,7 @@ module "acm" {
   source  = "terraform-aws-modules/acm/aws"
   version = "6.1.0"
 
-  count = var.create_addons && var.enable_acm_certificate ? 1 : 0
+  count = var.enable_acm_certificate ? 1 : 0
 
   region      = var.region
   domain_name = local.primary_acm_domain

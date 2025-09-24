@@ -4,18 +4,6 @@ variable "region" {
   default     = null
 }
 
-variable "create_addons" {
-  description = "Create the platform addons. if set to false, no addons will be created"
-  type        = bool
-  default     = true
-}
-
-variable "create_addon_roles" {
-  description = "Create addon IRSA roles. If set to false, no addon roles will be created"
-  type        = bool
-  default     = true
-}
-
 variable "create_addon_pod_identity_roles" {
   description = "Create addon pod identities roles. If set to true, all roles will be created"
   type        = bool
@@ -50,7 +38,6 @@ variable "vpc" {
   })
 }
 
-# TODO: Split out into dedicated variables
 variable "eks" {
   description = "Map of EKS configurations"
   type        = any
@@ -58,12 +45,28 @@ variable "eks" {
 }
 
 variable "cluster_admins" {
-  description = "Map of IAM roles to add as cluster admins. Only exact matching role names are returned"
+  description = <<-EOT
+  Map of IAM roles to add as cluster admins
+    role_arn: ARN of the IAM role to add as cluster admin
+    role_name: Name of the IAM role to add as cluster admin
+    kubernetes_groups: List of Kubernetes groups to add the role to (default: ["system:masters"])
+
+  role_arn and role_name are mutually exclusive, exactly one must be set.
+  EOT
   type = map(object({
-    role_name         = string
+    role_arn          = optional(string)
+    role_name         = optional(string)
     kubernetes_groups = optional(list(string))
   }))
   default = {}
+
+  validation {
+    condition = alltrue([
+      for k, v in var.cluster_admins :
+      (v.role_arn != null) != (v.role_name != null) # XOR - exactly one must be set
+    ])
+    error_message = "Each cluster admin must have either role_arn or role_name, not both."
+  }
 }
 
 variable "enable_sso_admin_auto_discovery" {
@@ -145,6 +148,7 @@ variable "karpenter_helm_set" {
   type = list(object({
     name  = string
     value = string
+    type  = optional(string)
   }))
   default = []
 }
@@ -160,6 +164,7 @@ variable "karpenter_resources_helm_set" {
   type = list(object({
     name  = string
     value = string
+    type  = optional(string)
   }))
   default = []
 }
@@ -168,42 +173,6 @@ variable "enable_fargate_fluentbit" {
   description = "Enable Fargate Fluentbit"
   type        = bool
   default     = true
-}
-
-variable "enable_aws_load_balancer_controller" {
-  description = "Enable AWS Load Balancer Controller"
-  type        = bool
-  default     = true
-}
-
-variable "aws_load_balancer_controller" {
-  description = "AWS Load Balancer Controller configurations"
-  type        = any
-  default     = {}
-}
-
-variable "enable_external_dns" {
-  description = "Enable External DNS"
-  type        = bool
-  default     = true
-}
-
-variable "external_dns" {
-  description = "External DNS configurations"
-  type        = any
-  default     = {}
-}
-
-variable "enable_external_secrets" {
-  description = "Enable External Secrets"
-  type        = bool
-  default     = true
-}
-
-variable "external_secrets" {
-  description = "External Secrets configurations"
-  type        = any
-  default     = {}
 }
 
 ################################################################################

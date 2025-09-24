@@ -43,14 +43,14 @@ module "spoke" {
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.10 |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 5.0 |
-| <a name="requirement_helm"></a> [helm](#requirement\_helm) | >= 2.9, < 3.0.0 |
+| <a name="requirement_helm"></a> [helm](#requirement\_helm) | >= 3.0.2 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
 | <a name="provider_aws"></a> [aws](#provider\_aws) | >= 5.0 |
-| <a name="provider_helm"></a> [helm](#provider\_helm) | >= 2.9, < 3.0.0 |
+| <a name="provider_helm"></a> [helm](#provider\_helm) | >= 3.0.2 |
 
 ## Modules
 
@@ -83,7 +83,7 @@ No modules.
 | <a name="input_create"></a> [create](#input\_create) | Create the ArgoCD resources | `bool` | `true` | no |
 | <a name="input_enable_hub"></a> [enable\_hub](#input\_enable\_hub) | Enable ArgoCD Hub | `bool` | `false` | no |
 | <a name="input_enable_spoke"></a> [enable\_spoke](#input\_enable\_spoke) | Enable ArgoCD Spoke | `bool` | `false` | no |
-| <a name="input_helm_set"></a> [helm\_set](#input\_helm\_set) | Set values to pass to the Helm chart | <pre>list(object({<br/>    name  = string<br/>    value = string<br/>  }))</pre> | `[]` | no |
+| <a name="input_helm_set"></a> [helm\_set](#input\_helm\_set) | Set values to pass to the Helm chart | <pre>list(object({<br/>    name  = string<br/>    value = string<br/>    type  = optional(string)<br/>  }))</pre> | `[]` | no |
 | <a name="input_helm_values"></a> [helm\_values](#input\_helm\_values) | Values to pass to the Helm chart | `list(string)` | `[]` | no |
 | <a name="input_helm_version"></a> [helm\_version](#input\_helm\_version) | Version of the Helm chart to install | `string` | `"7.8.26"` | no |
 | <a name="input_hub_iam_role_arn"></a> [hub\_iam\_role\_arn](#input\_hub\_iam\_role\_arn) | (Deprecated, use hub\_iam\_role\_arns) IAM Role ARN for ArgoCD Hub. This is required for spoke clusters | `string` | `null` | no |

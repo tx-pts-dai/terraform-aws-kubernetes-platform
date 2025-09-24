@@ -5,7 +5,7 @@
 #
 # main.tf
 # This file is the entrypoint for the TKaaS module. It is responsible for
-# orchestrating the creation of the Kubernetes cluster and Karpenter resources.
+# orchestrating the creation of the Kubernetes cluster.
 ################################################################################
 
 data "aws_region" "current" {}
@@ -20,12 +20,6 @@ resource "time_static" "timestamp_id" {
 
 ################################################################################
 # Common locals
-#
-# Tidy up the naming here to be more consistent
-# TODO: what happens if you dont pass a k8s version to the eks module. do you get latest?
-# TODO: we cannot use the random id in the tags since it only gets generated after the resource is created
-# and this create a tags merge issue,
-
 locals {
   id = var.enable_timestamp_id ? format("%08x", time_static.timestamp_id[0].unix) : local.name
 
@@ -43,38 +37,34 @@ locals {
 
 ################################################################################
 # EKS Cluster
-data "aws_iam_roles" "sso" {
+data "aws_iam_roles" "sso_admin" {
   count = var.enable_sso_admin_auto_discovery ? 1 : 0
 
   name_regex  = "AWSReservedSSO_AWSAdministratorAccess_.*"
-  path_prefix = local.sso_path_prefix
-}
-
-data "aws_iam_roles" "iam_cluster_admins" {
-  for_each = var.cluster_admins
-
-  name_regex = "^${each.value.role_name}$"
+  path_prefix = "/aws-reserved/sso.amazonaws.com/"
 }
 
 locals {
-  sso_path_prefix = "/aws-reserved/sso.amazonaws.com/"
-  sso_cluster_admin = var.enable_sso_admin_auto_discovery && length(data.aws_iam_roles.sso) > 0 && length(data.aws_iam_roles.sso[0].arns) == 1 ? {
-    sso = {
-      role_arn = tolist(data.aws_iam_roles.sso[0].arns)[0]
+  cluster_admin_arns = { for k, v in var.cluster_admins : k => {
+    role_arn          = v.role_arn != null ? v.role_arn : "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${v.role_name}"
+    kubernetes_groups = v.kubernetes_groups
+  } }
+
+  sso_admin_arns = var.enable_sso_admin_auto_discovery ? try(tolist(data.aws_iam_roles.sso_admin[0].arns), []) : []
+
+  sso_admin = length(local.sso_admin_arns) == 1 ? {
+    sso_admin = {
+      role_arn          = local.sso_admin_arns[0]
+      kubernetes_groups = null
     }
   } : {}
 
-  iam_cluster_admins = { for k, v in var.cluster_admins : k => {
-    role_arn          = tolist(data.aws_iam_roles.iam_cluster_admins[k].arns)[0]
-    kubernetes_groups = try(v.kubernetes_groups, null)
-  } }
+  all_admins = merge(local.sso_admin, local.cluster_admin_arns)
 
-  cluster_admins = merge(local.sso_cluster_admin, local.iam_cluster_admins)
-
-  access_entries = { for k, v in local.cluster_admins : k => {
+  access_entries = { for k, v in local.all_admins : k => {
     principal_arn     = v.role_arn
     type              = "STANDARD"
-    kubernetes_groups = try(v.kubernetes_groups, null)
+    kubernetes_groups = v.kubernetes_groups
 
     policy_associations = {
       admin = {
@@ -86,6 +76,7 @@ locals {
     }
   } }
   k8s_version = trimspace(file("${path.module}/K8S_VERSION"))
+
 }
 
 module "eks" {
@@ -107,7 +98,19 @@ module "eks" {
 
       service_account_role_arn = module.vpc_cni_irsa.arn
 
-      configuration_values = jsonencode({ env = { ENABLE_PREFIX_DELEGATION = "true" } })
+      # TODO: https://github.com/hashicorp/terraform-provider-aws/issues/30645
+      # pod_identity_association = [
+      #   {
+      #     role_arn        = module.aws_vpc_cni_pod_identity.iam_role_arn
+      #     service_account = "aws-node"
+      #   }
+      # ]
+
+      configuration_values = jsonencode({
+        env = {
+          ENABLE_PREFIX_DELEGATION = "true"
+        }
+      })
     }
 
     kube-proxy = {
@@ -164,7 +167,7 @@ module "eks" {
 locals {
   ingress_rules = {
     vpc_control_plane = {
-      description = "Allow all traffic from the VPC to EKS managed workfloads over HTTPS"
+      description = "Allow all traffic from the VPC to EKS managed workloads over HTTPS"
       type        = "ingress"
       protocol    = "tcp"
       from_port   = 443
@@ -200,6 +203,21 @@ resource "aws_security_group_rule" "eks_control_plane_ingress" {
 
 ################################################################################
 # VPC CNI IAM Role for Service Accounts
+module "aws_vpc_cni_pod_identity" {
+  source  = "terraform-aws-modules/eks-pod-identity/aws"
+  version = "2.0.0"
+
+  name                    = "aws-vpc-cni-pod-identity-${local.id}"
+  aws_vpc_cni_policy_name = "aws-vpc-cni-pod-identity-${local.id}"
+  use_name_prefix         = false
+
+  attach_aws_vpc_cni_policy = true
+  aws_vpc_cni_enable_ipv4   = true
+  aws_vpc_cni_enable_ipv6   = true
+
+  tags = local.tags
+}
+
 
 module "vpc_cni_irsa" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts"
@@ -211,6 +229,7 @@ module "vpc_cni_irsa" {
 
   attach_vpc_cni_policy = true
   vpc_cni_enable_ipv4   = true
+  vpc_cni_enable_ipv6   = true
 
   oidc_providers = {
     main = {
@@ -235,5 +254,5 @@ resource "time_sleep" "wait_on_destroy" {
   ]
 
   # Sleep for 5 minutes to allow Karpenter to clean up resources
-  destroy_duration = "5m"
+  destroy_duration = "1m"
 }

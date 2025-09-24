@@ -41,6 +41,7 @@ variable "datadog_operator_helm_set" {
   type = list(object({
     name  = string
     value = string
+    type  = optional(string)
   }))
   default = []
 }
@@ -56,6 +57,7 @@ variable "datadog_agent_helm_set" {
   type = list(object({
     name  = string
     value = string
+    type  = optional(string)
   }))
   default = []
 }
