@@ -1492,7 +1492,7 @@ Each new kubernetes version needs it's own release. This is due to the fact that
 </tr>
 <tr>
 <td><a name="requirement_helm"></a> <a href="..#requirement_helm">helm</a></td>
-<td>&gt;= 2.12, &lt; 3.0.0</td>
+<td>&gt;= 3.0.2</td>
 </tr>
 <tr>
 <td><a name="requirement_kubectl"></a> <a href="..#requirement_kubectl">kubectl</a></td>
@@ -1523,7 +1523,7 @@ Each new kubernetes version needs it's own release. This is due to the fact that
 </tr>
 <tr>
 <td><a name="provider_helm"></a> <a href="..#provider_helm">helm</a></td>
-<td>&gt;= 2.12, &lt; 3.0.0</td>
+<td>&gt;= 3.0.2</td>
 </tr>
 <tr>
 <td><a name="provider_kubernetes"></a> <a href="..#provider_kubernetes">kubernetes</a></td>
@@ -1551,11 +1551,6 @@ Each new kubernetes version needs it's own release. This is due to the fact that
 <td>6.1.0</td>
 </tr>
 <tr>
-<td><a name="module_addons"></a> <a href="..#module_addons">addons</a></td>
-<td>aws-ia/eks-blueprints-addons/aws</td>
-<td>1.22.0</td>
-</tr>
-<tr>
 <td><a name="module_argocd"></a> <a href="..#module_argocd">argocd</a></td>
 <td>./modules/argocd</td>
 <td>n/a</td>
@@ -1572,6 +1567,11 @@ Each new kubernetes version needs it's own release. This is due to the fact that
 </tr>
 <tr>
 <td><a name="module_aws_lb_controller_pod_identity"></a> <a href="..#module_aws_lb_controller_pod_identity">aws_lb_controller_pod_identity</a></td>
+<td>terraform-aws-modules/eks-pod-identity/aws</td>
+<td>2.0.0</td>
+</tr>
+<tr>
+<td><a name="module_aws_vpc_cni_pod_identity"></a> <a href="..#module_aws_vpc_cni_pod_identity">aws_vpc_cni_pod_identity</a></td>
 <td>terraform-aws-modules/eks-pod-identity/aws</td>
 <td>2.0.0</td>
 </tr>
@@ -1705,11 +1705,7 @@ Each new kubernetes version needs it's own release. This is due to the fact that
 <td>data source</td>
 </tr>
 <tr>
-<td><a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_roles">aws_iam_roles.iam_cluster_admins</a></td>
-<td>data source</td>
-</tr>
-<tr>
-<td><a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_roles">aws_iam_roles.sso</a></td>
+<td><a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_roles">aws_iam_roles.sso_admin</a></td>
 <td>data source</td>
 </tr>
 <tr>
@@ -1753,13 +1749,6 @@ Each new kubernetes version needs it's own release. This is due to the fact that
 <td style="text-align: center;">no</td>
 </tr>
 <tr>
-<td><a name="input_aws_load_balancer_controller"></a> <a href="..#input_aws_load_balancer_controller">aws_load_balancer_controller</a></td>
-<td>AWS Load Balancer Controller configurations</td>
-<td><code>any</code></td>
-<td><code>{}</code></td>
-<td style="text-align: center;">no</td>
-</tr>
-<tr>
 <td><a name="input_base_domain"></a> <a href="..#input_base_domain">base_domain</a></td>
 <td>Base domain for the platform, used for ingress and ACM certificates</td>
 <td><code>string</code></td>
@@ -1768,28 +1757,14 @@ Each new kubernetes version needs it's own release. This is due to the fact that
 </tr>
 <tr>
 <td><a name="input_cluster_admins"></a> <a href="..#input_cluster_admins">cluster_admins</a></td>
-<td>Map of IAM roles to add as cluster admins. Only exact matching role names are returned</td>
-<td><pre>map(object({<br/>    role_name         = string<br/>    kubernetes_groups = optional(list(string))<br/>  }))</pre></td>
+<td>Map of IAM roles to add as cluster admins<br/>  role_arn: ARN of the IAM role to add as cluster admin<br/>  role_name: Name of the IAM role to add as cluster admin<br/>  kubernetes_groups: List of Kubernetes groups to add the role to (default: ["system:masters"])<br/><br/>role_arn and role_name are mutually exclusive, exactly one must be set.</td>
+<td><pre>map(object({<br/>    role_arn          = optional(string)<br/>    role_name         = optional(string)<br/>    kubernetes_groups = optional(list(string))<br/>  }))</pre></td>
 <td><code>{}</code></td>
 <td style="text-align: center;">no</td>
 </tr>
 <tr>
 <td><a name="input_create_addon_pod_identity_roles"></a> <a href="..#input_create_addon_pod_identity_roles">create_addon_pod_identity_roles</a></td>
 <td>Create addon pod identities roles. If set to true, all roles will be created</td>
-<td><code>bool</code></td>
-<td><code>true</code></td>
-<td style="text-align: center;">no</td>
-</tr>
-<tr>
-<td><a name="input_create_addon_roles"></a> <a href="..#input_create_addon_roles">create_addon_roles</a></td>
-<td>Create addon IRSA roles. If set to false, no addon roles will be created</td>
-<td><code>bool</code></td>
-<td><code>true</code></td>
-<td style="text-align: center;">no</td>
-</tr>
-<tr>
-<td><a name="input_create_addons"></a> <a href="..#input_create_addons">create_addons</a></td>
-<td>Create the platform addons. if set to false, no addons will be created</td>
 <td><code>bool</code></td>
 <td><code>true</code></td>
 <td style="text-align: center;">no</td>
@@ -1816,27 +1791,6 @@ Each new kubernetes version needs it's own release. This is due to the fact that
 <td style="text-align: center;">no</td>
 </tr>
 <tr>
-<td><a name="input_enable_aws_load_balancer_controller"></a> <a href="..#input_enable_aws_load_balancer_controller">enable_aws_load_balancer_controller</a></td>
-<td>Enable AWS Load Balancer Controller</td>
-<td><code>bool</code></td>
-<td><code>true</code></td>
-<td style="text-align: center;">no</td>
-</tr>
-<tr>
-<td><a name="input_enable_external_dns"></a> <a href="..#input_enable_external_dns">enable_external_dns</a></td>
-<td>Enable External DNS</td>
-<td><code>bool</code></td>
-<td><code>true</code></td>
-<td style="text-align: center;">no</td>
-</tr>
-<tr>
-<td><a name="input_enable_external_secrets"></a> <a href="..#input_enable_external_secrets">enable_external_secrets</a></td>
-<td>Enable External Secrets</td>
-<td><code>bool</code></td>
-<td><code>true</code></td>
-<td style="text-align: center;">no</td>
-</tr>
-<tr>
 <td><a name="input_enable_fargate_fluentbit"></a> <a href="..#input_enable_fargate_fluentbit">enable_fargate_fluentbit</a></td>
 <td>Enable Fargate Fluentbit</td>
 <td><code>bool</code></td>
@@ -1855,20 +1809,6 @@ Each new kubernetes version needs it's own release. This is due to the fact that
 <td>Disable the timestamp-based ID generation. When true, uses a static ID instead of timestamp.</td>
 <td><code>bool</code></td>
 <td><code>true</code></td>
-<td style="text-align: center;">no</td>
-</tr>
-<tr>
-<td><a name="input_external_dns"></a> <a href="..#input_external_dns">external_dns</a></td>
-<td>External DNS configurations</td>
-<td><code>any</code></td>
-<td><code>{}</code></td>
-<td style="text-align: center;">no</td>
-</tr>
-<tr>
-<td><a name="input_external_secrets"></a> <a href="..#input_external_secrets">external_secrets</a></td>
-<td>External Secrets configurations</td>
-<td><code>any</code></td>
-<td><code>{}</code></td>
 <td style="text-align: center;">no</td>
 </tr>
 <tr>
@@ -1895,7 +1835,7 @@ Each new kubernetes version needs it's own release. This is due to the fact that
 <tr>
 <td><a name="input_karpenter_helm_set"></a> <a href="..#input_karpenter_helm_set">karpenter_helm_set</a></td>
 <td>List of Karpenter Helm set values</td>
-<td><pre>list(object({<br/>    name  = string<br/>    value = string<br/>  }))</pre></td>
+<td><pre>list(object({<br/>    name  = string<br/>    value = string<br/>    type  = optional(string)<br/>  }))</pre></td>
 <td><code>[]</code></td>
 <td style="text-align: center;">no</td>
 </tr>
@@ -1909,7 +1849,7 @@ Each new kubernetes version needs it's own release. This is due to the fact that
 <tr>
 <td><a name="input_karpenter_resources_helm_set"></a> <a href="..#input_karpenter_resources_helm_set">karpenter_resources_helm_set</a></td>
 <td>List of Karpenter Resources Helm set values</td>
-<td><pre>list(object({<br/>    name  = string<br/>    value = string<br/>  }))</pre></td>
+<td><pre>list(object({<br/>    name  = string<br/>    value = string<br/>    type  = optional(string)<br/>  }))</pre></td>
 <td><code>[]</code></td>
 <td style="text-align: center;">no</td>
 </tr>
