@@ -61,6 +61,16 @@ module "ebs_csi_driver_irsa" {
   tags = local.tags
 }
 
+# Add time delay after Karpenter resources
+resource "time_sleep" "wait_after_karpenter" {
+  create_duration = "1m"
+
+  depends_on = [
+    helm_release.karpenter_release,
+    helm_release.karpenter_resources
+  ]
+}
+
 module "eks_addons" {
   source = "./modules/eks-addons"
 
@@ -73,8 +83,7 @@ module "eks_addons" {
   tags = var.tags
 
   depends_on = [
-    helm_release.karpenter_release,
-    helm_release.karpenter_resources
+    time_sleep.wait_after_karpenter
   ]
 }
 

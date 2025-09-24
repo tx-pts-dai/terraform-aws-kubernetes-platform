@@ -6,7 +6,6 @@ on:
       - "*.tf"
       - "modules/**/*.tf"
       - "tests/**/*.tf"
-      - "files/helm/**/*.yaml"
       - "K8S_VERSION"
     types:
       - opened

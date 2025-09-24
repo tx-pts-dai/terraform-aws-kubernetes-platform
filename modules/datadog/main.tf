@@ -93,20 +93,6 @@ resource "kubernetes_secret" "datadog_keys" {
   type = "Opaque"
 }
 
-resource "kubernetes_secret" "datadog_keys_fargate" {
-  metadata {
-    name      = "datadog-keys"
-    namespace = "kube-system"
-  }
-
-  data = {
-    "api-key" = local.datadog_secret["DD_API_KEY"]
-    "app-key" = local.datadog_secret["DD_APP_KEY"]
-  }
-
-  type = "Opaque"
-}
-
 ################################################################################
 # Datadog Agent - available specs options https://github.com/DataDog/datadog-operator/blob/main/docs/configuration.v2alpha1.md
 
@@ -216,7 +202,6 @@ resource "helm_release" "datadog_agent" {
   depends_on = [
     helm_release.datadog_operator,
     kubernetes_secret.datadog_keys,
-    kubernetes_secret.datadog_keys_fargate
   ]
 }
 

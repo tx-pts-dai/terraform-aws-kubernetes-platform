@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - examples/lacework/*.tf
+      - modules/lacework/*.tf
     types:
       - opened
       - synchronize
