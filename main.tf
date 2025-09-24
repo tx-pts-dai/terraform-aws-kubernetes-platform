@@ -37,7 +37,7 @@ locals {
 
 ################################################################################
 # EKS Cluster
-data "aws_iam_roles" "sso_admin" {
+data "aws_iam_roles" "sso" {
   count = var.enable_sso_admin_auto_discovery ? 1 : 0
 
   name_regex  = "AWSReservedSSO_AWSAdministratorAccess_.*"
@@ -50,7 +50,7 @@ locals {
     kubernetes_groups = v.kubernetes_groups
   } }
 
-  sso_admin_arns = var.enable_sso_admin_auto_discovery ? try(tolist(data.aws_iam_roles.sso_admin[0].arns), []) : []
+  sso_admin_arns = var.enable_sso_admin_auto_discovery ? try(tolist(data.aws_iam_roles.sso[0].arns), []) : []
 
   sso_admin = length(local.sso_admin_arns) == 1 ? {
     sso_admin = {
