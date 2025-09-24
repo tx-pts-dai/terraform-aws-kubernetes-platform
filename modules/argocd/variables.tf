@@ -58,28 +58,3 @@ variable "namespace" {
 
   default = "argocd"
 }
-
-variable "helm_version" {
-  description = "Version of the Helm chart to install"
-  type        = string
-
-  default = "7.8.26" # renovate: datasource=helm depName=argo-cd repositoryUrl=https://argoproj.github.io/argo-helm
-}
-
-variable "helm_values" {
-  description = "Values to pass to the Helm chart"
-  type        = list(string)
-
-  default = []
-}
-
-variable "helm_set" {
-  description = "Set values to pass to the Helm chart"
-  type = list(object({
-    name  = string
-    value = string
-    type  = optional(string)
-  }))
-
-  default = []
-}
