@@ -192,12 +192,6 @@ variable "argocd" {
     namespace         = optional(string, "argocd")
     hub_iam_role_name = optional(string, "argocd-controller")
 
-    helm_values = optional(list(string), [])
-    helm_set = optional(list(object({
-      name  = string
-      value = string
-    })), [])
-
     # Spoke specific
     enable_spoke = optional(bool, false)
 
