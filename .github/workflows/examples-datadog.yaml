@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - examples/datadog/*.tf
+      - modules/datadog/*.tf
     types:
       - opened
       - synchronize
