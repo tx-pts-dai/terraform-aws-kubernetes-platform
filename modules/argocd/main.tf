@@ -84,28 +84,6 @@ resource "aws_eks_pod_identity_association" "argocd_server" {
   tags = var.tags
 }
 
-resource "helm_release" "argocd" {
-  count = var.create && var.enable_hub ? 1 : 0
-
-  name             = "argocd"
-  description      = "A Helm chart to install the ArgoCD"
-  chart            = "argo-cd"
-  version          = var.helm_version
-  repository       = "https://argoproj.github.io/argo-helm"
-  namespace        = var.namespace
-  wait             = true
-  create_namespace = true
-
-  # https://github.com/argoproj/argo-helm/blob/main/charts/argo-cd/values.yaml
-  values = var.helm_values
-
-  set = var.helm_set
-
-  depends_on = [
-    aws_iam_role.argocd_controller
-  ]
-}
-
 ##################### ArgoCD Spoke ###########################################
 locals {
   # Remove this when the variable hub_iam_role_arn is deprecated
