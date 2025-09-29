@@ -34,7 +34,7 @@ locals {
 
 module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
-  version = "6.0.1" # requires provider v6 from https://github.com/terraform-aws-modules/terraform-aws-vpc/releases/tag/v6.0.0
+  version = "6.4.0" # requires provider v6 from https://github.com/terraform-aws-modules/terraform-aws-vpc/releases/tag/v6.0.0
 
   create_vpc = var.create_vpc
 

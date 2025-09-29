@@ -191,6 +191,7 @@ data "aws_iam_policy_document" "karpenter_controller" {
     sid       = "AllowRegionalReadActions"
     resources = ["*"]
     actions = [
+      "ec2:DescribeCapacityReservations",
       "ec2:DescribeAvailabilityZones",
       "ec2:DescribeImages",
       "ec2:DescribeInstances",
@@ -394,7 +395,7 @@ module "karpenter_irsa" {
 # IRSA is disabled as we're using a custom role for Fargate
 module "karpenter" {
   source  = "terraform-aws-modules/eks/aws//modules/karpenter"
-  version = "21.1.5"
+  version = "21.3.1"
 
   cluster_name = module.eks.cluster_name
 
@@ -415,7 +416,7 @@ module "karpenter" {
 resource "helm_release" "karpenter_crd" {
   name             = "karpenter-crd"
   chart            = "karpenter-crd"
-  version          = "1.6.3"
+  version          = "1.7.1"
   repository       = "oci://public.ecr.aws/karpenter"
   description      = "Karpenter CRDs"
   namespace        = local.karpenter.namespace
@@ -425,7 +426,7 @@ resource "helm_release" "karpenter_crd" {
 resource "helm_release" "karpenter_release" {
   name             = "karpenter"
   chart            = "karpenter"
-  version          = "1.6.3"
+  version          = "1.7.1"
   repository       = "oci://public.ecr.aws/karpenter"
   namespace        = local.karpenter.namespace
   create_namespace = true
