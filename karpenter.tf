@@ -395,7 +395,7 @@ module "karpenter_irsa" {
 # IRSA is disabled as we're using a custom role for Fargate
 module "karpenter" {
   source  = "terraform-aws-modules/eks/aws//modules/karpenter"
-  version = "21.3.1"
+  version = "21.3.2"
 
   cluster_name = module.eks.cluster_name
 
