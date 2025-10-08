@@ -61,16 +61,6 @@ module "ebs_csi_driver_irsa" {
   tags = local.tags
 }
 
-# Add time delay after Karpenter resources
-resource "time_sleep" "wait_after_karpenter" {
-  create_duration = "1m"
-
-  depends_on = [
-    helm_release.karpenter_release,
-    helm_release.karpenter_resources
-  ]
-}
-
 module "eks_addons" {
   source = "./modules/eks-addons"
 
@@ -106,7 +96,7 @@ module "aws_ebs_csi_pod_identity" {
     controller = {
       cluster_name    = module.eks.cluster_name
       namespace       = "kube-system"
-      service_account = "aws-gateway-api-controller"
+      service_account = "ebs-csi-controller-sa"
     }
   }
 
