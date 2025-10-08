@@ -102,6 +102,14 @@ module "aws_ebs_csi_pod_identity" {
 
   attach_aws_ebs_csi_policy = true
 
+  associations = {
+    controller = {
+      cluster_name    = module.eks.cluster_name
+      namespace       = "kube-system"
+      service_account = "aws-gateway-api-controller"
+    }
+  }
+
   tags = local.tags
 }
 
