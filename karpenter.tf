@@ -357,6 +357,12 @@ data "aws_iam_policy_document" "karpenter_controller" {
   }
 
   statement {
+    sid       = "AllowUnscopedInstanceProfileListAction"
+    resources = ["*"]
+    actions   = ["iam:ListInstanceProfiles"]
+  }
+
+  statement {
     sid       = "AllowAPIServerEndpointDiscovery"
     resources = ["arn:aws:eks:${local.region}:${local.account_id}:cluster/${module.eks.cluster_name}"]
     actions   = ["eks:DescribeCluster"]
@@ -395,7 +401,7 @@ module "karpenter_irsa" {
 # IRSA is disabled as we're using a custom role for Fargate
 module "karpenter" {
   source  = "terraform-aws-modules/eks/aws//modules/karpenter"
-  version = "21.3.1"
+  version = "21.3.2"
 
   cluster_name = module.eks.cluster_name
 
@@ -577,4 +583,14 @@ module "karpenter_security_group" {
     "kubernetes.io/cluster/${local.stack_name}" = "owned"
     "karpenter.sh/discovery"                    = local.stack_name
   })
+}
+
+# Add time delay after Karpenter resources
+resource "time_sleep" "wait_after_karpenter" {
+  create_duration = "3m"
+
+  depends_on = [
+    helm_release.karpenter_release,
+    helm_release.karpenter_resources
+  ]
 }

@@ -81,7 +81,7 @@ locals {
 
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
-  version = "21.2.0" # DOTNOTCHANGE until fixed https://github.com/terraform-aws-modules/terraform-aws-eks/issues/3516
+  version = "21.3.2"
 
   name                    = local.stack_name
   kubernetes_version      = local.k8s_version
