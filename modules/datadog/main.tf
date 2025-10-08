@@ -79,6 +79,20 @@ locals {
   datadog_secret = jsondecode(data.aws_secretsmanager_secret_version.datadog.secret_string)
 }
 
+resource "kubernetes_secret" "datadog_keys_karpenter" {
+  metadata {
+    name      = "datadog-keys"
+    namespace = "kube-system"
+  }
+
+  data = {
+    "api-key" = local.datadog_secret["DD_API_KEY"]
+    "app-key" = local.datadog_secret["DD_APP_KEY"]
+  }
+
+  type = "Opaque"
+}
+
 resource "kubernetes_secret" "datadog_keys" {
   metadata {
     name      = "datadog-keys"
