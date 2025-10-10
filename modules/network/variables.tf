@@ -51,3 +51,16 @@ variable "single_nat_gateway" {
   type        = bool
   default     = true
 }
+
+###################### VPC Endpoints ######################
+variable "create_vpc_endpoints" {
+  description = "Whether to create VPC endpoints for ECR and S3"
+  type        = bool
+  default     = false
+}
+
+variable "enabled_vpc_endpoints_private_dns" {
+  description = "Whether to enable private DNS for VPC endpoints"
+  type        = bool
+  default     = true
+}

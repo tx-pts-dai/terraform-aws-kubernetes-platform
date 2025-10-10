@@ -1,4 +1,5 @@
 data "aws_availability_zones" "available" {}
+data "aws_region" "current" {}
 
 locals {
   azs = slice(data.aws_availability_zones.available.names, 0, var.az_count)
@@ -34,7 +35,7 @@ locals {
 
 module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
-  version = "6.4.0" # requires provider v6 from https://github.com/terraform-aws-modules/terraform-aws-vpc/releases/tag/v6.0.0
+  version = "6.4.0"
 
   create_vpc = var.create_vpc
 
@@ -63,4 +64,104 @@ module "vpc" {
   }
 
   tags = var.tags
+}
+
+###################### VPC Endpoints ######################
+resource "aws_security_group" "vpc_endpoints" {
+  count = var.create_vpc_endpoints ? 1 : 0
+
+  name        = "${var.stack_name}-vpc-endpoints"
+  description = "Security group for VPC endpoints"
+  vpc_id      = module.vpc.vpc_id
+
+  ingress {
+    description = "TLS from VPC"
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = [module.vpc.vpc_cidr_block]
+  }
+
+  egress {
+    description = "Allow all outbound"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = merge(
+    var.tags,
+    {
+      Name = "${var.stack_name}-vpc-endpoints"
+    }
+  )
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "aws_vpc_endpoint" "ecr_api" {
+  count = var.create_vpc_endpoints ? 1 : 0
+
+  vpc_id              = module.vpc.vpc_id
+  service_name        = "com.amazonaws.${data.aws_region.current.region}.ecr.api"
+  vpc_endpoint_type   = "Interface"
+  subnet_ids          = module.vpc.private_subnets
+  security_group_ids  = [aws_security_group.vpc_endpoints[0].id]
+  private_dns_enabled = var.enabled_vpc_endpoints_private_dns
+
+  tags = merge(
+    var.tags,
+    {
+      Name = "${var.stack_name}-ecr-api"
+    }
+  )
+}
+
+resource "aws_vpc_endpoint" "ecr_dkr" {
+  count = var.create_vpc_endpoints ? 1 : 0
+
+  vpc_id              = module.vpc.vpc_id
+  service_name        = "com.amazonaws.${data.aws_region.current.region}.ecr.dkr"
+  vpc_endpoint_type   = "Interface"
+  subnet_ids          = module.vpc.private_subnets
+  security_group_ids  = [aws_security_group.vpc_endpoints[0].id]
+  private_dns_enabled = var.enabled_vpc_endpoints_private_dns
+
+  tags = merge(
+    var.tags,
+    {
+      Name = "${var.stack_name}-ecr-dkr"
+    }
+  )
+}
+
+resource "aws_vpc_endpoint" "s3" {
+  count = var.create_vpc_endpoints ? 1 : 0
+
+  vpc_id            = module.vpc.vpc_id
+  service_name      = "com.amazonaws.${data.aws_region.current.region}.s3"
+  vpc_endpoint_type = "Gateway"
+  route_table_ids   = module.vpc.private_route_table_ids
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect    = "Allow"
+        Principal = "*"
+        Action    = "*"
+        Resource  = "*"
+      }
+    ]
+  })
+
+  tags = merge(
+    var.tags,
+    {
+      Name = "${var.stack_name}-s3"
+    }
+  )
 }

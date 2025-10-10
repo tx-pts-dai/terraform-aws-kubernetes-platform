@@ -29,7 +29,12 @@ See the [network example](../../example/network) how to use it and how to retrie
 
 | Name | Type |
 |------|------|
+| [aws_security_group.vpc_endpoints](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
+| [aws_vpc_endpoint.ecr_api](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_endpoint) | resource |
+| [aws_vpc_endpoint.ecr_dkr](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_endpoint) | resource |
+| [aws_vpc_endpoint.s3](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_endpoint) | resource |
 | [aws_availability_zones.available](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/availability_zones) | data source |
+| [aws_region.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/region) | data source |
 
 ## Inputs
 
@@ -38,7 +43,9 @@ See the [network example](../../example/network) how to use it and how to retrie
 | <a name="input_az_count"></a> [az\_count](#input\_az\_count) | Number of availability zones to use | `number` | `3` | no |
 | <a name="input_cidr"></a> [cidr](#input\_cidr) | The CIDR block for the VPC | `string` | `"10.0.0.0/16"` | no |
 | <a name="input_create_vpc"></a> [create\_vpc](#input\_create\_vpc) | Create the VPC | `bool` | `true` | no |
+| <a name="input_create_vpc_endpoints"></a> [create\_vpc\_endpoints](#input\_create\_vpc\_endpoints) | Whether to create VPC endpoints for ECR and S3 | `bool` | `false` | no |
 | <a name="input_enable_nat_gateway"></a> [enable\_nat\_gateway](#input\_enable\_nat\_gateway) | Enable NAT Gateways | `bool` | `true` | no |
+| <a name="input_enabled_vpc_endpoints_private_dns"></a> [enabled\_vpc\_endpoints\_private\_dns](#input\_enabled\_vpc\_endpoints\_private\_dns) | Whether to enable private DNS for VPC endpoints | `bool` | `true` | no |
 | <a name="input_single_nat_gateway"></a> [single\_nat\_gateway](#input\_single\_nat\_gateway) | Use a single NAT Gateway | `bool` | `true` | no |
 | <a name="input_stack_name"></a> [stack\_name](#input\_stack\_name) | The stack name for the resources | `string` | n/a | yes |
 | <a name="input_subnet_configs"></a> [subnet\_configs](#input\_subnet\_configs) | List of networks objects with their name and size in bits. The order of the list should not change. | `list(map(number))` | <pre>[<br/>  {<br/>    "public": 24<br/>  },<br/>  {<br/>    "private": 24<br/>  },<br/>  {<br/>    "intra": 26<br/>  },<br/>  {<br/>    "database": 26<br/>  },<br/>  {<br/>    "redshift": 26<br/>  },<br/>  {<br/>    "karpenter": 22<br/>  }<br/>]</pre> | no |
@@ -53,6 +60,10 @@ See the [network example](../../example/network) how to use it and how to retrie
 | <a name="output_network_cidr_blocks"></a> [network\_cidr\_blocks](#output\_network\_cidr\_blocks) | A map from network names to allocated address prefixes in CIDR notation. |
 | <a name="output_networks"></a> [networks](#output\_networks) | A list of network objects with name, az, hosts, and cidr\_block. |
 | <a name="output_vpc"></a> [vpc](#output\_vpc) | Map of attributes for the VPC |
+| <a name="output_vpc_endpoint_ecr_api_id"></a> [vpc\_endpoint\_ecr\_api\_id](#output\_vpc\_endpoint\_ecr\_api\_id) | The ID of the ECR API VPC endpoint |
+| <a name="output_vpc_endpoint_ecr_dkr_id"></a> [vpc\_endpoint\_ecr\_dkr\_id](#output\_vpc\_endpoint\_ecr\_dkr\_id) | The ID of the ECR DKR VPC endpoint |
+| <a name="output_vpc_endpoint_s3_id"></a> [vpc\_endpoint\_s3\_id](#output\_vpc\_endpoint\_s3\_id) | The ID of the S3 VPC endpoint |
+| <a name="output_vpc_endpoints_security_group_id"></a> [vpc\_endpoints\_security\_group\_id](#output\_vpc\_endpoints\_security\_group\_id) | The ID of the VPC endpoints security group |
 <!-- END_TF_DOCS -->
 
 <!-- BEGIN_TF_DOCS -->

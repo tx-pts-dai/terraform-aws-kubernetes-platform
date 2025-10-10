@@ -32,6 +32,8 @@ module "network" {
 
   stack_name = local.network_stack_name
 
+  create_vpc_endpoints = true
+
   tags = {
     Environment = "sandbox"
     GithubRepo  = "terraform-aws-kubernetes-platform"
