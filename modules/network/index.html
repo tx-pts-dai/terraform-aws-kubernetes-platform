@@ -1339,7 +1339,27 @@
 </thead>
 <tbody>
 <tr>
+<td><a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group">aws_security_group.vpc_endpoints</a></td>
+<td>resource</td>
+</tr>
+<tr>
+<td><a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_endpoint">aws_vpc_endpoint.ecr_api</a></td>
+<td>resource</td>
+</tr>
+<tr>
+<td><a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_endpoint">aws_vpc_endpoint.ecr_dkr</a></td>
+<td>resource</td>
+</tr>
+<tr>
+<td><a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_endpoint">aws_vpc_endpoint.s3</a></td>
+<td>resource</td>
+</tr>
+<tr>
 <td><a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/availability_zones">aws_availability_zones.available</a></td>
+<td>data source</td>
+</tr>
+<tr>
+<td><a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/region">aws_region.current</a></td>
 <td>data source</td>
 </tr>
 </tbody>
@@ -1378,8 +1398,22 @@
 <td style="text-align: center;">no</td>
 </tr>
 <tr>
+<td><a name="input_create_vpc_endpoints"></a> <a href="../../modules/network#input_create_vpc_endpoints">create_vpc_endpoints</a></td>
+<td>Whether to create VPC endpoints for ECR and S3</td>
+<td><code>bool</code></td>
+<td><code>false</code></td>
+<td style="text-align: center;">no</td>
+</tr>
+<tr>
 <td><a name="input_enable_nat_gateway"></a> <a href="../../modules/network#input_enable_nat_gateway">enable_nat_gateway</a></td>
 <td>Enable NAT Gateways</td>
+<td><code>bool</code></td>
+<td><code>true</code></td>
+<td style="text-align: center;">no</td>
+</tr>
+<tr>
+<td><a name="input_enabled_vpc_endpoints_private_dns"></a> <a href="../../modules/network#input_enabled_vpc_endpoints_private_dns">enabled_vpc_endpoints_private_dns</a></td>
+<td>Whether to enable private DNS for VPC endpoints</td>
 <td><code>bool</code></td>
 <td><code>true</code></td>
 <td style="text-align: center;">no</td>
@@ -1442,6 +1476,22 @@
 <tr>
 <td><a name="output_vpc"></a> <a href="../../modules/network#output_vpc">vpc</a></td>
 <td>Map of attributes for the VPC</td>
+</tr>
+<tr>
+<td><a name="output_vpc_endpoint_ecr_api_id"></a> <a href="../../modules/network#output_vpc_endpoint_ecr_api_id">vpc_endpoint_ecr_api_id</a></td>
+<td>The ID of the ECR API VPC endpoint</td>
+</tr>
+<tr>
+<td><a name="output_vpc_endpoint_ecr_dkr_id"></a> <a href="../../modules/network#output_vpc_endpoint_ecr_dkr_id">vpc_endpoint_ecr_dkr_id</a></td>
+<td>The ID of the ECR DKR VPC endpoint</td>
+</tr>
+<tr>
+<td><a name="output_vpc_endpoint_s3_id"></a> <a href="../../modules/network#output_vpc_endpoint_s3_id">vpc_endpoint_s3_id</a></td>
+<td>The ID of the S3 VPC endpoint</td>
+</tr>
+<tr>
+<td><a name="output_vpc_endpoints_security_group_id"></a> <a href="../../modules/network#output_vpc_endpoints_security_group_id">vpc_endpoints_security_group_id</a></td>
+<td>The ID of the VPC endpoints security group</td>
 </tr>
 </tbody>
 </table>
