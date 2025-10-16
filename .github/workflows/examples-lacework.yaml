@@ -4,7 +4,6 @@ on:
   pull_request:
     paths:
       - examples/lacework/*.tf
-      - modules/lacework/*.tf
     types:
       - opened
       - synchronize
@@ -12,6 +11,7 @@ on:
       - closed
     branches-ignore:
       - renovate/*
+  workflow_dispatch:
 
 permissions:
   id-token: write

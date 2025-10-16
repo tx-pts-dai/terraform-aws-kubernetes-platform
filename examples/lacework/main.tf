@@ -36,6 +36,15 @@ terraform {
 
 provider "aws" {
   region = local.region
+  default_tags {
+    tags = {
+      Terraform   = "true"
+      Environment = "examples"
+      GithubRepo  = "terraform-aws-kubernetes-platform"
+      GithubOrg   = "tx-pts-dai"
+      Example     = "lacework"
+    }
+  }
 }
 
 provider "kubernetes" {

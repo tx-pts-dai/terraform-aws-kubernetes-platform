@@ -1,15 +1,13 @@
 name: Release
 
 on:
-  workflow_dispatch:
   push:
     branches:
       - main
     paths:
       - "**/*.tf"
       - "**/K8S_VERSION"
-permissions:
-  contents: write
+  workflow_dispatch:
 
 jobs:
   release:
@@ -17,3 +15,22 @@ jobs:
     with:
       metadata_file: ./K8S_VERSION
       update_version_aliases: false
+
+  notify-slack:
+    name: Notify Slack of Release
+    needs: [release]
+    if: success()
+    uses: DND-IT/github-workflows/.github/workflows/notify-slack.yaml@v3
+    secrets:
+      slack_bot_token: ${{ secrets.SLACK_BOT_TOKEN }}
+    with:
+      channel: "C09LG2L8EQ5" # #it_pts_dai_releases
+      notification_title: "New Terraform AWS Kubernetes Platform Release 🚀"
+      notification_message: "A new release has been published!"
+      status: "success"
+      additional_fields: |
+        [
+          {"name": "Repository", "value": "<${{ github.server_url }}/${{ github.repository }}|${{ github.repository }}>"}
+        ]
+      include_workflow_link: true
+      include_triggered_by: true
