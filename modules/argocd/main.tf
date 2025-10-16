@@ -142,3 +142,67 @@ resource "aws_eks_access_policy_association" "argocd_spoke" {
     type = "cluster"
   }
 }
+
+##################### ArgoCD Spoke Configuration ################################
+
+locals {
+  # Build the Kubernetes cluster config for ArgoCD
+  argocd_cluster_config = var.create && var.enable_spoke && var.spoke_secret_config.create ? jsonencode({
+    tlsClientConfig = {
+      insecure = false
+      caData   = data.aws_eks_cluster.cluster.certificate_authority[0].data
+    }
+    awsAuthConfig = {
+      clusterName = var.cluster_name
+      roleARN     = aws_iam_role.argocd_spoke[0].arn
+    }
+  }) : ""
+
+  cluster_secret_labels = merge(
+    {
+      "argocd.argoproj.io/secret-type" = "cluster"
+      cluster-name                     = var.cluster_name
+      region                           = var.spoke_secret_config.region
+      environment                      = var.spoke_secret_config.environment
+      team                             = var.spoke_secret_config.team
+    },
+    var.spoke_extra_cluster_labels
+  )
+
+  argocd_secret_value = var.create && var.enable_spoke && var.spoke_secret_config.create ? yamlencode({
+    apiVersion = var.cluster_name
+    kind       = "Secret"
+    metadata = {
+      name      = "cluster-${var.cluster_name}"
+      namespace = "argocd"
+      labels    = local.cluster_secret_labels
+    }
+    type = "Opaque"
+    stringData = {
+      name = var.cluster_name
+    }
+    server = data.aws_eks_cluster.cluster.endpoint
+    config = local.argocd_cluster_config
+  }) : ""
+
+  parameter_name = "/argocd/clusters/${var.cluster_name}"
+}
+
+resource "aws_ssm_parameter" "argocd_cluster" {
+  count = var.create && var.enable_spoke && var.spoke_secret_config.create ? 1 : 0
+
+  name        = local.parameter_name
+  description = "ArgoCD cluster configuration for ${var.cluster_name}"
+  type        = "String"
+  value       = local.argocd_secret_value
+  tier        = "Intelligent-Tiering"
+
+  tags = merge(
+    var.tags,
+    {
+      cluster-name = var.cluster_name
+      environment  = var.spoke_secret_config.environment
+      region       = var.spoke_secret_config.region
+    }
+  )
+}

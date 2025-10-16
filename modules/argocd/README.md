@@ -65,6 +65,7 @@ No modules.
 | [aws_iam_role.argocd_controller](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
 | [aws_iam_role.argocd_spoke](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
 | [aws_iam_role_policy_attachment.argocd_controller](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
+| [aws_ssm_parameter.argocd_cluster](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
 | [aws_eks_cluster.cluster](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/eks_cluster) | data source |
 | [aws_iam_policy_document.argocd_controller](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.argocd_controller_assume_role](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
@@ -82,12 +83,16 @@ No modules.
 | <a name="input_hub_iam_role_arns"></a> [hub\_iam\_role\_arns](#input\_hub\_iam\_role\_arns) | A list of ArgoCD Hub IAM Role ARNs, enabling hubs to access spoke clusters. This is required for spoke clusters. | `list(string)` | `null` | no |
 | <a name="input_hub_iam_role_name"></a> [hub\_iam\_role\_name](#input\_hub\_iam\_role\_name) | IAM Role Name for ArgoCD Hub. This is referenced by the Spoke clusters | `string` | `"argocd-controller"` | no |
 | <a name="input_namespace"></a> [namespace](#input\_namespace) | Namespace to deploy ArgoCD | `string` | `"argocd"` | no |
+| <a name="input_spoke_extra_cluster_labels"></a> [spoke\_extra\_cluster\_labels](#input\_spoke\_extra\_cluster\_labels) | Labels to add to the ArgoCD spoke cluster Secret | `map(string)` | `{}` | no |
+| <a name="input_spoke_secret_config"></a> [spoke\_secret\_config](#input\_spoke\_secret\_config) | Configuration for ArgoCD spoke cluster secret in AWS Secrets Manager | <pre>object({<br/>    create                              = optional(bool, false)<br/>    environment                         = string<br/>    region                              = string<br/>    team                                = string<br/>    enable_aws_load_balancer_controller = optional(bool, true)<br/>    enable_external_dns                 = optional(bool, true)<br/>    enable_external_secrets             = optional(bool, true)<br/>    enable_metrics_server               = optional(bool, true)<br/>    enable_reloader                     = optional(bool, true)<br/>    enable_downscaler                   = optional(bool, false)<br/>  })</pre> | `null` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | A map of tags to add to all resources | `map(string)` | `{}` | no |
 
 ## Outputs
 
 | Name | Description |
 |------|-------------|
+| <a name="output_argocd_parameter_arn"></a> [argocd\_parameter\_arn](#output\_argocd\_parameter\_arn) | ARN of the ArgoCD cluster configuration in SSM Parameter Store |
+| <a name="output_argocd_parameter_name"></a> [argocd\_parameter\_name](#output\_argocd\_parameter\_name) | Name of the ArgoCD cluster configuration in SSM Parameter Store |
 | <a name="output_cluster_name"></a> [cluster\_name](#output\_cluster\_name) | Name of the EKS cluster |
 | <a name="output_hub_iam_role_arn"></a> [hub\_iam\_role\_arn](#output\_hub\_iam\_role\_arn) | IAM Role ARN for ArgoCD |
 | <a name="output_spoke_iam_role_arn"></a> [spoke\_iam\_role\_arn](#output\_spoke\_iam\_role\_arn) | IAM Role ARN for ArgoCD Spoke |
