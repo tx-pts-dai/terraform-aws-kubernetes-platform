@@ -10,7 +10,6 @@ locals {
         name     = keys(config)[0]
         az       = az
         new_bits = values(config)[0] - tonumber(split("/", var.cidr)[1])
-        hosts    = pow(2, 32 - values(config)[0]) - 4
       }
     ]
   ])
@@ -18,7 +17,6 @@ locals {
   networks = [for i, n in local.subnet_list : {
     name       = n.name
     az         = n.az
-    hosts      = n.hosts
     cidr_block = cidrsubnets(var.cidr, local.subnet_list[*].new_bits...)[i]
   }]
 
