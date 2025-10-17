@@ -58,6 +58,7 @@ See the [network example](../../example/network) how to use it and how to retrie
 |------|-------------|
 | <a name="output_additional_cidr_blocks"></a> [additional\_cidr\_blocks](#output\_additional\_cidr\_blocks) | The additional CIDR blocks associated with the VPC |
 | <a name="output_cidr"></a> [cidr](#output\_cidr) | The base CIDR block for the VPC |
+| <a name="output_grouped_networks"></a> [grouped\_networks](#output\_grouped\_networks) | A map of subnet names to their respective list of CIDR blocks. |
 | <a name="output_networks"></a> [networks](#output\_networks) | A list of network objects with name, az, hosts, and cidr\_block. |
 | <a name="output_vpc"></a> [vpc](#output\_vpc) | Map of attributes for the VPC |
 | <a name="output_vpc_endpoint_ecr_api_id"></a> [vpc\_endpoint\_ecr\_api\_id](#output\_vpc\_endpoint\_ecr\_api\_id) | The ID of the ECR API VPC endpoint |

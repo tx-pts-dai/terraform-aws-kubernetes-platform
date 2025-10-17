@@ -8,6 +8,11 @@ output "networks" {
   description = "A list of network objects with name, az, hosts, and cidr_block."
 }
 
+output "grouped_networks" {
+  value       = local.grouped_networks
+  description = "A map of subnet names to their respective list of CIDR blocks."
+}
+
 output "cidr" {
   value       = module.vpc.vpc_cidr_block
   description = "The base CIDR block for the VPC"

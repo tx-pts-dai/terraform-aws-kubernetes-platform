@@ -21,6 +21,10 @@ locals {
     hosts      = n.hosts
     cidr_block = cidrsubnets(var.cidr, local.subnet_list[*].new_bits...)[i]
   }]
+
+  grouped_networks = {
+    for net in local.networks : net.name => net.cidr_block...
+  }
 }
 
 module "vpc" {
