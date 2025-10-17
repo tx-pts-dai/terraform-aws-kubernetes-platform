@@ -7,3 +7,8 @@ output "network_stack_infos" {
     vpc_name          = module.ssm_lookup.lookup[local.network_stack_name].vpc_name
   }
 }
+
+output "networks" {
+  description = "Example of how to retrieve the networks from network module from another stack"
+  value       = module.network.networks
+}
