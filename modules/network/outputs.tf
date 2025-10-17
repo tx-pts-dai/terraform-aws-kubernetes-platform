@@ -8,19 +8,14 @@ output "networks" {
   description = "A list of network objects with name, az, hosts, and cidr_block."
 }
 
-output "network_cidr_blocks" {
-  value       = tomap(local.network_by_name)
-  description = "A map from network names to allocated address prefixes in CIDR notation."
-}
-
-output "grouped_networks" {
-  value       = local.grouped_networks
-  description = "A map of subnet names to their respective details and list of CIDR blocks."
-}
-
 output "cidr" {
-  value       = var.cidr
+  value       = module.vpc.vpc_cidr_block
   description = "The base CIDR block for the VPC"
+}
+
+output "additional_cidr_blocks" {
+  value       = module.vpc.vpc_secondary_cidr_blocks
+  description = "The additional CIDR blocks associated with the VPC"
 }
 
 ## VPC Endpoints

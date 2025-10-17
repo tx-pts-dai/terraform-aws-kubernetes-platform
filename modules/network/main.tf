@@ -5,32 +5,22 @@ locals {
   azs = slice(data.aws_availability_zones.available.names, 0, var.az_count)
 
   subnet_list = flatten([
-    for subnet_map in var.subnet_configs : [
-      for subnet_name, size in subnet_map : [
-        for az in local.azs : {
-          name     = subnet_name,
-          az       = az,
-          new_bits = size - tonumber(split("/", var.cidr)[1])
-          hosts    = pow(2, 32 - size) - 4 # 2 reserved, 1 network, 1 broadcast
-        }
-      ]
+    for config in var.subnet_configs : [
+      for az in local.azs : {
+        name     = keys(config)[0]
+        az       = az
+        new_bits = values(config)[0] - tonumber(split("/", var.cidr)[1])
+        hosts    = pow(2, 32 - values(config)[0]) - 4
+      }
     ]
   ])
-
-  network_by_index = cidrsubnets(var.cidr, local.subnet_list[*].new_bits...)
-
-  network_by_name = { for i, n in local.subnet_list : "${n.name}-${n.az}" => local.network_by_index[i] if n.name != null }
 
   networks = [for i, n in local.subnet_list : {
     name       = n.name
     az         = n.az
     hosts      = n.hosts
-    cidr_block = n.name != null ? local.network_by_index[i] : tostring(null)
+    cidr_block = cidrsubnets(var.cidr, local.subnet_list[*].new_bits...)[i]
   }]
-
-  grouped_networks = {
-    for net in local.networks : net.name => net.cidr_block...
-  }
 }
 
 module "vpc" {
@@ -39,8 +29,9 @@ module "vpc" {
 
   create_vpc = var.create_vpc
 
-  name = var.stack_name
-  cidr = var.cidr
+  name                  = var.stack_name
+  cidr                  = var.cidr
+  secondary_cidr_blocks = var.secondary_cidr_blocks
 
   azs = local.azs
 
@@ -76,18 +67,10 @@ resource "aws_security_group" "vpc_endpoints" {
 
   ingress {
     description = "Allow all inbound"
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  egress {
-    description = "Allow all outbound"
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = concat(module.vpc.vpc_cidr_block, module.vpc.vpc_secondary_cidr_blocks)
   }
 
   tags = merge(
