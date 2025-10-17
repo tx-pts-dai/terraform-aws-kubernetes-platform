@@ -23,8 +23,8 @@ variable "subnet_configs" {
     { private = 24 },
     { intra = 26 },
     { database = 26 },
+    { elasticache = 26 },
     { redshift = 26 },
-    { karpenter = 22 }
   ]
 }
 
@@ -38,6 +38,12 @@ variable "cidr" {
   description = "The CIDR block for the VPC"
   type        = string
   default     = "10.0.0.0/16"
+}
+
+variable "secondary_cidr_blocks" {
+  description = " List of secondary CIDR blocks to associate with the VPC to extend the IP Address pool"
+  type        = list(string)
+  default     = []
 }
 
 variable "enable_nat_gateway" {

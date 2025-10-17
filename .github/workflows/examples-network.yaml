@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - examples/network/*.tf
+      - modules/network/*.tf
     types:
       - opened
       - synchronize
