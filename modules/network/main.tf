@@ -70,7 +70,7 @@ resource "aws_security_group" "vpc_endpoints" {
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
-    cidr_blocks = concat(module.vpc.vpc_cidr_block, module.vpc.vpc_secondary_cidr_blocks)
+    cidr_blocks = concat([module.vpc.vpc_cidr_block], module.vpc.vpc_secondary_cidr_blocks)
   }
 
   tags = merge(
