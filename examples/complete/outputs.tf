@@ -12,3 +12,15 @@ output "karpenter" {
   description = "karpenter module outputs"
   value       = module.k8s_platform.karpenter
 }
+
+# Example outputs for Kubernetes access roles
+# These will only have values if kubernetes_access_roles is configured
+output "kubernetes_access_role_arns" {
+  description = "Reusable IAM role ARNs for Kubernetes access - use these for AssumeRole operations"
+  value       = module.k8s_platform.kubernetes_access_role_arns
+}
+
+output "kubernetes_access_roles" {
+  description = "Detailed information about reusable Kubernetes access roles"
+  value       = module.k8s_platform.kubernetes_access_roles
+}

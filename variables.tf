@@ -203,3 +203,107 @@ variable "argocd" {
   })
   default = {}
 }
+
+################################################################################
+# Kubernetes Access Control
+################################################################################
+
+variable "kubernetes_access_roles" {
+  description = <<-EOT
+    Map of reusable IAM roles that can be assumed by multiple principals.
+    Creates standard roles that grant different levels of Kubernetes access.
+
+    Supported predefined access_level values:
+    - "view"         -> AmazonEKSViewPolicy (read-only)
+    - "edit"         -> AmazonEKSEditPolicy (create/update resources)
+    - "admin"        -> AmazonEKSClusterAdminPolicy (full admin)
+    - "custom"       -> Use custom_policy_arns (list of policy ARNs)
+
+    Example:
+    {
+      "readonly" = {
+        controller_iam_role_arns = [
+          "arn:aws:iam::123456789012:role/backstage-prod",
+          "arn:aws:iam::123456789012:role/ai-agent"
+        ]
+        access_level = "view"           # Predefined: view, edit, admin, or custom
+        scope        = "cluster"        # "cluster" or "namespace"
+        namespaces   = []               # required if scope = "namespace"
+      }
+      "developer" = {
+        controller_iam_role_arns = ["arn:aws:iam::123456789012:role/dev-team"]
+        access_level = "edit"
+        scope        = "namespace"
+        namespaces   = ["development", "staging"]
+      }
+      "ops-admin" = {
+        controller_iam_role_arns = ["arn:aws:iam::123456789012:role/ops-team"]
+        access_level = "admin"
+        scope        = "cluster"
+      }
+      "custom-access" = {
+        controller_iam_role_arns = ["arn:aws:iam::123456789012:role/special-service"]
+        access_level = "custom"
+        custom_policy_arns = [
+          "arn:aws:eks::aws:cluster-access-policy/MyCustomPolicy"
+        ]
+        scope = "cluster"
+      }
+    }
+
+    This creates:
+    - {cluster}-k8s-readonly (view access)
+    - {cluster}-k8s-developer (edit access on dev/staging namespaces)
+    - {cluster}-k8s-ops-admin (full admin access)
+    - {cluster}-k8s-custom-access (custom policies)
+  EOT
+  type = map(object({
+    controller_iam_role_arns = list(string)
+    access_level             = string # "view", "edit", "admin", or "custom"
+    scope                    = string # "cluster" or "namespace"
+    namespaces               = optional(list(string), [])
+    custom_policy_arns       = optional(list(string), [])
+    external_id              = optional(string)
+  }))
+  default = {}
+
+  validation {
+    condition = alltrue([
+      for k, v in var.kubernetes_access_roles :
+      contains(["view", "edit", "admin", "custom"], v.access_level)
+    ])
+    error_message = "access_level must be one of: view, edit, admin, custom"
+  }
+
+  validation {
+    condition = alltrue([
+      for k, v in var.kubernetes_access_roles :
+      contains(["cluster", "namespace"], v.scope)
+    ])
+    error_message = "scope must be either 'cluster' or 'namespace'"
+  }
+
+  validation {
+    condition = alltrue([
+      for k, v in var.kubernetes_access_roles :
+      v.scope == "namespace" ? length(v.namespaces) > 0 : true
+    ])
+    error_message = "namespaces must be provided when scope is 'namespace'"
+  }
+
+  validation {
+    condition = alltrue([
+      for k, v in var.kubernetes_access_roles :
+      length(v.controller_iam_role_arns) > 0
+    ])
+    error_message = "At least one controller_iam_role_arn must be provided"
+  }
+
+  validation {
+    condition = alltrue([
+      for k, v in var.kubernetes_access_roles :
+      v.access_level == "custom" ? length(lookup(v, "custom_policy_arns", [])) > 0 : true
+    ])
+    error_message = "custom_policy_arns must be provided when access_level is 'custom'"
+  }
+}
