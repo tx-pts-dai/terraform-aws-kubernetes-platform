@@ -1641,11 +1641,27 @@ Each new kubernetes version needs it's own release. This is due to the fact that
 <td>resource</td>
 </tr>
 <tr>
+<td><a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/eks_access_entry">aws_eks_access_entry.k8s_access</a></td>
+<td>resource</td>
+</tr>
+<tr>
+<td><a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/eks_access_policy_association">aws_eks_access_policy_association.k8s_access_custom</a></td>
+<td>resource</td>
+</tr>
+<tr>
+<td><a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/eks_access_policy_association">aws_eks_access_policy_association.k8s_access_predefined</a></td>
+<td>resource</td>
+</tr>
+<tr>
 <td><a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy">aws_iam_policy.fargate_fluentbit</a></td>
 <td>resource</td>
 </tr>
 <tr>
 <td><a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy">aws_iam_policy.karpenter_controller</a></td>
+<td>resource</td>
+</tr>
+<tr>
+<td><a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role">aws_iam_role.k8s_access</a></td>
 <td>resource</td>
 </tr>
 <tr>
@@ -1702,6 +1718,10 @@ Each new kubernetes version needs it's own release. This is due to the fact that
 </tr>
 <tr>
 <td><a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document">aws_iam_policy_document.fargate_fluentbit</a></td>
+<td>data source</td>
+</tr>
+<tr>
+<td><a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document">aws_iam_policy_document.k8s_access_assume</a></td>
 <td>data source</td>
 </tr>
 <tr>
@@ -1865,6 +1885,13 @@ Each new kubernetes version needs it's own release. This is due to the fact that
 <td style="text-align: center;">no</td>
 </tr>
 <tr>
+<td><a name="input_kubernetes_access_roles"></a> <a href="..#input_kubernetes_access_roles">kubernetes_access_roles</a></td>
+<td>Map of reusable IAM roles that can be assumed by multiple principals.<br/>Creates standard roles that grant different levels of Kubernetes access.<br/><br/>Supported predefined access_level values:<br/>- "view"         -&gt; AmazonEKSViewPolicy (read-only)<br/>- "edit"         -&gt; AmazonEKSEditPolicy (create/update resources)<br/>- "admin"        -&gt; AmazonEKSClusterAdminPolicy (full admin)<br/>- "custom"       -&gt; Use custom_policy_arns (list of policy ARNs)<br/><br/>Example:<br/>{<br/>  "readonly" = {<br/>    controller_iam_role_arns = [<br/>      "arn:aws:iam::123456789012:role/backstage-prod",<br/>      "arn:aws:iam::123456789012:role/ai-agent"<br/>    ]<br/>    access_level = "view"           # Predefined: view, edit, admin, or custom<br/>    scope        = "cluster"        # "cluster" or "namespace"<br/>    namespaces   = []               # required if scope = "namespace"<br/>  }<br/>  "developer" = {<br/>    controller_iam_role_arns = ["arn:aws:iam::123456789012:role/dev-team"]<br/>    access_level = "edit"<br/>    scope        = "namespace"<br/>    namespaces   = ["development", "staging"]<br/>  }<br/>  "ops-admin" = {<br/>    controller_iam_role_arns = ["arn:aws:iam::123456789012:role/ops-team"]<br/>    access_level = "admin"<br/>    scope        = "cluster"<br/>  }<br/>  "custom-access" = {<br/>    controller_iam_role_arns = ["arn:aws:iam::123456789012:role/special-service"]<br/>    access_level = "custom"<br/>    custom_policy_arns = [<br/>      "arn:aws:eks::aws:cluster-access-policy/MyCustomPolicy"<br/>    ]<br/>    scope = "cluster"<br/>  }<br/>}<br/><br/>This creates:<br/>- {cluster}-k8s-readonly (view access)<br/>- {cluster}-k8s-developer (edit access on dev/staging namespaces)<br/>- {cluster}-k8s-ops-admin (full admin access)<br/>- {cluster}-k8s-custom-access (custom policies)</td>
+<td><pre>map(object({<br/>    controller_iam_role_arns = list(string)<br/>    access_level             = string # "view", "edit", "admin", or "custom"<br/>    scope                    = string # "cluster" or "namespace"<br/>    namespaces               = optional(list(string), [])<br/>    custom_policy_arns       = optional(list(string), [])<br/>    external_id              = optional(string)<br/>  }))</pre></td>
+<td><code>{}</code></td>
+<td style="text-align: center;">no</td>
+</tr>
+<tr>
 <td><a name="input_name"></a> <a href="..#input_name">name</a></td>
 <td>The name of the platform, a timestamp will be appended to this name to make the stack_name. If not provided, the name of the directory will be used.</td>
 <td><code>string</code></td>
@@ -1914,6 +1941,14 @@ Each new kubernetes version needs it's own release. This is due to the fact that
 <tr>
 <td><a name="output_karpenter"></a> <a href="..#output_karpenter">karpenter</a></td>
 <td>Map of attributes for the Karpenter module</td>
+</tr>
+<tr>
+<td><a name="output_kubernetes_access_role_arns"></a> <a href="..#output_kubernetes_access_role_arns">kubernetes_access_role_arns</a></td>
+<td>Map of reusable Kubernetes access role names to their IAM role ARNs</td>
+</tr>
+<tr>
+<td><a name="output_kubernetes_access_roles"></a> <a href="..#output_kubernetes_access_roles">kubernetes_access_roles</a></td>
+<td>Detailed information about reusable Kubernetes access IAM roles</td>
 </tr>
 </tbody>
 </table>
