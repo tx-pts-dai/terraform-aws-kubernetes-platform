@@ -296,7 +296,7 @@ variable "kubernetes_access_roles" {
       for k, v in var.kubernetes_access_roles :
       length(v.controller_iam_role_arns) > 0
     ])
-    error_message = "At least one controller_iam_role_arn must be provided"
+    error_message = "At least one controller_iam_role_arns entry must be provided"
   }
 
   validation {
