@@ -147,6 +147,45 @@ module "k8s_platform" {
       value = "shared"
     }
   ]
+
+  # Example: Reusable Kubernetes access roles with different permission levels
+  # Creates standard roles that can be assumed by multiple principals
+  # kubernetes_access_roles = {
+  #   # View-only access (read-only) - for Backstage, AI agents, monitoring
+  #   readonly = {
+  #     controller_iam_role_arns = [
+  #       "arn:aws:iam::123456789012:role/backstage-prod",
+  #       "arn:aws:iam::123456789012:role/ai-agent"
+  #     ]
+  #     access_level = "view"    # Options: view, edit, admin, custom
+  #     scope        = "cluster"
+  #   }
+  #   # Edit access - for developers in specific namespaces
+  #   developer = {
+  #     controller_iam_role_arns = [
+  #       "arn:aws:iam::123456789012:role/dev-team-prod",
+  #       "arn:aws:iam::123456789012:role/dev-team-staging"
+  #     ]
+  #     access_level = "edit"
+  #     scope        = "namespace"
+  #     namespaces   = ["development", "staging"]
+  #   }
+  #   # Admin access - for ops team with full cluster permissions
+  #   ops-admin = {
+  #     controller_iam_role_arns = ["arn:aws:iam::123456789012:role/ops-team"]
+  #     access_level             = "admin"
+  #     scope                    = "cluster"
+  #   }
+  #   # Custom policies - for special use cases
+  #   custom-access = {
+  #     controller_iam_role_arns = ["arn:aws:iam::123456789012:role/special-service"]
+  #     access_level             = "custom"
+  #     custom_policy_arns = [
+  #       "arn:aws:eks::aws:cluster-access-policy/MyCustomPolicy"
+  #     ]
+  #     scope = "cluster"
+  #   }
+  # }
 }
 
 data "aws_secretsmanager_secret_version" "cloudflare" {

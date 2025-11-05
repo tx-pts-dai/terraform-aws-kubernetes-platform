@@ -15,6 +15,13 @@ locals {
           maxReplicas = 10
         }
       })
+
+      # Increase timeout to allow Karpenter time to provision nodes
+      # Karpenter provisions nodes on-demand when pods are pending
+      timeouts = {
+        create = "20m"
+        update = "20m"
+      }
     }
 
     aws-ebs-csi-driver = {
@@ -28,6 +35,14 @@ locals {
       })
 
       service_account_role_arn = module.ebs_csi_driver_irsa.arn
+
+      # Increase timeout to allow Karpenter time to provision nodes
+      # Karpenter provisions nodes on-demand when pods are pending
+      timeouts = {
+        create = "20m"
+        update = "20m"
+      }
+
       # Removing the IRSA role  does not work
       # BUG: https://github.com/hashicorp/terraform-provider-aws/issues/30645
       # pod_identity_association = [{

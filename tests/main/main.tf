@@ -175,13 +175,13 @@ module "k8s_platform" {
     wildcard_certificates = false # Don't create wildcards for test deployments since other stacks might use them and cause cleanup failures
   }
 
-  enable_argocd = true
+  enable_argocd = false
 
   argocd = {
     enable_spoke = true
     hub_iam_role_arns = [
-      "arn:aws:iam::730335665754:role/argocd-controller",
-      "arn:aws:iam::911453050078:role/argocd-controller"
+      "arn:aws:iam::123456789012:role/argocd-controller",
+      "arn:aws:iam::851725213542:role/argocd-controller"
     ]
   }
 }
