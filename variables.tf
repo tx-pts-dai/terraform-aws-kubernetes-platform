@@ -203,3 +203,27 @@ variable "argocd" {
   })
   default = {}
 }
+
+variable "argocd_spoke_secret_config" {
+  description = "Configuration for ArgoCD spoke cluster secret in AWS Secrets Manager"
+  type = object({
+    create                              = optional(bool, false)
+    environment                         = string
+    region                              = string
+    team                                = string
+    enable_aws_load_balancer_controller = optional(bool, true)
+    enable_external_dns                 = optional(bool, true)
+    enable_external_secrets             = optional(bool, true)
+    enable_metrics_server               = optional(bool, true)
+    enable_reloader                     = optional(bool, true)
+    enable_downscaler                   = optional(bool, false)
+  })
+
+  default = null
+}
+
+variable "argocd_spoke_extra_cluster_labels" {
+  description = "Labels to add to the ArgoCD spoke cluster Secret"
+  type        = map(string)
+  default     = {}
+}

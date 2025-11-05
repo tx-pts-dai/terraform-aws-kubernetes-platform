@@ -180,8 +180,14 @@ module "k8s_platform" {
   argocd = {
     enable_spoke = true
     hub_iam_role_arns = [
-      "arn:aws:iam::730335665754:role/argocd-controller",
-      "arn:aws:iam::911453050078:role/argocd-controller"
+      "arn:aws:iam::730335665754:role/argocd-controller"
     ]
+  }
+
+  argocd_spoke_secret_config = {
+    create      = true
+    environment = "example"
+    region      = local.region
+    team        = "dai"
   }
 }

@@ -209,6 +209,9 @@ module "argocd" {
   hub_iam_role_name = var.argocd.hub_iam_role_name
   hub_iam_role_arn  = var.argocd.hub_iam_role_arn
   hub_iam_role_arns = var.argocd.hub_iam_role_arns
+
+  spoke_secret_config        = var.argocd_spoke_secret_config
+  spoke_extra_cluster_labels = var.argocd_spoke_extra_cluster_labels
 }
 
 ################################################################################
