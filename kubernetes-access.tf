@@ -17,7 +17,7 @@ locals {
   # Flatten custom policy associations for iteration
   custom_policy_associations = flatten([
     for role_key, role_config in local.kubernetes_access_roles : [
-      for policy_arn in(role_config.access_level == "custom" ? role_config.custom_policy_arns : []) : {
+      for policy_arn in (role_config.access_level == "custom" ? role_config.custom_policy_arns : []) : {
         role_key   = role_key
         policy_arn = policy_arn
         scope      = role_config.scope
