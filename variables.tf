@@ -39,7 +39,30 @@ variable "vpc" {
 }
 
 variable "eks" {
-  description = "Map of EKS configurations"
+  description = <<-EOT
+  Map of EKS configurations including cluster settings and core addon customization.
+
+  Cluster settings:
+    - cluster_endpoint_public_access: Enable public access to cluster endpoint (default: true)
+    - cluster_endpoint_private_access: Enable private access to cluster endpoint (default: true)
+    - enable_cluster_creator_admin_permissions: Grant admin permissions to cluster creator (default: false)
+
+  Core addon settings (vpc_cni, kube_proxy, eks_pod_identity_agent):
+    - configuration_values: JSON string of addon configuration (merged with defaults for vpc-cni)
+
+  Example:
+    eks = {
+      cluster_endpoint_public_access = false
+      vpc_cni = {
+        configuration_values = jsonencode({
+          env = {
+            ENABLE_PREFIX_DELEGATION = "true"
+            WARM_PREFIX_TARGET       = "1"
+          }
+        })
+      }
+    }
+  EOT
   type        = any
   default     = {}
 }
