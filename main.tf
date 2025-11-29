@@ -75,7 +75,7 @@ locals {
       }
     }
   } }
-  k8s_version = trimspace(file("${path.module}/K8S_VERSION"))
+  k8s_version = var.kubernetes_version
 
 }
 

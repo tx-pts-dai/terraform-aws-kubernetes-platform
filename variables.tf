@@ -38,6 +38,12 @@ variable "vpc" {
   })
 }
 
+variable "kubernetes_version" {
+  description = "Kubernetes version for the EKS cluster (e.g., \"1.33\")"
+  type        = string
+  default     = "1.33"
+}
+
 variable "eks" {
   description = <<-EOT
   Map of EKS configurations including cluster settings and core addon customization.
