@@ -10,7 +10,7 @@ on:
 
 jobs:
   release:
-    uses: DND-IT/github-workflows/.github/workflows/gh-release.yaml@main
+    uses: DND-IT/github-workflows/.github/workflows/gh-release.yaml@v3
     with:
       use_semantic_release: true
       update_version_aliases: false

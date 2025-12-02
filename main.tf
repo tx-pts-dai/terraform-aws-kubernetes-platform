@@ -75,8 +75,6 @@ locals {
       }
     }
   } }
-  k8s_version = var.kubernetes_version
-
 }
 
 ################################################################################
@@ -108,7 +106,7 @@ module "eks" {
   version = "21.3.2"
 
   name                    = local.stack_name
-  kubernetes_version      = local.k8s_version
+  kubernetes_version      = var.kubernetes_version
   endpoint_public_access  = try(var.eks.cluster_endpoint_public_access, true)
   endpoint_private_access = try(var.eks.cluster_endpoint_private_access, true)
   authentication_mode     = "API"
