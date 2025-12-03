@@ -6,14 +6,13 @@ on:
       - "*.tf"
       - "modules/**/*.tf"
       - "tests/**/*.tf"
-      - "K8S_VERSION"
     types:
       - opened
       - synchronize
       - reopened
       - closed
-    branches:
-      - main
+    branches-ignore:
+      - renovate/*
 
   workflow_dispatch:
 

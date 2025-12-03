@@ -6,31 +6,31 @@ on:
       - main
     paths:
       - "**/*.tf"
-      - "**/K8S_VERSION"
   workflow_dispatch:
 
 jobs:
   release:
-    uses: DND-IT/github-workflows/.github/workflows/gh-release-on-main.yaml@v3
+    uses: DND-IT/github-workflows/.github/workflows/gh-release.yaml@v3
     with:
-      metadata_file: ./K8S_VERSION
+      use_semantic_release: true
       update_version_aliases: false
 
   notify-slack:
     name: Notify Slack of Release
     needs: [release]
-    if: success()
+    if: needs.release.outputs.new_release_published == 'true'
     uses: DND-IT/github-workflows/.github/workflows/notify-slack.yaml@v3
     secrets:
       slack_bot_token: ${{ secrets.SLACK_BOT_TOKEN }}
     with:
       channel: "C09LG2L8EQ5" # #it_pts_dai_releases
-      notification_title: "New Terraform AWS Kubernetes Platform Release 🚀"
+      notification_title: "New Terraform AWS Kubernetes Platform Release ${{ needs.release.outputs.new_release_git_tag }} 🚀"
       notification_message: "A new release has been published!"
       status: "success"
       additional_fields: |
         [
-          {"name": "Repository", "value": "<${{ github.server_url }}/${{ github.repository }}|${{ github.repository }}>"}
+          {"name": "Repository", "value": "<${{ github.server_url }}/${{ github.repository }}|${{ github.repository }}>"},
+          {"name": "Version", "value": "${{ needs.release.outputs.new_release_git_tag }}"}
         ]
       include_workflow_link: true
       include_triggered_by: true

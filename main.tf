@@ -75,8 +75,30 @@ locals {
       }
     }
   } }
-  k8s_version = trimspace(file("${path.module}/K8S_VERSION"))
+}
 
+################################################################################
+# Core Addon Configuration
+locals {
+  # Default vpc-cni configuration
+  vpc_cni_default_config = {
+    env = {
+      ENABLE_PREFIX_DELEGATION = "true"
+    }
+  }
+
+  # Merge user-provided vpc-cni configuration with defaults (deep merge for env)
+  vpc_cni_user_config = try(jsondecode(var.eks.vpc_cni.configuration_values), {})
+  vpc_cni_merged_config = jsonencode(merge(
+    local.vpc_cni_default_config,
+    local.vpc_cni_user_config,
+    contains(keys(local.vpc_cni_user_config), "env") ? {
+      env = merge(
+        local.vpc_cni_default_config.env,
+        local.vpc_cni_user_config.env
+      )
+    } : {}
+  ))
 }
 
 module "eks" {
@@ -84,7 +106,7 @@ module "eks" {
   version = "21.3.2"
 
   name                    = local.stack_name
-  kubernetes_version      = local.k8s_version
+  kubernetes_version      = var.kubernetes_version
   endpoint_public_access  = try(var.eks.cluster_endpoint_public_access, true)
   endpoint_private_access = try(var.eks.cluster_endpoint_private_access, true)
   authentication_mode     = "API"
@@ -106,11 +128,7 @@ module "eks" {
       #   }
       # ]
 
-      configuration_values = jsonencode({
-        env = {
-          ENABLE_PREFIX_DELEGATION = "true"
-        }
-      })
+      configuration_values = local.vpc_cni_merged_config
     }
 
     kube-proxy = {
@@ -118,6 +136,8 @@ module "eks" {
 
       most_recent = true
       preserve    = true
+
+      configuration_values = try(var.eks.kube_proxy.configuration_values, null)
     }
 
     eks-pod-identity-agent = {
@@ -125,6 +145,8 @@ module "eks" {
 
       most_recent = true
       preserve    = true
+
+      configuration_values = try(var.eks.eks_pod_identity_agent.configuration_values, null)
 
       timeouts = {
         create = "3m"
