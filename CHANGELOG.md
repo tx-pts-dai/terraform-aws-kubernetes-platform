@@ -1,3 +1,13 @@
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+## [6.6.1](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/compare/v6.6.0+1.33...v6.6.1) (2025-12-03)
+
+### Bug Fixes
+
+* allow custom settings for default addons ([#260](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/issues/260)) ([315aa1d](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/commit/315aa1df2f9fb70fb1e3f025ec6f28be30a318fa))
+
 # v6.0.0
 
 **Breaking Changes:**
