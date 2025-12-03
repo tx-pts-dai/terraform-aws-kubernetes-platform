@@ -519,9 +519,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#release-new-kubernetes-version" class="md-nav__link">
+  <a href="#upgrading-kubernetes-version" class="md-nav__link">
     <span class="md-ellipsis">
-      Release new kubernetes version
+      Upgrading Kubernetes Version
     </span>
   </a>
   
@@ -1207,9 +1207,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#release-new-kubernetes-version" class="md-nav__link">
+  <a href="#upgrading-kubernetes-version" class="md-nav__link">
     <span class="md-ellipsis">
-      Release new kubernetes version
+      Upgrading Kubernetes Version
     </span>
   </a>
   
@@ -1406,42 +1406,18 @@
 </span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a><span class="p">}</span>
 </span></code></pre></div>
 <p>See the <a href="..#Examples">Examples below</a> for more use cases</p>
-<h2 id="release-new-kubernetes-version">Release new kubernetes version<a class="headerlink" href="#release-new-kubernetes-version" title="Permanent link">&para;</a></h2>
-<p><strong>important</strong>
-Each new kubernetes version needs it's own release. This is due to the fact that we should not skip kubernetes versions during a cluster upgrade.</p>
-<p>To release a new Kubernetes version, follow these steps:</p>
-<ol>
-<li><strong>Update the version file</strong>:</li>
-<li>Open the <code>K8S_VERSION</code> file located in the root of the repository.</li>
-<li>
-<p>Update the version number to the next Kubernetes version.</p>
-</li>
-<li>
-<p><strong>Commit the Changes</strong>:</p>
-</li>
-<li>
-<p>Commit the changes to the <code>K8S_VERSION</code> file with a meaningful commit message following the release proces. For example:
-     <div class="language-sh highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>git<span class="w"> </span>add<span class="w"> </span>K8S_VERSION
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;feat! update Kubernetes version to 1.30&quot;</span>
-</span></code></pre></div></p>
-</li>
-<li>
-<p><strong>Push the Changes</strong>:</p>
-</li>
-<li>
-<p>Push the changes to the main branch, the release workflow will automatically run. This workflow will:</p>
-<ul>
-<li>Read the updated Kubernetes version from the <code>K8S_VERSION</code> file.</li>
-<li>Determine the new module version based on the commit message.</li>
-<li>Create a new release with the updated module version and the kubernetes version as metadata. The format would be X.Y.Z+A.B where X.Y.Z is the module version and A.B is the kubenetes control plane version.</li>
-</ul>
-</li>
-<li>
-<p><strong>Verify the Release</strong>:</p>
-</li>
-<li>Check the <a href="https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/actions">GitHub Actions</a> page to ensure the release workflow completed successfully.</li>
-<li>Verify that the new module version is available in the <a href="https://registry.terraform.io/modules/tx-pts-dai/kubernetes-platform/aws">Terraform Registry</a>.</li>
-</ol>
+<h2 id="upgrading-kubernetes-version">Upgrading Kubernetes Version<a class="headerlink" href="#upgrading-kubernetes-version" title="Permanent link">&para;</a></h2>
+<p>The Kubernetes version is configured via the <code>kubernetes_version</code> variable. The default version is updated with each module release.</p>
+<p>To upgrade your cluster to a new Kubernetes version:</p>
+<div class="language-hcl highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kr">module</span><span class="w"> </span><span class="nv">&quot;k8s_platform&quot;</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">  </span><span class="na">source</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;tx-pts-dai/kubernetes-platform/aws&quot;</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">  </span><span class="na">kubernetes_version</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;1.33&quot;</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="c1">  # ... other configuration</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="p">}</span>
+</span></code></pre></div>
+<p><strong>Important</strong>: Do not skip Kubernetes minor versions during upgrades. For example, upgrade from 1.31 → 1.32 → 1.33, not directly from 1.31 → 1.33.</p>
 <h2 id="explanation-and-description-of-interesting-use-cases">Explanation and description of interesting use-cases<a class="headerlink" href="#explanation-and-description-of-interesting-use-cases" title="Permanent link">&para;</a></h2>
 <p>Why this module?</p>
 <ul>
@@ -1795,7 +1771,7 @@ Each new kubernetes version needs it's own release. This is due to the fact that
 </tr>
 <tr>
 <td><a name="input_eks"></a> <a href="..#input_eks">eks</a></td>
-<td>Map of EKS configurations</td>
+<td>Map of EKS configurations including cluster settings and core addon customization.<br/><br/>Cluster settings:<br/>  - cluster_endpoint_public_access: Enable public access to cluster endpoint (default: true)<br/>  - cluster_endpoint_private_access: Enable private access to cluster endpoint (default: true)<br/>  - enable_cluster_creator_admin_permissions: Grant admin permissions to cluster creator (default: false)<br/><br/>Core addon settings (vpc_cni, kube_proxy, eks_pod_identity_agent):<br/>  - configuration_values: JSON string of addon configuration (merged with defaults for vpc-cni)<br/><br/>Example:<br/>  eks = {<br/>    cluster_endpoint_public_access = false<br/>    vpc_cni = {<br/>      configuration_values = jsonencode({<br/>        env = {<br/>          ENABLE_PREFIX_DELEGATION = "true"<br/>          WARM_PREFIX_TARGET       = "1"<br/>        }<br/>      })<br/>    }<br/>  }</td>
 <td><code>any</code></td>
 <td><code>{}</code></td>
 <td style="text-align: center;">no</td>
@@ -1889,6 +1865,13 @@ Each new kubernetes version needs it's own release. This is due to the fact that
 <td>Map of reusable IAM roles that can be assumed by multiple principals.<br/>Creates standard roles that grant different levels of Kubernetes access.<br/><br/>Supported predefined access_level values:<br/>- "view"         -&gt; AmazonEKSViewPolicy (read-only)<br/>- "edit"         -&gt; AmazonEKSEditPolicy (create/update resources)<br/>- "admin"        -&gt; AmazonEKSClusterAdminPolicy (full admin)<br/>- "custom"       -&gt; Use custom_policy_arns (list of policy ARNs)<br/><br/>Example:<br/>{<br/>  "readonly" = {<br/>    controller_iam_role_arns = [<br/>      "arn:aws:iam::123456789012:role/backstage-prod",<br/>      "arn:aws:iam::123456789012:role/ai-agent"<br/>    ]<br/>    access_level = "view"           # Predefined: view, edit, admin, or custom<br/>    scope        = "cluster"        # "cluster" or "namespace"<br/>    namespaces   = []               # required if scope = "namespace"<br/>  }<br/>  "developer" = {<br/>    controller_iam_role_arns = ["arn:aws:iam::123456789012:role/dev-team"]<br/>    access_level = "edit"<br/>    scope        = "namespace"<br/>    namespaces   = ["development", "staging"]<br/>  }<br/>  "ops-admin" = {<br/>    controller_iam_role_arns = ["arn:aws:iam::123456789012:role/ops-team"]<br/>    access_level = "admin"<br/>    scope        = "cluster"<br/>  }<br/>  "custom-access" = {<br/>    controller_iam_role_arns = ["arn:aws:iam::123456789012:role/special-service"]<br/>    access_level = "custom"<br/>    custom_policy_arns = [<br/>      "arn:aws:eks::aws:cluster-access-policy/MyCustomPolicy"<br/>    ]<br/>    scope = "cluster"<br/>  }<br/>}<br/><br/>This creates:<br/>- {cluster}-k8s-readonly (view access)<br/>- {cluster}-k8s-developer (edit access on dev/staging namespaces)<br/>- {cluster}-k8s-ops-admin (full admin access)<br/>- {cluster}-k8s-custom-access (custom policies)</td>
 <td><pre>map(object({<br/>    controller_iam_role_arns = list(string)<br/>    access_level             = string # "view", "edit", "admin", or "custom"<br/>    scope                    = string # "cluster" or "namespace"<br/>    namespaces               = optional(list(string), [])<br/>    custom_policy_arns       = optional(list(string), [])<br/>    external_id              = optional(string)<br/>  }))</pre></td>
 <td><code>{}</code></td>
+<td style="text-align: center;">no</td>
+</tr>
+<tr>
+<td><a name="input_kubernetes_version"></a> <a href="..#input_kubernetes_version">kubernetes_version</a></td>
+<td>Kubernetes version for the EKS cluster (e.g., "1.33")</td>
+<td><code>string</code></td>
+<td><code>"1.33"</code></td>
 <td style="text-align: center;">no</td>
 </tr>
 <tr>
