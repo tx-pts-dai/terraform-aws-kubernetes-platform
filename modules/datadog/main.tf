@@ -114,7 +114,7 @@ resource "helm_release" "datadog_agent" {
   name        = "datadog-agent"
   repository  = "https://dnd-it.github.io/helm-charts"
   chart       = "custom-resources"
-  version     = "0.1.2"
+  version     = "0.1.3"
   namespace   = var.namespace
   max_history = 3
 
