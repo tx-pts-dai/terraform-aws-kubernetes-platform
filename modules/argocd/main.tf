@@ -1,7 +1,3 @@
-data "aws_eks_cluster" "cluster" {
-  name = var.cluster_name
-}
-
 ##################### ArgoCD Hub #############################################
 
 data "aws_iam_policy_document" "argocd_controller_assume_role" {
@@ -54,7 +50,7 @@ resource "aws_iam_role_policy_attachment" "argocd_controller" {
 resource "aws_eks_pod_identity_association" "argocd_application_controller" {
   count = var.create && var.enable_hub ? 1 : 0
 
-  cluster_name    = data.aws_eks_cluster.cluster.name
+  cluster_name    = var.cluster_name
   namespace       = var.namespace
   service_account = "argocd-application-controller"
   role_arn        = aws_iam_role.argocd_controller[0].arn
@@ -65,7 +61,7 @@ resource "aws_eks_pod_identity_association" "argocd_application_controller" {
 resource "aws_eks_pod_identity_association" "argocd_applicationset_controller" {
   count = var.create && var.enable_hub ? 1 : 0
 
-  cluster_name    = data.aws_eks_cluster.cluster.name
+  cluster_name    = var.cluster_name
   namespace       = var.namespace
   service_account = "argocd-applicationset-controller"
   role_arn        = aws_iam_role.argocd_controller[0].arn
@@ -76,7 +72,7 @@ resource "aws_eks_pod_identity_association" "argocd_applicationset_controller" {
 resource "aws_eks_pod_identity_association" "argocd_server" {
   count = var.create && var.enable_hub ? 1 : 0
 
-  cluster_name    = data.aws_eks_cluster.cluster.name
+  cluster_name    = var.cluster_name
   namespace       = var.namespace
   service_account = "argocd-server"
   role_arn        = aws_iam_role.argocd_controller[0].arn
@@ -123,7 +119,7 @@ resource "aws_iam_role" "argocd_spoke" {
 resource "aws_eks_access_entry" "argocd_spoke" {
   count = var.create && var.enable_spoke ? 1 : 0
 
-  cluster_name      = data.aws_eks_cluster.cluster.name
+  cluster_name      = var.cluster_name
   principal_arn     = aws_iam_role.argocd_spoke[0].arn
   kubernetes_groups = []
   type              = "STANDARD"
@@ -134,7 +130,7 @@ resource "aws_eks_access_entry" "argocd_spoke" {
 resource "aws_eks_access_policy_association" "argocd_spoke" {
   count = var.create && var.enable_spoke ? 1 : 0
 
-  cluster_name  = data.aws_eks_cluster.cluster.name
+  cluster_name  = var.cluster_name
   policy_arn    = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
   principal_arn = aws_iam_role.argocd_spoke[0].arn
 
