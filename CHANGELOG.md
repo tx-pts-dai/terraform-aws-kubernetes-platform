@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [6.6.2](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/compare/v6.6.1...v6.6.2) (2025-12-09)
+
+### Bug Fixes
+
+* **argocd:** use static cluster name to prevent dependency issues ([#263](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/issues/263)) ([b356f5f](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/commit/b356f5fc0331c1432b0730f3e5fae320d5916629))
+
 ## [6.6.1](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/compare/v6.6.0+1.33...v6.6.1) (2025-12-03)
 
 ### Bug Fixes
