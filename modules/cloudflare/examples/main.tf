@@ -12,7 +12,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 6.9"
+      version = "~> 6.0"
     }
     cloudflare = {
       source  = "cloudflare/cloudflare"
@@ -42,21 +42,19 @@ module "cloudflare" {
 
   for_each = local.zones
 
-  zone_name    = module.route53_zones[each.key].route53_zone_name[each.key]
+  zone_name    = each.key
   comment      = "Managed by KAAS examples"
-  name_servers = [for i in range(4) : module.route53_zones[each.key].route53_zone_name_servers[each.key][i]]
+  name_servers = [for i in range(4) : module.route53_zones[each.key].name_servers[i]]
   account_id   = jsondecode(data.aws_secretsmanager_secret_version.cloudflare.secret_string)["accountId"]
 }
 
 module "route53_zones" {
-  source  = "terraform-aws-modules/route53/aws//modules/zones"
-  version = "5.0.0"
+  source  = "terraform-aws-modules/route53/aws"
+  version = "6.1.1"
 
   for_each = local.zones
 
-  zones = {
-    (each.key) = {
-      comment = each.value.comment
-    }
-  }
+  name    = each.key
+  comment = lookup(each.value, "comment", null)
+
 }
