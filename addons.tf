@@ -97,7 +97,7 @@ module "eks_addons" {
 #
 module "aws_ebs_csi_pod_identity" {
   source  = "terraform-aws-modules/eks-pod-identity/aws"
-  version = "2.5.0"
+  version = "2.6.0"
 
   create = var.create_addon_pod_identity_roles
 
@@ -120,7 +120,7 @@ module "aws_ebs_csi_pod_identity" {
 
 module "aws_gateway_controller_pod_identity" {
   source  = "terraform-aws-modules/eks-pod-identity/aws"
-  version = "2.5.0"
+  version = "2.6.0"
 
   create = var.create_addon_pod_identity_roles
 
@@ -143,7 +143,7 @@ module "aws_gateway_controller_pod_identity" {
 
 module "aws_lb_controller_pod_identity" {
   source  = "terraform-aws-modules/eks-pod-identity/aws"
-  version = "2.5.0"
+  version = "2.6.0"
 
   create = var.create_addon_pod_identity_roles
 
@@ -164,7 +164,7 @@ module "aws_lb_controller_pod_identity" {
 
 module "external_dns_pod_identity" {
   source  = "terraform-aws-modules/eks-pod-identity/aws"
-  version = "2.5.0"
+  version = "2.6.0"
 
   create = var.create_addon_pod_identity_roles
 
@@ -186,7 +186,7 @@ module "external_dns_pod_identity" {
 
 module "external_secrets_pod_identity" {
   source  = "terraform-aws-modules/eks-pod-identity/aws"
-  version = "2.5.0"
+  version = "2.6.0"
 
   create = var.create_addon_pod_identity_roles
 

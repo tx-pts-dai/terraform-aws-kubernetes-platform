@@ -227,7 +227,7 @@ resource "aws_security_group_rule" "eks_control_plane_ingress" {
 # VPC CNI IAM Role for Service Accounts
 module "aws_vpc_cni_pod_identity" {
   source  = "terraform-aws-modules/eks-pod-identity/aws"
-  version = "2.5.0"
+  version = "2.6.0"
 
   name                    = "aws-vpc-cni-pod-identity-${local.id}"
   aws_vpc_cni_policy_name = "aws-vpc-cni-pod-identity-${local.id}"
