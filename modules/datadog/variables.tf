@@ -27,7 +27,7 @@ variable "namespace" {
 variable "datadog_operator_helm_version" {
   description = "Version of the datadog operator chart"
   type        = string
-  default     = "2.15.2" # renovate: datasource=helm depName=datadog-operator registryUrl=https://helm.datadoghq.com
+  default     = "2.16.0" # renovate: datasource=helm depName=datadog-operator registryUrl=https://helm.datadoghq.com
 }
 
 variable "datadog_operator_helm_values" {
