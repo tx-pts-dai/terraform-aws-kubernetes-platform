@@ -96,7 +96,7 @@ No modules.
 | <a name="input_datadog_agent_helm_values"></a> [datadog\_agent\_helm\_values](#input\_datadog\_agent\_helm\_values) | List of Datadog Agent custom resource values | `list(string)` | `[]` | no |
 | <a name="input_datadog_operator_helm_set"></a> [datadog\_operator\_helm\_set](#input\_datadog\_operator\_helm\_set) | List of Datadog Operator Helm set values | <pre>list(object({<br/>    name  = string<br/>    value = string<br/>    type  = optional(string)<br/>  }))</pre> | `[]` | no |
 | <a name="input_datadog_operator_helm_values"></a> [datadog\_operator\_helm\_values](#input\_datadog\_operator\_helm\_values) | List of Datadog Operator Helm values | `list(string)` | `[]` | no |
-| <a name="input_datadog_operator_helm_version"></a> [datadog\_operator\_helm\_version](#input\_datadog\_operator\_helm\_version) | Version of the datadog operator chart | `string` | `"2.15.2"` | no |
+| <a name="input_datadog_operator_helm_version"></a> [datadog\_operator\_helm\_version](#input\_datadog\_operator\_helm\_version) | Version of the datadog operator chart | `string` | `"2.16.0"` | no |
 | <a name="input_datadog_secret"></a> [datadog\_secret](#input\_datadog\_secret) | Name of the datadog secret in Secrets Manager | `string` | n/a | yes |
 | <a name="input_environment"></a> [environment](#input\_environment) | Name of the environment | `string` | n/a | yes |
 | <a name="input_namespace"></a> [namespace](#input\_namespace) | Namespace for Datadog resources | `string` | `"monitoring"` | no |
