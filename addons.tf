@@ -58,7 +58,7 @@ locals {
 # Required for Managed EBS CSI Driver
 module "ebs_csi_driver_irsa" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts"
-  version = "6.2.3"
+  version = "6.3.0"
 
   name            = "ebs-csi-driver-${local.id}"
   policy_name     = "ebs-csi-driver-${local.id}"
@@ -97,7 +97,7 @@ module "eks_addons" {
 #
 module "aws_ebs_csi_pod_identity" {
   source  = "terraform-aws-modules/eks-pod-identity/aws"
-  version = "2.5.0"
+  version = "2.7.0"
 
   create = var.create_addon_pod_identity_roles
 
@@ -120,7 +120,7 @@ module "aws_ebs_csi_pod_identity" {
 
 module "aws_gateway_controller_pod_identity" {
   source  = "terraform-aws-modules/eks-pod-identity/aws"
-  version = "2.5.0"
+  version = "2.7.0"
 
   create = var.create_addon_pod_identity_roles
 
@@ -143,7 +143,7 @@ module "aws_gateway_controller_pod_identity" {
 
 module "aws_lb_controller_pod_identity" {
   source  = "terraform-aws-modules/eks-pod-identity/aws"
-  version = "2.5.0"
+  version = "2.7.0"
 
   create = var.create_addon_pod_identity_roles
 
@@ -164,7 +164,7 @@ module "aws_lb_controller_pod_identity" {
 
 module "external_dns_pod_identity" {
   source  = "terraform-aws-modules/eks-pod-identity/aws"
-  version = "2.5.0"
+  version = "2.7.0"
 
   create = var.create_addon_pod_identity_roles
 
@@ -186,7 +186,7 @@ module "external_dns_pod_identity" {
 
 module "external_secrets_pod_identity" {
   source  = "terraform-aws-modules/eks-pod-identity/aws"
-  version = "2.5.0"
+  version = "2.7.0"
 
   create = var.create_addon_pod_identity_roles
 
