@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [6.7.0](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/compare/v6.6.2...v6.7.0) (2026-01-19)
+
+### Features
+
+* chore(deps): update terraform minor / patch updates ([#265](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/issues/265)) ([2299507](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/commit/22995076db3bb7e2383ba0eb4591c901fa1ee31f))
+
 ## [6.6.2](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/compare/v6.6.1...v6.6.2) (2025-12-09)
 
 ### Bug Fixes
