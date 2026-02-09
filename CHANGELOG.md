@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [6.8.0](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/compare/v6.7.0...v6.8.0) (2026-02-09)
+
+### Features
+
+* Add AssumeRole permissions to the external secrets role ([#269](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/issues/269)) ([c76d4ab](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/commit/c76d4ab70c4c01bad24adb0e4a89c03117639fc0))
+
 ## [6.7.0](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/compare/v6.6.2...v6.7.0) (2026-01-19)
 
 ### Features
