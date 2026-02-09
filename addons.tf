@@ -199,6 +199,14 @@ module "external_secrets_pod_identity" {
   external_secrets_ssm_parameter_arns   = ["*"]
   external_secrets_secrets_manager_arns = ["*"]
 
+  policy_statements = [
+    {
+      sid       = "AssumeRole"
+      actions   = ["sts:AssumeRole", "sts:TagSession"]
+      resources = ["*"]
+    }
+  ]
+
   associations = {
     controller = {
       cluster_name    = module.eks.cluster_name
