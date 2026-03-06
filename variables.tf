@@ -234,6 +234,22 @@ variable "argocd" {
 }
 
 ################################################################################
+# EKS Capabilities
+################################################################################
+
+variable "enable_ack" {
+  description = "Enable ACK (AWS Controllers for Kubernetes) EKS capability. Note: AdministratorAccess is attached by default. Use ack_iam_policy_arn to override with a least-privilege policy."
+  type        = bool
+  default     = true
+}
+
+variable "ack_iam_policy_arn" {
+  description = "IAM policy ARN to attach to the ACK capability role. Defaults to AdministratorAccess if not specified."
+  type        = string
+  default     = null
+}
+
+################################################################################
 # Kubernetes Access Control
 ################################################################################
 

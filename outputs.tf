@@ -13,6 +13,11 @@ output "argocd" {
   value       = module.argocd
 }
 
+output "ack" {
+  description = "Map of attributes for the ACK EKS capability"
+  value       = module.ack_capability
+}
+
 output "kubernetes_access_role_arns" {
   description = "Map of reusable Kubernetes access role names to their IAM role ARNs"
   value = {
