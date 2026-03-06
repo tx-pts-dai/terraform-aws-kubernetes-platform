@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [6.9.0](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/compare/v6.8.0...v6.9.0) (2026-03-06)
+
+### Features
+
+* add ack capability ([#270](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/issues/270)) ([7787f08](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/commit/7787f08a5415e888652651b5648601b0d4c793e7))
+
 ## [6.8.0](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/compare/v6.7.0...v6.8.0) (2026-02-09)
 
 ### Features
