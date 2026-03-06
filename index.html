@@ -1464,7 +1464,7 @@
 </tr>
 <tr>
 <td><a name="requirement_aws"></a> <a href="..#requirement_aws">aws</a></td>
-<td>&gt;= 6.9</td>
+<td>&gt;= 6.28</td>
 </tr>
 <tr>
 <td><a name="requirement_helm"></a> <a href="..#requirement_helm">helm</a></td>
@@ -1495,7 +1495,7 @@
 <tbody>
 <tr>
 <td><a name="provider_aws"></a> <a href="..#provider_aws">aws</a></td>
-<td>&gt;= 6.9</td>
+<td>&gt;= 6.28</td>
 </tr>
 <tr>
 <td><a name="provider_helm"></a> <a href="..#provider_helm">helm</a></td>
@@ -1521,6 +1521,11 @@
 </tr>
 </thead>
 <tbody>
+<tr>
+<td><a name="module_ack_capability"></a> <a href="..#module_ack_capability">ack_capability</a></td>
+<td>terraform-aws-modules/eks/aws//modules/capability</td>
+<td>21.15.1</td>
+</tr>
 <tr>
 <td><a name="module_acm"></a> <a href="..#module_acm">acm</a></td>
 <td>terraform-aws-modules/acm/aws</td>
@@ -1559,7 +1564,7 @@
 <tr>
 <td><a name="module_eks"></a> <a href="..#module_eks">eks</a></td>
 <td>terraform-aws-modules/eks/aws</td>
-<td>21.14.0</td>
+<td>21.15.1</td>
 </tr>
 <tr>
 <td><a name="module_eks_addons"></a> <a href="..#module_eks_addons">eks_addons</a></td>
@@ -1579,7 +1584,7 @@
 <tr>
 <td><a name="module_karpenter"></a> <a href="..#module_karpenter">karpenter</a></td>
 <td>terraform-aws-modules/eks/aws//modules/karpenter</td>
-<td>21.14.0</td>
+<td>21.15.1</td>
 </tr>
 <tr>
 <td><a name="module_karpenter_irsa"></a> <a href="..#module_karpenter_irsa">karpenter_irsa</a></td>
@@ -1735,6 +1740,13 @@
 </thead>
 <tbody>
 <tr>
+<td><a name="input_ack_iam_policy_arn"></a> <a href="..#input_ack_iam_policy_arn">ack_iam_policy_arn</a></td>
+<td>IAM policy ARN to attach to the ACK capability role. Defaults to AdministratorAccess if not specified.</td>
+<td><code>string</code></td>
+<td><code>null</code></td>
+<td style="text-align: center;">no</td>
+</tr>
+<tr>
 <td><a name="input_acm_certificate"></a> <a href="..#input_acm_certificate">acm_certificate</a></td>
 <td>ACM certificate configuration for the domain(s). Controls domain name, alternative domain names, wildcard configuration, and validation behavior.<br/>Options include:<br/>  - domain_name: Primary domain name for the certificate. If not provided, uses base_domain from other configuration.<br/>  - subject_alternative_names: List of additional domain names to include in the certificate.<br/>  - wildcard_certificates: When true, adds a wildcard prefix (*.) to all domains in the certificate.<br/>  - prepend_stack_id: When true, prepends the stack identifier to each domain name. Only works after random_string is created.<br/>  - wait_for_validation: When true, Terraform will wait for certificate validation to complete before proceeding.</td>
 <td><pre>object({<br/>    domain_name               = optional(string)<br/>    subject_alternative_names = optional(list(string), [])<br/>    wildcard_certificates     = optional(bool, false)<br/>    prepend_stack_id          = optional(bool, false)<br/>    wait_for_validation       = optional(bool, false)<br/>  })</pre></td>
@@ -1774,6 +1786,13 @@
 <td>Map of EKS configurations including cluster settings and core addon customization.<br/><br/>Cluster settings:<br/>  - cluster_endpoint_public_access: Enable public access to cluster endpoint (default: true)<br/>  - cluster_endpoint_private_access: Enable private access to cluster endpoint (default: true)<br/>  - enable_cluster_creator_admin_permissions: Grant admin permissions to cluster creator (default: false)<br/><br/>Core addon settings (vpc_cni, kube_proxy, eks_pod_identity_agent):<br/>  - configuration_values: JSON string of addon configuration (merged with defaults for vpc-cni)<br/><br/>Example:<br/>  eks = {<br/>    cluster_endpoint_public_access = false<br/>    vpc_cni = {<br/>      configuration_values = jsonencode({<br/>        env = {<br/>          ENABLE_PREFIX_DELEGATION = "true"<br/>          WARM_PREFIX_TARGET       = "1"<br/>        }<br/>      })<br/>    }<br/>  }</td>
 <td><code>any</code></td>
 <td><code>{}</code></td>
+<td style="text-align: center;">no</td>
+</tr>
+<tr>
+<td><a name="input_enable_ack"></a> <a href="..#input_enable_ack">enable_ack</a></td>
+<td>Enable ACK (AWS Controllers for Kubernetes) EKS capability. Note: AdministratorAccess is attached by default. Use ack_iam_policy_arn to override with a least-privilege policy.</td>
+<td><code>bool</code></td>
+<td><code>true</code></td>
 <td style="text-align: center;">no</td>
 </tr>
 <tr>
@@ -1913,6 +1932,10 @@
 </tr>
 </thead>
 <tbody>
+<tr>
+<td><a name="output_ack"></a> <a href="..#output_ack">ack</a></td>
+<td>Map of attributes for the ACK EKS capability</td>
+</tr>
 <tr>
 <td><a name="output_argocd"></a> <a href="..#output_argocd">argocd</a></td>
 <td>Map of attributes for the ArgoCD module</td>
