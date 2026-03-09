@@ -377,7 +377,7 @@ resource "aws_iam_policy" "karpenter_controller" {
 # Custom IAM role for Karpenter running in Fargate
 module "karpenter_irsa" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts"
-  version = "6.3.0"
+  version = "6.4.0"
 
   name            = "karpenter-controller-${local.id}"
   use_name_prefix = false
@@ -422,7 +422,7 @@ module "karpenter" {
 resource "helm_release" "karpenter_crd" {
   name             = "karpenter-crd"
   chart            = "karpenter-crd"
-  version          = "1.8.5"
+  version          = "1.9.0"
   repository       = "oci://public.ecr.aws/karpenter"
   description      = "Karpenter CRDs"
   namespace        = local.karpenter.namespace
@@ -432,7 +432,7 @@ resource "helm_release" "karpenter_crd" {
 resource "helm_release" "karpenter_release" {
   name             = "karpenter"
   chart            = "karpenter"
-  version          = "1.8.5"
+  version          = "1.9.0"
   repository       = "oci://public.ecr.aws/karpenter"
   namespace        = local.karpenter.namespace
   create_namespace = true
