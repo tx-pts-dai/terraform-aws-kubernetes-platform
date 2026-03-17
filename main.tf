@@ -243,7 +243,7 @@ module "aws_vpc_cni_pod_identity" {
 
 module "vpc_cni_irsa" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts"
-  version = "6.3.0"
+  version = "6.4.0"
 
   name            = "vpc-cni-${local.id}"
   policy_name     = "vpc-cni-${local.id}"

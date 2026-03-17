@@ -58,7 +58,7 @@ locals {
 # Required for Managed EBS CSI Driver
 module "ebs_csi_driver_irsa" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts"
-  version = "6.3.0"
+  version = "6.4.0"
 
   name            = "ebs-csi-driver-${local.id}"
   policy_name     = "ebs-csi-driver-${local.id}"
