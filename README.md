@@ -59,13 +59,13 @@ To upgrade your cluster to a new Kubernetes version:
 module "k8s_platform" {
   source = "tx-pts-dai/kubernetes-platform/aws"
 
-  kubernetes_version = "1.33"
+  kubernetes_version = "1.34"
 
   # ... other configuration
 }
 ```
 
-**Important**: Do not skip Kubernetes minor versions during upgrades. For example, upgrade from 1.31 → 1.32 → 1.33, not directly from 1.31 → 1.33.
+**Important**: Do not skip Kubernetes minor versions during upgrades. For example, upgrade from 1.32 → 1.33 → 1.34, not directly from 1.32 → 1.34.
 
 
 ## Explanation and description of interesting use-cases
@@ -138,16 +138,16 @@ as described in the `.pre-commit-config.yaml` file
 | <a name="module_aws_gateway_controller_pod_identity"></a> [aws\_gateway\_controller\_pod\_identity](#module\_aws\_gateway\_controller\_pod\_identity) | terraform-aws-modules/eks-pod-identity/aws | 2.7.0 |
 | <a name="module_aws_lb_controller_pod_identity"></a> [aws\_lb\_controller\_pod\_identity](#module\_aws\_lb\_controller\_pod\_identity) | terraform-aws-modules/eks-pod-identity/aws | 2.7.0 |
 | <a name="module_aws_vpc_cni_pod_identity"></a> [aws\_vpc\_cni\_pod\_identity](#module\_aws\_vpc\_cni\_pod\_identity) | terraform-aws-modules/eks-pod-identity/aws | 2.7.0 |
-| <a name="module_ebs_csi_driver_irsa"></a> [ebs\_csi\_driver\_irsa](#module\_ebs\_csi\_driver\_irsa) | terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts | 6.3.0 |
+| <a name="module_ebs_csi_driver_irsa"></a> [ebs\_csi\_driver\_irsa](#module\_ebs\_csi\_driver\_irsa) | terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts | 6.4.0 |
 | <a name="module_eks"></a> [eks](#module\_eks) | terraform-aws-modules/eks/aws | 21.15.1 |
 | <a name="module_eks_addons"></a> [eks\_addons](#module\_eks\_addons) | ./modules/eks-addons | n/a |
 | <a name="module_external_dns_pod_identity"></a> [external\_dns\_pod\_identity](#module\_external\_dns\_pod\_identity) | terraform-aws-modules/eks-pod-identity/aws | 2.7.0 |
 | <a name="module_external_secrets_pod_identity"></a> [external\_secrets\_pod\_identity](#module\_external\_secrets\_pod\_identity) | terraform-aws-modules/eks-pod-identity/aws | 2.7.0 |
 | <a name="module_karpenter"></a> [karpenter](#module\_karpenter) | terraform-aws-modules/eks/aws//modules/karpenter | 21.15.1 |
-| <a name="module_karpenter_irsa"></a> [karpenter\_irsa](#module\_karpenter\_irsa) | terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts | 6.3.0 |
+| <a name="module_karpenter_irsa"></a> [karpenter\_irsa](#module\_karpenter\_irsa) | terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts | 6.4.0 |
 | <a name="module_karpenter_security_group"></a> [karpenter\_security\_group](#module\_karpenter\_security\_group) | ./modules/security-group | n/a |
 | <a name="module_ssm"></a> [ssm](#module\_ssm) | ./modules/ssm | n/a |
-| <a name="module_vpc_cni_irsa"></a> [vpc\_cni\_irsa](#module\_vpc\_cni\_irsa) | terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts | 6.3.0 |
+| <a name="module_vpc_cni_irsa"></a> [vpc\_cni\_irsa](#module\_vpc\_cni\_irsa) | terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts | 6.4.0 |
 
 ## Resources
 
@@ -206,7 +206,7 @@ as described in the `.pre-commit-config.yaml` file
 | <a name="input_karpenter_resources_helm_set"></a> [karpenter\_resources\_helm\_set](#input\_karpenter\_resources\_helm\_set) | List of Karpenter Resources Helm set values | <pre>list(object({<br/>    name  = string<br/>    value = string<br/>    type  = optional(string)<br/>  }))</pre> | `[]` | no |
 | <a name="input_karpenter_resources_helm_values"></a> [karpenter\_resources\_helm\_values](#input\_karpenter\_resources\_helm\_values) | List of Karpenter Resources Helm values | `list(string)` | `[]` | no |
 | <a name="input_kubernetes_access_roles"></a> [kubernetes\_access\_roles](#input\_kubernetes\_access\_roles) | Map of reusable IAM roles that can be assumed by multiple principals.<br/>Creates standard roles that grant different levels of Kubernetes access.<br/><br/>Supported predefined access\_level values:<br/>- "view"         -> AmazonEKSViewPolicy (read-only)<br/>- "edit"         -> AmazonEKSEditPolicy (create/update resources)<br/>- "admin"        -> AmazonEKSClusterAdminPolicy (full admin)<br/>- "custom"       -> Use custom\_policy\_arns (list of policy ARNs)<br/><br/>Example:<br/>{<br/>  "readonly" = {<br/>    controller\_iam\_role\_arns = [<br/>      "arn:aws:iam::123456789012:role/backstage-prod",<br/>      "arn:aws:iam::123456789012:role/ai-agent"<br/>    ]<br/>    access\_level = "view"           # Predefined: view, edit, admin, or custom<br/>    scope        = "cluster"        # "cluster" or "namespace"<br/>    namespaces   = []               # required if scope = "namespace"<br/>  }<br/>  "developer" = {<br/>    controller\_iam\_role\_arns = ["arn:aws:iam::123456789012:role/dev-team"]<br/>    access\_level = "edit"<br/>    scope        = "namespace"<br/>    namespaces   = ["development", "staging"]<br/>  }<br/>  "ops-admin" = {<br/>    controller\_iam\_role\_arns = ["arn:aws:iam::123456789012:role/ops-team"]<br/>    access\_level = "admin"<br/>    scope        = "cluster"<br/>  }<br/>  "custom-access" = {<br/>    controller\_iam\_role\_arns = ["arn:aws:iam::123456789012:role/special-service"]<br/>    access\_level = "custom"<br/>    custom\_policy\_arns = [<br/>      "arn:aws:eks::aws:cluster-access-policy/MyCustomPolicy"<br/>    ]<br/>    scope = "cluster"<br/>  }<br/>}<br/><br/>This creates:<br/>- {cluster}-k8s-readonly (view access)<br/>- {cluster}-k8s-developer (edit access on dev/staging namespaces)<br/>- {cluster}-k8s-ops-admin (full admin access)<br/>- {cluster}-k8s-custom-access (custom policies) | <pre>map(object({<br/>    controller_iam_role_arns = list(string)<br/>    access_level             = string # "view", "edit", "admin", or "custom"<br/>    scope                    = string # "cluster" or "namespace"<br/>    namespaces               = optional(list(string), [])<br/>    custom_policy_arns       = optional(list(string), [])<br/>    external_id              = optional(string)<br/>  }))</pre> | `{}` | no |
-| <a name="input_kubernetes_version"></a> [kubernetes\_version](#input\_kubernetes\_version) | Kubernetes version for the EKS cluster (e.g., "1.33") | `string` | `"1.33"` | no |
+| <a name="input_kubernetes_version"></a> [kubernetes\_version](#input\_kubernetes\_version) | Kubernetes version for the EKS cluster (e.g., "1.34") | `string` | `"1.34"` | no |
 | <a name="input_name"></a> [name](#input\_name) | The name of the platform, a timestamp will be appended to this name to make the stack\_name. If not provided, the name of the directory will be used. | `string` | `""` | no |
 | <a name="input_region"></a> [region](#input\_region) | AWS region to use | `string` | `null` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | Default tags to apply to all resources | `map(string)` | `{}` | no |
