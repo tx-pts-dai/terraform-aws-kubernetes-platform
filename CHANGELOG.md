@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [6.10.0](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/compare/v6.9.0...v6.10.0) (2026-03-23)
+
+### Features
+
+* Bump module default Kubernetes version to 1.34 ([#274](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/issues/274)) ([5738ef3](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/commit/5738ef3da98a36c4c145134eb3a28f6270e82cfd))
+
 ## [6.9.0](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/compare/v6.8.0...v6.9.0) (2026-03-06)
 
 ### Features
