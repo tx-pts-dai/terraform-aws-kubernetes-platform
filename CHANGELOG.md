@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [6.11.0](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/compare/v6.10.0...v6.11.0) (2026-04-08)
+
+### Features
+
+* ecr pullthrough cache policy ([#280](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/issues/280)) ([f24ec06](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/commit/f24ec0678a24ab3dc50a95f827d7a3726d77ccfc))
+
 ## [6.10.0](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/compare/v6.9.0...v6.10.0) (2026-03-23)
 
 ### Features
