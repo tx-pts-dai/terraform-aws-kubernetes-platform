@@ -1,0 +1,15 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: terraform-aws-kubernetes-platform
+  namespace: tx-pts-dai
+  description: terraform-aws-kubernetes-platform component
+  annotations:
+    github.com/project-slug: tx-pts-dai/terraform-aws-kubernetes-platform
+    backstage.io/techdocs-ref: url:https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform
+  tags:
+    - tx-pts-dai
+spec:
+  type: infrastructure
+  lifecycle: production
+  owner: group:default/dai
