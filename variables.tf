@@ -104,6 +104,12 @@ variable "enable_sso_admin_auto_discovery" {
   default     = true
 }
 
+variable "enable_ecr_passthrough_policy" {
+  description = "Enable ECR passthrough policy for cluster nodes. This allows nodes to pull images from ECR without needing additional IAM permissions."
+  type        = bool
+  default     = true
+}
+
 ################################################################################
 # Extra EKS Addons
 ################################################################################

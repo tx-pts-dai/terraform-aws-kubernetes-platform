@@ -397,6 +397,25 @@ module "karpenter_irsa" {
   tags = local.tags
 }
 
+# Optional ECR passthrough policy for nodes to create ecr repositories if needed (e.g. for EKS Distro or custom images)
+data "aws_iam_policy_document" "ecr_passthrough" {
+  count = var.enable_ecr_passthrough_policy ? 1 : 0
+
+  statement {
+    sid       = "PullThroughCreate"
+    effect    = "Allow"
+    actions   = ["ecr:CreateRepository"]
+    resources = ["*"]
+  }
+}
+
+resource "aws_iam_policy" "ecr_passthrough" {
+  count = var.enable_ecr_passthrough_policy ? 1 : 0
+
+  name   = "EcrPassthrough-${local.id}"
+  policy = data.aws_iam_policy_document.ecr_passthrough[0].json
+}
+
 # Karpenter module - only for node IAM role and other resources
 # IRSA is disabled as we're using a custom role for Fargate
 module "karpenter" {
@@ -412,9 +431,14 @@ module "karpenter" {
   node_iam_role_name              = "karpenter-node-${local.id}"
   node_iam_role_use_name_prefix   = false
   node_iam_role_attach_cni_policy = true
-  node_iam_role_additional_policies = {
-    AmazonSSMManagedInstanceCore = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
-  }
+  node_iam_role_additional_policies = merge(
+    {
+      AmazonSSMManagedInstanceCore = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+    },
+    var.enable_ecr_passthrough_policy ? {
+      EcrPassthrough = aws_iam_policy.ecr_passthrough[0].arn
+    } : {}
+  )
 
   tags = local.tags
 }
