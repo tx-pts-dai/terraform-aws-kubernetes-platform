@@ -104,6 +104,12 @@ variable "enable_sso_admin_auto_discovery" {
   default     = true
 }
 
+variable "enable_ecr_passthrough_policy" {
+  description = "Enable the ECR pull-through cache policy for cluster nodes. This policy may grant additional ECR permissions, including automatic repository creation for pull-through cache repositories, and is not required for standard ECR image pulls."
+  type        = bool
+  default     = false
+}
+
 ################################################################################
 # Extra EKS Addons
 ################################################################################

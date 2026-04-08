@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/antonbabenko/pre-commit-terraform
-    rev: v1.99.0
+    rev: v1.105.0
     hooks:
       - id: terraform_fmt
         args:
@@ -28,18 +28,18 @@ repos:
           - '--args=--only=terraform_standard_module_structure'
           - '--args=--only=terraform_workspace_remote'
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
+    rev: v6.0.0
     hooks:
       - id: check-merge-conflict
       - id: end-of-file-fixer
       - id: trailing-whitespace
       - id: no-commit-to-branch
   - repo: https://github.com/renovatebot/pre-commit-hooks
-    rev: 42.52.4
+    rev: 43.109.4
     hooks:
       - id: renovate-config-validator
   - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
-    rev: v2.14.0
+    rev: v2.16.0
     hooks:
       - id: pretty-format-yaml
         args: [--autofix, --indent, '2', --offset, '2', --preserve-quotes]
