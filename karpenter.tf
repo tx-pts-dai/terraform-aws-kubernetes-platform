@@ -412,7 +412,7 @@ data "aws_iam_policy_document" "ecr_passthrough" {
 resource "aws_iam_policy" "ecr_passthrough" {
   count = var.enable_ecr_passthrough_policy ? 1 : 0
 
-  name   = "EcrPassthrough-${local.id}"
+  name   = "ecr-passthrough-${local.id}"
   policy = data.aws_iam_policy_document.ecr_passthrough[0].json
 }
 
