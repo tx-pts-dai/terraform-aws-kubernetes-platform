@@ -1634,6 +1634,10 @@
 <td>resource</td>
 </tr>
 <tr>
+<td><a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy">aws_iam_policy.ecr_passthrough</a></td>
+<td>resource</td>
+</tr>
+<tr>
 <td><a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy">aws_iam_policy.fargate_fluentbit</a></td>
 <td>resource</td>
 </tr>
@@ -1643,6 +1647,10 @@
 </tr>
 <tr>
 <td><a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role">aws_iam_role.k8s_access</a></td>
+<td>resource</td>
+</tr>
+<tr>
+<td><a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy">aws_iam_role_policy.k8s_access</a></td>
 <td>resource</td>
 </tr>
 <tr>
@@ -1698,11 +1706,19 @@
 <td>data source</td>
 </tr>
 <tr>
+<td><a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document">aws_iam_policy_document.ecr_passthrough</a></td>
+<td>data source</td>
+</tr>
+<tr>
 <td><a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document">aws_iam_policy_document.fargate_fluentbit</a></td>
 <td>data source</td>
 </tr>
 <tr>
 <td><a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document">aws_iam_policy_document.k8s_access_assume</a></td>
+<td>data source</td>
+</tr>
+<tr>
+<td><a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document">aws_iam_policy_document.k8s_access_permissions</a></td>
 <td>data source</td>
 </tr>
 <tr>
@@ -1805,6 +1821,13 @@
 <tr>
 <td><a name="input_enable_argocd"></a> <a href="..#input_enable_argocd">enable_argocd</a></td>
 <td>Enable Argo CD</td>
+<td><code>bool</code></td>
+<td><code>false</code></td>
+<td style="text-align: center;">no</td>
+</tr>
+<tr>
+<td><a name="input_enable_ecr_passthrough_policy"></a> <a href="..#input_enable_ecr_passthrough_policy">enable_ecr_passthrough_policy</a></td>
+<td>Enable the ECR pull-through cache policy for cluster nodes. This policy may grant additional ECR permissions, including automatic repository creation for pull-through cache repositories, and is not required for standard ECR image pulls.</td>
 <td><code>bool</code></td>
 <td><code>false</code></td>
 <td style="text-align: center;">no</td>
