@@ -54,8 +54,17 @@ data "aws_iam_policy_document" "k8s_access_assume" {
     actions = ["sts:AssumeRole", "sts:TagSession"]
 
     principals {
-      type        = "AWS"
-      identifiers = each.value.controller_iam_role_arns
+      type = "AWS"
+      identifiers = distinct([
+        for arn in each.value.controller_iam_role_arns :
+        "arn:aws:iam::${element(split(":", arn), 4)}:root"
+      ])
+    }
+
+    condition {
+      test     = "ArnEquals"
+      variable = "aws:PrincipalArn"
+      values   = each.value.controller_iam_role_arns
     }
 
     # Optional: Add external ID for additional security
@@ -68,6 +77,28 @@ data "aws_iam_policy_document" "k8s_access_assume" {
       }
     }
   }
+}
+
+# IAM permissions allowing the role to interact with the EKS cluster
+data "aws_iam_policy_document" "k8s_access_permissions" {
+  for_each = local.kubernetes_access_roles
+
+  statement {
+    effect = "Allow"
+    actions = [
+      "eks:DescribeCluster",
+      "eks:AccessKubernetesApi",
+    ]
+    resources = [module.eks.cluster_arn]
+  }
+}
+
+resource "aws_iam_role_policy" "k8s_access" {
+  for_each = local.kubernetes_access_roles
+
+  name   = "eks-access"
+  role   = aws_iam_role.k8s_access[each.key].id
+  policy = data.aws_iam_policy_document.k8s_access_permissions[each.key].json
 }
 
 # EKS Access Entry - grants the IAM role access to the Kubernetes API
