@@ -4,7 +4,7 @@
 
 module "ack_capability" {
   source  = "terraform-aws-modules/eks/aws//modules/capability"
-  version = "21.15.1"
+  version = "21.17.1"
 
   create = var.enable_ack
 
