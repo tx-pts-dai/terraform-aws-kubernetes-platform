@@ -6,7 +6,7 @@ metadata:
   description: terraform-aws-kubernetes-platform component
   annotations:
     github.com/project-slug: tx-pts-dai/terraform-aws-kubernetes-platform
-    backstage.io/techdocs-ref: url:https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform
+    backstage.io/techdocs-ref: dir:.
   tags:
     - tx-pts-dai
 spec:
