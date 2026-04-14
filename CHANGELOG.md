@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [6.12.0](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/compare/v6.11.0...v6.12.0) (2026-04-14)
+
+### Features
+
+* add Backstage catalog-info.yaml ([#277](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/issues/277)) ([3f645dc](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/commit/3f645dcdb26e61f9abd51a241596ac2bd3459870))
+
 ## [6.11.0](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/compare/v6.10.0...v6.11.0) (2026-04-08)
 
 ### Features
