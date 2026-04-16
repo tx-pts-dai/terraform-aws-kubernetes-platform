@@ -420,7 +420,7 @@ resource "aws_iam_policy" "ecr_passthrough" {
 # IRSA is disabled as we're using a custom role for Fargate
 module "karpenter" {
   source  = "terraform-aws-modules/eks/aws//modules/karpenter"
-  version = "21.15.1"
+  version = "21.18.0"
 
   cluster_name = module.eks.cluster_name
 
@@ -446,7 +446,7 @@ module "karpenter" {
 resource "helm_release" "karpenter_crd" {
   name             = "karpenter-crd"
   chart            = "karpenter-crd"
-  version          = "1.10.0"
+  version          = "1.11.1"
   repository       = "oci://public.ecr.aws/karpenter"
   description      = "Karpenter CRDs"
   namespace        = local.karpenter.namespace
@@ -456,7 +456,7 @@ resource "helm_release" "karpenter_crd" {
 resource "helm_release" "karpenter_release" {
   name             = "karpenter"
   chart            = "karpenter"
-  version          = "1.10.0"
+  version          = "1.11.1"
   repository       = "oci://public.ecr.aws/karpenter"
   namespace        = local.karpenter.namespace
   create_namespace = true
