@@ -18,6 +18,11 @@ output "ack" {
   value       = module.ack_capability
 }
 
+output "argocd_registration" {
+  description = "ArgoCD cluster registration outputs (file path and commit SHA)"
+  value       = module.argocd_registration
+}
+
 output "kubernetes_access_role_arns" {
   description = "Map of reusable Kubernetes access role names to their IAM role ARNs"
   value = {

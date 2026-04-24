@@ -250,9 +250,52 @@ variable "enable_ack" {
 }
 
 variable "ack_iam_policy_arn" {
-  description = "IAM policy ARN to attach to the ACK capability role. Defaults to AdministratorAccess if not specified."
+  description = "IAM policy ARN to attach to the ACK capability role. When null (default), a purpose-built policy covering ACM, Route53, IAM CRUD, and EKS pod-identity actions is created automatically."
   type        = string
   default     = null
+}
+
+################################################################################
+# ArgoCD Dynamic Cluster Registration
+################################################################################
+
+variable "enable_argocd_registration" {
+  description = "Automatically register this cluster with the ArgoCD hub by committing a cluster Secret YAML to the GitOps repository via the GitHub provider."
+  type        = bool
+  default     = false
+}
+
+variable "argocd_registration" {
+  description = "ArgoCD cluster registration config. Required when enable_argocd_registration = true."
+  type = object({
+    github_repository      = string
+    github_branch          = optional(string, "main")
+    argocd_hub_environment = optional(string, "prod")
+    cluster_labels = object({
+      cluster_group  = string
+      environment    = string
+      team           = string
+      promotion_tier = string
+
+      enable_ack                          = optional(bool, false)
+      enable_adapter                      = optional(bool, false)
+      enable_aws_load_balancer_controller = optional(bool, false)
+      enable_cert_manager                 = optional(bool, false)
+      enable_datadog_operator             = optional(bool, false)
+      enable_downscaler                   = optional(bool, false)
+      enable_exporters                    = optional(bool, false)
+      enable_external_dns                 = optional(bool, false)
+      enable_external_dns_crossaccount    = optional(bool, false)
+      enable_external_secrets             = optional(bool, false)
+      enable_grafana                      = optional(bool, false)
+      enable_kargo                        = optional(bool, false)
+      enable_kube_prometheus_stack        = optional(bool, false)
+      enable_metrics_server               = optional(bool, false)
+      enable_reloader                     = optional(bool, false)
+      enable_tailscale_operator           = optional(bool, false)
+    })
+  })
+  default = null
 }
 
 ################################################################################
