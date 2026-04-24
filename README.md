@@ -110,9 +110,10 @@ as described in the `.pre-commit-config.yaml` file
 ## Requirements
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.10 |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 6.28 |
+| <a name="requirement_github"></a> [github](#requirement\_github) | >= 6.0 |
 | <a name="requirement_helm"></a> [helm](#requirement\_helm) | >= 3.0.2 |
 | <a name="requirement_kubectl"></a> [kubectl](#requirement\_kubectl) | >= 2.0.2 |
 | <a name="requirement_kubernetes"></a> [kubernetes](#requirement\_kubernetes) | >= 2.27 |
@@ -121,7 +122,7 @@ as described in the `.pre-commit-config.yaml` file
 ## Providers
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
 | <a name="provider_aws"></a> [aws](#provider\_aws) | >= 6.28 |
 | <a name="provider_helm"></a> [helm](#provider\_helm) | >= 3.0.2 |
 | <a name="provider_kubernetes"></a> [kubernetes](#provider\_kubernetes) | >= 2.27 |
@@ -130,10 +131,11 @@ as described in the `.pre-commit-config.yaml` file
 ## Modules
 
 | Name | Source | Version |
-|------|--------|---------|
+| ---- | ------ | ------- |
 | <a name="module_ack_capability"></a> [ack\_capability](#module\_ack\_capability) | terraform-aws-modules/eks/aws//modules/capability | 21.15.1 |
 | <a name="module_acm"></a> [acm](#module\_acm) | terraform-aws-modules/acm/aws | 6.3.0 |
 | <a name="module_argocd"></a> [argocd](#module\_argocd) | ./modules/argocd | n/a |
+| <a name="module_argocd_registration"></a> [argocd\_registration](#module\_argocd\_registration) | ./modules/argocd-registration | n/a |
 | <a name="module_aws_ebs_csi_pod_identity"></a> [aws\_ebs\_csi\_pod\_identity](#module\_aws\_ebs\_csi\_pod\_identity) | terraform-aws-modules/eks-pod-identity/aws | 2.7.0 |
 | <a name="module_aws_gateway_controller_pod_identity"></a> [aws\_gateway\_controller\_pod\_identity](#module\_aws\_gateway\_controller\_pod\_identity) | terraform-aws-modules/eks-pod-identity/aws | 2.7.0 |
 | <a name="module_aws_lb_controller_pod_identity"></a> [aws\_lb\_controller\_pod\_identity](#module\_aws\_lb\_controller\_pod\_identity) | terraform-aws-modules/eks-pod-identity/aws | 2.7.0 |
@@ -152,11 +154,12 @@ as described in the `.pre-commit-config.yaml` file
 ## Resources
 
 | Name | Type |
-|------|------|
+| ---- | ---- |
 | [aws_cloudwatch_log_group.fargate_fluentbit](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
 | [aws_eks_access_entry.k8s_access](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/eks_access_entry) | resource |
 | [aws_eks_access_policy_association.k8s_access_custom](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/eks_access_policy_association) | resource |
 | [aws_eks_access_policy_association.k8s_access_predefined](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/eks_access_policy_association) | resource |
+| [aws_iam_policy.ack_controller](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.ecr_passthrough](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.fargate_fluentbit](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.karpenter_controller](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
@@ -175,6 +178,7 @@ as described in the `.pre-commit-config.yaml` file
 | [time_static.timestamp_id](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/static) | resource |
 | [aws_availability_zones.available](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/availability_zones) | data source |
 | [aws_caller_identity.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/caller_identity) | data source |
+| [aws_iam_policy_document.ack_controller](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.ecr_passthrough](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.fargate_fluentbit](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.k8s_access_assume](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
@@ -188,10 +192,11 @@ as described in the `.pre-commit-config.yaml` file
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
-| <a name="input_ack_iam_policy_arn"></a> [ack\_iam\_policy\_arn](#input\_ack\_iam\_policy\_arn) | IAM policy ARN to attach to the ACK capability role. Defaults to AdministratorAccess if not specified. | `string` | `null` | no |
+| ---- | ----------- | ---- | ------- | :------: |
+| <a name="input_ack_iam_policy_arn"></a> [ack\_iam\_policy\_arn](#input\_ack\_iam\_policy\_arn) | IAM policy ARN to attach to the ACK capability role. When null (default), a purpose-built policy covering ACM, Route53, IAM CRUD, and EKS pod-identity actions is created automatically. | `string` | `null` | no |
 | <a name="input_acm_certificate"></a> [acm\_certificate](#input\_acm\_certificate) | ACM certificate configuration for the domain(s). Controls domain name, alternative domain names, wildcard configuration, and validation behavior.<br/>Options include:<br/>  - domain\_name: Primary domain name for the certificate. If not provided, uses base\_domain from other configuration.<br/>  - subject\_alternative\_names: List of additional domain names to include in the certificate.<br/>  - wildcard\_certificates: When true, adds a wildcard prefix (*.) to all domains in the certificate.<br/>  - prepend\_stack\_id: When true, prepends the stack identifier to each domain name. Only works after random\_string is created.<br/>  - wait\_for\_validation: When true, Terraform will wait for certificate validation to complete before proceeding. | <pre>object({<br/>    domain_name               = optional(string)<br/>    subject_alternative_names = optional(list(string), [])<br/>    wildcard_certificates     = optional(bool, false)<br/>    prepend_stack_id          = optional(bool, false)<br/>    wait_for_validation       = optional(bool, false)<br/>  })</pre> | `{}` | no |
 | <a name="input_argocd"></a> [argocd](#input\_argocd) | Argo CD configurations | <pre>object({<br/>    # Hub specific<br/>    enable_hub        = optional(bool, false)<br/>    namespace         = optional(string, "argocd")<br/>    hub_iam_role_name = optional(string, "argocd-controller")<br/><br/>    # Spoke specific<br/>    enable_spoke = optional(bool, false)<br/><br/>    hub_iam_role_arn  = optional(string, null)<br/>    hub_iam_role_arns = optional(list(string), null)<br/><br/>    # Common<br/>    tags = optional(map(string), {})<br/>  })</pre> | `{}` | no |
+| <a name="input_argocd_registration"></a> [argocd\_registration](#input\_argocd\_registration) | ArgoCD cluster registration config. Required when enable\_argocd\_registration = true. | <pre>object({<br/>    github_repository      = string<br/>    github_branch          = optional(string, "main")<br/>    argocd_hub_environment = optional(string, "prod")<br/>    cluster_labels = object({<br/>      cluster_group  = string<br/>      environment    = string<br/>      team           = string<br/>      promotion_tier = string<br/><br/>      enable_ack                          = optional(bool, false)<br/>      enable_adapter                      = optional(bool, false)<br/>      enable_aws_load_balancer_controller = optional(bool, false)<br/>      enable_cert_manager                 = optional(bool, false)<br/>      enable_datadog_operator             = optional(bool, false)<br/>      enable_downscaler                   = optional(bool, false)<br/>      enable_exporters                    = optional(bool, false)<br/>      enable_external_dns                 = optional(bool, false)<br/>      enable_external_dns_crossaccount    = optional(bool, false)<br/>      enable_external_secrets             = optional(bool, false)<br/>      enable_grafana                      = optional(bool, false)<br/>      enable_kargo                        = optional(bool, false)<br/>      enable_kube_prometheus_stack        = optional(bool, false)<br/>      enable_metrics_server               = optional(bool, false)<br/>      enable_reloader                     = optional(bool, false)<br/>      enable_tailscale_operator           = optional(bool, false)<br/>    })<br/>  })</pre> | `null` | no |
 | <a name="input_base_domain"></a> [base\_domain](#input\_base\_domain) | Base domain for the platform, used for ingress and ACM certificates | `string` | `null` | no |
 | <a name="input_cluster_admins"></a> [cluster\_admins](#input\_cluster\_admins) | Map of IAM roles to add as cluster admins<br/>  role\_arn: ARN of the IAM role to add as cluster admin<br/>  role\_name: Name of the IAM role to add as cluster admin<br/>  kubernetes\_groups: List of Kubernetes groups to add the role to (default: ["system:masters"])<br/><br/>role\_arn and role\_name are mutually exclusive, exactly one must be set. | <pre>map(object({<br/>    role_arn          = optional(string)<br/>    role_name         = optional(string)<br/>    kubernetes_groups = optional(list(string))<br/>  }))</pre> | `{}` | no |
 | <a name="input_create_addon_pod_identity_roles"></a> [create\_addon\_pod\_identity\_roles](#input\_create\_addon\_pod\_identity\_roles) | Create addon pod identities roles. If set to true, all roles will be created | `bool` | `true` | no |
@@ -199,6 +204,7 @@ as described in the `.pre-commit-config.yaml` file
 | <a name="input_enable_ack"></a> [enable\_ack](#input\_enable\_ack) | Enable ACK (AWS Controllers for Kubernetes) EKS capability. Note: AdministratorAccess is attached by default. Use ack\_iam\_policy\_arn to override with a least-privilege policy. | `bool` | `true` | no |
 | <a name="input_enable_acm_certificate"></a> [enable\_acm\_certificate](#input\_enable\_acm\_certificate) | Enable ACM certificate | `bool` | `false` | no |
 | <a name="input_enable_argocd"></a> [enable\_argocd](#input\_enable\_argocd) | Enable Argo CD | `bool` | `false` | no |
+| <a name="input_enable_argocd_registration"></a> [enable\_argocd\_registration](#input\_enable\_argocd\_registration) | Automatically register this cluster with the ArgoCD hub by committing a cluster Secret YAML to the GitOps repository via the GitHub provider. | `bool` | `false` | no |
 | <a name="input_enable_ecr_passthrough_policy"></a> [enable\_ecr\_passthrough\_policy](#input\_enable\_ecr\_passthrough\_policy) | Enable the ECR pull-through cache policy for cluster nodes. This policy may grant additional ECR permissions, including automatic repository creation for pull-through cache repositories, and is not required for standard ECR image pulls. | `bool` | `false` | no |
 | <a name="input_enable_fargate_fluentbit"></a> [enable\_fargate\_fluentbit](#input\_enable\_fargate\_fluentbit) | Enable Fargate Fluentbit | `bool` | `true` | no |
 | <a name="input_enable_sso_admin_auto_discovery"></a> [enable\_sso\_admin\_auto\_discovery](#input\_enable\_sso\_admin\_auto\_discovery) | Enable automatic discovery of SSO admin roles. When disabled, only explicitly defined cluster\_admins are used. | `bool` | `true` | no |
@@ -220,9 +226,10 @@ as described in the `.pre-commit-config.yaml` file
 ## Outputs
 
 | Name | Description |
-|------|-------------|
+| ---- | ----------- |
 | <a name="output_ack"></a> [ack](#output\_ack) | Map of attributes for the ACK EKS capability |
 | <a name="output_argocd"></a> [argocd](#output\_argocd) | Map of attributes for the ArgoCD module |
+| <a name="output_argocd_registration"></a> [argocd\_registration](#output\_argocd\_registration) | ArgoCD cluster registration outputs (file path and commit SHA) |
 | <a name="output_eks"></a> [eks](#output\_eks) | Map of attributes for the EKS cluster |
 | <a name="output_karpenter"></a> [karpenter](#output\_karpenter) | Map of attributes for the Karpenter module |
 | <a name="output_kubernetes_access_role_arns"></a> [kubernetes\_access\_role\_arns](#output\_kubernetes\_access\_role\_arns) | Map of reusable Kubernetes access role names to their IAM role ARNs |
