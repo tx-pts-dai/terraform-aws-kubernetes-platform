@@ -377,7 +377,7 @@ resource "aws_iam_policy" "karpenter_controller" {
 # Custom IAM role for Karpenter running in Fargate
 module "karpenter_irsa" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts"
-  version = "6.4.0"
+  version = "6.6.1"
 
   name            = "karpenter-controller-${local.id}"
   use_name_prefix = false
