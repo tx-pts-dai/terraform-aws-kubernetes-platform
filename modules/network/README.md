@@ -8,27 +8,27 @@ See the [network example](../../example/network) how to use it and how to retrie
 ## Requirements
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.10 |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 5.42 |
 
 ## Providers
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
 | <a name="provider_aws"></a> [aws](#provider\_aws) | >= 5.42 |
 
 ## Modules
 
 | Name | Source | Version |
-|------|--------|---------|
+| ---- | ------ | ------- |
 | <a name="module_ssm"></a> [ssm](#module\_ssm) | ./../ssm | n/a |
 | <a name="module_vpc"></a> [vpc](#module\_vpc) | terraform-aws-modules/vpc/aws | 6.6.0 |
 
 ## Resources
 
 | Name | Type |
-|------|------|
+| ---- | ---- |
 | [aws_security_group.vpc_endpoints](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
 | [aws_vpc_endpoint.ecr_api](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_endpoint) | resource |
 | [aws_vpc_endpoint.ecr_dkr](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_endpoint) | resource |
@@ -39,7 +39,7 @@ See the [network example](../../example/network) how to use it and how to retrie
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
+| ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_az_count"></a> [az\_count](#input\_az\_count) | Number of availability zones to use | `number` | `3` | no |
 | <a name="input_cidr"></a> [cidr](#input\_cidr) | The CIDR block for the VPC | `string` | `"10.0.0.0/16"` | no |
 | <a name="input_create_vpc"></a> [create\_vpc](#input\_create\_vpc) | Create the VPC | `bool` | `true` | no |
@@ -55,7 +55,7 @@ See the [network example](../../example/network) how to use it and how to retrie
 ## Outputs
 
 | Name | Description |
-|------|-------------|
+| ---- | ----------- |
 | <a name="output_additional_cidr_blocks"></a> [additional\_cidr\_blocks](#output\_additional\_cidr\_blocks) | The additional CIDR blocks associated with the VPC |
 | <a name="output_cidr"></a> [cidr](#output\_cidr) | The base CIDR block for the VPC |
 | <a name="output_grouped_networks"></a> [grouped\_networks](#output\_grouped\_networks) | A map of subnet names to their respective list of CIDR blocks. |

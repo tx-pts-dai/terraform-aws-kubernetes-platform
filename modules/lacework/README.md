@@ -14,7 +14,7 @@ module "lacework" {
 ## Requirements
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.10 |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 5.0 |
 | <a name="requirement_kubernetes"></a> [kubernetes](#requirement\_kubernetes) | >= 2.0.0 |
@@ -23,7 +23,7 @@ module "lacework" {
 ## Providers
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
 | <a name="provider_aws"></a> [aws](#provider\_aws) | >= 5.0 |
 | <a name="provider_kubernetes"></a> [kubernetes](#provider\_kubernetes) | >= 2.0.0 |
 | <a name="provider_lacework"></a> [lacework](#provider\_lacework) | >= 2.0.0 |
@@ -31,13 +31,13 @@ module "lacework" {
 ## Modules
 
 | Name | Source | Version |
-|------|--------|---------|
+| ---- | ------ | ------- |
 | <a name="module_lacework_k8s_datacollector"></a> [lacework\_k8s\_datacollector](#module\_lacework\_k8s\_datacollector) | lacework/agent/kubernetes | 2.5.2 |
 
 ## Resources
 
 | Name | Type |
-|------|------|
+| ---- | ---- |
 | [kubernetes_namespace_v1.lacework](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/namespace_v1) | resource |
 | [lacework_agent_access_token.kubernetes](https://registry.terraform.io/providers/lacework/lacework/latest/docs/resources/agent_access_token) | resource |
 | [aws_caller_identity.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/caller_identity) | data source |
@@ -45,7 +45,7 @@ module "lacework" {
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
+| ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_agent_tags"></a> [agent\_tags](#input\_agent\_tags) | A map/dictionary of Tags to be assigned to the Lacework datacollector | `map(string)` | `{}` | no |
 | <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | Name of the cluster | `string` | n/a | yes |
 | <a name="input_enable_cluster_agent"></a> [enable\_cluster\_agent](#input\_enable\_cluster\_agent) | A boolean representing whether the Lacework cluster agent should be deployed | `bool` | `true` | no |
