@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [6.12.1](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/compare/v6.12.0...v6.12.1) (2026-06-01)
+
+### Bug Fixes
+
+* **deps:** bump terraform-aws-modules for missing ec2:DescribeSecurityGroups ([#287](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/issues/287)) ([29df42e](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/commit/29df42eb74b8dc85299383ec1d239066711ed181)), closes [#646](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/issues/646) [#61](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/issues/61) [aws/amazon-vpc-cni-k8s#3705](https://github.com/aws/amazon-vpc-cni-k8s/issues/3705)
+
 ## [6.12.0](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/compare/v6.11.0...v6.12.0) (2026-04-14)
 
 ### Features
