@@ -123,14 +123,14 @@ The `filtered_parameters` local variable is used to filter parameters based on t
 ## Requirements
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.10 |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 5.42 |
 
 ## Providers
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
 | <a name="provider_aws"></a> [aws](#provider\_aws) | >= 5.42 |
 
 ## Modules
@@ -140,14 +140,14 @@ No modules.
 ## Resources
 
 | Name | Type |
-|------|------|
+| ---- | ---- |
 | [aws_ssm_parameter.cluster_name](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
 | [aws_ssm_parameters_by_path.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ssm_parameters_by_path) | data source |
 
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
+| ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_base_prefix"></a> [base\_prefix](#input\_base\_prefix) | Base SSM namespace prefix for the parameters | `string` | `"infrastructure"` | no |
 | <a name="input_create"></a> [create](#input\_create) | Create the SSM parameters | `bool` | `true` | no |
 | <a name="input_lookup"></a> [lookup](#input\_lookup) | List of parameters to Lookup | `list(any)` | `[]` | no |
@@ -160,7 +160,7 @@ No modules.
 ## Outputs
 
 | Name | Description |
-|------|-------------|
+| ---- | ----------- |
 | <a name="output_filtered_parameters"></a> [filtered\_parameters](#output\_filtered\_parameters) | List of parameters filtered by stack name prefix |
 | <a name="output_latest_stack_parameters"></a> [latest\_stack\_parameters](#output\_latest\_stack\_parameters) | Latest created stack parameters |
 | <a name="output_lookup"></a> [lookup](#output\_lookup) | Map of parameters from filtered parameters containing only keys defined in lookup |

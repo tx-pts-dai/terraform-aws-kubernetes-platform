@@ -38,14 +38,14 @@ module "spoke" {
 ## Requirements
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.10 |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 5.0 |
 
 ## Providers
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
 | <a name="provider_aws"></a> [aws](#provider\_aws) | >= 5.0 |
 
 ## Modules
@@ -55,7 +55,7 @@ No modules.
 ## Resources
 
 | Name | Type |
-|------|------|
+| ---- | ---- |
 | [aws_eks_access_entry.argocd_spoke](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/eks_access_entry) | resource |
 | [aws_eks_access_policy_association.argocd_spoke](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/eks_access_policy_association) | resource |
 | [aws_eks_pod_identity_association.argocd_application_controller](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/eks_pod_identity_association) | resource |
@@ -72,7 +72,7 @@ No modules.
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
+| ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | Name of the EKS cluster | `string` | n/a | yes |
 | <a name="input_create"></a> [create](#input\_create) | Create the ArgoCD resources | `bool` | `true` | no |
 | <a name="input_enable_hub"></a> [enable\_hub](#input\_enable\_hub) | Enable ArgoCD Hub | `bool` | `false` | no |
@@ -86,7 +86,7 @@ No modules.
 ## Outputs
 
 | Name | Description |
-|------|-------------|
+| ---- | ----------- |
 | <a name="output_cluster_name"></a> [cluster\_name](#output\_cluster\_name) | Name of the EKS cluster |
 | <a name="output_hub_iam_role_arn"></a> [hub\_iam\_role\_arn](#output\_hub\_iam\_role\_arn) | IAM Role ARN for ArgoCD |
 | <a name="output_spoke_iam_role_arn"></a> [spoke\_iam\_role\_arn](#output\_spoke\_iam\_role\_arn) | IAM Role ARN for ArgoCD Spoke |
