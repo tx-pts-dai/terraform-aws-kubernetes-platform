@@ -8,27 +8,27 @@ See the [network example](../../example/network) how to use it and how to retrie
 ## Requirements
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.10 |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 5.42 |
 
 ## Providers
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
 | <a name="provider_aws"></a> [aws](#provider\_aws) | >= 5.42 |
 
 ## Modules
 
 | Name | Source | Version |
-|------|--------|---------|
+| ---- | ------ | ------- |
 | <a name="module_ssm"></a> [ssm](#module\_ssm) | ./../ssm | n/a |
 | <a name="module_vpc"></a> [vpc](#module\_vpc) | terraform-aws-modules/vpc/aws | 6.6.0 |
 
 ## Resources
 
 | Name | Type |
-|------|------|
+| ---- | ---- |
 | [aws_security_group.vpc_endpoints](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
 | [aws_vpc_endpoint.ecr_api](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_endpoint) | resource |
 | [aws_vpc_endpoint.ecr_dkr](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_endpoint) | resource |
@@ -39,13 +39,19 @@ See the [network example](../../example/network) how to use it and how to retrie
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
+| ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_az_count"></a> [az\_count](#input\_az\_count) | Number of availability zones to use | `number` | `3` | no |
 | <a name="input_cidr"></a> [cidr](#input\_cidr) | The CIDR block for the VPC | `string` | `"10.0.0.0/16"` | no |
 | <a name="input_create_vpc"></a> [create\_vpc](#input\_create\_vpc) | Create the VPC | `bool` | `true` | no |
 | <a name="input_create_vpc_endpoints"></a> [create\_vpc\_endpoints](#input\_create\_vpc\_endpoints) | Whether to create VPC endpoints for ECR and S3 | `bool` | `false` | no |
 | <a name="input_enable_nat_gateway"></a> [enable\_nat\_gateway](#input\_enable\_nat\_gateway) | Enable NAT Gateways | `bool` | `true` | no |
 | <a name="input_enabled_vpc_endpoints_private_dns"></a> [enabled\_vpc\_endpoints\_private\_dns](#input\_enabled\_vpc\_endpoints\_private\_dns) | Whether to enable private DNS for VPC endpoints | `bool` | `true` | no |
+| <a name="input_intra_subnet_names"></a> [intra\_subnet\_names](#input\_intra\_subnet\_names) | Explicit Name tag values for intra subnets, one per AZ. Empty list keeps upstream default naming. | `list(string)` | `[]` | no |
+| <a name="input_manage_default_network_acl"></a> [manage\_default\_network\_acl](#input\_manage\_default\_network\_acl) | Whether the upstream module manages the VPC's default Network ACL (rules + tags). Set false to leave the live default NACL untouched (recommended when importing an existing VPC). | `bool` | `true` | no |
+| <a name="input_manage_default_route_table"></a> [manage\_default\_route\_table](#input\_manage\_default\_route\_table) | Whether the upstream module manages the VPC's default Route Table (routes + tags). Set false to leave the live default RT untouched. | `bool` | `true` | no |
+| <a name="input_manage_default_security_group"></a> [manage\_default\_security\_group](#input\_manage\_default\_security\_group) | Whether the upstream module manages the VPC's default Security Group (rules + tags). Set false to leave the live default SG untouched (in particular, preserves any existing 'allow all from self' rule). | `bool` | `true` | no |
+| <a name="input_private_subnet_names"></a> [private\_subnet\_names](#input\_private\_subnet\_names) | Explicit Name tag values for private subnets, one per AZ. Empty list keeps upstream default naming. | `list(string)` | `[]` | no |
+| <a name="input_public_subnet_names"></a> [public\_subnet\_names](#input\_public\_subnet\_names) | Explicit Name tag values for public subnets, one per AZ. Empty list keeps upstream default naming. | `list(string)` | `[]` | no |
 | <a name="input_secondary_cidr_blocks"></a> [secondary\_cidr\_blocks](#input\_secondary\_cidr\_blocks) | List of secondary CIDR blocks to associate with the VPC to extend the IP Address pool | `list(string)` | `[]` | no |
 | <a name="input_single_nat_gateway"></a> [single\_nat\_gateway](#input\_single\_nat\_gateway) | Use a single NAT Gateway | `bool` | `true` | no |
 | <a name="input_stack_name"></a> [stack\_name](#input\_stack\_name) | The stack name for the resources | `string` | n/a | yes |
@@ -55,7 +61,7 @@ See the [network example](../../example/network) how to use it and how to retrie
 ## Outputs
 
 | Name | Description |
-|------|-------------|
+| ---- | ----------- |
 | <a name="output_additional_cidr_blocks"></a> [additional\_cidr\_blocks](#output\_additional\_cidr\_blocks) | The additional CIDR blocks associated with the VPC |
 | <a name="output_cidr"></a> [cidr](#output\_cidr) | The base CIDR block for the VPC |
 | <a name="output_grouped_networks"></a> [grouped\_networks](#output\_grouped\_networks) | A map of subnet names to their respective list of CIDR blocks. |

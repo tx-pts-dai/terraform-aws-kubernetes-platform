@@ -47,6 +47,14 @@ module "vpc" {
   enable_nat_gateway = var.enable_nat_gateway
   single_nat_gateway = var.single_nat_gateway
 
+  public_subnet_names  = var.public_subnet_names
+  private_subnet_names = var.private_subnet_names
+  intra_subnet_names   = var.intra_subnet_names
+
+  manage_default_network_acl    = var.manage_default_network_acl
+  manage_default_route_table    = var.manage_default_route_table
+  manage_default_security_group = var.manage_default_security_group
+
   public_subnet_tags = {
     "kubernetes.io/role/elb" = 1
   }
