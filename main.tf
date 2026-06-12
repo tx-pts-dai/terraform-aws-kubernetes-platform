@@ -186,11 +186,13 @@ module "eks" {
     }
   }
 
-  # Admin entries derived from cluster_admins/SSO, plus any caller-supplied
-  # entries (e.g. read-only / operator roles mapped to custom kubernetes_groups,
-  # which cluster_admins can't express because it always attaches the cluster
-  # admin policy). Caller keys must not collide with cluster_admins keys.
-  access_entries = merge(local.access_entries, var.access_entries)
+  # Caller-supplied entries (e.g. read-only / operator roles mapped to custom
+  # kubernetes_groups, which cluster_admins can't express because it always
+  # attaches the cluster admin policy), plus the admin entries derived from
+  # cluster_admins/SSO. Admin entries are listed last so they win on any key
+  # collision and a caller can never accidentally drop/alter admin access
+  # (collisions are also rejected by validation on var.access_entries).
+  access_entries = merge(var.access_entries, local.access_entries)
 
   tags = local.tags
 }

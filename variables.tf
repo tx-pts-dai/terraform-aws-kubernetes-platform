@@ -73,6 +73,11 @@ variable "eks" {
   EOT
   type        = any
   default     = {}
+
+  validation {
+    condition     = try(var.eks.create_iam_role, true) || try(var.eks.iam_role_arn, null) != null
+    error_message = "When eks.create_iam_role is false, eks.iam_role_arn must be set to the ARN of an existing cluster IAM role."
+  }
 }
 
 variable "cluster_admins" {
@@ -108,9 +113,11 @@ variable "access_entries" {
   Use this for non-admin principals — e.g. roles mapped to custom Kubernetes
   groups (read-only, operator) — which cluster_admins cannot express because it
   always attaches the AmazonEKSClusterAdminPolicy. Keys must not collide with
-  cluster_admins keys.
+  cluster_admins keys or the reserved "sso_admin" key; on any collision the
+  admin entry wins.
 
-  Each entry matches the EKS module's access_entries schema, e.g.:
+  Typed as `any` to accept the full EKS module access_entries schema (nested
+  policy_associations etc.), but it must be a map. Each entry, e.g.:
     access_entries = {
       readonly = {
         principal_arn     = "arn:aws:iam::123456789012:role/AWSReservedSSO_ReadOnly_abc"
@@ -120,6 +127,16 @@ variable "access_entries" {
   EOT
   type        = any
   default     = {}
+
+  validation {
+    condition     = can(keys(var.access_entries))
+    error_message = "access_entries must be a map of access entry objects."
+  }
+
+  validation {
+    condition     = length(setintersection(keys(var.access_entries), concat(keys(var.cluster_admins), ["sso_admin"]))) == 0
+    error_message = "access_entries keys must not collide with cluster_admins keys or the reserved \"sso_admin\" key."
+  }
 }
 
 variable "enable_sso_admin_auto_discovery" {
