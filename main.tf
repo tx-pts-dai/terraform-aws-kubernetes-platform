@@ -155,6 +155,12 @@ module "eks" {
     }
   }
 
+  # Allow consumers to reuse a pre-existing cluster IAM role instead of having
+  # the module create one. This is required when adopting an existing cluster
+  # whose role name doesn't match the stack name (the cluster role_arn is
+  # immutable, so a different role forces cluster replacement).
+  create_iam_role          = try(var.eks.create_iam_role, true)
+  iam_role_arn             = try(var.eks.iam_role_arn, null)
   iam_role_name            = local.stack_name
   iam_role_use_name_prefix = false
 
@@ -180,7 +186,11 @@ module "eks" {
     }
   }
 
-  access_entries = local.access_entries
+  # Admin entries derived from cluster_admins/SSO, plus any caller-supplied
+  # entries (e.g. read-only / operator roles mapped to custom kubernetes_groups,
+  # which cluster_admins can't express because it always attaches the cluster
+  # admin policy). Caller keys must not collide with cluster_admins keys.
+  access_entries = merge(local.access_entries, var.access_entries)
 
   tags = local.tags
 }
