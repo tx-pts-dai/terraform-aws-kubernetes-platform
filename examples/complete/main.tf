@@ -152,7 +152,7 @@ module "k8s_platform" {
   # EKS Auto Mode is enabled alongside the self-managed Karpenter stack
   # (enable_karpenter defaults to true) to demonstrate a gradual migration.
   # See docs/auto-mode-migration.md.
-  enable_auto_mode = true
+  enable_auto_mode = false
 
   auto_mode = {
     # Self-managed Karpenter here discovers subnets tagged
