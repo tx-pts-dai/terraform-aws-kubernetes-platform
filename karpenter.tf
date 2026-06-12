@@ -8,10 +8,16 @@ locals {
   }
 
   azs = slice(data.aws_availability_zones.available.names, 0, 3)
+
+  # The self-managed Karpenter stack is controlled independently of Auto Mode so
+  # both can run side-by-side during a migration. See var.enable_karpenter.
+  create_karpenter = var.enable_karpenter
 }
 
 # https://github.com/terraform-aws-modules/terraform-aws-eks/blob/master/modules/karpenter/policy.tf
 data "aws_iam_policy_document" "karpenter_controller" {
+  count = local.create_karpenter ? 1 : 0
+
   statement {
     sid = "AllowScopedEC2InstanceAccessActions"
     resources = [
@@ -370,8 +376,10 @@ data "aws_iam_policy_document" "karpenter_controller" {
 }
 
 resource "aws_iam_policy" "karpenter_controller" {
+  count = local.create_karpenter ? 1 : 0
+
   name   = "karpenter-controller-${local.id}"
-  policy = data.aws_iam_policy_document.karpenter_controller.json
+  policy = data.aws_iam_policy_document.karpenter_controller[0].json
 }
 
 # Custom IAM role for Karpenter running in Fargate
@@ -379,12 +387,14 @@ module "karpenter_irsa" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts"
   version = "6.6.1"
 
+  create = local.create_karpenter
+
   name            = "karpenter-controller-${local.id}"
   use_name_prefix = false
 
   create_policy = false
   policies = {
-    controller = aws_iam_policy.karpenter_controller.arn
+    controller = one(aws_iam_policy.karpenter_controller[*].arn)
   }
 
   oidc_providers = {
@@ -422,6 +432,8 @@ module "karpenter" {
   source  = "terraform-aws-modules/eks/aws//modules/karpenter"
   version = "21.15.1"
 
+  create = local.create_karpenter
+
   cluster_name = module.eks.cluster_name
 
   create_iam_role = false
@@ -444,6 +456,8 @@ module "karpenter" {
 }
 
 resource "helm_release" "karpenter_crd" {
+  count = local.create_karpenter ? 1 : 0
+
   name             = "karpenter-crd"
   chart            = "karpenter-crd"
   version          = "1.10.0"
@@ -454,6 +468,8 @@ resource "helm_release" "karpenter_crd" {
 }
 
 resource "helm_release" "karpenter_release" {
+  count = local.create_karpenter ? 1 : 0
+
   name             = "karpenter"
   chart            = "karpenter"
   version          = "1.10.0"
@@ -499,6 +515,8 @@ resource "helm_release" "karpenter_release" {
 }
 
 resource "helm_release" "karpenter_resources" {
+  count = local.create_karpenter ? 1 : 0
+
   name       = "karpenter-resources"
   chart      = "karpenter-resources"
   version    = "1.0.3"
@@ -534,7 +552,7 @@ resource "helm_release" "karpenter_resources" {
 # Karpenter Networking
 
 resource "aws_subnet" "karpenter" {
-  count = length(var.karpenter.subnet_cidrs)
+  count = local.create_karpenter ? length(var.karpenter.subnet_cidrs) : 0
 
   vpc_id            = var.vpc.vpc_id
   cidr_block        = var.karpenter.subnet_cidrs[count.index]
@@ -556,7 +574,7 @@ data "aws_route_tables" "private_route_tables" {
 }
 
 resource "aws_route_table_association" "karpenter" {
-  count = length(var.karpenter.subnet_cidrs)
+  count = local.create_karpenter ? length(var.karpenter.subnet_cidrs) : 0
 
   subnet_id      = aws_subnet.karpenter[count.index].id
   route_table_id = try(data.aws_route_tables.private_route_tables.ids[count.index], data.aws_route_tables.private_route_tables.ids[0], "") # Depends on the number of Nat Gateways
@@ -564,6 +582,8 @@ resource "aws_route_table_association" "karpenter" {
 
 module "karpenter_security_group" {
   source = "./modules/security-group"
+
+  create = local.create_karpenter
 
   name        = "karpenter-default-${local.stack_name}"
   description = "Karpenter default security group"
@@ -611,6 +631,8 @@ module "karpenter_security_group" {
 
 # Add time delay after Karpenter resources
 resource "time_sleep" "wait_after_karpenter" {
+  count = local.create_karpenter ? 1 : 0
+
   create_duration = "3m"
 
   depends_on = [

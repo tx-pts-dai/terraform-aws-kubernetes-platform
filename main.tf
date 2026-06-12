@@ -111,49 +111,81 @@ module "eks" {
   endpoint_private_access = try(var.eks.cluster_endpoint_private_access, true)
   authentication_mode     = "API"
 
-  addons = {
-    vpc-cni = {
-      before_compute = true
+  # EKS Auto Mode. When enabled, AWS manages compute, storage, load balancing and
+  # core networking. The networking/pod-identity addons below are always suppressed
+  # in Auto Mode; storage and load balancing have their own self-managed toggles
+  # (enable_self_managed_ebs_csi / enable_self_managed_lb_controller) so they can be
+  # migrated independently.
+  create_auto_mode_iam_resources    = var.enable_auto_mode
+  node_iam_role_additional_policies = var.auto_mode.node_iam_role_additional_policies
 
-      most_recent = true
-      preserve    = true
+  # node_pools must be null (not []) when no AWS built-in pools are requested: the
+  # EKS module derives the cluster-level node_role_arn from `node_pools != null`,
+  # and AWS rejects a non-empty nodeRoleArn with an empty nodePool list
+  # ("When nodeRoleArn is not null or empty, nodePool value(s) must be provided").
+  # Passing null means "bring your own NodePool/NodeClass" — our custom NodeClass
+  # carries its own role.
+  compute_config = var.enable_auto_mode ? {
+    enabled    = true
+    node_pools = length(var.auto_mode.builtin_node_pools) > 0 ? var.auto_mode.builtin_node_pools : null
+  } : null
 
-      service_account_role_arn = module.vpc_cni_irsa.arn
+  # Networking (VPC CNI, kube-proxy) and the pod-identity agent are owned by the
+  # Auto Mode data plane and cannot run self-managed alongside it, so they are
+  # suppressed entirely when Auto Mode is enabled.
+  #
+  # Each addon is gated individually via merge(): a single `enable_auto_mode ? {} :
+  # {...}` over all three at once fails type-checking, because the addons have
+  # different attribute sets and an empty object can't unify with them as a map.
+  addons = merge(
+    var.enable_auto_mode ? {} : {
+      vpc-cni = {
+        before_compute = true
 
-      # TODO: https://github.com/hashicorp/terraform-provider-aws/issues/30645
-      # pod_identity_association = [
-      #   {
-      #     role_arn        = module.aws_vpc_cni_pod_identity.iam_role_arn
-      #     service_account = "aws-node"
-      #   }
-      # ]
+        most_recent = true
+        preserve    = true
 
-      configuration_values = local.vpc_cni_merged_config
-    }
+        service_account_role_arn = module.vpc_cni_irsa.arn
 
-    kube-proxy = {
-      before_compute = true
+        # TODO: https://github.com/hashicorp/terraform-provider-aws/issues/30645
+        # pod_identity_association = [
+        #   {
+        #     role_arn        = module.aws_vpc_cni_pod_identity.iam_role_arn
+        #     service_account = "aws-node"
+        #   }
+        # ]
 
-      most_recent = true
-      preserve    = true
-
-      configuration_values = try(var.eks.kube_proxy.configuration_values, null)
-    }
-
-    eks-pod-identity-agent = {
-      before_compute = true
-
-      most_recent = true
-      preserve    = true
-
-      configuration_values = try(var.eks.eks_pod_identity_agent.configuration_values, null)
-
-      timeouts = {
-        create = "3m"
-        delete = "3m"
+        configuration_values = local.vpc_cni_merged_config
       }
-    }
-  }
+    },
+
+    var.enable_auto_mode ? {} : {
+      kube-proxy = {
+        before_compute = true
+
+        most_recent = true
+        preserve    = true
+
+        configuration_values = try(var.eks.kube_proxy.configuration_values, null)
+      }
+    },
+
+    var.enable_auto_mode ? {} : {
+      eks-pod-identity-agent = {
+        before_compute = true
+
+        most_recent = true
+        preserve    = true
+
+        configuration_values = try(var.eks.eks_pod_identity_agent.configuration_values, null)
+
+        timeouts = {
+          create = "3m"
+          delete = "3m"
+        }
+      }
+    },
+  )
 
   iam_role_name            = local.stack_name
   iam_role_use_name_prefix = false
@@ -167,7 +199,9 @@ module "eks" {
 
   enable_cluster_creator_admin_permissions = try(var.eks.enable_cluster_creator_admin_permissions, false)
 
-  fargate_profiles = {
+  # Fargate is only needed to host the self-managed Karpenter controller, so it
+  # follows enable_karpenter (not Auto Mode) to support running both side-by-side.
+  fargate_profiles = var.enable_karpenter ? {
     karpenter = {
       selectors = [
         {
@@ -178,7 +212,7 @@ module "eks" {
       iam_role_name            = "karpenter-fargate-${local.id}"
       iam_role_use_name_prefix = false
     }
-  }
+  } : {}
 
   access_entries = local.access_entries
 
@@ -229,6 +263,8 @@ module "aws_vpc_cni_pod_identity" {
   source  = "terraform-aws-modules/eks-pod-identity/aws"
   version = "2.8.1"
 
+  create = !var.enable_auto_mode
+
   name                    = "aws-vpc-cni-pod-identity-${local.id}"
   aws_vpc_cni_policy_name = "aws-vpc-cni-pod-identity-${local.id}"
   use_name_prefix         = false
@@ -244,6 +280,8 @@ module "aws_vpc_cni_pod_identity" {
 module "vpc_cni_irsa" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts"
   version = "6.6.1"
+
+  create = !var.enable_auto_mode
 
   name            = "vpc-cni-${local.id}"
   policy_name     = "vpc-cni-${local.id}"

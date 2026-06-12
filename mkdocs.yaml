@@ -13,6 +13,7 @@ nav:
       - patterns.md
   - getting-started.md
   - argocd-addons-migration.md
+  - auto-mode-migration.md
   - Submodules:
       - modules/argocd.md
       - modules/cloudflare.md
