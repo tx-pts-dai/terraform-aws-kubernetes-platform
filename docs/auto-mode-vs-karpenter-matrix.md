@@ -82,9 +82,10 @@ block storage, load balancing, pod identity).
 The supported path for a gradual, in-place migration. **Both controllers run
 side-by-side.** This is what `examples/complete` and `tests/main` exercise.
 
-> ⚠️ Only safe as a **staged** migration: enable self-managed Karpenter first (it
-> owns the `karpenter.sh` CRDs), then flip on Auto Mode so it adopts them. Never
-> both at once on a fresh cluster. See [auto-mode-migration.md](./auto-mode-migration.md).
+> ℹ️ Both stacks share the `karpenter.sh` CRDs. The module's `karpenter-crd` Helm
+> release sets `take_ownership = true`, so it adopts the CRDs whether Auto Mode or
+> the release created them first — fresh single-apply and staged migrations both
+> work. See [auto-mode-migration.md](./auto-mode-migration.md).
 
 **Deployed (union of both, with coexistence rules):**
 

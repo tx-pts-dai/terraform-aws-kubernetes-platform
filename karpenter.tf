@@ -465,6 +465,14 @@ resource "helm_release" "karpenter_crd" {
   description      = "Karpenter CRDs"
   namespace        = local.karpenter.namespace
   create_namespace = true
+
+  # EKS Auto Mode also installs the karpenter.sh CRDs and owns them, and disabling
+  # Auto Mode does not remove them. Either way this release would otherwise fail to
+  # install over the existing CRDs ("exists and cannot be imported ... invalid
+  # ownership metadata"). take_ownership lets it adopt the existing CRDs regardless
+  # of who created them; it's a no-op when this release already owns them, so the
+  # pure self-managed and staged-migration paths are unaffected.
+  take_ownership = true
 }
 
 resource "helm_release" "karpenter_release" {

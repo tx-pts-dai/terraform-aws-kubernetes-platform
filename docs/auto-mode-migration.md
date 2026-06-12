@@ -244,15 +244,17 @@ fighting over it.
 
 Once nothing depends on the self-managed versions, flip both toggles to `false`.
 
-> **⚠️ Order matters — never enable both on a fresh cluster in a single apply.**
-> EKS Auto Mode installs and owns the `nodepools.karpenter.sh` /
-> `nodeclaims.karpenter.sh` CRDs. If `helm_release.karpenter_crd` tries to install
-> those same CRDs on a cluster where Auto Mode created them first, Helm fails with
-> an **`invalid ownership metadata`** error. **Coexistence is only safe as a staged
-> migration: enable self-managed Karpenter first (it owns the CRDs), then enable
-> Auto Mode so it adopts them.** A clean cluster with both `enable_karpenter = true`
-> and `enable_auto_mode = true` applied at once is **not supported** — deploy
-> Karpenter-only first, then flip `enable_auto_mode = true` in a second apply.
+> **ℹ️ CRD ownership is handled for you.** EKS Auto Mode installs and owns the
+> `nodepools.karpenter.sh` / `nodeclaims.karpenter.sh` CRDs, which would otherwise
+> collide with the module's `karpenter-crd` Helm release (`invalid ownership
+> metadata`). That release sets `take_ownership = true`, so it **adopts** the
+> existing CRDs no matter which controller created them first. As a result a clean
+> cluster with both `enable_karpenter` and `enable_auto_mode` enabled applies in a
+> single pass, and disabling Auto Mode later (its CRDs linger on the cluster) does
+> not break the self-managed stack. The staged approach — deploy Karpenter first,
+> then enable Auto Mode in a second apply — still works and is the most conservative
+> path. Note that with both stacks enabled the chart's CRD version and Auto Mode's
+> are co-managed; this is low-risk since both are `karpenter.sh/v1`.
 
 <!-- -->
 
