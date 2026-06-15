@@ -1756,6 +1756,13 @@
 </thead>
 <tbody>
 <tr>
+<td><a name="input_access_entries"></a> <a href="..#input_access_entries">access_entries</a></td>
+<td>Additional EKS access entries, passed through to the underlying EKS module and<br/>merged with the admin entries derived from cluster_admins / SSO discovery.<br/><br/>Use this for non-admin principals — e.g. roles mapped to custom Kubernetes<br/>groups (read-only, operator) — which cluster_admins cannot express because it<br/>always attaches the AmazonEKSClusterAdminPolicy. Keys must not collide with<br/>cluster_admins keys or the reserved "sso_admin" key; on any collision the<br/>admin entry wins.<br/><br/>Typed as <code>any</code> to accept the full EKS module access_entries schema (nested<br/>policy_associations etc.), but it must be a map. Each entry, e.g.:<br/>  access_entries = {<br/>    readonly = {<br/>      principal_arn     = "arn:aws:iam::123456789012:role/AWSReservedSSO_ReadOnly_abc"<br/>      kubernetes_groups = ["readonly"]<br/>    }<br/>  }</td>
+<td><code>any</code></td>
+<td><code>{}</code></td>
+<td style="text-align: center;">no</td>
+</tr>
+<tr>
 <td><a name="input_ack_iam_policy_arn"></a> <a href="..#input_ack_iam_policy_arn">ack_iam_policy_arn</a></td>
 <td>IAM policy ARN to attach to the ACK capability role. Defaults to AdministratorAccess if not specified.</td>
 <td><code>string</code></td>
@@ -1799,7 +1806,7 @@
 </tr>
 <tr>
 <td><a name="input_eks"></a> <a href="..#input_eks">eks</a></td>
-<td>Map of EKS configurations including cluster settings and core addon customization.<br/><br/>Cluster settings:<br/>  - cluster_endpoint_public_access: Enable public access to cluster endpoint (default: true)<br/>  - cluster_endpoint_private_access: Enable private access to cluster endpoint (default: true)<br/>  - enable_cluster_creator_admin_permissions: Grant admin permissions to cluster creator (default: false)<br/><br/>Core addon settings (vpc_cni, kube_proxy, eks_pod_identity_agent):<br/>  - configuration_values: JSON string of addon configuration (merged with defaults for vpc-cni)<br/><br/>Example:<br/>  eks = {<br/>    cluster_endpoint_public_access = false<br/>    vpc_cni = {<br/>      configuration_values = jsonencode({<br/>        env = {<br/>          ENABLE_PREFIX_DELEGATION = "true"<br/>          WARM_PREFIX_TARGET       = "1"<br/>        }<br/>      })<br/>    }<br/>  }</td>
+<td>Map of EKS configurations including cluster settings and core addon customization.<br/><br/>Cluster settings:<br/>  - cluster_endpoint_public_access: Enable public access to cluster endpoint (default: true)<br/>  - cluster_endpoint_private_access: Enable private access to cluster endpoint (default: true)<br/>  - enable_cluster_creator_admin_permissions: Grant admin permissions to cluster creator (default: false)<br/>  - create_iam_role: Whether the module creates the cluster IAM role (default: true). Set to false to reuse an existing role, e.g. when adopting an existing cluster.<br/>  - iam_role_arn: ARN of an existing cluster IAM role to use when create_iam_role is false.<br/><br/>Core addon settings (vpc_cni, kube_proxy, eks_pod_identity_agent):<br/>  - configuration_values: JSON string of addon configuration (merged with defaults for vpc-cni)<br/><br/>Example:<br/>  eks = {<br/>    cluster_endpoint_public_access = false<br/>    vpc_cni = {<br/>      configuration_values = jsonencode({<br/>        env = {<br/>          ENABLE_PREFIX_DELEGATION = "true"<br/>          WARM_PREFIX_TARGET       = "1"<br/>        }<br/>      })<br/>    }<br/>  }</td>
 <td><code>any</code></td>
 <td><code>{}</code></td>
 <td style="text-align: center;">no</td>
