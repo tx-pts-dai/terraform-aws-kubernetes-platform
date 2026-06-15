@@ -52,6 +52,8 @@ variable "eks" {
     - cluster_endpoint_public_access: Enable public access to cluster endpoint (default: true)
     - cluster_endpoint_private_access: Enable private access to cluster endpoint (default: true)
     - enable_cluster_creator_admin_permissions: Grant admin permissions to cluster creator (default: false)
+    - create_iam_role: Whether the module creates the cluster IAM role (default: true). Set to false to reuse an existing role, e.g. when adopting an existing cluster.
+    - iam_role_arn: ARN of an existing cluster IAM role to use when create_iam_role is false.
 
   Core addon settings (vpc_cni, kube_proxy, eks_pod_identity_agent):
     - configuration_values: JSON string of addon configuration (merged with defaults for vpc-cni)
@@ -71,6 +73,11 @@ variable "eks" {
   EOT
   type        = any
   default     = {}
+
+  validation {
+    condition     = try(var.eks.create_iam_role, true) || try(var.eks.iam_role_arn, null) != null
+    error_message = "When eks.create_iam_role is false, eks.iam_role_arn must be set to the ARN of an existing cluster IAM role."
+  }
 }
 
 variable "cluster_admins" {
@@ -95,6 +102,40 @@ variable "cluster_admins" {
       (v.role_arn != null) != (v.role_name != null) # XOR - exactly one must be set
     ])
     error_message = "Each cluster admin must have either role_arn or role_name, not both."
+  }
+}
+
+variable "access_entries" {
+  description = <<-EOT
+  Additional EKS access entries, passed through to the underlying EKS module and
+  merged with the admin entries derived from cluster_admins / SSO discovery.
+
+  Use this for non-admin principals — e.g. roles mapped to custom Kubernetes
+  groups (read-only, operator) — which cluster_admins cannot express because it
+  always attaches the AmazonEKSClusterAdminPolicy. Keys must not collide with
+  cluster_admins keys or the reserved "sso_admin" key; on any collision the
+  admin entry wins.
+
+  Typed as `any` to accept the full EKS module access_entries schema (nested
+  policy_associations etc.), but it must be a map. Each entry, e.g.:
+    access_entries = {
+      readonly = {
+        principal_arn     = "arn:aws:iam::123456789012:role/AWSReservedSSO_ReadOnly_abc"
+        kubernetes_groups = ["readonly"]
+      }
+    }
+  EOT
+  type        = any
+  default     = {}
+
+  validation {
+    condition     = can(keys(var.access_entries))
+    error_message = "access_entries must be a map of access entry objects."
+  }
+
+  validation {
+    condition     = length(setintersection(keys(var.access_entries), concat(keys(var.cluster_admins), ["sso_admin"]))) == 0
+    error_message = "access_entries keys must not collide with cluster_admins keys or the reserved \"sso_admin\" key."
   }
 }
 
