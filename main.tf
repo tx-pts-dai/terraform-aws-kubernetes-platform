@@ -155,6 +155,8 @@ module "eks" {
     }
   }
 
+  create_iam_role          = try(var.eks.create_iam_role, true)
+  iam_role_arn             = try(var.eks.iam_role_arn, null)
   iam_role_name            = local.stack_name
   iam_role_use_name_prefix = false
 
@@ -180,7 +182,8 @@ module "eks" {
     }
   }
 
-  access_entries = local.access_entries
+  # Admin entries last so they win on any key collision.
+  access_entries = merge(var.access_entries, local.access_entries)
 
   tags = local.tags
 }
