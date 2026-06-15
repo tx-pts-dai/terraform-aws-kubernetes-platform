@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [6.13.0](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/compare/v6.12.1...v6.13.0) (2026-06-15)
+
+### Features
+
+* allow reusing existing cluster IAM role and arbitrary access entries ([#293](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/issues/293)) ([c8b3950](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/commit/c8b3950f66225eebdeca10e971d74d5b2a6f9880))
+
 ## [6.12.1](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/compare/v6.12.0...v6.12.1) (2026-06-01)
 
 ### Bug Fixes
