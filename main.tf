@@ -112,10 +112,12 @@ module "eks" {
   authentication_mode     = "API"
 
   # EKS Auto Mode. When enabled, AWS manages compute, storage, load balancing and
-  # core networking. The networking/pod-identity addons below are always suppressed
-  # in Auto Mode; storage and load balancing have their own self-managed toggles
-  # (enable_self_managed_ebs_csi / enable_self_managed_lb_controller) so they can be
-  # migrated independently.
+  # core networking. The networking / Pod Identity addons below are suppressed only
+  # in PURE Auto Mode (no self-managed Karpenter); they are retained while
+  # enable_karpenter is true so the self-managed nodes get pod networking (see
+  # local.create_self_managed_networking). Storage and load balancing have their own
+  # self-managed toggles (enable_self_managed_ebs_csi / enable_self_managed_lb_controller)
+  # so they can be migrated independently.
   create_auto_mode_iam_resources    = var.enable_auto_mode
   node_iam_role_additional_policies = var.auto_mode.node_iam_role_additional_policies
 
@@ -130,20 +132,31 @@ module "eks" {
     node_pools = length(var.auto_mode.builtin_node_pools) > 0 ? var.auto_mode.builtin_node_pools : null
   } : null
 
-  # Networking (VPC CNI, kube-proxy) and the pod-identity agent are owned by the
-  # Auto Mode data plane and cannot run self-managed alongside it, so they are
-  # suppressed entirely when Auto Mode is enabled.
+  # Networking (VPC CNI, kube-proxy) and the Pod Identity agent run as node-level
+  # services on Auto Mode nodes; Auto Mode does NOT extend them to non-Auto-Mode
+  # nodes. While the self-managed Karpenter stack runs (enable_karpenter), its nodes
+  # are ordinary EC2 nodes that need the traditional vpc-cni / kube-proxy DaemonSets
+  # (and the Pod Identity agent) to get pod networking and become Ready — so these
+  # are retained via local.create_self_managed_networking and dropped only in PURE
+  # Auto Mode. Mirrors the CoreDNS rule in addons.tf.
   #
-  # Each addon is gated individually via merge(): a single `enable_auto_mode ? {} :
-  # {...}` over all three at once fails type-checking, because the addons have
-  # different attribute sets and an empty object can't unify with them as a map.
+  # Each addon is gated individually via merge(): a single `... ? {...} : {}` over
+  # all three at once fails type-checking, because the addons have different
+  # attribute sets and an empty object can't unify with them as a map.
   addons = merge(
-    var.enable_auto_mode ? {} : {
+    local.create_self_managed_networking ? {
       vpc-cni = {
         before_compute = true
 
         most_recent = true
         preserve    = true
+
+        # This addon sets preserve = true, so its aws-node resources stay on the
+        # cluster after the addon is removed — e.g. while suppressed under Auto Mode.
+        # Re-creating the addon must adopt those leftover resources; without OVERWRITE
+        # the create fails with ConfigurationConflict on their version labels. No-op
+        # on a clean cluster.
+        resolve_conflicts_on_create = "OVERWRITE"
 
         service_account_role_arn = module.vpc_cni_irsa.arn
 
@@ -157,25 +170,31 @@ module "eks" {
 
         configuration_values = local.vpc_cni_merged_config
       }
-    },
+    } : {},
 
-    var.enable_auto_mode ? {} : {
+    local.create_self_managed_networking ? {
       kube-proxy = {
         before_compute = true
 
         most_recent = true
         preserve    = true
 
+        # See vpc-cni above: adopt existing resources rather than fail on conflict.
+        resolve_conflicts_on_create = "OVERWRITE"
+
         configuration_values = try(var.eks.kube_proxy.configuration_values, null)
       }
-    },
+    } : {},
 
-    var.enable_auto_mode ? {} : {
+    local.create_self_managed_networking ? {
       eks-pod-identity-agent = {
         before_compute = true
 
         most_recent = true
         preserve    = true
+
+        # See vpc-cni above: adopt existing resources rather than fail on conflict.
+        resolve_conflicts_on_create = "OVERWRITE"
 
         configuration_values = try(var.eks.eks_pod_identity_agent.configuration_values, null)
 
@@ -184,7 +203,7 @@ module "eks" {
           delete = "3m"
         }
       }
-    },
+    } : {},
   )
 
   create_iam_role          = try(var.eks.create_iam_role, true)
@@ -266,7 +285,7 @@ module "aws_vpc_cni_pod_identity" {
   source  = "terraform-aws-modules/eks-pod-identity/aws"
   version = "2.8.1"
 
-  create = !var.enable_auto_mode
+  create = local.create_self_managed_networking
 
   name                    = "aws-vpc-cni-pod-identity-${local.id}"
   aws_vpc_cni_policy_name = "aws-vpc-cni-pod-identity-${local.id}"
@@ -284,7 +303,7 @@ module "vpc_cni_irsa" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts"
   version = "6.6.1"
 
-  create = !var.enable_auto_mode
+  create = local.create_self_managed_networking
 
   name            = "vpc-cni-${local.id}"
   policy_name     = "vpc-cni-${local.id}"

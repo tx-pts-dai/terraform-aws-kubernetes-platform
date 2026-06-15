@@ -206,8 +206,11 @@ variable "acm_certificate" {
 # EKS Auto Mode
 # When enabled, the cluster runs in EKS Auto Mode: AWS manages compute (built-in
 # Karpenter), block storage (EBS CSI), load balancing (ALB/NLB) and core
-# networking. The EBS CSI addon, VPC CNI / kube-proxy addons and AWS Load Balancer
-# Controller pod-identity role are NOT created in this mode.
+# networking. In PURE Auto Mode the EBS CSI addon, VPC CNI / kube-proxy addons, Pod
+# Identity agent and AWS Load Balancer Controller pod-identity role are not created.
+# When combined with the self-managed Karpenter stack the networking addons are
+# retained for its non-Auto-Mode nodes (see the enable_self_managed_* notes below
+# and docs/auto-mode-migration.md).
 #
 # Auto Mode and the self-managed Karpenter stack (var.enable_karpenter) are
 # independent: both can be enabled at the same time to run them side-by-side for a
@@ -271,11 +274,11 @@ variable "auto_mode_node_pools" {
 # Per-capability "self-managed vs Auto Mode" overrides. Each defaults to enabled
 # unless Auto Mode is on (Auto Mode provides a managed equivalent). Set explicitly
 # to run the self-managed and Auto Mode versions side-by-side and migrate each
-# capability independently. Networking (VPC CNI, kube-proxy) is NOT overridable:
-# Auto Mode owns the data plane, so those copies always follow enable_auto_mode.
-# CoreDNS is also not overridable but is retained while self-managed compute runs
-# (enable_karpenter) — Auto Mode's DNS only serves Auto Mode nodes — and is dropped
-# only in pure Auto Mode.
+# capability independently. Networking (VPC CNI, kube-proxy) and the Pod Identity
+# agent are NOT overridable: Auto Mode's copies serve only Auto Mode nodes, so the
+# self-managed addons are retained whenever self-managed compute runs
+# (enable_karpenter) — the non-Auto-Mode nodes need them — and dropped only in pure
+# Auto Mode. CoreDNS follows the same rule.
 variable "enable_self_managed_ebs_csi" {
   description = "Create the self-managed EBS CSI driver (addon, IRSA and pod-identity role). Defaults to enabled unless Auto Mode is on. Set to true to keep it running alongside Auto Mode's managed EBS CSI during a storage migration, or false to drop it."
   type        = bool

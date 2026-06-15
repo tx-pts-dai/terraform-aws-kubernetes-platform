@@ -39,18 +39,21 @@ given moment:
 
 Each storage/LB toggle defaults to "off when Auto Mode is on", but you can set it to
 `true` to keep the self-managed version running alongside Auto Mode's managed one
-while you cut over, then flip it to `false` when done. Networking (VPC CNI,
-kube-proxy) is **not** independently togglable — Auto Mode owns the data plane, so
-those copies always follow `enable_auto_mode`.
+while you cut over, then flip it to `false` when done.
 
-**CoreDNS is the exception:** Auto Mode's managed DNS only serves Auto Mode nodes,
-so while self-managed compute is still running (`enable_karpenter = true`) the
-cluster `coredns` addon is **retained automatically** — its pods run on the
-self-managed nodes and back the `kube-dns` Service for the whole cluster. CoreDNS
-is handed over to Auto Mode (the addon dropped) only in **pure** Auto Mode
-(`enable_auto_mode = true`, `enable_karpenter = false`). You don't toggle this; it
-follows `enable_karpenter`. Removing it too early leaves every pod on the
-self-managed nodes without DNS.
+**Networking and CoreDNS are not togglable — they follow `enable_karpenter`.** Auto
+Mode runs the VPC CNI, kube-proxy and CoreDNS as node-level services on Auto Mode
+nodes **only**; they do not serve non-Auto-Mode nodes. So while self-managed compute
+is still running (`enable_karpenter = true`) the cluster keeps the traditional
+`vpc-cni`, `kube-proxy` and `eks-pod-identity-agent` addons **and** the `coredns`
+addon: the self-managed Karpenter nodes are ordinary EC2 nodes that need those
+DaemonSets to get pod networking, reach `Ready`, and resolve DNS. Their DaemonSets
+exclude Auto Mode nodes via node affinity, so they coexist with Auto Mode's managed
+copies. These are handed over to Auto Mode (the addons dropped) only in **pure** Auto
+Mode (`enable_auto_mode = true`, `enable_karpenter = false`). You don't toggle this;
+it follows `enable_karpenter`. Dropping them while self-managed nodes still run leaves
+every pod on those nodes stuck — without a CNI a node never leaves `NotReady` and
+nothing schedules on it.
 
 Resources that are **not** affected and keep working in both modes: ArgoCD, the
 ACK capability, external-dns / external-secrets pod identities, the AWS Gateway

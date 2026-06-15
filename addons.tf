@@ -57,6 +57,18 @@ locals {
   create_self_managed_ebs_csi       = coalesce(var.enable_self_managed_ebs_csi, !var.enable_auto_mode)
   create_self_managed_lb_controller = coalesce(var.enable_self_managed_lb_controller, !var.enable_auto_mode)
 
+  # Networking (VPC CNI, kube-proxy) and the Pod Identity agent run as node-level
+  # services on Auto Mode nodes, but Auto Mode does NOT extend them to non-Auto-Mode
+  # nodes. While the self-managed Karpenter stack runs, its nodes are ordinary EC2
+  # nodes that need the traditional vpc-cni / kube-proxy DaemonSets (and the Pod
+  # Identity agent) to get pod networking and become Ready — so these are retained
+  # whenever enable_karpenter is true and dropped only in PURE Auto Mode, mirroring
+  # the CoreDNS rule below. Not exposed as its own toggle: Auto Mode cannot serve a
+  # self-managed node's data plane, so this strictly follows whether self-managed
+  # compute exists. The addon DaemonSets exclude Auto Mode nodes via their own node
+  # affinity, so they coexist with Auto Mode's managed copies.
+  create_self_managed_networking = !var.enable_auto_mode || var.enable_karpenter
+
   # CoreDNS is dropped only in PURE Auto Mode, where Auto Mode provides cluster DNS
   # on its own nodes. In a mixed cluster (Auto Mode + self-managed Karpenter/Fargate
   # compute) those nodes are NOT served by Auto Mode's DNS and still need the cluster
