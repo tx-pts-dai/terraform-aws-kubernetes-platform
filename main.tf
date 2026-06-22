@@ -109,7 +109,12 @@ module "eks" {
   kubernetes_version      = var.kubernetes_version
   endpoint_public_access  = try(var.eks.cluster_endpoint_public_access, true)
   endpoint_private_access = try(var.eks.cluster_endpoint_private_access, true)
-  authentication_mode     = "API"
+
+  # Configurable for brownfield adoption. Default "API" (greenfield). When adopting a
+  # cluster on the legacy aws-auth ConfigMap, set "API_AND_CONFIG_MAP" so both auth
+  # paths stay live while access entries are created and verified — going straight to
+  # "API" drops the ConfigMap, cutting off every principal not yet an access entry.
+  authentication_mode = try(var.eks.authentication_mode, "API")
 
   # EKS Auto Mode. When enabled, AWS manages compute, storage, load balancing and
   # core networking. The networking / Pod Identity addons below are suppressed only
@@ -210,6 +215,14 @@ module "eks" {
   iam_role_arn             = try(var.eks.iam_role_arn, null)
   iam_role_name            = local.stack_name
   iam_role_use_name_prefix = false
+
+  # Encryption / KMS — exposed for brownfield adoption. Defaults preserve the eks
+  # module behaviour (create a KMS key + encrypt secrets). To adopt a cluster that
+  # has NO encryption today, set var.eks.encryption_config = null and
+  # var.eks.create_kms_key = false: enabling secrets encryption is IRREVERSIBLE, so
+  # it must be an explicit choice, not a side effect of adoption.
+  encryption_config = try(var.eks.encryption_config, {})
+  create_kms_key    = try(var.eks.create_kms_key, true)
 
   vpc_id                   = var.vpc.vpc_id
   subnet_ids               = var.vpc.private_subnets

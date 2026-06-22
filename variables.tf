@@ -54,6 +54,9 @@ variable "eks" {
     - enable_cluster_creator_admin_permissions: Grant admin permissions to cluster creator (default: false)
     - create_iam_role: Whether the module creates the cluster IAM role (default: true). Set to false to reuse an existing role, e.g. when adopting an existing cluster.
     - iam_role_arn: ARN of an existing cluster IAM role to use when create_iam_role is false.
+    - authentication_mode: EKS auth mode (default: "API"). When adopting a cluster still on the aws-auth ConfigMap, set "API_AND_CONFIG_MAP" until every principal is reproduced as an access entry, then move to "API".
+    - encryption_config: Cluster secrets-encryption config (default: {} = encrypt secrets). Set to null to adopt a cluster with no encryption without enabling it (enabling is irreversible).
+    - create_kms_key: Whether to create a KMS key for cluster encryption (default: true). Set false together with encryption_config = null to skip encryption, or with encryption_config.provider_key_arn to reuse an existing key.
 
   Core addon settings (vpc_cni, kube_proxy, eks_pod_identity_agent):
     - configuration_values: JSON string of addon configuration (merged with defaults for vpc-cni)
