@@ -135,6 +135,8 @@ as described in the `.pre-commit-config.yaml` file
 | <a name="module_acm"></a> [acm](#module\_acm) | terraform-aws-modules/acm/aws | 6.3.0 |
 | <a name="module_argocd"></a> [argocd](#module\_argocd) | ./modules/argocd | n/a |
 | <a name="module_aws_ebs_csi_pod_identity"></a> [aws\_ebs\_csi\_pod\_identity](#module\_aws\_ebs\_csi\_pod\_identity) | terraform-aws-modules/eks-pod-identity/aws | 2.8.1 |
+| <a name="module_aws_efs_csi_controller_pod_identity"></a> [aws\_efs\_csi\_controller\_pod\_identity](#module\_aws\_efs\_csi\_controller\_pod\_identity) | terraform-aws-modules/eks-pod-identity/aws | 2.8.1 |
+| <a name="module_aws_efs_csi_node_pod_identity"></a> [aws\_efs\_csi\_node\_pod\_identity](#module\_aws\_efs\_csi\_node\_pod\_identity) | terraform-aws-modules/eks-pod-identity/aws | 2.8.1 |
 | <a name="module_aws_gateway_controller_pod_identity"></a> [aws\_gateway\_controller\_pod\_identity](#module\_aws\_gateway\_controller\_pod\_identity) | terraform-aws-modules/eks-pod-identity/aws | 2.8.1 |
 | <a name="module_aws_lb_controller_pod_identity"></a> [aws\_lb\_controller\_pod\_identity](#module\_aws\_lb\_controller\_pod\_identity) | terraform-aws-modules/eks-pod-identity/aws | 2.8.1 |
 | <a name="module_aws_vpc_cni_pod_identity"></a> [aws\_vpc\_cni\_pod\_identity](#module\_aws\_vpc\_cni\_pod\_identity) | terraform-aws-modules/eks-pod-identity/aws | 2.8.1 |
