@@ -59,6 +59,12 @@ locals {
       most_recent = true
       preserve    = false
 
+      configuration_values = jsonencode({
+        controller = {
+          replicaCount = 1
+        }
+      })
+
       # Increase timeout to allow Karpenter time to provision nodes
       # Karpenter provisions nodes on-demand when pods are pending
       timeouts = {
