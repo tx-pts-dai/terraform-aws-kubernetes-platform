@@ -141,8 +141,9 @@ module "aws_efs_csi_controller_pod_identity" {
 
   create = var.create_addon_pod_identity_roles
 
-  name            = "aws-efs-csi-controller-pod-identity-${local.id}"
-  use_name_prefix = false
+  name                    = "aws-efs-csi-controller-pod-identity-${local.id}"
+  aws_efs_csi_policy_name = "aws-efs-csi-controller-pod-identity-${local.id}"
+  use_name_prefix         = false
 
   attach_aws_efs_csi_policy = true
 
