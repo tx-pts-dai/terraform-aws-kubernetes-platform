@@ -50,6 +50,28 @@ locals {
       #   service_account = "ebs-csi-controller-sa"
       # }]
     }
+
+    # Provides classic Amazon EFS and Amazon S3 Files storage (S3 Files needs
+    # driver v3.0.0+). IAM is supplied via the controller/node Pod Identity
+    # roles below; the node role has account-wide S3 read so applications only
+    # need to create a bucket and reference it.
+    aws-efs-csi-driver = {
+      most_recent = true
+      preserve    = false
+
+      configuration_values = jsonencode({
+        controller = {
+          replicaCount = 1
+        }
+      })
+
+      # Increase timeout to allow Karpenter time to provision nodes
+      # Karpenter provisions nodes on-demand when pods are pending
+      timeouts = {
+        create = "20m"
+        update = "20m"
+      }
+    }
   }
 
   extra_cluster_addons = merge(local.cluster_addons, var.extra_cluster_addons)
@@ -112,6 +134,64 @@ module "aws_ebs_csi_pod_identity" {
       cluster_name    = module.eks.cluster_name
       namespace       = "kube-system"
       service_account = "ebs-csi-controller-sa"
+    }
+  }
+
+  tags = local.tags
+}
+
+# EFS CSI driver controller: classic EFS permissions plus the Amazon S3 Files
+module "aws_efs_csi_controller_pod_identity" {
+  source  = "terraform-aws-modules/eks-pod-identity/aws"
+  version = "2.8.1"
+
+  create = var.create_addon_pod_identity_roles
+
+  name                    = "aws-efs-csi-controller-pod-identity-${local.id}"
+  aws_efs_csi_policy_name = "aws-efs-csi-controller-pod-identity-${local.id}"
+  use_name_prefix         = false
+
+  attach_aws_efs_csi_policy = true
+
+  additional_policy_arns = {
+    AmazonS3FilesCSIDriverPolicy  = "arn:aws:iam::aws:policy/service-role/AmazonS3FilesCSIDriverPolicy"
+    AmazonS3FilesClientFullAccess = "arn:aws:iam::aws:policy/AmazonS3FilesClientFullAccess"
+  }
+
+  associations = {
+    controller = {
+      cluster_name    = module.eks.cluster_name
+      namespace       = "kube-system"
+      service_account = "efs-csi-controller-sa"
+    }
+  }
+
+  tags = local.tags
+}
+
+# EFS CSI driver node: account-level S3 Files client/mount permissions plus
+# account-wide S3 read so applications only need to create a bucket and
+# reference it.
+module "aws_efs_csi_node_pod_identity" {
+  source  = "terraform-aws-modules/eks-pod-identity/aws"
+  version = "2.8.1"
+
+  create = var.create_addon_pod_identity_roles
+
+  name            = "aws-efs-csi-node-pod-identity-${local.id}"
+  use_name_prefix = false
+
+  additional_policy_arns = {
+    AmazonS3FilesClientFullAccess = "arn:aws:iam::aws:policy/AmazonS3FilesClientFullAccess"
+    AmazonElasticFileSystemsUtils = "arn:aws:iam::aws:policy/AmazonElasticFileSystemsUtils"
+    AmazonS3ReadOnlyAccess        = "arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess"
+  }
+
+  associations = {
+    node = {
+      cluster_name    = module.eks.cluster_name
+      namespace       = "kube-system"
+      service_account = "efs-csi-node-sa"
     }
   }
 
