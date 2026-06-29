@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [6.14.0](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/compare/v6.13.0...v6.14.0) (2026-06-29)
+
+### Features
+
+* adding efs driver ([#296](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/issues/296)) ([f3456f5](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/commit/f3456f514ce33ab54db3481e05a23110553f08db))
+
 ## [6.13.0](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/compare/v6.12.1...v6.13.0) (2026-06-15)
 
 ### Features
