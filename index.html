@@ -525,6 +525,45 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Upgrading Kubernetes Version">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#notes-for-135" class="md-nav__link">
+    <span class="md-ellipsis">
+      Notes for 1.35
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#versioning-and-releases" class="md-nav__link">
+    <span class="md-ellipsis">
+      Versioning and Releases
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Versioning and Releases">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#kubernetes-minor-version-updates-require-a-major-release" class="md-nav__link">
+    <span class="md-ellipsis">
+      Kubernetes minor version updates require a MAJOR release
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -1213,6 +1252,45 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Upgrading Kubernetes Version">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#notes-for-135" class="md-nav__link">
+    <span class="md-ellipsis">
+      Notes for 1.35
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#versioning-and-releases" class="md-nav__link">
+    <span class="md-ellipsis">
+      Versioning and Releases
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Versioning and Releases">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#kubernetes-minor-version-updates-require-a-major-release" class="md-nav__link">
+    <span class="md-ellipsis">
+      Kubernetes minor version updates require a MAJOR release
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -1412,12 +1490,55 @@
 <div class="language-hcl highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kr">module</span><span class="w"> </span><span class="nv">&quot;k8s_platform&quot;</span><span class="w"> </span><span class="p">{</span>
 </span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">  </span><span class="na">source</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;tx-pts-dai/kubernetes-platform/aws&quot;</span>
 </span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">  </span><span class="na">kubernetes_version</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;1.34&quot;</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">  </span><span class="na">kubernetes_version</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;1.35&quot;</span>
 </span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>
 </span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="c1">  # ... other configuration</span>
 </span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="p">}</span>
 </span></code></pre></div>
 <p><strong>Important</strong>: Do not skip Kubernetes minor versions during upgrades. For example, upgrade from 1.32 → 1.33 → 1.34, not directly from 1.32 → 1.34.</p>
+<h3 id="notes-for-135">Notes for 1.35<a class="headerlink" href="#notes-for-135" title="Permanent link">&para;</a></h3>
+<p>When upgrading to the current default (<code>1.35</code>), be aware of the following (<a href="https://aws.amazon.com/about-aws/whats-new/2026/01/amazon-eks-distro-kubernetes-version-1-35/">EKS 1.35 support</a>):</p>
+<ul>
+<li><strong>cgroup v1 is deprecated</strong> — the kubelet refuses to start by default on cgroup v1 nodes; ensure node AMIs use cgroup v2.</li>
+<li><strong>Last release to support containerd 1.x</strong> — migrate nodes to containerd 2.0+ before the next Kubernetes upgrade.</li>
+</ul>
+<h2 id="versioning-and-releases">Versioning and Releases<a class="headerlink" href="#versioning-and-releases" title="Permanent link">&para;</a></h2>
+<p>This module follows <a href="https://semver.org/">Semantic Versioning</a> (<code>MAJOR.MINOR.PATCH</code>). Releases are automated with <a href="https://github.com/semantic-release/semantic-release">semantic-release</a> and derived from <a href="https://www.conventionalcommits.org/">Conventional Commits</a> on <code>main</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Commit type</th>
+<th>Example</th>
+<th>Version bump</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>fix:</code></td>
+<td><code>fix: correct karpenter subnet tag</code></td>
+<td>PATCH (<code>x.y.Z</code>)</td>
+</tr>
+<tr>
+<td><code>feat:</code></td>
+<td><code>feat: add efs driver</code></td>
+<td>MINOR (<code>x.Y.0</code>)</td>
+</tr>
+<tr>
+<td><code>feat!:</code> / <code>fix!:</code> or a <code>BREAKING CHANGE:</code> footer</td>
+<td><code>feat!: drop support for k8s 1.32</code></td>
+<td>MAJOR (<code>X.0.0</code>)</td>
+</tr>
+</tbody>
+</table>
+<p>Guidelines for choosing the bump:</p>
+<ul>
+<li><strong>PATCH</strong> — backwards-compatible bug fixes that do not change the module interface or default behaviour.</li>
+<li><strong>MINOR</strong> — backwards-compatible new features (new variables, new optional resources) where existing configurations keep working unchanged.</li>
+<li><strong>MAJOR</strong> — any backwards-incompatible change: removed or renamed variables/outputs, changed defaults that alter live infrastructure, or behaviour that requires consumers to take action before upgrading.</li>
+</ul>
+<h3 id="kubernetes-minor-version-updates-require-a-major-release">Kubernetes minor version updates require a MAJOR release<a class="headerlink" href="#kubernetes-minor-version-updates-require-a-major-release" title="Permanent link">&para;</a></h3>
+<p>Bumping the default <code>kubernetes_version</code> by a minor version (e.g. <code>1.33</code> → <code>1.34</code>) <strong>must be released as a MAJOR version</strong> of this module. A Kubernetes minor upgrade is a backwards-incompatible change for consumers: it advances the control plane, may deprecate or remove APIs, and cannot be skipped or rolled back, so it requires deliberate action before upgrading. Mark such changes as breaking (use <code>feat!:</code> or a <code>BREAKING CHANGE:</code> footer) so semantic-release produces a MAJOR bump.</p>
+<p>Always <a href="..#usage">pin the module to a specific version</a> so that MAJOR releases never reach your infrastructure unintentionally.</p>
 <h2 id="explanation-and-description-of-interesting-use-cases">Explanation and description of interesting use-cases<a class="headerlink" href="#explanation-and-description-of-interesting-use-cases" title="Permanent link">&para;</a></h2>
 <p>Why this module?</p>
 <ul>
@@ -1928,9 +2049,9 @@
 </tr>
 <tr>
 <td><a name="input_kubernetes_version"></a> <a href="..#input_kubernetes_version">kubernetes_version</a></td>
-<td>Kubernetes version for the EKS cluster (e.g., "1.34")</td>
+<td>Kubernetes version for the EKS cluster (e.g., "1.35")</td>
 <td><code>string</code></td>
-<td><code>"1.34"</code></td>
+<td><code>"1.35"</code></td>
 <td style="text-align: center;">no</td>
 </tr>
 <tr>
