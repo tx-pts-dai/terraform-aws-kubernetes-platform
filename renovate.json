@@ -8,5 +8,18 @@
   ],
   "schedule": [
     "after 9am on Monday"
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "Track the Bottlerocket AMI alias in the Karpenter EC2NodeClass via GitHub releases",
+      "fileMatch": [
+        "^karpenter\\.tf$"
+      ],
+      "matchStrings": [
+        "alias: bottlerocket@(?<currentValue>\\S+)\\s*#\\s*renovate:\\s*datasource=(?<datasource>\\S+)\\s+depName=(?<depName>\\S+)(?:\\s+packageName=(?<packageName>\\S+))?(?:\\s+versioning=(?<versioning>\\S+))?(?:\\s+extractVersion=(?<extractVersion>\\S+))?(?:\\s+registryUrl=(?<registryUrl>\\S+))?"
+      ],
+      "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{/if}}"
+    }
   ]
 }

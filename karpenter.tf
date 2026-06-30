@@ -446,7 +446,7 @@ module "karpenter" {
 resource "helm_release" "karpenter_crd" {
   name             = "karpenter-crd"
   chart            = "karpenter-crd"
-  version          = "1.10.0"
+  version          = "1.13.0" # renovate: datasource=github-releases depName=aws/karpenter-provider-aws
   repository       = "oci://public.ecr.aws/karpenter"
   description      = "Karpenter CRDs"
   namespace        = local.karpenter.namespace
@@ -456,7 +456,7 @@ resource "helm_release" "karpenter_crd" {
 resource "helm_release" "karpenter_release" {
   name             = "karpenter"
   chart            = "karpenter"
-  version          = "1.10.0"
+  version          = "1.13.0" # renovate: datasource=github-releases depName=aws/karpenter-provider-aws
   repository       = "oci://public.ecr.aws/karpenter"
   namespace        = local.karpenter.namespace
   create_namespace = true
@@ -479,7 +479,7 @@ resource "helm_release" "karpenter_release" {
       clusterEndpoint: ${module.eks.cluster_endpoint}
       interruptionQueue: ${module.karpenter.queue_name}
       featureGates:
-        spotToSpotConsolidation: true
+        spotToSpotConsolidation: false
     serviceAccount:
       annotations:
         eks.amazonaws.com/role-arn: ${module.karpenter_irsa.arn}
@@ -515,10 +515,14 @@ resource "helm_release" "karpenter_resources" {
     nodePools:
       default:
         enabled: true
+        disruption:
+          consolidateAfter: 1m
 
     ec2NodeClasses:
       default:
         enabled: true
+        amiSelectorTerms:
+          - alias: bottlerocket@v1.62.1 # renovate: datasource=github-releases depName=bottlerocket-os/bottlerocket
     EOT
   ], var.karpenter_resources_helm_values)
 
