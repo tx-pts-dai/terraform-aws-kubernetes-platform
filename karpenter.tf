@@ -384,8 +384,10 @@ data "aws_iam_policy_document" "karpenter_controller" {
   }
 }
 
-resource "aws_iam_policy" "karpenter_controller" {
+# Inline policy to avoid the 6144 char managed-policy size limit
+resource "aws_iam_role_policy" "karpenter_controller" {
   name   = "karpenter-controller-${local.id}"
+  role   = module.karpenter_irsa.name
   policy = data.aws_iam_policy_document.karpenter_controller.json
 }
 
@@ -398,9 +400,6 @@ module "karpenter_irsa" {
   use_name_prefix = false
 
   create_policy = false
-  policies = {
-    controller = aws_iam_policy.karpenter_controller.arn
-  }
 
   oidc_providers = {
     main = {
