@@ -67,6 +67,13 @@ module "k8s_platform" {
 
 **Important**: Do not skip Kubernetes minor versions during upgrades. For example, upgrade from 1.32 → 1.33 → 1.34, not directly from 1.32 → 1.34.
 
+### Notes for 1.35
+
+When upgrading to the current default (`1.35`), be aware of the following ([EKS 1.35 support](https://aws.amazon.com/about-aws/whats-new/2026/01/amazon-eks-distro-kubernetes-version-1-35/)):
+
+- **cgroup v1 is deprecated** — the kubelet refuses to start by default on cgroup v1 nodes; ensure node AMIs use cgroup v2.
+- **Last release to support containerd 1.x** — migrate nodes to containerd 2.0+ before the next Kubernetes upgrade.
+
 ## Versioning and Releases
 
 This module follows [Semantic Versioning](https://semver.org/) (`MAJOR.MINOR.PATCH`). Releases are automated with [semantic-release](https://github.com/semantic-release/semantic-release) and derived from [Conventional Commits](https://www.conventionalcommits.org/) on `main`:

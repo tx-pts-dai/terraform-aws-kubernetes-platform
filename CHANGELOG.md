@@ -2,21 +2,6 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
-
-### ⚠ BREAKING CHANGES
-
-* **Bump default Kubernetes version to 1.35.** Per the module's versioning policy, a Kubernetes minor upgrade is released as a MAJOR version. Clusters on 1.34 are upgraded in place when applying; the upgrade cannot be skipped or rolled back, so review the notes below first. Pin `kubernetes_version = "1.34"` to defer.
-
-  Notable Kubernetes 1.35 changes ([EKS 1.35 support](https://aws.amazon.com/about-aws/whats-new/2026/01/amazon-eks-distro-kubernetes-version-1-35/)):
-  * **cgroup v1 is deprecated** — the kubelet refuses to start by default on cgroup v1 nodes; ensure node AMIs use cgroup v2.
-  * **Last release to support containerd 1.x** — migrate nodes to containerd 2.0+ before the next Kubernetes upgrade.
-  * In-Place Pod Resource Updates (adjust CPU/memory without restarting Pods).
-  * `PreferSameNode` traffic distribution for lower-latency, node-local routing.
-  * Node topology labels exposed via the Downward API.
-  * Image Volumes for mounting OCI artifacts (e.g. AI models).
-  * EKS 1.35 adds Windows Server 2025 support.
-
 ## [6.14.0](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/compare/v6.13.0...v6.14.0) (2026-06-29)
 
 ### Features
