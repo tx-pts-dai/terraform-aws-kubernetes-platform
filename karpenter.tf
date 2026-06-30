@@ -420,7 +420,7 @@ resource "aws_iam_policy" "ecr_passthrough" {
 # IRSA is disabled as we're using a custom role for Fargate
 module "karpenter" {
   source  = "terraform-aws-modules/eks/aws//modules/karpenter"
-  version = "21.15.1"
+  version = "21.24.0"
 
   cluster_name = module.eks.cluster_name
 
