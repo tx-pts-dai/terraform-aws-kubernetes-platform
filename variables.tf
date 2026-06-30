@@ -39,9 +39,9 @@ variable "vpc" {
 }
 
 variable "kubernetes_version" {
-  description = "Kubernetes version for the EKS cluster (e.g., \"1.34\")"
+  description = "Kubernetes version for the EKS cluster (e.g., \"1.35\")"
   type        = string
-  default     = "1.34"
+  default     = "1.35"
 }
 
 variable "eks" {
