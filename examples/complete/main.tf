@@ -188,6 +188,28 @@ module "k8s_platform" {
   # }
 }
 
+# Example: Using Amazon S3 Files with the EFS CSI driver
+#
+# The aws-efs-csi-driver add-on (driver v3.0.0+) is installed by the module and
+# provides classic Amazon EFS plus Amazon S3 Files storage. The driver's node
+# role is granted account-wide S3 read (AmazonS3ReadOnlyAccess), so an
+# application only needs to create a bucket and reference it - no per-bucket IAM.
+#
+# End-to-end steps for a consuming application (S3 Files has no Terraform
+# resource yet; the file system is created via the `aws s3files` API/CLI):
+#
+#   1. Create an S3 bucket (e.g. aws_s3_bucket.app).
+#
+#   2. Create the S3 file system and capture its id
+#
+#   3. Create mount targets in the cluster's subnets
+#
+#   4. Mount it with a StorageClass / PersistentVolume / PVC referencing the
+#      file system id. See the driver's S3 Files docs for the manifest schema:
+#        https://docs.aws.amazon.com/eks/latest/userguide/s3files-csi.html
+#
+
+
 data "aws_secretsmanager_secret_version" "cloudflare" {
   secret_id = "dai/cloudflare/tamedia/apiToken"
 }

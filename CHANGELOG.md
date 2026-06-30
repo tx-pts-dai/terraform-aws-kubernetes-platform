@@ -2,6 +2,39 @@
 
 All notable changes to this project will be documented in this file.
 
+## [7.0.0](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/compare/v6.14.0...v7.0.0) (2026-06-30)
+
+### ⚠ BREAKING CHANGES
+
+* default kubernetes_version is now 1.35. Clusters on 1.34 are
+upgraded in place on apply and cannot be skipped or rolled back. Note cgroup v1
+is deprecated and 1.35 is the last release supporting containerd 1.x. Pin
+kubernetes_version = "1.34" to defer.
+
+* feat: bump karpenter to 1.13.0, pin bottlerocket AMI, add renovate tracking
+
+- Upgrade karpenter helm chart/CRDs 1.10.0 -> 1.13.0
+- Pin bottlerocket AMI alias to v1.62.1
+- Add inline # renovate: github-releases markers for karpenter and the AMI
+- Add a custom manager in renovate.json for the bottlerocket alias
+
+* docs: move 1.35 upgrade notes out of manual CHANGELOG Unreleased section
+
+CHANGELOG.md is managed by semantic-release; a manual Unreleased section
+goes stale once the next release notes are prepended above it. Keep the
+durable 1.35 upgrade caveats in the README and let semantic-release own
+the changelog.
+
+### Features
+
+* bump default Kubernetes version to 1.35 ([#297](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/issues/297)) ([02283df](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/commit/02283df6580b2c5290661c1b2b3fc2b54136e412))
+
+## [6.14.0](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/compare/v6.13.0...v6.14.0) (2026-06-29)
+
+### Features
+
+* adding efs driver ([#296](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/issues/296)) ([f3456f5](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/commit/f3456f514ce33ab54db3481e05a23110553f08db))
+
 ## [6.13.0](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/compare/v6.12.1...v6.13.0) (2026-06-15)
 
 ### Features

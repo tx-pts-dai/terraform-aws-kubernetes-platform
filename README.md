@@ -59,7 +59,7 @@ To upgrade your cluster to a new Kubernetes version:
 module "k8s_platform" {
   source = "tx-pts-dai/kubernetes-platform/aws"
 
-  kubernetes_version = "1.34"
+  kubernetes_version = "1.35"
 
   # ... other configuration
 }
@@ -67,6 +67,34 @@ module "k8s_platform" {
 
 **Important**: Do not skip Kubernetes minor versions during upgrades. For example, upgrade from 1.32 → 1.33 → 1.34, not directly from 1.32 → 1.34.
 
+### Notes for 1.35
+
+When upgrading to the current default (`1.35`), be aware of the following ([EKS 1.35 support](https://aws.amazon.com/about-aws/whats-new/2026/01/amazon-eks-distro-kubernetes-version-1-35/)):
+
+- **cgroup v1 is deprecated** — the kubelet refuses to start by default on cgroup v1 nodes; ensure node AMIs use cgroup v2.
+- **Last release to support containerd 1.x** — migrate nodes to containerd 2.0+ before the next Kubernetes upgrade.
+
+## Versioning and Releases
+
+This module follows [Semantic Versioning](https://semver.org/) (`MAJOR.MINOR.PATCH`). Releases are automated with [semantic-release](https://github.com/semantic-release/semantic-release) and derived from [Conventional Commits](https://www.conventionalcommits.org/) on `main`:
+
+| Commit type | Example | Version bump |
+| ----------- | ------- | ------------ |
+| `fix:` | `fix: correct karpenter subnet tag` | PATCH (`x.y.Z`) |
+| `feat:` | `feat: add efs driver` | MINOR (`x.Y.0`) |
+| `feat!:` / `fix!:` or a `BREAKING CHANGE:` footer | `feat!: drop support for k8s 1.32` | MAJOR (`X.0.0`) |
+
+Guidelines for choosing the bump:
+
+- **PATCH** — backwards-compatible bug fixes that do not change the module interface or default behaviour.
+- **MINOR** — backwards-compatible new features (new variables, new optional resources) where existing configurations keep working unchanged.
+- **MAJOR** — any backwards-incompatible change: removed or renamed variables/outputs, changed defaults that alter live infrastructure, or behaviour that requires consumers to take action before upgrading.
+
+### Kubernetes minor version updates require a MAJOR release
+
+Bumping the default `kubernetes_version` by a minor version (e.g. `1.33` → `1.34`) **must be released as a MAJOR version** of this module. A Kubernetes minor upgrade is a backwards-incompatible change for consumers: it advances the control plane, may deprecate or remove APIs, and cannot be skipped or rolled back, so it requires deliberate action before upgrading. Mark such changes as breaking (use `feat!:` or a `BREAKING CHANGE:` footer) so semantic-release produces a MAJOR bump.
+
+Always [pin the module to a specific version](#usage) so that MAJOR releases never reach your infrastructure unintentionally.
 
 ## Explanation and description of interesting use-cases
 
@@ -135,6 +163,8 @@ as described in the `.pre-commit-config.yaml` file
 | <a name="module_acm"></a> [acm](#module\_acm) | terraform-aws-modules/acm/aws | 6.3.0 |
 | <a name="module_argocd"></a> [argocd](#module\_argocd) | ./modules/argocd | n/a |
 | <a name="module_aws_ebs_csi_pod_identity"></a> [aws\_ebs\_csi\_pod\_identity](#module\_aws\_ebs\_csi\_pod\_identity) | terraform-aws-modules/eks-pod-identity/aws | 2.8.1 |
+| <a name="module_aws_efs_csi_controller_pod_identity"></a> [aws\_efs\_csi\_controller\_pod\_identity](#module\_aws\_efs\_csi\_controller\_pod\_identity) | terraform-aws-modules/eks-pod-identity/aws | 2.8.1 |
+| <a name="module_aws_efs_csi_node_pod_identity"></a> [aws\_efs\_csi\_node\_pod\_identity](#module\_aws\_efs\_csi\_node\_pod\_identity) | terraform-aws-modules/eks-pod-identity/aws | 2.8.1 |
 | <a name="module_aws_gateway_controller_pod_identity"></a> [aws\_gateway\_controller\_pod\_identity](#module\_aws\_gateway\_controller\_pod\_identity) | terraform-aws-modules/eks-pod-identity/aws | 2.8.1 |
 | <a name="module_aws_lb_controller_pod_identity"></a> [aws\_lb\_controller\_pod\_identity](#module\_aws\_lb\_controller\_pod\_identity) | terraform-aws-modules/eks-pod-identity/aws | 2.8.1 |
 | <a name="module_aws_vpc_cni_pod_identity"></a> [aws\_vpc\_cni\_pod\_identity](#module\_aws\_vpc\_cni\_pod\_identity) | terraform-aws-modules/eks-pod-identity/aws | 2.8.1 |
@@ -212,7 +242,7 @@ as described in the `.pre-commit-config.yaml` file
 | <a name="input_karpenter_resources_helm_set"></a> [karpenter\_resources\_helm\_set](#input\_karpenter\_resources\_helm\_set) | List of Karpenter Resources Helm set values | <pre>list(object({<br/>    name  = string<br/>    value = string<br/>    type  = optional(string)<br/>  }))</pre> | `[]` | no |
 | <a name="input_karpenter_resources_helm_values"></a> [karpenter\_resources\_helm\_values](#input\_karpenter\_resources\_helm\_values) | List of Karpenter Resources Helm values | `list(string)` | `[]` | no |
 | <a name="input_kubernetes_access_roles"></a> [kubernetes\_access\_roles](#input\_kubernetes\_access\_roles) | Map of reusable IAM roles that can be assumed by multiple principals.<br/>Creates standard roles that grant different levels of Kubernetes access.<br/><br/>Supported predefined access\_level values:<br/>- "view"         -> AmazonEKSViewPolicy (read-only)<br/>- "edit"         -> AmazonEKSEditPolicy (create/update resources)<br/>- "admin"        -> AmazonEKSClusterAdminPolicy (full admin)<br/>- "custom"       -> Use custom\_policy\_arns (list of policy ARNs)<br/><br/>Example:<br/>{<br/>  "readonly" = {<br/>    controller\_iam\_role\_arns = [<br/>      "arn:aws:iam::123456789012:role/backstage-prod",<br/>      "arn:aws:iam::123456789012:role/ai-agent"<br/>    ]<br/>    access\_level = "view"           # Predefined: view, edit, admin, or custom<br/>    scope        = "cluster"        # "cluster" or "namespace"<br/>    namespaces   = []               # required if scope = "namespace"<br/>  }<br/>  "developer" = {<br/>    controller\_iam\_role\_arns = ["arn:aws:iam::123456789012:role/dev-team"]<br/>    access\_level = "edit"<br/>    scope        = "namespace"<br/>    namespaces   = ["development", "staging"]<br/>  }<br/>  "ops-admin" = {<br/>    controller\_iam\_role\_arns = ["arn:aws:iam::123456789012:role/ops-team"]<br/>    access\_level = "admin"<br/>    scope        = "cluster"<br/>  }<br/>  "custom-access" = {<br/>    controller\_iam\_role\_arns = ["arn:aws:iam::123456789012:role/special-service"]<br/>    access\_level = "custom"<br/>    custom\_policy\_arns = [<br/>      "arn:aws:eks::aws:cluster-access-policy/MyCustomPolicy"<br/>    ]<br/>    scope = "cluster"<br/>  }<br/>}<br/><br/>This creates:<br/>- {cluster}-k8s-readonly (view access)<br/>- {cluster}-k8s-developer (edit access on dev/staging namespaces)<br/>- {cluster}-k8s-ops-admin (full admin access)<br/>- {cluster}-k8s-custom-access (custom policies) | <pre>map(object({<br/>    controller_iam_role_arns = list(string)<br/>    access_level             = string # "view", "edit", "admin", or "custom"<br/>    scope                    = string # "cluster" or "namespace"<br/>    namespaces               = optional(list(string), [])<br/>    custom_policy_arns       = optional(list(string), [])<br/>    external_id              = optional(string)<br/>  }))</pre> | `{}` | no |
-| <a name="input_kubernetes_version"></a> [kubernetes\_version](#input\_kubernetes\_version) | Kubernetes version for the EKS cluster (e.g., "1.34") | `string` | `"1.34"` | no |
+| <a name="input_kubernetes_version"></a> [kubernetes\_version](#input\_kubernetes\_version) | Kubernetes version for the EKS cluster (e.g., "1.35") | `string` | `"1.35"` | no |
 | <a name="input_name"></a> [name](#input\_name) | The name of the platform, a timestamp will be appended to this name to make the stack\_name. If not provided, the name of the directory will be used. | `string` | `""` | no |
 | <a name="input_region"></a> [region](#input\_region) | AWS region to use | `string` | `null` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | Default tags to apply to all resources | `map(string)` | `{}` | no |
