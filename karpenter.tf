@@ -233,7 +233,7 @@ data "aws_iam_policy_document" "karpenter_controller" {
     condition {
       test     = "StringEquals"
       variable = "arc-zonal-shift:ResourceIdentifier"
-      values   = ["arn:aws:eks:${local.region}:${local.account_id}:cluster/${module.eks.cluster_name}"]
+      values   = [module.eks.cluster_arn]
     }
   }
 
