@@ -20,6 +20,7 @@ data "aws_iam_policy_document" "karpenter_controller" {
       "arn:aws:ec2:${local.region}:*:security-group/*",
       "arn:aws:ec2:${local.region}:*:subnet/*",
       "arn:aws:ec2:${local.region}:*:capacity-reservation/*",
+      "arn:aws:ec2:${local.region}:*:placement-group/*",
     ]
 
     actions = [
@@ -200,7 +201,9 @@ data "aws_iam_policy_document" "karpenter_controller" {
       "ec2:DescribeLaunchTemplates",
       "ec2:DescribeSecurityGroups",
       "ec2:DescribeSpotPriceHistory",
-      "ec2:DescribeSubnets"
+      "ec2:DescribeSubnets",
+      "ec2:DescribeInstanceStatus",
+      "ec2:DescribePlacementGroups"
     ]
 
     condition {
@@ -220,6 +223,18 @@ data "aws_iam_policy_document" "karpenter_controller" {
     sid       = "AllowPricingReadActions"
     resources = ["*"]
     actions   = ["pricing:GetProducts"]
+  }
+
+  statement {
+    sid       = "AllowZonalShiftReadActions"
+    resources = ["*"]
+    actions   = ["arc-zonal-shift:GetManagedResource"]
+
+    condition {
+      test     = "StringEquals"
+      variable = "arc-zonal-shift:ResourceIdentifier"
+      values   = ["arn:aws:eks:${local.region}:${local.account_id}:cluster/${module.eks.cluster_name}"]
+    }
   }
 
   statement {
