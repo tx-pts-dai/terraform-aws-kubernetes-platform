@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [7.0.1](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/compare/v7.0.0...v7.0.1) (2026-07-01)
+
+### Bug Fixes
+
+* align karpenter controller IAM policy with upstream module ([#298](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/issues/298)) ([4199874](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/commit/4199874a18a5a5a5a77dc94d629524955d28db64))
+
 ## [7.0.0](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/compare/v6.14.0...v7.0.0) (2026-06-30)
 
 ### ⚠ BREAKING CHANGES
