@@ -59,20 +59,22 @@ To upgrade your cluster to a new Kubernetes version:
 module "k8s_platform" {
   source = "tx-pts-dai/kubernetes-platform/aws"
 
-  kubernetes_version = "1.35"
+  kubernetes_version = "1.36"
 
   # ... other configuration
 }
 ```
 
-**Important**: Do not skip Kubernetes minor versions during upgrades. For example, upgrade from 1.32 → 1.33 → 1.34, not directly from 1.32 → 1.34.
+**Important**: Do not skip Kubernetes minor versions during upgrades. For example, upgrade from 1.34 → 1.35 → 1.36, not directly from 1.34 → 1.36.
 
-### Notes for 1.35
+### Notes for 1.36
 
-When upgrading to the current default (`1.35`), be aware of the following ([EKS 1.35 support](https://aws.amazon.com/about-aws/whats-new/2026/01/amazon-eks-distro-kubernetes-version-1-35/)):
+When upgrading to the current default (`1.36`), be aware of the following ([EKS 1.36 support](https://aws.amazon.com/about-aws/whats-new/2026/06/amazon-eks-distro-kubernetes-version-1-36/), [EKS 1.36 release notes](https://docs.aws.amazon.com/eks/latest/userguide/kubernetes-versions-standard.html#kubernetes-1-36)):
 
-- **cgroup v1 is deprecated** — the kubelet refuses to start by default on cgroup v1 nodes; ensure node AMIs use cgroup v2.
-- **Last release to support containerd 1.x** — migrate nodes to containerd 2.0+ before the next Kubernetes upgrade.
+- **`gitRepo` volume type permanently removed** — the kubelet refuses to run Pods that use `gitRepo` volumes (the API still accepts them). Migrate to init containers or a git-sync sidecar before upgrading.
+- **containerd 2.0+ required** — 1.35 was the last release supporting containerd 1.x, so nodes must run containerd 2.0+ before this upgrade. The AL2023 and Bottlerocket EKS AMIs already ship containerd 2.x.
+- **Strict IP/CIDR validation is on by default** — IP addresses with leading zeros (e.g. `010.0.0.5`) and non-canonical CIDRs (e.g. `192.168.0.5/24`) are rejected on create/update. Audit manifests, Helm charts, and automation for canonical notation.
+- **kube-proxy IPVS mode removed** — deprecated in 1.35 and removed in 1.36; if you switched kube-proxy to IPVS mode, move back to iptables mode before upgrading.
 
 ## Versioning and Releases
 
@@ -242,7 +244,7 @@ as described in the `.pre-commit-config.yaml` file
 | <a name="input_karpenter_resources_helm_set"></a> [karpenter\_resources\_helm\_set](#input\_karpenter\_resources\_helm\_set) | List of Karpenter Resources Helm set values | <pre>list(object({<br/>    name  = string<br/>    value = string<br/>    type  = optional(string)<br/>  }))</pre> | `[]` | no |
 | <a name="input_karpenter_resources_helm_values"></a> [karpenter\_resources\_helm\_values](#input\_karpenter\_resources\_helm\_values) | List of Karpenter Resources Helm values | `list(string)` | `[]` | no |
 | <a name="input_kubernetes_access_roles"></a> [kubernetes\_access\_roles](#input\_kubernetes\_access\_roles) | Map of reusable IAM roles that can be assumed by multiple principals.<br/>Creates standard roles that grant different levels of Kubernetes access.<br/><br/>Supported predefined access\_level values:<br/>- "view"         -> AmazonEKSViewPolicy (read-only)<br/>- "edit"         -> AmazonEKSEditPolicy (create/update resources)<br/>- "admin"        -> AmazonEKSClusterAdminPolicy (full admin)<br/>- "custom"       -> Use custom\_policy\_arns (list of policy ARNs)<br/><br/>Example:<br/>{<br/>  "readonly" = {<br/>    controller\_iam\_role\_arns = [<br/>      "arn:aws:iam::123456789012:role/backstage-prod",<br/>      "arn:aws:iam::123456789012:role/ai-agent"<br/>    ]<br/>    access\_level = "view"           # Predefined: view, edit, admin, or custom<br/>    scope        = "cluster"        # "cluster" or "namespace"<br/>    namespaces   = []               # required if scope = "namespace"<br/>  }<br/>  "developer" = {<br/>    controller\_iam\_role\_arns = ["arn:aws:iam::123456789012:role/dev-team"]<br/>    access\_level = "edit"<br/>    scope        = "namespace"<br/>    namespaces   = ["development", "staging"]<br/>  }<br/>  "ops-admin" = {<br/>    controller\_iam\_role\_arns = ["arn:aws:iam::123456789012:role/ops-team"]<br/>    access\_level = "admin"<br/>    scope        = "cluster"<br/>  }<br/>  "custom-access" = {<br/>    controller\_iam\_role\_arns = ["arn:aws:iam::123456789012:role/special-service"]<br/>    access\_level = "custom"<br/>    custom\_policy\_arns = [<br/>      "arn:aws:eks::aws:cluster-access-policy/MyCustomPolicy"<br/>    ]<br/>    scope = "cluster"<br/>  }<br/>}<br/><br/>This creates:<br/>- {cluster}-k8s-readonly (view access)<br/>- {cluster}-k8s-developer (edit access on dev/staging namespaces)<br/>- {cluster}-k8s-ops-admin (full admin access)<br/>- {cluster}-k8s-custom-access (custom policies) | <pre>map(object({<br/>    controller_iam_role_arns = list(string)<br/>    access_level             = string # "view", "edit", "admin", or "custom"<br/>    scope                    = string # "cluster" or "namespace"<br/>    namespaces               = optional(list(string), [])<br/>    custom_policy_arns       = optional(list(string), [])<br/>    external_id              = optional(string)<br/>  }))</pre> | `{}` | no |
-| <a name="input_kubernetes_version"></a> [kubernetes\_version](#input\_kubernetes\_version) | Kubernetes version for the EKS cluster (e.g., "1.35") | `string` | `"1.35"` | no |
+| <a name="input_kubernetes_version"></a> [kubernetes\_version](#input\_kubernetes\_version) | Kubernetes version for the EKS cluster (e.g., "1.36") | `string` | `"1.36"` | no |
 | <a name="input_name"></a> [name](#input\_name) | The name of the platform, a timestamp will be appended to this name to make the stack\_name. If not provided, the name of the directory will be used. | `string` | `""` | no |
 | <a name="input_region"></a> [region](#input\_region) | AWS region to use | `string` | `null` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | Default tags to apply to all resources | `map(string)` | `{}` | no |
