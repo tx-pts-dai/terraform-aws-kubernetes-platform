@@ -251,6 +251,12 @@ variable "enable_fargate_fluentbit" {
   default     = true
 }
 
+variable "enable_efs_csi_driver" {
+  description = "Enable the aws-efs-csi-driver add-on (classic Amazon EFS and Amazon S3 Files storage) and its controller/node Pod Identity roles"
+  type        = bool
+  default     = true
+}
+
 ################################################################################
 # Additional Addons - Not installed by default
 

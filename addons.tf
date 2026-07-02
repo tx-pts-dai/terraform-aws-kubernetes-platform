@@ -50,11 +50,14 @@ locals {
       #   service_account = "ebs-csi-controller-sa"
       # }]
     }
+  }
 
-    # Provides classic Amazon EFS and Amazon S3 Files storage (S3 Files needs
-    # driver v3.0.0+). IAM is supplied via the controller/node Pod Identity
-    # roles below; the node role has account-wide S3 read so applications only
-    # need to create a bucket and reference it.
+  # Provides classic Amazon EFS and Amazon S3 Files storage (S3 Files needs
+  # driver v3.0.0+). IAM is supplied via the controller/node Pod Identity
+  # roles below; the node role has account-wide S3 read so applications only
+  # need to create a bucket and reference it. Installation is optional via
+  # var.enable_efs_csi_driver.
+  efs_cluster_addon = var.enable_efs_csi_driver ? {
     aws-efs-csi-driver = {
       most_recent = true
       preserve    = false
@@ -72,9 +75,9 @@ locals {
         update = "20m"
       }
     }
-  }
+  } : {}
 
-  extra_cluster_addons = merge(local.cluster_addons, var.extra_cluster_addons)
+  extra_cluster_addons = merge(local.cluster_addons, local.efs_cluster_addon, var.extra_cluster_addons)
 }
 
 # Required for Managed EBS CSI Driver
@@ -145,7 +148,7 @@ module "aws_efs_csi_controller_pod_identity" {
   source  = "terraform-aws-modules/eks-pod-identity/aws"
   version = "2.8.1"
 
-  create = var.create_addon_pod_identity_roles
+  create = var.create_addon_pod_identity_roles && var.enable_efs_csi_driver
 
   name                    = "aws-efs-csi-controller-pod-identity-${local.id}"
   aws_efs_csi_policy_name = "aws-efs-csi-controller-pod-identity-${local.id}"
@@ -176,7 +179,7 @@ module "aws_efs_csi_node_pod_identity" {
   source  = "terraform-aws-modules/eks-pod-identity/aws"
   version = "2.8.1"
 
-  create = var.create_addon_pod_identity_roles
+  create = var.create_addon_pod_identity_roles && var.enable_efs_csi_driver
 
   name            = "aws-efs-csi-node-pod-identity-${local.id}"
   use_name_prefix = false
