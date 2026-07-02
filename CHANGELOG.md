@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [8.0.0](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/compare/v7.0.1...v8.0.0) (2026-07-02)
+
+### ⚠ BREAKING CHANGES
+
+* default kubernetes_version is now 1.36; consumers pinned to
+older module majors are unaffected, but upgrading requires stepping the
+control plane through 1.36 and reviewing the version notes in the README.
+
+### Features
+
+* bump default kubernetes version to 1.36 ([#299](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/issues/299)) ([b591d40](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/commit/b591d4024c1c36cf2784837b975e5caf16cd1cb7))
+
 ## [7.0.1](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/compare/v7.0.0...v7.0.1) (2026-07-01)
 
 ### Bug Fixes
