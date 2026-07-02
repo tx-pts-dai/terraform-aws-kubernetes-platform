@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [8.1.0](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/compare/v8.0.0...v8.1.0) (2026-07-02)
+
+### Features
+
+* **addons:** make efs csi driver installation optional ([#301](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/issues/301)) ([1cf6e89](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/commit/1cf6e8998d242384607d393515f0365e660fbadf))
+
 ## [8.0.0](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/compare/v7.0.1...v8.0.0) (2026-07-02)
 
 ### ⚠ BREAKING CHANGES
