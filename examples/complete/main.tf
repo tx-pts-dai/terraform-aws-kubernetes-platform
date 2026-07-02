@@ -148,6 +148,8 @@ module "k8s_platform" {
     }
   ]
 
+  enable_efs_csi_driver = true
+
   # Example: Reusable Kubernetes access roles with different permission levels
   # Creates standard roles that can be assumed by multiple principals
   # kubernetes_access_roles = {
@@ -190,9 +192,7 @@ module "k8s_platform" {
 
 # Example: Using Amazon S3 Files with the EFS CSI driver
 #
-# The aws-efs-csi-driver add-on (driver v3.0.0+) is installed by the module and
-# provides classic Amazon EFS plus Amazon S3 Files storage. The driver's node
-# role is granted account-wide S3 read (AmazonS3ReadOnlyAccess), so an
+# The driver's node role is granted account-wide S3 read (AmazonS3ReadOnlyAccess), so an
 # application only needs to create a bucket and reference it - no per-bucket IAM.
 #
 # End-to-end steps for a consuming application (S3 Files has no Terraform
