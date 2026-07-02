@@ -52,11 +52,6 @@ locals {
     }
   }
 
-  # Provides classic Amazon EFS and Amazon S3 Files storage (S3 Files needs
-  # driver v3.0.0+). IAM is supplied via the controller/node Pod Identity
-  # roles below; the node role has account-wide S3 read so applications only
-  # need to create a bucket and reference it. Installation is optional via
-  # var.enable_efs_csi_driver.
   efs_cluster_addon = var.enable_efs_csi_driver ? {
     aws-efs-csi-driver = {
       most_recent = true
