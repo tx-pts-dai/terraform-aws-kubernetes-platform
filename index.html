@@ -306,6 +306,23 @@
   
   
   
+    <li class="md-tabs__item">
+      <a href="auto-mode-migration/" class="md-tabs__link">
+        
+  
+    
+  
+  EKS Auto Mode Migration Guide
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
     
     
       <li class="md-tabs__item">
@@ -576,6 +593,24 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#eks-auto-mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      EKS Auto Mode
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#argo-cd" class="md-nav__link">
+    <span class="md-ellipsis">
+      Argo CD
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#examples" class="md-nav__link">
     <span class="md-ellipsis">
       Examples
@@ -778,6 +813,26 @@
   
   
   
+    <li class="md-nav__item">
+      <a href="auto-mode-migration/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    EKS Auto Mode Migration Guide
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
     
     
     
@@ -789,10 +844,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
         
           
-          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -803,8 +858,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_4">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             Submodules
           </label>
@@ -1002,10 +1057,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
         
           
-          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -1016,8 +1071,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_5">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
             <span class="md-nav__icon md-icon"></span>
             Examples
           </label>
@@ -1124,10 +1179,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_5" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_5" >
         
           
-          <label class="md-nav__link" for="__nav_5_5" id="__nav_5_5_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_6_5" id="__nav_6_5_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -1138,8 +1193,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_5_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_5_5">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_5">
             <span class="md-nav__icon md-icon"></span>
             Snippets
           </label>
@@ -1297,6 +1352,24 @@
   <a href="#explanation-and-description-of-interesting-use-cases" class="md-nav__link">
     <span class="md-ellipsis">
       Explanation and description of interesting use-cases
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#eks-auto-mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      EKS Auto Mode
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#argo-cd" class="md-nav__link">
+    <span class="md-ellipsis">
+      Argo CD
     </span>
   </a>
   
@@ -1548,6 +1621,41 @@
 <li>To encourage standardization and common practices</li>
 <li>To ease maintenance</li>
 </ul>
+<h2 id="eks-auto-mode">EKS Auto Mode<a class="headerlink" href="#eks-auto-mode" title="Permanent link">&para;</a></h2>
+<p>The module can provision the cluster in <a href="https://docs.aws.amazon.com/eks/latest/userguide/automode.html">EKS Auto Mode</a>
+instead of (or alongside) the self-managed Karpenter / EBS CSI / AWS Load Balancer
+Controller stack. Set <code>enable_auto_mode = true</code> and, optionally, pass your own
+NodePool and NodeClass via <code>auto_mode_node_pools</code> / <code>auto_mode_node_classes</code> (the
+module injects the Auto Mode node IAM role automatically). Auto Mode is <strong>opt-in</strong>
+and defaults to <code>false</code>, so existing clusters are unaffected.</p>
+<p><code>enable_auto_mode</code> and <code>enable_karpenter</code> (default <code>true</code>) are <strong>independent</strong>: keep
+both enabled to run the two compute stacks side-by-side for a gradual migration. At
+least one must be enabled or the cluster has no compute.</p>
+<p>See the <a href="auto-mode-migration/">Auto Mode migration guide</a> for details,
+including how to migrate the ALB controller that is deployed via ArgoCD today.</p>
+<h2 id="argo-cd">Argo CD<a class="headerlink" href="#argo-cd" title="Permanent link">&para;</a></h2>
+<p>Three mutually-exclusive options are available:</p>
+<ol>
+<li><strong>None</strong> (default) — no Argo CD.</li>
+<li><strong>Self-managed</strong> (<code>enable_argocd = true</code>) — creates the hub/spoke IAM roles and
+   pod-identity associations for an Argo CD that you deploy via GitOps.</li>
+<li><strong>AWS-managed capability</strong> (<code>enable_argocd_capability = true</code>) — provisions the
+   <a href="https://docs.aws.amazon.com/eks/latest/userguide/argocd.html">Argo CD EKS capability</a>.
+   The managed server is <strong>publicly accessible by default</strong> (set
+   <code>argocd_capability.vpce_ids</code> to restrict it to VPC endpoints) and requires IAM
+   Identity Center for authentication. The Identity Center instance ARN is
+   auto-discovered (needs <code>sso:ListInstances</code>) or can be set explicitly via
+   <code>argocd_capability.idc_instance_arn</code>. The server URL is exposed as the
+   <code>argocd_capability_server_url</code> output.</li>
+</ol>
+<div class="language-hcl highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="na">enable_argocd_capability</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">true</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="nb">argocd_capability</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">  </span><span class="na">rbac_role_mapping</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[{</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">    </span><span class="na">role</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;ADMIN&quot;</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">    </span><span class="na">identity</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[{</span><span class="w"> </span><span class="na">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;&lt;idc-group-id&gt;&quot;, type = &quot;SSO_GROUP&quot;</span><span class="w"> </span><span class="p">}]</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">  </span><span class="p">}]</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="p">}</span>
+</span></code></pre></div>
 <h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">&para;</a></h2>
 <ul>
 <li><a href="../examples/complete/">Complete</a> - Includes creation of VPC, k8s cluster, addons and all the optional features.</li>
@@ -1660,6 +1768,11 @@
 <td>n/a</td>
 </tr>
 <tr>
+<td><a name="module_argocd_capability"></a> <a href="..#module_argocd_capability">argocd_capability</a></td>
+<td>terraform-aws-modules/eks/aws//modules/capability</td>
+<td>21.15.1</td>
+</tr>
+<tr>
 <td><a name="module_aws_ebs_csi_pod_identity"></a> <a href="..#module_aws_ebs_csi_pod_identity">aws_ebs_csi_pod_identity</a></td>
 <td>terraform-aws-modules/eks-pod-identity/aws</td>
 <td>2.8.1</td>
@@ -1755,6 +1868,10 @@
 <td>resource</td>
 </tr>
 <tr>
+<td><a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/eks_access_entry">aws_eks_access_entry.auto_mode_node</a></td>
+<td>resource</td>
+</tr>
+<tr>
 <td><a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/eks_access_entry">aws_eks_access_entry.k8s_access</a></td>
 <td>resource</td>
 </tr>
@@ -1799,6 +1916,14 @@
 <td>resource</td>
 </tr>
 <tr>
+<td><a href="https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release">helm_release.auto_mode_node_class</a></td>
+<td>resource</td>
+</tr>
+<tr>
+<td><a href="https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release">helm_release.auto_mode_node_pool</a></td>
+<td>resource</td>
+</tr>
+<tr>
 <td><a href="https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release">helm_release.karpenter_crd</a></td>
 <td>resource</td>
 </tr>
@@ -1820,6 +1945,10 @@
 </tr>
 <tr>
 <td><a href="https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/sleep">time_sleep.wait_after_karpenter</a></td>
+<td>resource</td>
+</tr>
+<tr>
+<td><a href="https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/sleep">time_sleep.wait_for_auto_mode_crds</a></td>
 <td>resource</td>
 </tr>
 <tr>
@@ -1874,6 +2003,10 @@
 <td><a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/route_tables">aws_route_tables.private_route_tables</a></td>
 <td>data source</td>
 </tr>
+<tr>
+<td><a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ssoadmin_instances">aws_ssoadmin_instances.this</a></td>
+<td>data source</td>
+</tr>
 </tbody>
 </table>
 <h2 id="inputs">Inputs<a class="headerlink" href="#inputs" title="Permanent link">&para;</a></h2>
@@ -1917,6 +2050,34 @@
 <td style="text-align: center;">no</td>
 </tr>
 <tr>
+<td><a name="input_argocd_capability"></a> <a href="..#input_argocd_capability">argocd_capability</a></td>
+<td>Configuration for the AWS-managed Argo CD EKS capability. Only used when <code>enable_argocd_capability = true</code>.<br/>  - idc_instance_arn: IAM Identity Center instance ARN. Leave null to auto-discover the account/org instance via the aws_ssoadmin_instances data source (requires sso:ListInstances).<br/>  - idc_region: Region of the Identity Center instance (defaults to the provider region).<br/>  - namespace: Kubernetes namespace for Argo CD (default "argocd").<br/>  - rbac_role_mapping: Maps Identity Center users/groups to Argo CD roles (ADMIN, EDITOR, VIEWER).<br/>  - vpc_endpoint_ids: VPC endpoint IDs for private access. When set, the public endpoint is BLOCKED and Argo CD is reachable only through these VPC endpoints. Leave empty for a public endpoint.<br/>  - iam_policy_statements: Extra IAM policy statements to attach to the capability role (e.g. ECR read for image reflection).</td>
+<td><pre>object({<br/>    idc_instance_arn = optional(string)<br/>    idc_region       = optional(string)<br/>    namespace        = optional(string, "argocd")<br/>    rbac_role_mapping = optional(list(object({<br/>      role = string<br/>      identity = list(object({<br/>        id   = string<br/>        type = string<br/>      }))<br/>    })), [])<br/>    vpc_endpoint_ids = optional(list(string), [])<br/>    iam_policy_statements = optional(map(object({<br/>      sid       = optional(string)<br/>      actions   = optional(list(string))<br/>      resources = optional(list(string))<br/>      effect    = optional(string)<br/>    })), {})<br/>  })</pre></td>
+<td><code>{}</code></td>
+<td style="text-align: center;">no</td>
+</tr>
+<tr>
+<td><a name="input_auto_mode"></a> <a href="..#input_auto_mode">auto_mode</a></td>
+<td>EKS Auto Mode configuration. Only used when <code>enable_auto_mode = true</code>.<br/>  - builtin_node_pools: List of AWS-managed node pools to enable (e.g. ["general-purpose", "system"]). Leave empty ([]) to only use your own NodePools/NodeClasses.<br/>  - node_iam_role_additional_policies: Additional IAM policy ARNs to attach to the Auto Mode node role, keyed by an arbitrary name.<br/>  - default_node_pool_taints: Taints applied to the auto-generated <code>default</code> NodePool (ignored when you pass your own auto_mode_node_pools). Use this during a migration so existing workloads do not schedule onto Auto Mode nodes until they tolerate the taint.<br/>  - discover_karpenter_subnets: Controls how the auto-generated <code>default</code> NodeClass finds subnets. When true, it discovers them by tag (see subnet_discovery_tags) — by default the SAME dedicated subnets as the self-managed Karpenter stack (the "same network, different NodePools/taints" migration path). When false, it selects var.vpc.private_subnets by ID. Defaults to null, which resolves to enable_karpenter: shared subnets while the Karpenter stack runs, private subnets in pure Auto Mode. Ignored when you pass your own auto_mode_node_classes.<br/>  - subnet_discovery_tags: Tags the <code>default</code> NodeClass matches when discover_karpenter_subnets is true. Defaults to { "karpenter.sh/discovery" = <cluster-name> } (the tag the module puts on its own dedicated Karpenter subnets). Override it to match a customized Karpenter discovery tag — e.g. { "karpenter.sh/discovery" = "shared" } when Karpenter is pointed at pre-existing subnets via karpenter_resources_helm_set.</td>
+<td><pre>object({<br/>    builtin_node_pools                = optional(list(string), [])<br/>    node_iam_role_additional_policies = optional(map(string), {})<br/>    default_node_pool_taints = optional(list(object({<br/>      key    = string<br/>      value  = optional(string)<br/>      effect = string<br/>    })), [])<br/>    discover_karpenter_subnets = optional(bool, null)<br/>    subnet_discovery_tags      = optional(map(string), null)<br/>  })</pre></td>
+<td><code>{}</code></td>
+<td style="text-align: center;">no</td>
+</tr>
+<tr>
+<td><a name="input_auto_mode_node_classes"></a> <a href="..#input_auto_mode_node_classes">auto_mode_node_classes</a></td>
+<td>Map of EKS Auto Mode NodeClass resources to apply (apiVersion <code>eks.amazonaws.com/v1</code>). The map key is the NodeClass name and the value is its <code>spec</code>.<br/>Only used when <code>enable_auto_mode = true</code>. When left empty, a <code>default</code> NodeClass is created that targets the cluster private subnets and primary security group and uses the Auto Mode node IAM role.</td>
+<td><code>any</code></td>
+<td><code>{}</code></td>
+<td style="text-align: center;">no</td>
+</tr>
+<tr>
+<td><a name="input_auto_mode_node_pools"></a> <a href="..#input_auto_mode_node_pools">auto_mode_node_pools</a></td>
+<td>Map of Karpenter NodePool resources to apply (apiVersion <code>karpenter.sh/v1</code>). The map key is the NodePool name and the value is its <code>spec</code>.<br/>Only used when <code>enable_auto_mode = true</code>. When left empty, a <code>default</code> NodePool referencing the <code>default</code> NodeClass is created.</td>
+<td><code>any</code></td>
+<td><code>{}</code></td>
+<td style="text-align: center;">no</td>
+</tr>
+<tr>
 <td><a name="input_base_domain"></a> <a href="..#input_base_domain">base_domain</a></td>
 <td>Base domain for the platform, used for ingress and ACM certificates</td>
 <td><code>string</code></td>
@@ -1939,7 +2100,7 @@
 </tr>
 <tr>
 <td><a name="input_eks"></a> <a href="..#input_eks">eks</a></td>
-<td>Map of EKS configurations including cluster settings and core addon customization.<br/><br/>Cluster settings:<br/>  - cluster_endpoint_public_access: Enable public access to cluster endpoint (default: true)<br/>  - cluster_endpoint_private_access: Enable private access to cluster endpoint (default: true)<br/>  - enable_cluster_creator_admin_permissions: Grant admin permissions to cluster creator (default: false)<br/>  - create_iam_role: Whether the module creates the cluster IAM role (default: true). Set to false to reuse an existing role, e.g. when adopting an existing cluster.<br/>  - iam_role_arn: ARN of an existing cluster IAM role to use when create_iam_role is false.<br/><br/>Core addon settings (vpc_cni, kube_proxy, eks_pod_identity_agent):<br/>  - configuration_values: JSON string of addon configuration (merged with defaults for vpc-cni)<br/><br/>Example:<br/>  eks = {<br/>    cluster_endpoint_public_access = false<br/>    vpc_cni = {<br/>      configuration_values = jsonencode({<br/>        env = {<br/>          ENABLE_PREFIX_DELEGATION = "true"<br/>          WARM_PREFIX_TARGET       = "1"<br/>        }<br/>      })<br/>    }<br/>  }</td>
+<td>Map of EKS configurations including cluster settings and core addon customization.<br/><br/>Cluster settings:<br/>  - cluster_endpoint_public_access: Enable public access to cluster endpoint (default: true)<br/>  - cluster_endpoint_private_access: Enable private access to cluster endpoint (default: true)<br/>  - enable_cluster_creator_admin_permissions: Grant admin permissions to cluster creator (default: false)<br/>  - create_iam_role: Whether the module creates the cluster IAM role (default: true). Set to false to reuse an existing role, e.g. when adopting an existing cluster.<br/>  - iam_role_arn: ARN of an existing cluster IAM role to use when create_iam_role is false.<br/>  - authentication_mode: EKS auth mode (default: "API"). When adopting a cluster still on the aws-auth ConfigMap, set "API_AND_CONFIG_MAP" until every principal is reproduced as an access entry, then move to "API".<br/>  - encryption_config: Cluster secrets-encryption config (default: {} = encrypt secrets). Set to null to adopt a cluster with no encryption without enabling it (enabling is irreversible).<br/>  - create_kms_key: Whether to create a KMS key for cluster encryption (default: true). Set false together with encryption_config = null to skip encryption, or with encryption_config.provider_key_arn to reuse an existing key.<br/><br/>Core addon settings (vpc_cni, kube_proxy, eks_pod_identity_agent):<br/>  - configuration_values: JSON string of addon configuration (merged with defaults for vpc-cni)<br/><br/>Example:<br/>  eks = {<br/>    cluster_endpoint_public_access = false<br/>    vpc_cni = {<br/>      configuration_values = jsonencode({<br/>        env = {<br/>          ENABLE_PREFIX_DELEGATION = "true"<br/>          WARM_PREFIX_TARGET       = "1"<br/>        }<br/>      })<br/>    }<br/>  }</td>
 <td><code>any</code></td>
 <td><code>{}</code></td>
 <td style="text-align: center;">no</td>
@@ -1966,6 +2127,20 @@
 <td style="text-align: center;">no</td>
 </tr>
 <tr>
+<td><a name="input_enable_argocd_capability"></a> <a href="..#input_enable_argocd_capability">enable_argocd_capability</a></td>
+<td>Enable the AWS-managed Argo CD EKS capability. Mutually exclusive with enable_argocd (self-managed Argo CD). Requires IAM Identity Center (auto-discovered, or set argocd_capability.idc_instance_arn).</td>
+<td><code>bool</code></td>
+<td><code>false</code></td>
+<td style="text-align: center;">no</td>
+</tr>
+<tr>
+<td><a name="input_enable_auto_mode"></a> <a href="..#input_enable_auto_mode">enable_auto_mode</a></td>
+<td>Enable EKS Auto Mode. AWS manages compute (built-in Karpenter), block storage, load balancing and core networking. Can be combined with enable_karpenter to run both compute stacks side-by-side during a migration.</td>
+<td><code>bool</code></td>
+<td><code>false</code></td>
+<td style="text-align: center;">no</td>
+</tr>
+<tr>
 <td><a name="input_enable_ecr_passthrough_policy"></a> <a href="..#input_enable_ecr_passthrough_policy">enable_ecr_passthrough_policy</a></td>
 <td>Enable the ECR pull-through cache policy for cluster nodes. This policy may grant additional ECR permissions, including automatic repository creation for pull-through cache repositories, and is not required for standard ECR image pulls.</td>
 <td><code>bool</code></td>
@@ -1984,6 +2159,27 @@
 <td>Enable Fargate Fluentbit</td>
 <td><code>bool</code></td>
 <td><code>true</code></td>
+<td style="text-align: center;">no</td>
+</tr>
+<tr>
+<td><a name="input_enable_karpenter"></a> <a href="..#input_enable_karpenter">enable_karpenter</a></td>
+<td>Enable the self-managed Karpenter stack (controller, Helm releases, IRSA, subnets, security group, Fargate profile). Independent of enable_auto_mode: keep both enabled to run them side-by-side during a migration. At least one of enable_karpenter / enable_auto_mode must be true or the cluster has no compute.</td>
+<td><code>bool</code></td>
+<td><code>true</code></td>
+<td style="text-align: center;">no</td>
+</tr>
+<tr>
+<td><a name="input_enable_self_managed_ebs_csi"></a> <a href="..#input_enable_self_managed_ebs_csi">enable_self_managed_ebs_csi</a></td>
+<td>Create the self-managed EBS CSI driver (addon, IRSA and pod-identity role). Defaults to enabled unless Auto Mode is on. Set to true to keep it running alongside Auto Mode's managed EBS CSI during a storage migration, or false to drop it.</td>
+<td><code>bool</code></td>
+<td><code>null</code></td>
+<td style="text-align: center;">no</td>
+</tr>
+<tr>
+<td><a name="input_enable_self_managed_lb_controller"></a> <a href="..#input_enable_self_managed_lb_controller">enable_self_managed_lb_controller</a></td>
+<td>Create the IAM pod-identity role for the self-managed AWS Load Balancer Controller. Defaults to enabled unless Auto Mode is on. Set to true to keep it alongside Auto Mode's built-in load balancing during a migration, or false to drop it.</td>
+<td><code>bool</code></td>
+<td><code>null</code></td>
 <td style="text-align: center;">no</td>
 </tr>
 <tr>
@@ -2108,7 +2304,23 @@
 </tr>
 <tr>
 <td><a name="output_argocd"></a> <a href="..#output_argocd">argocd</a></td>
-<td>Map of attributes for the ArgoCD module</td>
+<td>Map of attributes for the self-managed ArgoCD module</td>
+</tr>
+<tr>
+<td><a name="output_argocd_capability"></a> <a href="..#output_argocd_capability">argocd_capability</a></td>
+<td>Map of attributes for the AWS-managed ArgoCD EKS capability (empty when disabled)</td>
+</tr>
+<tr>
+<td><a name="output_argocd_capability_server_url"></a> <a href="..#output_argocd_capability_server_url">argocd_capability_server_url</a></td>
+<td>URL of the AWS-managed ArgoCD server (null when the capability is disabled)</td>
+</tr>
+<tr>
+<td><a name="output_auto_mode_node_iam_role_arn"></a> <a href="..#output_auto_mode_node_iam_role_arn">auto_mode_node_iam_role_arn</a></td>
+<td>ARN of the EKS Auto Mode node IAM role (null when Auto Mode is disabled). Reference this from custom NodeClasses.</td>
+</tr>
+<tr>
+<td><a name="output_auto_mode_node_iam_role_name"></a> <a href="..#output_auto_mode_node_iam_role_name">auto_mode_node_iam_role_name</a></td>
+<td>Name of the EKS Auto Mode node IAM role (null when Auto Mode is disabled).</td>
 </tr>
 <tr>
 <td><a name="output_eks"></a> <a href="..#output_eks">eks</a></td>
@@ -2116,7 +2328,7 @@
 </tr>
 <tr>
 <td><a name="output_karpenter"></a> <a href="..#output_karpenter">karpenter</a></td>
-<td>Map of attributes for the Karpenter module</td>
+<td>Map of attributes for the self-managed Karpenter module (empty when enable_karpenter is false)</td>
 </tr>
 <tr>
 <td><a name="output_kubernetes_access_role_arns"></a> <a href="..#output_kubernetes_access_role_arns">kubernetes_access_role_arns</a></td>

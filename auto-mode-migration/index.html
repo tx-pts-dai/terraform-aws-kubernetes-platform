@@ -12,13 +12,13 @@
         <meta name="author" content="DAI">
       
       
-        <link rel="canonical" href="https://tx-pts-dai.github.io/terraform-aws-kubernetes-platform/argocd-addons-migration/">
+        <link rel="canonical" href="https://tx-pts-dai.github.io/terraform-aws-kubernetes-platform/auto-mode-migration/">
       
       
-        <link rel="prev" href="../getting-started/">
+        <link rel="prev" href="../argocd-addons-migration/">
       
       
-        <link rel="next" href="../auto-mode-migration/">
+        <link rel="next" href="../modules/argocd/">
       
       
       <link rel="icon" href="../images/logo.ico">
@@ -26,7 +26,7 @@
     
     
       
-        <title>ArgoCD Addons Migration Guide - Terraform AWS Kubernetes Platform</title>
+        <title>EKS Auto Mode Migration Guide - Terraform AWS Kubernetes Platform</title>
       
     
     
@@ -119,7 +119,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#argocd-addons-migration-guide" class="md-skip">
+        <a href="#eks-auto-mode-migration-guide" class="md-skip">
           Skip to content
         </a>
       
@@ -154,7 +154,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              ArgoCD Addons Migration Guide
+              EKS Auto Mode Migration Guide
             
           </span>
         </div>
@@ -288,11 +288,9 @@
         
   
   
-    
   
-  
-    <li class="md-tabs__item md-tabs__item--active">
-      <a href="./" class="md-tabs__link">
+    <li class="md-tabs__item">
+      <a href="../argocd-addons-migration/" class="md-tabs__link">
         
   
     
@@ -307,9 +305,11 @@
         
   
   
+    
   
-    <li class="md-tabs__item">
-      <a href="../auto-mode-migration/" class="md-tabs__link">
+  
+    <li class="md-tabs__item md-tabs__item--active">
+      <a href="./" class="md-tabs__link">
         
   
     
@@ -535,6 +535,26 @@
       
   
   
+  
+  
+    <li class="md-nav__item">
+      <a href="../argocd-addons-migration/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ArgoCD Addons Migration Guide
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
     
   
   
@@ -551,7 +571,7 @@
           
   
   <span class="md-ellipsis">
-    ArgoCD Addons Migration Guide
+    EKS Auto Mode Migration Guide
   </span>
   
 
@@ -562,7 +582,7 @@
         
   
   <span class="md-ellipsis">
-    ArgoCD Addons Migration Guide
+    EKS Auto Mode Migration Guide
   </span>
   
 
@@ -593,70 +613,64 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#architecture" class="md-nav__link">
+  <a href="#what-changes" class="md-nav__link">
     <span class="md-ellipsis">
-      Architecture
+      What changes
     </span>
   </a>
-  
-    <nav class="md-nav" aria-label="Architecture">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#core-components" class="md-nav__link">
-    <span class="md-ellipsis">
-      Core Components
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#label-based-addon-installation" class="md-nav__link">
-    <span class="md-ellipsis">
-      Label-Based Addon Installation
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#migration-process" class="md-nav__link">
+  <a href="#prerequisites" class="md-nav__link">
     <span class="md-ellipsis">
-      Migration Process
+      Prerequisites
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Migration Process">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#bringing-your-own-nodepool-nodeclass" class="md-nav__link">
+    <span class="md-ellipsis">
+      Bringing your own NodePool / NodeClass
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#migrating-an-existing-cluster" class="md-nav__link">
+    <span class="md-ellipsis">
+      Migrating an existing cluster
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Migrating an existing cluster">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#step-1-prepare-cluster-labels" class="md-nav__link">
+  <a href="#migrating-compute-taint-tolerations" class="md-nav__link">
     <span class="md-ellipsis">
-      Step 1: Prepare Cluster Labels
+      Migrating compute (taint + tolerations)
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#step-2-create-addon-applicationset" class="md-nav__link">
+  <a href="#same-network-vs-different-subnets" class="md-nav__link">
     <span class="md-ellipsis">
-      Step 2: Create Addon ApplicationSet
+      Same network vs. different subnets
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#step-3-configure-values-hierarchy" class="md-nav__link">
+  <a href="#migrating-storage-and-load-balancing" class="md-nav__link">
     <span class="md-ellipsis">
-      Step 3: Configure Values Hierarchy
+      Migrating storage and load balancing
     </span>
   </a>
   
@@ -671,26 +685,6 @@
   
 </nav>
       
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../auto-mode-migration/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    EKS Auto Mode Migration Guide
-  </span>
-  
-
-      </a>
     </li>
   
 
@@ -1160,70 +1154,64 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#architecture" class="md-nav__link">
+  <a href="#what-changes" class="md-nav__link">
     <span class="md-ellipsis">
-      Architecture
+      What changes
     </span>
   </a>
-  
-    <nav class="md-nav" aria-label="Architecture">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#core-components" class="md-nav__link">
-    <span class="md-ellipsis">
-      Core Components
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#label-based-addon-installation" class="md-nav__link">
-    <span class="md-ellipsis">
-      Label-Based Addon Installation
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#migration-process" class="md-nav__link">
+  <a href="#prerequisites" class="md-nav__link">
     <span class="md-ellipsis">
-      Migration Process
+      Prerequisites
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Migration Process">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#bringing-your-own-nodepool-nodeclass" class="md-nav__link">
+    <span class="md-ellipsis">
+      Bringing your own NodePool / NodeClass
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#migrating-an-existing-cluster" class="md-nav__link">
+    <span class="md-ellipsis">
+      Migrating an existing cluster
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Migrating an existing cluster">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#step-1-prepare-cluster-labels" class="md-nav__link">
+  <a href="#migrating-compute-taint-tolerations" class="md-nav__link">
     <span class="md-ellipsis">
-      Step 1: Prepare Cluster Labels
+      Migrating compute (taint + tolerations)
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#step-2-create-addon-applicationset" class="md-nav__link">
+  <a href="#same-network-vs-different-subnets" class="md-nav__link">
     <span class="md-ellipsis">
-      Step 2: Create Addon ApplicationSet
+      Same network vs. different subnets
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#step-3-configure-values-hierarchy" class="md-nav__link">
+  <a href="#migrating-storage-and-load-balancing" class="md-nav__link">
     <span class="md-ellipsis">
-      Step 3: Configure Values Hierarchy
+      Migrating storage and load balancing
     </span>
   </a>
   
@@ -1252,115 +1240,308 @@
   
 
 
-<h1 id="argocd-addons-migration-guide">ArgoCD Addons Migration Guide<a class="headerlink" href="#argocd-addons-migration-guide" title="Permanent link">&para;</a></h1>
+<h1 id="eks-auto-mode-migration-guide">EKS Auto Mode Migration Guide<a class="headerlink" href="#eks-auto-mode-migration-guide" title="Permanent link">&para;</a></h1>
 <h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
-<p>This guide documents the migration process for deploying Kubernetes cluster addons using ArgoCD ApplicationSets with a label-based enablement strategy. This approach provides a scalable, GitOps-driven method for managing cluster tooling across multiple environments.</p>
-<h2 id="architecture">Architecture<a class="headerlink" href="#architecture" title="Permanent link">&para;</a></h2>
-<h3 id="core-components">Core Components<a class="headerlink" href="#core-components" title="Permanent link">&para;</a></h3>
+<p>This guide explains how to enable <a href="https://docs.aws.amazon.com/eks/latest/userguide/automode.html">EKS Auto Mode</a>
+on a cluster created with this module, and how to migrate an existing cluster
+that currently runs the <strong>self-managed</strong> stack (Karpenter, EBS CSI driver and the
+AWS Load Balancer Controller deployed via ArgoCD) over to the AWS-managed
+equivalents.</p>
+<blockquote>
+<p><strong>Auto Mode is opt-in.</strong> The <code>enable_auto_mode</code> variable defaults to <code>false</code>,
+so existing clusters are unaffected until you explicitly flip it.</p>
+</blockquote>
+<h2 id="what-changes">What changes<a class="headerlink" href="#what-changes" title="Permanent link">&para;</a></h2>
+<p>When <code>enable_auto_mode = true</code>, AWS manages compute, block storage, load
+balancing and core networking. This module therefore <strong>stops creating</strong> the
+self-managed components:</p>
+<table>
+<thead>
+<tr>
+<th>Capability</th>
+<th>Self-managed (default)</th>
+<th>Auto Mode</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Compute / scaling</td>
+<td>Karpenter Helm release + Fargate profile + IRSA + subnets</td>
+<td>Built-in Karpenter (<code>compute_config</code>)</td>
+</tr>
+<tr>
+<td>Node config</td>
+<td><code>karpenter-resources</code> Helm chart (NodePool / EC2NodeClass)</td>
+<td><code>NodePool</code> (<code>karpenter.sh/v1</code>) + <code>NodeClass</code> (<code>eks.amazonaws.com/v1</code>)</td>
+</tr>
+<tr>
+<td>Core networking</td>
+<td><code>vpc-cni</code>, <code>kube-proxy</code> addons + VPC CNI IRSA</td>
+<td>Managed by Auto Mode</td>
+</tr>
+<tr>
+<td>Cluster DNS</td>
+<td><code>coredns</code> addon</td>
+<td>Managed by Auto Mode</td>
+</tr>
+<tr>
+<td>Block storage</td>
+<td><code>aws-ebs-csi-driver</code> addon + IRSA / pod identity</td>
+<td>Managed by Auto Mode (<code>ebs.csi.eks.amazonaws.com</code>)</td>
+</tr>
+<tr>
+<td>Load balancing</td>
+<td>AWS Load Balancer Controller (ArgoCD) + pod identity</td>
+<td>Built-in (<code>eks.amazonaws.com/alb</code>)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Migrate storage and load balancing independently.</strong> Compute (<code>enable_karpenter</code>)
+and the <strong>storage</strong> and <strong>load balancing</strong> capabilities each have their own toggle,
+so you can decide per capability which side — self-managed or Auto Mode — runs at a
+given moment:</p>
+<table>
+<thead>
+<tr>
+<th>Capability</th>
+<th>Toggle</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Compute</td>
+<td><code>enable_karpenter</code></td>
+<td><code>true</code></td>
+</tr>
+<tr>
+<td>Block storage</td>
+<td><code>enable_self_managed_ebs_csi</code></td>
+<td><code>!enable_auto_mode</code></td>
+</tr>
+<tr>
+<td>Load balancing</td>
+<td><code>enable_self_managed_lb_controller</code></td>
+<td><code>!enable_auto_mode</code></td>
+</tr>
+</tbody>
+</table>
+<p>Each storage/LB toggle defaults to "off when Auto Mode is on", but you can set it to
+<code>true</code> to keep the self-managed version running alongside Auto Mode's managed one
+while you cut over, then flip it to <code>false</code> when done.</p>
+<p><strong>Networking and CoreDNS are not togglable — they follow <code>enable_karpenter</code>.</strong> Auto
+Mode runs the VPC CNI, kube-proxy and CoreDNS as node-level services on Auto Mode
+nodes <strong>only</strong>; they do not serve non-Auto-Mode nodes. So while self-managed compute
+is still running (<code>enable_karpenter = true</code>) the cluster keeps the traditional
+<code>vpc-cni</code>, <code>kube-proxy</code> and <code>eks-pod-identity-agent</code> addons <strong>and</strong> the <code>coredns</code>
+addon: the self-managed Karpenter nodes are ordinary EC2 nodes that need those
+DaemonSets to get pod networking, reach <code>Ready</code>, and resolve DNS. Their DaemonSets
+exclude Auto Mode nodes via node affinity, so they coexist with Auto Mode's managed
+copies. These are handed over to Auto Mode (the addons dropped) only in <strong>pure</strong> Auto
+Mode (<code>enable_auto_mode = true</code>, <code>enable_karpenter = false</code>). You don't toggle this;
+it follows <code>enable_karpenter</code>. Dropping them while self-managed nodes still run leaves
+every pod on those nodes stuck — without a CNI a node never leaves <code>NotReady</code> and
+nothing schedules on it.</p>
+<p>Resources that are <strong>not</strong> affected and keep working in both modes: ArgoCD, the
+ACK capability, external-dns / external-secrets pod identities, the AWS Gateway
+API (VPC Lattice) controller pod identity, ACM, and the Kubernetes access roles.</p>
+<h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Module version that includes Auto Mode support (this release or newer).</li>
+<li>Kubernetes <code>1.29</code>+ (Auto Mode requires a recent control plane).</li>
+<li>The <code>helm</code> provider configured in the root module (already a dependency). The
+  NodePool/NodeClass are applied via the <code>custom-resources</code> Helm chart, which
+  defers correctly on clusters created in the same <code>apply</code>.</li>
+</ul>
+<h2 id="bringing-your-own-nodepool-nodeclass">Bringing your own NodePool / NodeClass<a class="headerlink" href="#bringing-your-own-nodepool-nodeclass" title="Permanent link">&para;</a></h2>
+<p>Auto Mode capacity is declared with two CRDs:</p>
+<ul>
+<li><strong><code>NodeClass</code></strong> (<code>eks.amazonaws.com/v1</code>) — the AWS-specific node configuration
+  (IAM role, subnets, security groups, ephemeral storage, …).</li>
+<li><strong><code>NodePool</code></strong> (<code>karpenter.sh/v1</code>) — scheduling requirements, limits and
+  disruption settings, referencing a <code>NodeClass</code>.</li>
+</ul>
+<p>Pass them while calling the module, the same way the <code>karpenter_resources</code> Helm
+values were passed before. The map key is the resource name and the value is its
+<code>spec</code>. The module injects the Auto Mode node IAM <code>role</code> into each NodeClass
+automatically, so you only provide selectors and extra settings:</p>
+<div class="language-hcl highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kr">module</span><span class="w"> </span><span class="nv">&quot;k8s_platform&quot;</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">  </span><span class="na">source</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;tx-pts-dai/kubernetes-platform/aws&quot;</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="c1">  # ...</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">  </span><span class="na">enable_auto_mode</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">true</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">  </span><span class="nb">auto_mode_node_classes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">    </span><span class="nb">default</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">      </span><span class="na">subnetSelectorTerms</span><span class="w">        </span><span class="o">=</span><span class="w"> </span><span class="p">[{</span><span class="w"> </span><span class="nb">tags</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="s2">&quot;kubernetes.io/role/internal-elb&quot;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;1&quot;</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">}]</span>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="w">      </span><span class="na">securityGroupSelectorTerms</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[{</span><span class="w"> </span><span class="nb">tags</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="s2">&quot;kubernetes.io/cluster/&lt;cluster-name&gt;&quot;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;owned&quot;</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">}]</span>
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="w">      </span><span class="nb">ephemeralStorage</span><span class="w">           </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="na">size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;80Gi&quot;</span><span class="p">,</span><span class="w"> </span><span class="na">iops</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">3000</span><span class="p">,</span><span class="w"> </span><span class="na">throughput</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">125</span><span class="w"> </span><span class="p">}</span>
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>
+</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="w">  </span><span class="nb">auto_mode_node_pools</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="w">    </span><span class="nb">default</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="w">      </span><span class="nb">template</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a><span class="w">        </span><span class="nb">spec</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a><span class="w">          </span><span class="nb">nodeClassRef</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="na">group</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;eks.amazonaws.com&quot;, kind = &quot;NodeClass&quot;, name = &quot;default&quot;</span><span class="w"> </span><span class="p">}</span>
+</span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a><span class="w">          </span><span class="na">requirements</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a><span class="w">            </span><span class="p">{</span><span class="w"> </span><span class="na">key</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;eks.amazonaws.com/instance-category&quot;, operator = &quot;In&quot;, values = [&quot;c&quot;, &quot;m&quot;, &quot;r&quot;</span><span class="p">]</span><span class="w"> </span><span class="p">},</span>
+</span><span id="__span-0-23"><a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a><span class="w">            </span><span class="p">{</span><span class="w"> </span><span class="na">key</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;kubernetes.io/arch&quot;, operator = &quot;In&quot;, values = [&quot;amd64&quot;</span><span class="p">]</span><span class="w"> </span><span class="p">},</span>
+</span><span id="__span-0-24"><a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a><span class="w">            </span><span class="p">{</span><span class="w"> </span><span class="na">key</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;karpenter.sh/capacity-type&quot;, operator = &quot;In&quot;, values = [&quot;on-demand&quot;</span><span class="p">]</span><span class="w"> </span><span class="p">},</span>
+</span><span id="__span-0-25"><a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a><span class="w">          </span><span class="p">]</span>
+</span><span id="__span-0-26"><a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a><span class="w">        </span><span class="p">}</span>
+</span><span id="__span-0-27"><a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a><span class="w">      </span><span class="p">}</span>
+</span><span id="__span-0-28"><a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a><span class="w">      </span><span class="nb">limits</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="na">cpu</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;1000&quot;</span><span class="w"> </span><span class="p">}</span>
+</span><span id="__span-0-29"><a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a><span class="w">      </span><span class="nb">disruption</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="na">consolidationPolicy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;WhenEmptyOrUnderutilized&quot;, consolidateAfter = &quot;30s&quot;</span><span class="w"> </span><span class="p">}</span>
+</span><span id="__span-0-30"><a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-0-31"><a id="__codelineno-0-31" name="__codelineno-0-31" href="#__codelineno-0-31"></a><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-0-32"><a id="__codelineno-0-32" name="__codelineno-0-32" href="#__codelineno-0-32"></a><span class="p">}</span>
+</span></code></pre></div>
+<p>If you omit <code>auto_mode_node_classes</code> / <code>auto_mode_node_pools</code> entirely, the module
+creates a sensible <code>default</code> NodeClass (targeting the cluster private subnets and
+primary security group) and a <code>default</code> NodePool.</p>
+<p>You can also enable the AWS-managed built-in node pools alongside your own:</p>
+<div class="language-hcl highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nb">auto_mode</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">  </span><span class="na">builtin_node_pools</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;system&quot;] # and/or &quot;general-purpose&quot;</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="p">}</span>
+</span></code></pre></div>
+<hr />
+<h2 id="migrating-an-existing-cluster">Migrating an existing cluster<a class="headerlink" href="#migrating-an-existing-cluster" title="Permanent link">&para;</a></h2>
+<p><code>enable_auto_mode</code> and <code>enable_karpenter</code> are <strong>independent</strong> toggles. Auto Mode
+and the self-managed Karpenter stack can run <strong>side-by-side</strong>, which is the
+supported path for a gradual, low-risk in-place migration. Each capability cuts
+over with its own mechanism:</p>
+<table>
+<thead>
+<tr>
+<th>Capability</th>
+<th>Cutover mechanism</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Compute</td>
+<td>Auto Mode NodePool <strong>taint</strong> + per-workload <strong>toleration</strong></td>
+</tr>
+<tr>
+<td>Block storage</td>
+<td><strong>StorageClass</strong> — provision new volumes against <code>ebs.csi.eks.amazonaws.com</code></td>
+</tr>
+<tr>
+<td>Load balancing</td>
+<td><strong><code>ingressClassName</code></strong> — repoint each Ingress to the Auto Mode class</td>
+</tr>
+</tbody>
+</table>
+<h3 id="migrating-compute-taint-tolerations">Migrating compute (taint + tolerations)<a class="headerlink" href="#migrating-compute-taint-tolerations" title="Permanent link">&para;</a></h3>
 <ol>
-<li><strong>Main Application</strong>: <code>cluster-tools-apps</code> in <code>/configs/cluster-tools/cluster-tools.yaml</code></li>
-<li>Manages all addon ApplicationSets</li>
-<li>Recursively processes all <code>appset.yaml</code> files in the apps directory</li>
-<li>
-<p>Deployed to the <code>argocd</code> namespace</p>
-</li>
-<li>
-<p><strong>ApplicationSets</strong>: Individual addon configurations in <code>/configs/cluster-tools/apps/</code></p>
-</li>
-<li>Each addon has its own directory with an <code>appset.yaml</code></li>
-<li>Uses cluster generator with label selectors</li>
-<li>Supports environment and team-specific configurations</li>
+<li>Enable Auto Mode <strong>alongside</strong> Karpenter (<code>enable_auto_mode = true</code>, keep
+   <code>enable_karpenter = true</code>), with the Auto Mode <code>default</code> NodePool <strong>tainted</strong> so
+   existing workloads do not move automatically. The <code>complete</code> example uses:</li>
 </ol>
-<h3 id="label-based-addon-installation">Label-Based Addon Installation<a class="headerlink" href="#label-based-addon-installation" title="Permanent link">&para;</a></h3>
-<p>Addons are automatically deployed to clusters based on labels. Each addon's ApplicationSet uses a cluster generator that matches specific labels:</p>
-<div class="language-yaml highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nt">generators</span><span class="p">:</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">clusters</span><span class="p">:</span>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">    </span><span class="nt">selector</span><span class="p">:</span>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">      </span><span class="nt">matchLabels</span><span class="p">:</span>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">        </span><span class="nt">enable-&lt;addon-name&gt;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;true&quot;</span>
+<div class="language-hcl highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nb">auto_mode</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">  </span><span class="nb">subnet_discovery_tags</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="s2">&quot;karpenter.sh/discovery&quot;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;shared&quot;</span><span class="w"> </span><span class="p">}</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">  </span><span class="na">default_node_pool_taints</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="na">key</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;auto-mode&quot;, value = &quot;true&quot;, effect = &quot;NoSchedule&quot;</span><span class="w"> </span><span class="p">},</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">  </span><span class="p">]</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="p">}</span>
 </span></code></pre></div>
-<h2 id="migration-process">Migration Process<a class="headerlink" href="#migration-process" title="Permanent link">&para;</a></h2>
-<h3 id="step-1-prepare-cluster-labels">Step 1: Prepare Cluster Labels<a class="headerlink" href="#step-1-prepare-cluster-labels" title="Permanent link">&para;</a></h3>
-<p>Label your clusters in ArgoCD to enable specific addons:</p>
-<h3 id="step-2-create-addon-applicationset">Step 2: Create Addon ApplicationSet<a class="headerlink" href="#step-2-create-addon-applicationset" title="Permanent link">&para;</a></h3>
-<p>For each addon, create a directory structure:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>configs/cluster-tools/apps/&lt;addon-name&gt;/
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>├── appset.yaml           # ApplicationSet definition
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>├── values.yaml           # Default values (optional)
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>├── values-&lt;env&gt;.yaml     # Environment-specific values (optional)
-</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>└── values-&lt;team&gt;.yaml    # Team-specific values (optional)
-</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>└── values-&lt;team&gt;-&lt;env&gt;.yaml # Team and environment specific values (optional)
-</span></code></pre></div>
-<p>Example ApplicationSet template (<code>appset.yaml</code>):</p>
-<div class="language-yaml highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">argoproj.io/v1alpha1</span>
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ApplicationSet</span>
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="nt">metadata</span><span class="p">:</span>
-</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;addon-name&gt;</span>
-</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">argocd</span>
-</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">  </span><span class="nt">labels</span><span class="p">:</span>
-</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">    </span><span class="nt">team</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">platform</span>
-</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="nt">spec</span><span class="p">:</span>
-</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="w">  </span><span class="nt">goTemplate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
-</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="w">  </span><span class="nt">goTemplateOptions</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;missingkey=error&quot;</span><span class="p p-Indicator">]</span>
-</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="w">  </span><span class="nt">generators</span><span class="p">:</span>
-</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">clusters</span><span class="p">:</span>
-</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="w">      </span><span class="nt">selector</span><span class="p">:</span>
-</span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="w">        </span><span class="nt">matchLabels</span><span class="p">:</span>
-</span><span id="__span-2-15"><a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a><span class="w">          </span><span class="nt">enable-&lt;addon-name&gt;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;true&quot;</span>
-</span><span id="__span-2-16"><a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a><span class="w">  </span><span class="nt">template</span><span class="p">:</span>
-</span><span id="__span-2-17"><a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a><span class="w">    </span><span class="nt">metadata</span><span class="p">:</span>
-</span><span id="__span-2-18"><a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a><span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{.nameNormalized}}-&lt;addon-name&gt;&quot;</span>
-</span><span id="__span-2-19"><a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a><span class="w">      </span><span class="nt">labels</span><span class="p">:</span>
-</span><span id="__span-2-20"><a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a><span class="w">        </span><span class="nt">team</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{.metadata.labels.team}}&quot;</span>
-</span><span id="__span-2-21"><a id="__codelineno-2-21" name="__codelineno-2-21" href="#__codelineno-2-21"></a><span class="w">        </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;addon-name&gt;</span>
-</span><span id="__span-2-22"><a id="__codelineno-2-22" name="__codelineno-2-22" href="#__codelineno-2-22"></a><span class="w">        </span><span class="nt">environment</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{.metadata.labels.environment}}&quot;</span>
-</span><span id="__span-2-23"><a id="__codelineno-2-23" name="__codelineno-2-23" href="#__codelineno-2-23"></a><span class="w">      </span><span class="nt">finalizers</span><span class="p">:</span>
-</span><span id="__span-2-24"><a id="__codelineno-2-24" name="__codelineno-2-24" href="#__codelineno-2-24"></a><span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">resources-finalizer.argocd.argoproj.io</span>
-</span><span id="__span-2-25"><a id="__codelineno-2-25" name="__codelineno-2-25" href="#__codelineno-2-25"></a><span class="w">    </span><span class="nt">spec</span><span class="p">:</span>
-</span><span id="__span-2-26"><a id="__codelineno-2-26" name="__codelineno-2-26" href="#__codelineno-2-26"></a><span class="w">      </span><span class="nt">project</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cluster-tools</span>
-</span><span id="__span-2-27"><a id="__codelineno-2-27" name="__codelineno-2-27" href="#__codelineno-2-27"></a><span class="w">      </span><span class="nt">sources</span><span class="p">:</span>
-</span><span id="__span-2-28"><a id="__codelineno-2-28" name="__codelineno-2-28" href="#__codelineno-2-28"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">repoURL</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;helm-chart-repo&gt;</span>
-</span><span id="__span-2-29"><a id="__codelineno-2-29" name="__codelineno-2-29" href="#__codelineno-2-29"></a><span class="w">        </span><span class="nt">chart</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;chart-name&gt;</span>
-</span><span id="__span-2-30"><a id="__codelineno-2-30" name="__codelineno-2-30" href="#__codelineno-2-30"></a><span class="w">        </span><span class="nt">targetRevision</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;version&gt;</span>
-</span><span id="__span-2-31"><a id="__codelineno-2-31" name="__codelineno-2-31" href="#__codelineno-2-31"></a><span class="w">        </span><span class="nt">helm</span><span class="p">:</span>
-</span><span id="__span-2-32"><a id="__codelineno-2-32" name="__codelineno-2-32" href="#__codelineno-2-32"></a><span class="w">          </span><span class="nt">releaseName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;addon-name&gt;</span>
-</span><span id="__span-2-33"><a id="__codelineno-2-33" name="__codelineno-2-33" href="#__codelineno-2-33"></a><span class="w">          </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;target-namespace&gt;</span>
-</span><span id="__span-2-34"><a id="__codelineno-2-34" name="__codelineno-2-34" href="#__codelineno-2-34"></a><span class="w">          </span><span class="nt">valueFiles</span><span class="p">:</span>
-</span><span id="__span-2-35"><a id="__codelineno-2-35" name="__codelineno-2-35" href="#__codelineno-2-35"></a><span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">$values/values.yaml</span>
-</span><span id="__span-2-36"><a id="__codelineno-2-36" name="__codelineno-2-36" href="#__codelineno-2-36"></a><span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">$values/values-{{.metadata.labels.environment}}.yaml</span>
-</span><span id="__span-2-37"><a id="__codelineno-2-37" name="__codelineno-2-37" href="#__codelineno-2-37"></a><span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">$values/values-{{.metadata.labels.team}}.yaml</span>
-</span><span id="__span-2-38"><a id="__codelineno-2-38" name="__codelineno-2-38" href="#__codelineno-2-38"></a><span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">$values/values-{{.metadata.labels.team}}-{{.metadata.labels.environment}}.yaml</span>
-</span><span id="__span-2-39"><a id="__codelineno-2-39" name="__codelineno-2-39" href="#__codelineno-2-39"></a><span class="w">          </span><span class="nt">ignoreMissingValueFiles</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
-</span><span id="__span-2-40"><a id="__codelineno-2-40" name="__codelineno-2-40" href="#__codelineno-2-40"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">repoURL</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://github.com/dnd-it/fission-argocd.git</span>
-</span><span id="__span-2-41"><a id="__codelineno-2-41" name="__codelineno-2-41" href="#__codelineno-2-41"></a><span class="w">        </span><span class="nt">targetRevision</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">HEAD</span>
-</span><span id="__span-2-42"><a id="__codelineno-2-42" name="__codelineno-2-42" href="#__codelineno-2-42"></a><span class="w">        </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">configs/cluster-tools/apps/&lt;addon-name&gt;</span>
-</span><span id="__span-2-43"><a id="__codelineno-2-43" name="__codelineno-2-43" href="#__codelineno-2-43"></a><span class="w">        </span><span class="nt">directory</span><span class="p">:</span>
-</span><span id="__span-2-44"><a id="__codelineno-2-44" name="__codelineno-2-44" href="#__codelineno-2-44"></a><span class="w">          </span><span class="nt">exclude</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">appset.yaml</span>
-</span><span id="__span-2-45"><a id="__codelineno-2-45" name="__codelineno-2-45" href="#__codelineno-2-45"></a><span class="w">        </span><span class="nt">ref</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">values</span>
-</span><span id="__span-2-46"><a id="__codelineno-2-46" name="__codelineno-2-46" href="#__codelineno-2-46"></a><span class="w">      </span><span class="nt">destination</span><span class="p">:</span>
-</span><span id="__span-2-47"><a id="__codelineno-2-47" name="__codelineno-2-47" href="#__codelineno-2-47"></a><span class="w">        </span><span class="nt">server</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{.server}}&quot;</span>
-</span><span id="__span-2-48"><a id="__codelineno-2-48" name="__codelineno-2-48" href="#__codelineno-2-48"></a><span class="w">        </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;target-namespace&gt;</span>
-</span><span id="__span-2-49"><a id="__codelineno-2-49" name="__codelineno-2-49" href="#__codelineno-2-49"></a><span class="w">      </span><span class="nt">syncPolicy</span><span class="p">:</span>
-</span><span id="__span-2-50"><a id="__codelineno-2-50" name="__codelineno-2-50" href="#__codelineno-2-50"></a><span class="w">        </span><span class="nt">automated</span><span class="p">:</span>
-</span><span id="__span-2-51"><a id="__codelineno-2-51" name="__codelineno-2-51" href="#__codelineno-2-51"></a><span class="w">          </span><span class="nt">prune</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
-</span><span id="__span-2-52"><a id="__codelineno-2-52" name="__codelineno-2-52" href="#__codelineno-2-52"></a><span class="w">          </span><span class="nt">selfHeal</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
-</span><span id="__span-2-53"><a id="__codelineno-2-53" name="__codelineno-2-53" href="#__codelineno-2-53"></a><span class="w">          </span><span class="nt">allowEmpty</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
-</span><span id="__span-2-54"><a id="__codelineno-2-54" name="__codelineno-2-54" href="#__codelineno-2-54"></a><span class="w">        </span><span class="nt">syncOptions</span><span class="p">:</span>
-</span><span id="__span-2-55"><a id="__codelineno-2-55" name="__codelineno-2-55" href="#__codelineno-2-55"></a><span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CreateNamespace=true</span>
-</span><span id="__span-2-56"><a id="__codelineno-2-56" name="__codelineno-2-56" href="#__codelineno-2-56"></a><span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ApplyOutOfSyncOnly=true</span>
-</span><span id="__span-2-57"><a id="__codelineno-2-57" name="__codelineno-2-57" href="#__codelineno-2-57"></a><span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PruneLast=true</span>
-</span><span id="__span-2-58"><a id="__codelineno-2-58" name="__codelineno-2-58" href="#__codelineno-2-58"></a><span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SkipDryRunOnMissingResource=true</span>
-</span><span id="__span-2-59"><a id="__codelineno-2-59" name="__codelineno-2-59" href="#__codelineno-2-59"></a><span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ServerSideApply=true</span>
-</span></code></pre></div>
-<h3 id="step-3-configure-values-hierarchy">Step 3: Configure Values Hierarchy<a class="headerlink" href="#step-3-configure-values-hierarchy" title="Permanent link">&para;</a></h3>
-<p>The system supports a hierarchical values configuration:</p>
 <ol>
-<li><code>values.yaml</code> - Base configuration for all deployments</li>
-<li><code>values-&lt;environment&gt;.yaml</code> - Environment-specific overrides (dev, staging, production)</li>
-<li><code>values-&lt;team&gt;.yaml</code> - Team-specific configurations</li>
-<li><code>values-&lt;team&gt;-&lt;environment&gt;.yaml</code> - Team and environment specific combinations</li>
+<li>Move workloads onto Auto Mode one at a time by adding the matching toleration
+   (and, if you want to force placement, a <code>nodeSelector</code> such as
+   <code>eks.amazonaws.com/compute-type: auto</code>):</li>
 </ol>
-<p>Files are merged in order, with later files overriding earlier ones. Missing files are ignored (<code>ignoreMissingValueFiles: true</code>).</p>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nt">tolerations</span><span class="p">:</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;auto-mode&quot;</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;true&quot;</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">    </span><span class="nt">effect</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;NoSchedule&quot;</span>
+</span></code></pre></div>
+<ol>
+<li>Once every workload runs on Auto Mode, disable the self-managed stack
+   (<code>enable_karpenter = false</code>). Karpenter's nodes drain as their pods reschedule.</li>
+</ol>
+<p>This mirrors AWS's
+<a href="https://docs.aws.amazon.com/eks/latest/userguide/auto-migrate-karpenter.html">Migrate from Karpenter to EKS Auto Mode</a>
+guide. The <code>karpenter.sh</code> NodePool/NodeClaim CRDs are <strong>shared</strong> between the two
+controllers — keep the <code>karpenter-crd</code> Helm release in place and <strong>do not change
+its version</strong> while both stacks run.</p>
+<h3 id="same-network-vs-different-subnets">Same network vs. different subnets<a class="headerlink" href="#same-network-vs-different-subnets" title="Permanent link">&para;</a></h3>
+<p>When both stacks run, you choose whether Auto Mode shares Karpenter's network or
+sits on its own subnets via <code>auto_mode.discover_karpenter_subnets</code>. It defaults to
+<code>null</code>, which <strong>resolves to <code>enable_karpenter</code></strong> — so when the self-managed
+Karpenter stack is enabled, Auto Mode shares its subnets <strong>by default</strong>:</p>
+<ul>
+<li><strong>Same network (different NodePools/taints) — default while Karpenter runs.</strong>
+  With <code>discover_karpenter_subnets</code> unset (or <code>true</code>), the auto-generated <code>default</code>
+  NodeClass discovers subnets by tag — by default <code>karpenter.sh/discovery =
+  &lt;cluster-name&gt;</code>, the tag the module puts on its own dedicated Karpenter subnets.
+  Both controllers launch into the same subnets; you separate them with NodePools
+  and taints, not with the network.</li>
+</ul>
+<p>If you point self-managed Karpenter at a <strong>customized</strong> discovery tag (e.g. via
+  <code>karpenter_resources_helm_set</code> setting <code>karpenter.sh/discovery = shared</code> on
+  pre-existing subnets), set <code>auto_mode.subnet_discovery_tags</code> to the same tag so
+  Auto Mode matches those subnets:</p>
+<div class="language-hcl highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="na">enable_auto_mode</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">true</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="nb">auto_mode</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">  </span><span class="nb">subnet_discovery_tags</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="s2">&quot;karpenter.sh/discovery&quot;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;shared&quot;</span><span class="w"> </span><span class="p">}</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="p">}</span>
+</span></code></pre></div>
+<p>Setting <code>discover_karpenter_subnets = true</code> with the default tag requires
+  <code>enable_karpenter = true</code> (those subnets only exist while the Karpenter stack is
+  enabled); with custom <code>subnet_discovery_tags</code> it does not, since you own those
+  subnets.
+- <strong>Different subnets.</strong> Set <code>discover_karpenter_subnets = false</code>. The <code>default</code>
+  NodeClass selects <code>var.vpc.private_subnets</code> by ID, while self-managed Karpenter
+  stays on its dedicated <code>karpenter.subnet_cidrs</code> subnets — so the two stacks land
+  on separate networks. To put Auto Mode on some other set of subnets, pass your
+  own <code>auto_mode_node_classes</code> with the selectors you want and provision those
+  subnets outside the module.</p>
+<p>In <strong>pure Auto Mode</strong> (<code>enable_karpenter = false</code>), the <code>null</code> default resolves to
+<code>false</code>, so the <code>default</code> NodeClass uses <code>var.vpc.private_subnets</code> — there are no
+Karpenter subnets to discover.</p>
+<h3 id="migrating-storage-and-load-balancing">Migrating storage and load balancing<a class="headerlink" href="#migrating-storage-and-load-balancing" title="Permanent link">&para;</a></h3>
+<p>Keep the self-managed components running alongside the Auto Mode ones while you
+cut over, by setting their toggles explicitly (they otherwise default to <strong>off</strong>
+when Auto Mode is on):</p>
+<div class="language-hcl highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="na">enable_self_managed_ebs_csi</span><span class="w">       </span><span class="o">=</span><span class="w"> </span><span class="no">true</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="na">enable_self_managed_lb_controller</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">true</span>
+</span></code></pre></div>
+<p><strong>Block storage.</strong> The self-managed driver (<code>ebs.csi.aws.com</code>) and Auto Mode's
+driver (<code>ebs.csi.eks.amazonaws.com</code>) coexist — they are different provisioners.
+Existing PVs stay bound to whichever driver created them. To migrate, create a
+StorageClass backed by <code>ebs.csi.eks.amazonaws.com</code> and point new PVCs at it via
+<code>storageClassName</code>. <strong>Avoid two default StorageClasses</strong> — keep exactly one
+marked <code>storageclass.kubernetes.io/is-default-class: "true"</code>.</p>
+<p><strong>Load balancing.</strong> The self-managed AWS Load Balancer Controller
+(<code>ingress.k8s.aws/alb</code>) and Auto Mode's built-in controller (<code>eks.amazonaws.com/alb</code>)
+are separate IngressClass controllers, so each Ingress is reconciled by <strong>one</strong>
+of them based on its <code>ingressClassName</code>. Migrate <strong>one Ingress at a time</strong> by
+repointing <code>ingressClassName</code> to the Auto Mode class. Do not leave an Ingress
+matching both (ambiguous class/annotations) or you get two load balancers
+fighting over it.</p>
+<p>Once nothing depends on the self-managed versions, flip both toggles to <code>false</code>.</p>
+<blockquote>
+<p><strong>ℹ️ CRD ownership is handled for you.</strong> EKS Auto Mode installs and owns the
+<code>nodepools.karpenter.sh</code> / <code>nodeclaims.karpenter.sh</code> CRDs, which would otherwise
+collide with the module's <code>karpenter-crd</code> Helm release (<code>invalid ownership
+metadata</code>). That release sets <code>take_ownership = true</code>, so it <strong>adopts</strong> the
+existing CRDs no matter which controller created them first. As a result a clean
+cluster with both <code>enable_karpenter</code> and <code>enable_auto_mode</code> enabled applies in a
+single pass, and disabling Auto Mode later (its CRDs linger on the cluster) does
+not break the self-managed stack. The staged approach — deploy Karpenter first,
+then enable Auto Mode in a second apply — still works and is the most conservative
+path. Note that with both stacks enabled the chart's CRD version and Auto Mode's
+are co-managed; this is low-risk since both are <code>karpenter.sh/v1</code>.</p>
+</blockquote>
+<!-- -->
+
+<blockquote>
+<p><strong>Compute guard:</strong> at least one of <code>enable_karpenter</code> / <code>enable_auto_mode</code> must
+be <code>true</code>, otherwise the cluster has no compute (enforced by a variable
+validation).</p>
+</blockquote>
 
 
 

@@ -12,13 +12,9 @@
         <meta name="author" content="DAI">
       
       
-        <link rel="canonical" href="https://tx-pts-dai.github.io/terraform-aws-kubernetes-platform/getting-started/">
+        <link rel="canonical" href="https://tx-pts-dai.github.io/terraform-aws-kubernetes-platform/auto-mode-vs-karpenter-matrix/">
       
       
-        <link rel="prev" href="../patterns/">
-      
-      
-        <link rel="next" href="../argocd-addons-migration/">
       
       
       <link rel="icon" href="../images/logo.ico">
@@ -26,7 +22,7 @@
     
     
       
-        <title>Getting Started - Terraform AWS Kubernetes Platform</title>
+        <title>Compute modes: what gets deployed (Karpenter vs Auto Mode vs hybrid) - Terraform AWS Kubernetes Platform</title>
       
     
     
@@ -119,7 +115,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#getting-started" class="md-skip">
+        <a href="#compute-modes-what-gets-deployed-karpenter-vs-auto-mode-vs-hybrid" class="md-skip">
           Skip to content
         </a>
       
@@ -154,7 +150,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Getting Started
+              Compute modes: what gets deployed (Karpenter vs Auto Mode vs hybrid)
             
           </span>
         </div>
@@ -271,11 +267,9 @@
         
   
   
-    
   
-  
-    <li class="md-tabs__item md-tabs__item--active">
-      <a href="./" class="md-tabs__link">
+    <li class="md-tabs__item">
+      <a href="../getting-started/" class="md-tabs__link">
         
   
     
@@ -515,30 +509,10 @@
       
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  <span class="md-ellipsis">
-    Getting Started
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../getting-started/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -547,53 +521,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#prerequisites" class="md-nav__link">
-    <span class="md-ellipsis">
-      Prerequisites
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#deploy" class="md-nav__link">
-    <span class="md-ellipsis">
-      Deploy
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#destroy" class="md-nav__link">
-    <span class="md-ellipsis">
-      Destroy
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1094,27 +1021,36 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#prerequisites" class="md-nav__link">
+  <a href="#scenario-1-karpenter-only-enable_karpenter-true-enable_auto_mode-false" class="md-nav__link">
     <span class="md-ellipsis">
-      Prerequisites
+      Scenario 1 — Karpenter only (enable_karpenter = true, enable_auto_mode = false)
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#deploy" class="md-nav__link">
+  <a href="#scenario-2-auto-mode-only-enable_auto_mode-true-enable_karpenter-false" class="md-nav__link">
     <span class="md-ellipsis">
-      Deploy
+      Scenario 2 — Auto Mode only (enable_auto_mode = true, enable_karpenter = false)
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#destroy" class="md-nav__link">
+  <a href="#scenario-3-hybrid-migration-both-enable_karpenter-true-and-enable_auto_mode-true" class="md-nav__link">
     <span class="md-ellipsis">
-      Destroy
+      Scenario 3 — Hybrid / migration (both enable_karpenter = true and enable_auto_mode = true)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#visibility-cheat-sheet" class="md-nav__link">
+    <span class="md-ellipsis">
+      Visibility cheat-sheet
     </span>
   </a>
   
@@ -1138,70 +1074,330 @@
   
 
 
-<h1 id="getting-started">Getting Started<a class="headerlink" href="#getting-started" title="Permanent link">&para;</a></h1>
-<p>This getting started guide will help you deploy your first EKS cluster.</p>
-<h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">&para;</a></h2>
-<p>Ensure that you have installed the following tools locally:</p>
-<ul>
-<li><a href="https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html">awscli</a></li>
-<li><a href="https://Kubernetes.io/docs/tasks/tools/">kubectl</a></li>
-<li><a href="https://learn.hashicorp.com/tutorials/terraform/install-cli">terraform</a></li>
-</ul>
-<h2 id="deploy">Deploy<a class="headerlink" href="#deploy" title="Permanent link">&para;</a></h2>
-<ol>
-<li>
-<p>For consuming EKS Blueprints, please see the <a href="https://aws-ia.github.io/terraform-aws-eks-blueprints/#consumption">Consumption</a> section. For exploring and trying out the patterns provided, please
-clone the project locally to quickly get up and running with a pattern. After cloning the project locally, <code>cd</code> into the pattern
-directory of your choice.</p>
-</li>
-<li>
-<p>To provision the pattern, the typical steps of execution are as follows:</p>
-<div class="language-sh highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>terraform<span class="w"> </span>init
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>terraform<span class="w"> </span>apply<span class="w"> </span>-auto-approve
-</span></code></pre></div>
-<p>For patterns that deviate from this general flow, see the pattern's respective <code>README.md</code> for more details.</p>
-<div class="admonition info">
-<p class="admonition-title">Terraform targeted apply</p>
-<p>Please see the <a href="https://aws-ia.github.io/terraform-aws-eks-blueprints/#terraform-caveats">Terraform Caveats</a> section for details on the use of targeted Terraform apply's</p>
-</div>
-</li>
-<li>
-<p>Once all of the resources have successfully been provisioned, the following command can be used to update the <code>kubeconfig</code>
-on your local machine and allow you to interact with your EKS Cluster using <code>kubectl</code>.</p>
-<div class="language-sh highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>aws<span class="w"> </span>eks<span class="w"> </span>--region<span class="w"> </span>&lt;REGION&gt;<span class="w"> </span>update-kubeconfig<span class="w"> </span>--name<span class="w"> </span>&lt;CLUSTER_NAME&gt;<span class="w"> </span>--alias<span class="w"> </span>&lt;CLUSTER_NAME&gt;
-</span></code></pre></div>
-<div class="admonition info">
-<p class="admonition-title">Pattern Terraform outputs</p>
-<p>Most examples will output the <code>aws eks update-kubeconfig ...</code> command as part of the Terraform apply output to simplify this process for users</p>
-</div>
-<div class="admonition warning">
-<p class="admonition-title">Private clusters</p>
-<p>Clusters that do not enable the clusters public endpoint will require users to access the cluster from within the VPC.
-For these patterns, a sample EC2 or other means are provided to demonstrate how to access those clusters privately</p>
-</div>
-<p>and without exposing the public endpoint. Please see the respective pattern's <code>README.md</code> for more details.</p>
-</li>
-<li>
-<p>Once you have updated your <code>kubeconfig</code>, you can verify that you are able to interact with your cluster by running the following command:</p>
-<div class="language-sh highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>kubectl<span class="w"> </span>get<span class="w"> </span>nodes
-</span></code></pre></div>
-<p>This should return a list of the node(s) running in the cluster created. If any errors are encountered, please re-trace the steps above
-and consult the pattern's <code>README.md</code> for more details on any additional/specific steps that may be required.</p>
-</li>
-</ol>
-<h2 id="destroy">Destroy<a class="headerlink" href="#destroy" title="Permanent link">&para;</a></h2>
-<p>To teardown and remove the resources created in the pattern, the typical steps of execution are as follows:</p>
-<div class="language-sh highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>terraform<span class="w"> </span>destroy<span class="w"> </span>-auto-approve
-</span></code></pre></div>
-<div class="admonition danger">
-<p class="admonition-title">Resources created outside of Terraform</p>
-<p>Depending on the pattern, some resources may have been created that Terraform is not aware of that will cause issues
-when attempting to clean up the pattern. For example, Karpenter is responsible for creating additional EC2 instances
-to satisfy the pod scheduling requirements. These instances will not be cleaned up by Terraform and will need to be
-de-provisioned <em>BEFORE</em> attempting to <code>terraform destroy</code>. This is why it is important that the addons, or any resources
-provisioned onto the cluster are cleaned up first. Please see the respective pattern's <code>README.md</code> for more
-details.</p>
-</div>
+<h1 id="compute-modes-what-gets-deployed-karpenter-vs-auto-mode-vs-hybrid">Compute modes: what gets deployed (Karpenter vs Auto Mode vs hybrid)<a class="headerlink" href="#compute-modes-what-gets-deployed-karpenter-vs-auto-mode-vs-hybrid" title="Permanent link">&para;</a></h1>
+<p>A quick reference for what this module deploys in each combination of the two
+independent compute toggles, and <strong>where each thing is visible</strong> (Kubernetes API
+via <code>kubectl</code> vs the AWS control plane via <code>aws</code> CLI).</p>
+<p>Two toggles drive everything:</p>
+<table>
+<thead>
+<tr>
+<th>Toggle</th>
+<th>Default</th>
+<th>Controls</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>enable_karpenter</code></td>
+<td><code>true</code></td>
+<td>Self-managed Karpenter stack (controller, CRDs, IRSA, subnets, SG, Fargate)</td>
+</tr>
+<tr>
+<td><code>enable_auto_mode</code></td>
+<td><code>false</code></td>
+<td>EKS Auto Mode (<code>compute_config</code> on the cluster + AWS-managed data plane)</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>At least one must be <code>true</code> (enforced by validation) or the cluster has no compute.</p>
+</blockquote>
+<p>The storage/LB capabilities have their own per-capability toggles that default to
+"on unless Auto Mode is on" but can be flipped to coexist during a migration:</p>
+<table>
+<thead>
+<tr>
+<th>Capability</th>
+<th>Toggle</th>
+<th>Default (when unset)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Block storage</td>
+<td><code>enable_self_managed_ebs_csi</code></td>
+<td><code>!enable_auto_mode</code></td>
+</tr>
+<tr>
+<td>Load balancing</td>
+<td><code>enable_self_managed_lb_controller</code></td>
+<td><code>!enable_auto_mode</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="scenario-1-karpenter-only-enable_karpenter-true-enable_auto_mode-false">Scenario 1 — Karpenter only (<code>enable_karpenter = true</code>, <code>enable_auto_mode = false</code>)<a class="headerlink" href="#scenario-1-karpenter-only-enable_karpenter-true-enable_auto_mode-false" title="Permanent link">&para;</a></h2>
+<p>The classic self-managed stack. Everything runs as workloads/CRDs <strong>you can see and
+manage with <code>kubectl</code></strong>.</p>
+<p><strong>Deployed:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>What</th>
+<th>Visible via</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Karpenter controller</td>
+<td>Helm <code>karpenter</code>, pods run on a <strong>Fargate</strong> profile</td>
+<td><code>kubectl</code> (pods)</td>
+</tr>
+<tr>
+<td>Karpenter CRDs</td>
+<td><code>karpenter-crd</code> Helm — owns <code>nodepools</code>/<code>nodeclaims.karpenter.sh</code></td>
+<td><code>kubectl get crd</code></td>
+</tr>
+<tr>
+<td>NodePool / EC2NodeClass</td>
+<td><code>karpenter-resources</code> Helm → <code>default</code> NodePool + <code>default</code> EC2NodeClass</td>
+<td><code>kubectl get nodepool,ec2nodeclass</code></td>
+</tr>
+<tr>
+<td>Karpenter networking</td>
+<td>Dedicated subnets (if <code>karpenter.subnet_cidrs</code>) + security group, tagged <code>karpenter.sh/discovery</code></td>
+<td><code>aws</code> CLI (EC2)</td>
+</tr>
+<tr>
+<td>IAM</td>
+<td>Karpenter controller IRSA + node IAM role</td>
+<td><code>aws</code> CLI (IAM)</td>
+</tr>
+<tr>
+<td>Nodes</td>
+<td>Regular EC2 instances Karpenter launches</td>
+<td><code>kubectl get nodes</code> + <code>aws</code> CLI (EC2 console)</td>
+</tr>
+<tr>
+<td>Core addons</td>
+<td><code>vpc-cni</code>, <code>kube-proxy</code>, <code>coredns</code>, <code>eks-pod-identity-agent</code>, <code>aws-ebs-csi-driver</code> (managed EKS addons)</td>
+<td><code>kubectl</code> (DaemonSets/Deployments) + <code>aws eks list-addons</code></td>
+</tr>
+<tr>
+<td>Load balancing</td>
+<td>Self-managed AWS LB Controller (deployed via ArgoCD; module creates its pod-identity IAM)</td>
+<td><code>kubectl</code> (pods)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="scenario-2-auto-mode-only-enable_auto_mode-true-enable_karpenter-false">Scenario 2 — Auto Mode only (<code>enable_auto_mode = true</code>, <code>enable_karpenter = false</code>)<a class="headerlink" href="#scenario-2-auto-mode-only-enable_auto_mode-true-enable_karpenter-false" title="Permanent link">&para;</a></h2>
+<p>"Pure" Auto Mode. AWS runs the data plane as <strong>managed core components</strong>, not as
+add-ons. The big mental shift: most of what used to be <code>kubectl</code>-visible pods is
+now <strong>invisible</strong> — it runs inside AWS-managed infrastructure. Yes, Auto Mode
+includes the full feature set (compute, pod networking, kube-proxy, local DNS,
+block storage, load balancing, pod identity).</p>
+<p><strong>Deployed:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>What</th>
+<th>Visible via</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Auto Mode enablement</td>
+<td><code>compute_config { enabled = true }</code> on the EKS cluster</td>
+<td><strong><code>aws eks describe-cluster</code></strong> (not kubectl)</td>
+</tr>
+<tr>
+<td>Built-in Karpenter</td>
+<td>Runs in the <strong>AWS-managed control plane</strong> — there is <strong>no</strong> karpenter pod</td>
+<td>not visible (no pod)</td>
+</tr>
+<tr>
+<td>NodePool</td>
+<td>Module's <code>auto-mode</code> NodePool (<code>karpenter.sh/v1</code>)</td>
+<td><code>kubectl get nodepool</code></td>
+</tr>
+<tr>
+<td>NodeClass</td>
+<td>Module's <code>auto-mode</code> NodeClass (<code>eks.amazonaws.com/v1</code>)</td>
+<td><code>kubectl get nodeclasses.eks.amazonaws.com</code></td>
+</tr>
+<tr>
+<td>Built-in node pools</td>
+<td><code>general-purpose</code> / <code>system</code> — only if <code>auto_mode.builtin_node_pools</code> set</td>
+<td><code>kubectl get nodepool</code></td>
+</tr>
+<tr>
+<td>Node IAM role</td>
+<td>Created by the EKS module; authorized via an <code>EC2</code>-type <strong>access entry</strong></td>
+<td><code>aws</code> CLI (IAM / <code>aws eks list-access-entries</code>)</td>
+</tr>
+<tr>
+<td>Nodes</td>
+<td>Auto Mode "managed instances" (Bottlerocket), labeled <code>eks.amazonaws.com/compute-type=auto</code></td>
+<td><code>kubectl get nodes</code>; underlying EC2 <strong>hidden by default</strong> from the EC2 console/API</td>
+</tr>
+<tr>
+<td>Pod networking (VPC CNI)</td>
+<td>Built into the node — <strong>no</strong> <code>aws-node</code> DaemonSet</td>
+<td>not visible (no pod)</td>
+</tr>
+<tr>
+<td>kube-proxy</td>
+<td>Built into the node — <strong>no</strong> <code>kube-proxy</code> DaemonSet</td>
+<td>not visible (no pod)</td>
+</tr>
+<tr>
+<td>Cluster DNS</td>
+<td>Local DNS on Auto Mode nodes — <strong>no</strong> <code>coredns</code> Deployment / addon</td>
+<td>not visible (no pod)</td>
+</tr>
+<tr>
+<td>Pod identity</td>
+<td>Built in — <strong>no</strong> <code>eks-pod-identity-agent</code> DaemonSet</td>
+<td>not visible (no pod)</td>
+</tr>
+<tr>
+<td>Block storage</td>
+<td>Managed <code>ebs.csi.eks.amazonaws.com</code> — <strong>no</strong> <code>ebs-csi-*</code> pods</td>
+<td>StorageClass via <code>kubectl</code>; driver itself not a pod</td>
+</tr>
+<tr>
+<td>Load balancing</td>
+<td>Built-in controller, IngressClass <code>eks.amazonaws.com/alb</code></td>
+<td>IngressClass via <code>kubectl</code>; controller not a pod</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Rule of thumb:</strong> in pure Auto Mode, <code>kubectl get pods -n kube-system</code> is nearly
+empty — no aws-node, kube-proxy, coredns, ebs-csi, or karpenter pods. They still
+exist as functionality, just not as Kubernetes objects you manage. You configure
+them through NodePools/NodeClasses and cluster settings, and inspect cluster-level
+facts with the <code>aws</code> CLI.</p>
+</blockquote>
+<hr />
+<h2 id="scenario-3-hybrid-migration-both-enable_karpenter-true-and-enable_auto_mode-true">Scenario 3 — Hybrid / migration (both <code>enable_karpenter = true</code> and <code>enable_auto_mode = true</code>)<a class="headerlink" href="#scenario-3-hybrid-migration-both-enable_karpenter-true-and-enable_auto_mode-true" title="Permanent link">&para;</a></h2>
+<p>The supported path for a gradual, in-place migration. <strong>Both controllers run
+side-by-side.</strong> This is what <code>examples/complete</code> and <code>tests/main</code> exercise.</p>
+<blockquote>
+<p>ℹ️ Both stacks share the <code>karpenter.sh</code> CRDs. The module's <code>karpenter-crd</code> Helm
+release sets <code>take_ownership = true</code>, so it adopts the CRDs whether Auto Mode or
+the release created them first — fresh single-apply and staged migrations both
+work. See <a href="../auto-mode-migration/">auto-mode-migration.md</a>.</p>
+</blockquote>
+<p><strong>Deployed (union of both, with coexistence rules):</strong></p>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>State in hybrid</th>
+<th>Visible via</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Karpenter controller</td>
+<td>Running (on Fargate)</td>
+<td><code>kubectl</code> (pods)</td>
+</tr>
+<tr>
+<td>Auto Mode built-in Karpenter</td>
+<td>Running (control plane)</td>
+<td>not visible (no pod)</td>
+</tr>
+<tr>
+<td>NodePools</td>
+<td><strong>Two</strong>, sharing one CRD: <code>default</code> (self-managed) + <code>auto-mode</code> (Auto Mode)</td>
+<td><code>kubectl get nodepool</code> (both listed)</td>
+</tr>
+<tr>
+<td>Node configs</td>
+<td><code>default</code> <strong>EC2NodeClass</strong> (<code>karpenter.k8s.aws</code>) <strong>and</strong> <code>auto-mode</code> <strong>NodeClass</strong> (<code>eks.amazonaws.com</code>) — different CRDs</td>
+<td><code>kubectl get ec2nodeclass</code> / <code>kubectl get nodeclasses.eks.amazonaws.com</code></td>
+</tr>
+<tr>
+<td>Subnet discovery</td>
+<td>Both discover the <strong>same</strong> subnets by tag (default), separated by NodePool + taints, OR different subnets — see migration doc</td>
+<td><code>aws</code> CLI (EC2 tags)</td>
+</tr>
+<tr>
+<td>Nodes</td>
+<td>Self-managed EC2 nodes <strong>and</strong> Auto Mode nodes (compute-type <code>auto</code>)</td>
+<td><code>kubectl get nodes -L eks.amazonaws.com/compute-type</code></td>
+</tr>
+<tr>
+<td>Compute separation</td>
+<td>Auto Mode <code>auto-mode</code> NodePool is <strong>tainted</strong> (<code>auto-mode=true:NoSchedule</code>); workloads migrate by adding the matching toleration</td>
+<td><code>kubectl</code></td>
+</tr>
+<tr>
+<td>CoreDNS</td>
+<td><strong>Retained</strong> (managed addon) — Auto Mode's DNS doesn't serve the self-managed nodes; pods run on the self-managed nodes</td>
+<td><code>kubectl</code> (Deployment) + <code>aws eks list-addons</code></td>
+</tr>
+<tr>
+<td>VPC CNI / kube-proxy / pod-identity</td>
+<td>Addons <strong>deregistered</strong> but <code>preserve = true</code> leaves the DaemonSets running on the self-managed nodes (gone once those nodes drain)</td>
+<td><code>kubectl</code> (DaemonSets on self-managed nodes only)</td>
+</tr>
+<tr>
+<td>Block storage</td>
+<td>Self-managed <code>ebs.csi.aws.com</code> <strong>and</strong> Auto Mode <code>ebs.csi.eks.amazonaws.com</code> coexist (set <code>enable_self_managed_ebs_csi = true</code>); migrate per <code>StorageClass</code></td>
+<td><code>kubectl</code> (self-managed pods)</td>
+</tr>
+<tr>
+<td>Load balancing</td>
+<td>Self-managed LB controller (<code>ingress.k8s.aws/alb</code>) <strong>and</strong> Auto Mode (<code>eks.amazonaws.com/alb</code>) coexist (set <code>enable_self_managed_lb_controller = true</code>); migrate per <code>ingressClassName</code></td>
+<td><code>kubectl</code> (self-managed pods)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="visibility-cheat-sheet">Visibility cheat-sheet<a class="headerlink" href="#visibility-cheat-sheet" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>You want to check…</th>
+<th>Command</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Is Auto Mode on?</td>
+<td><code>aws eks describe-cluster --name &lt;c&gt; --query 'cluster.computeConfig'</code></td>
+</tr>
+<tr>
+<td>Which Auto Mode capabilities are enabled</td>
+<td><code>describe-cluster</code> → <code>computeConfig.enabled</code>, <code>storageConfig.blockStorage.enabled</code>, <code>kubernetesNetworkConfig.elasticLoadBalancing.enabled</code> (all 3 wired together)</td>
+</tr>
+<tr>
+<td>Auto Mode node IAM authorization</td>
+<td><code>aws eks list-access-entries --cluster-name &lt;c&gt;</code> (look for the <code>EC2</code> entry)</td>
+</tr>
+<tr>
+<td>All NodePools (both controllers)</td>
+<td><code>kubectl get nodepools</code></td>
+</tr>
+<tr>
+<td>Self-managed node config</td>
+<td><code>kubectl get ec2nodeclasses</code></td>
+</tr>
+<tr>
+<td>Auto Mode node config + readiness</td>
+<td><code>kubectl get nodeclasses.eks.amazonaws.com</code>; <code>… -o yaml</code> → <code>.status.conditions</code></td>
+</tr>
+<tr>
+<td>Which nodes are Auto Mode vs self-managed</td>
+<td><code>kubectl get nodes -L eks.amazonaws.com/compute-type</code> (<code>auto</code> = Auto Mode)</td>
+</tr>
+<tr>
+<td>Managed EKS addons present</td>
+<td><code>aws eks list-addons --cluster-name &lt;c&gt;</code></td>
+</tr>
+<tr>
+<td>Is cluster DNS actually up</td>
+<td><code>kubectl get deploy,pods -n kube-system -l k8s-app=kube-dns</code></td>
+</tr>
+</tbody>
+</table>
 
 
 
