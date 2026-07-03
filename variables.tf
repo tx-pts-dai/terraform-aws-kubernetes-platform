@@ -389,7 +389,7 @@ variable "argocd_capability" {
     - idc_region: Region of the Identity Center instance (defaults to the provider region).
     - namespace: Kubernetes namespace for Argo CD (default "argocd").
     - rbac_role_mapping: Maps Identity Center users/groups to Argo CD roles (ADMIN, EDITOR, VIEWER).
-    - vpce_ids: VPC endpoint IDs for private access. When set, the public endpoint is BLOCKED and Argo CD is reachable only through these VPC endpoints. Leave empty for a public endpoint.
+    - vpc_endpoint_ids: VPC endpoint IDs for private access. When set, the public endpoint is BLOCKED and Argo CD is reachable only through these VPC endpoints. Leave empty for a public endpoint.
     - iam_policy_statements: Extra IAM policy statements to attach to the capability role (e.g. ECR read for image reflection).
   EOT
   type = object({
@@ -403,7 +403,7 @@ variable "argocd_capability" {
         type = string
       }))
     })), [])
-    vpce_ids = optional(list(string), [])
+    vpc_endpoint_ids = optional(list(string), [])
     iam_policy_statements = optional(map(object({
       sid       = optional(string)
       actions   = optional(list(string))

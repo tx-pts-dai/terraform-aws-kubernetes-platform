@@ -31,7 +31,7 @@ module "ack_capability" {
 # The managed Argo CD server requires IAM Identity Center for authentication. The
 # instance ARN is taken from var.argocd_capability.idc_instance_arn, or
 # auto-discovered from the account/org Identity Center instance. Argo CD is
-# publicly accessible unless argocd_capability.vpce_ids is set.
+# publicly accessible unless argocd_capability.vpc_endpoint_ids is set.
 data "aws_ssoadmin_instances" "this" {
   count = var.enable_argocd_capability && var.argocd_capability.idc_instance_arn == null ? 1 : 0
 }
@@ -71,8 +71,9 @@ module "argocd_capability" {
       }
       namespace         = var.argocd_capability.namespace
       rbac_role_mapping = length(var.argocd_capability.rbac_role_mapping) > 0 ? var.argocd_capability.rbac_role_mapping : null
-      # Public endpoint unless VPC endpoints are provided (setting vpce_ids blocks public access).
-      network_access = length(var.argocd_capability.vpce_ids) > 0 ? { vpce_ids = var.argocd_capability.vpce_ids } : null
+      # Public endpoint unless VPC endpoints are provided (setting vpc_endpoint_ids blocks public access).
+      # Inner key stays vpce_ids: that's the upstream module's/AWS API's field name.
+      network_access = length(var.argocd_capability.vpc_endpoint_ids) > 0 ? { vpce_ids = var.argocd_capability.vpc_endpoint_ids } : null
     }
   }
 

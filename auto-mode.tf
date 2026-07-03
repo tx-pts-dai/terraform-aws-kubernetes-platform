@@ -108,6 +108,17 @@ resource "aws_eks_access_entry" "auto_mode_node" {
   type          = "EC2"
 }
 
+# module.eks completing just means the aws_eks_cluster update call returned; Auto
+# Mode's own NodeClass CRD registration is asynchronous and can still be in
+# progress, which would make the Helm release below fail (unrecognized kind).
+resource "time_sleep" "wait_for_auto_mode_crds" {
+  count = var.enable_auto_mode ? 1 : 0
+
+  create_duration = "90s"
+
+  depends_on = [module.eks]
+}
+
 # Applied via the `custom-resources` Helm chart since the NodeClass/NodePool CRDs
 # only exist after Auto Mode is enabled — the `helm` provider defers gracefully on
 # clusters created in the same apply, unlike `kubectl`, which fails at plan.
@@ -132,7 +143,7 @@ resource "helm_release" "auto_mode_node_class" {
     spec = merge({ role = module.eks.node_iam_role_name }, each.value)
   })]
 
-  depends_on = [module.eks]
+  depends_on = [time_sleep.wait_for_auto_mode_crds]
 }
 
 resource "helm_release" "auto_mode_node_pool" {
