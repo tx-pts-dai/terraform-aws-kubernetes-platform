@@ -39,9 +39,9 @@ variable "vpc" {
 }
 
 variable "kubernetes_version" {
-  description = "Kubernetes version for the EKS cluster (e.g., \"1.34\")"
+  description = "Kubernetes version for the EKS cluster (e.g., \"1.36\")"
   type        = string
-  default     = "1.34"
+  default     = "1.36"
 }
 
 variable "eks" {
@@ -350,6 +350,12 @@ variable "karpenter_resources_helm_set" {
 
 variable "enable_fargate_fluentbit" {
   description = "Enable Fargate Fluentbit"
+  type        = bool
+  default     = true
+}
+
+variable "enable_efs_csi_driver" {
+  description = "Enable the aws-efs-csi-driver add-on (classic Amazon EFS and Amazon S3 Files storage) and its controller/node Pod Identity roles"
   type        = bool
   default     = true
 }

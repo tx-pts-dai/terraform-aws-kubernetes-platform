@@ -26,6 +26,7 @@ data "aws_iam_policy_document" "karpenter_controller" {
       "arn:aws:ec2:${local.region}:*:security-group/*",
       "arn:aws:ec2:${local.region}:*:subnet/*",
       "arn:aws:ec2:${local.region}:*:capacity-reservation/*",
+      "arn:aws:ec2:${local.region}:*:placement-group/*",
     ]
 
     actions = [
@@ -206,7 +207,9 @@ data "aws_iam_policy_document" "karpenter_controller" {
       "ec2:DescribeLaunchTemplates",
       "ec2:DescribeSecurityGroups",
       "ec2:DescribeSpotPriceHistory",
-      "ec2:DescribeSubnets"
+      "ec2:DescribeSubnets",
+      "ec2:DescribeInstanceStatus",
+      "ec2:DescribePlacementGroups"
     ]
 
     condition {
@@ -226,6 +229,18 @@ data "aws_iam_policy_document" "karpenter_controller" {
     sid       = "AllowPricingReadActions"
     resources = ["*"]
     actions   = ["pricing:GetProducts"]
+  }
+
+  statement {
+    sid       = "AllowZonalShiftReadActions"
+    resources = ["*"]
+    actions   = ["arc-zonal-shift:GetManagedResource"]
+
+    condition {
+      test     = "StringEquals"
+      variable = "arc-zonal-shift:ResourceIdentifier"
+      values   = [module.eks.cluster_arn]
+    }
   }
 
   statement {
@@ -375,10 +390,12 @@ data "aws_iam_policy_document" "karpenter_controller" {
   }
 }
 
-resource "aws_iam_policy" "karpenter_controller" {
+# Inline policy to avoid the 6144 char managed-policy size limit
+resource "aws_iam_role_policy" "karpenter_controller" {
   count = local.create_karpenter ? 1 : 0
 
   name   = "karpenter-controller-${local.id}"
+  role   = module.karpenter_irsa.name
   policy = data.aws_iam_policy_document.karpenter_controller[0].json
 }
 
@@ -393,9 +410,6 @@ module "karpenter_irsa" {
   use_name_prefix = false
 
   create_policy = false
-  policies = {
-    controller = one(aws_iam_policy.karpenter_controller[*].arn)
-  }
 
   oidc_providers = {
     main = {
@@ -430,7 +444,7 @@ resource "aws_iam_policy" "ecr_passthrough" {
 # IRSA is disabled as we're using a custom role for Fargate
 module "karpenter" {
   source  = "terraform-aws-modules/eks/aws//modules/karpenter"
-  version = "21.15.1"
+  version = "21.24.0"
 
   create = local.create_karpenter
 
@@ -460,7 +474,7 @@ resource "helm_release" "karpenter_crd" {
 
   name             = "karpenter-crd"
   chart            = "karpenter-crd"
-  version          = "1.10.0"
+  version          = "1.13.0" # renovate: datasource=github-releases depName=aws/karpenter-provider-aws
   repository       = "oci://public.ecr.aws/karpenter"
   description      = "Karpenter CRDs"
   namespace        = local.karpenter.namespace
@@ -480,7 +494,7 @@ resource "helm_release" "karpenter_release" {
 
   name             = "karpenter"
   chart            = "karpenter"
-  version          = "1.10.0"
+  version          = "1.13.0" # renovate: datasource=github-releases depName=aws/karpenter-provider-aws
   repository       = "oci://public.ecr.aws/karpenter"
   namespace        = local.karpenter.namespace
   create_namespace = true
@@ -503,7 +517,7 @@ resource "helm_release" "karpenter_release" {
       clusterEndpoint: ${module.eks.cluster_endpoint}
       interruptionQueue: ${module.karpenter.queue_name}
       featureGates:
-        spotToSpotConsolidation: true
+        spotToSpotConsolidation: false
     serviceAccount:
       annotations:
         eks.amazonaws.com/role-arn: ${module.karpenter_irsa.arn}
@@ -541,10 +555,14 @@ resource "helm_release" "karpenter_resources" {
     nodePools:
       default:
         enabled: true
+        disruption:
+          consolidateAfter: 1m
 
     ec2NodeClasses:
       default:
         enabled: true
+        amiSelectorTerms:
+          - alias: bottlerocket@v1.62.1 # renovate: datasource=github-releases depName=bottlerocket-os/bottlerocket
     EOT
   ], var.karpenter_resources_helm_values)
 

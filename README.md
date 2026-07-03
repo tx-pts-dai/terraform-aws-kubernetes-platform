@@ -59,14 +59,44 @@ To upgrade your cluster to a new Kubernetes version:
 module "k8s_platform" {
   source = "tx-pts-dai/kubernetes-platform/aws"
 
-  kubernetes_version = "1.34"
+  kubernetes_version = "1.36"
 
   # ... other configuration
 }
 ```
 
-**Important**: Do not skip Kubernetes minor versions during upgrades. For example, upgrade from 1.32 → 1.33 → 1.34, not directly from 1.32 → 1.34.
+**Important**: Do not skip Kubernetes minor versions during upgrades. For example, upgrade from 1.34 → 1.35 → 1.36, not directly from 1.34 → 1.36.
 
+### Notes for 1.36
+
+When upgrading to the current default (`1.36`), be aware of the following ([EKS 1.36 support](https://aws.amazon.com/about-aws/whats-new/2026/06/amazon-eks-distro-kubernetes-version-1-36/), [EKS 1.36 release notes](https://docs.aws.amazon.com/eks/latest/userguide/kubernetes-versions-standard.html#kubernetes-1-36)):
+
+- **`gitRepo` volume type permanently removed** — the kubelet refuses to run Pods that use `gitRepo` volumes (the API still accepts them). Migrate to init containers or a git-sync sidecar before upgrading.
+- **containerd 2.0+ required** — 1.35 was the last release supporting containerd 1.x, so nodes must run containerd 2.0+ before this upgrade. The AL2023 and Bottlerocket EKS AMIs already ship containerd 2.x.
+- **Strict IP/CIDR validation is on by default** — IP addresses with leading zeros (e.g. `010.0.0.5`) and non-canonical CIDRs (e.g. `192.168.0.5/24`) are rejected on create/update. Audit manifests, Helm charts, and automation for canonical notation.
+- **kube-proxy IPVS mode removed** — deprecated in 1.35 and removed in 1.36; if you switched kube-proxy to IPVS mode, move back to iptables mode before upgrading.
+
+## Versioning and Releases
+
+This module follows [Semantic Versioning](https://semver.org/) (`MAJOR.MINOR.PATCH`). Releases are automated with [semantic-release](https://github.com/semantic-release/semantic-release) and derived from [Conventional Commits](https://www.conventionalcommits.org/) on `main`:
+
+| Commit type | Example | Version bump |
+| ----------- | ------- | ------------ |
+| `fix:` | `fix: correct karpenter subnet tag` | PATCH (`x.y.Z`) |
+| `feat:` | `feat: add efs driver` | MINOR (`x.Y.0`) |
+| `feat!:` / `fix!:` or a `BREAKING CHANGE:` footer | `feat!: drop support for k8s 1.32` | MAJOR (`X.0.0`) |
+
+Guidelines for choosing the bump:
+
+- **PATCH** — backwards-compatible bug fixes that do not change the module interface or default behaviour.
+- **MINOR** — backwards-compatible new features (new variables, new optional resources) where existing configurations keep working unchanged.
+- **MAJOR** — any backwards-incompatible change: removed or renamed variables/outputs, changed defaults that alter live infrastructure, or behaviour that requires consumers to take action before upgrading.
+
+### Kubernetes minor version updates require a MAJOR release
+
+Bumping the default `kubernetes_version` by a minor version (e.g. `1.33` → `1.34`) **must be released as a MAJOR version** of this module. A Kubernetes minor upgrade is a backwards-incompatible change for consumers: it advances the control plane, may deprecate or remove APIs, and cannot be skipped or rolled back, so it requires deliberate action before upgrading. Mark such changes as breaking (use `feat!:` or a `BREAKING CHANGE:` footer) so semantic-release produces a MAJOR bump.
+
+Always [pin the module to a specific version](#usage) so that MAJOR releases never reach your infrastructure unintentionally.
 
 ## Explanation and description of interesting use-cases
 
@@ -173,20 +203,22 @@ as described in the `.pre-commit-config.yaml` file
 
 | Name | Source | Version |
 | ---- | ------ | ------- |
-| <a name="module_ack_capability"></a> [ack\_capability](#module\_ack\_capability) | terraform-aws-modules/eks/aws//modules/capability | 21.15.1 |
+| <a name="module_ack_capability"></a> [ack\_capability](#module\_ack\_capability) | terraform-aws-modules/eks/aws//modules/capability | 21.24.0 |
 | <a name="module_acm"></a> [acm](#module\_acm) | terraform-aws-modules/acm/aws | 6.3.0 |
 | <a name="module_argocd"></a> [argocd](#module\_argocd) | ./modules/argocd | n/a |
 | <a name="module_argocd_capability"></a> [argocd\_capability](#module\_argocd\_capability) | terraform-aws-modules/eks/aws//modules/capability | 21.15.1 |
 | <a name="module_aws_ebs_csi_pod_identity"></a> [aws\_ebs\_csi\_pod\_identity](#module\_aws\_ebs\_csi\_pod\_identity) | terraform-aws-modules/eks-pod-identity/aws | 2.8.1 |
+| <a name="module_aws_efs_csi_controller_pod_identity"></a> [aws\_efs\_csi\_controller\_pod\_identity](#module\_aws\_efs\_csi\_controller\_pod\_identity) | terraform-aws-modules/eks-pod-identity/aws | 2.8.1 |
+| <a name="module_aws_efs_csi_node_pod_identity"></a> [aws\_efs\_csi\_node\_pod\_identity](#module\_aws\_efs\_csi\_node\_pod\_identity) | terraform-aws-modules/eks-pod-identity/aws | 2.8.1 |
 | <a name="module_aws_gateway_controller_pod_identity"></a> [aws\_gateway\_controller\_pod\_identity](#module\_aws\_gateway\_controller\_pod\_identity) | terraform-aws-modules/eks-pod-identity/aws | 2.8.1 |
 | <a name="module_aws_lb_controller_pod_identity"></a> [aws\_lb\_controller\_pod\_identity](#module\_aws\_lb\_controller\_pod\_identity) | terraform-aws-modules/eks-pod-identity/aws | 2.8.1 |
 | <a name="module_aws_vpc_cni_pod_identity"></a> [aws\_vpc\_cni\_pod\_identity](#module\_aws\_vpc\_cni\_pod\_identity) | terraform-aws-modules/eks-pod-identity/aws | 2.8.1 |
 | <a name="module_ebs_csi_driver_irsa"></a> [ebs\_csi\_driver\_irsa](#module\_ebs\_csi\_driver\_irsa) | terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts | 6.6.1 |
-| <a name="module_eks"></a> [eks](#module\_eks) | terraform-aws-modules/eks/aws | 21.15.1 |
+| <a name="module_eks"></a> [eks](#module\_eks) | terraform-aws-modules/eks/aws | 21.24.0 |
 | <a name="module_eks_addons"></a> [eks\_addons](#module\_eks\_addons) | ./modules/eks-addons | n/a |
 | <a name="module_external_dns_pod_identity"></a> [external\_dns\_pod\_identity](#module\_external\_dns\_pod\_identity) | terraform-aws-modules/eks-pod-identity/aws | 2.8.1 |
 | <a name="module_external_secrets_pod_identity"></a> [external\_secrets\_pod\_identity](#module\_external\_secrets\_pod\_identity) | terraform-aws-modules/eks-pod-identity/aws | 2.8.1 |
-| <a name="module_karpenter"></a> [karpenter](#module\_karpenter) | terraform-aws-modules/eks/aws//modules/karpenter | 21.15.1 |
+| <a name="module_karpenter"></a> [karpenter](#module\_karpenter) | terraform-aws-modules/eks/aws//modules/karpenter | 21.24.0 |
 | <a name="module_karpenter_irsa"></a> [karpenter\_irsa](#module\_karpenter\_irsa) | terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts | 6.6.1 |
 | <a name="module_karpenter_security_group"></a> [karpenter\_security\_group](#module\_karpenter\_security\_group) | ./modules/security-group | n/a |
 | <a name="module_ssm"></a> [ssm](#module\_ssm) | ./modules/ssm | n/a |
@@ -203,9 +235,9 @@ as described in the `.pre-commit-config.yaml` file
 | [aws_eks_access_policy_association.k8s_access_predefined](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/eks_access_policy_association) | resource |
 | [aws_iam_policy.ecr_passthrough](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.fargate_fluentbit](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
-| [aws_iam_policy.karpenter_controller](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_role.k8s_access](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
 | [aws_iam_role_policy.k8s_access](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy) | resource |
+| [aws_iam_role_policy.karpenter_controller](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy) | resource |
 | [aws_route_table_association.karpenter](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route_table_association) | resource |
 | [aws_security_group_rule.eks_control_plane_ingress](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
 | [aws_subnet.karpenter](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/subnet) | resource |
@@ -254,6 +286,7 @@ as described in the `.pre-commit-config.yaml` file
 | <a name="input_enable_argocd_capability"></a> [enable\_argocd\_capability](#input\_enable\_argocd\_capability) | Enable the AWS-managed Argo CD EKS capability. Mutually exclusive with enable\_argocd (self-managed Argo CD). Requires IAM Identity Center (auto-discovered, or set argocd\_capability.idc\_instance\_arn). | `bool` | `false` | no |
 | <a name="input_enable_auto_mode"></a> [enable\_auto\_mode](#input\_enable\_auto\_mode) | Enable EKS Auto Mode. AWS manages compute (built-in Karpenter), block storage, load balancing and core networking. Can be combined with enable\_karpenter to run both compute stacks side-by-side during a migration. | `bool` | `false` | no |
 | <a name="input_enable_ecr_passthrough_policy"></a> [enable\_ecr\_passthrough\_policy](#input\_enable\_ecr\_passthrough\_policy) | Enable the ECR pull-through cache policy for cluster nodes. This policy may grant additional ECR permissions, including automatic repository creation for pull-through cache repositories, and is not required for standard ECR image pulls. | `bool` | `false` | no |
+| <a name="input_enable_efs_csi_driver"></a> [enable\_efs\_csi\_driver](#input\_enable\_efs\_csi\_driver) | Enable the aws-efs-csi-driver add-on (classic Amazon EFS and Amazon S3 Files storage) and its controller/node Pod Identity roles | `bool` | `true` | no |
 | <a name="input_enable_fargate_fluentbit"></a> [enable\_fargate\_fluentbit](#input\_enable\_fargate\_fluentbit) | Enable Fargate Fluentbit | `bool` | `true` | no |
 | <a name="input_enable_karpenter"></a> [enable\_karpenter](#input\_enable\_karpenter) | Enable the self-managed Karpenter stack (controller, Helm releases, IRSA, subnets, security group, Fargate profile). Independent of enable\_auto\_mode: keep both enabled to run them side-by-side during a migration. At least one of enable\_karpenter / enable\_auto\_mode must be true or the cluster has no compute. | `bool` | `true` | no |
 | <a name="input_enable_self_managed_ebs_csi"></a> [enable\_self\_managed\_ebs\_csi](#input\_enable\_self\_managed\_ebs\_csi) | Create the self-managed EBS CSI driver (addon, IRSA and pod-identity role). Defaults to enabled unless Auto Mode is on. Set to true to keep it running alongside Auto Mode's managed EBS CSI during a storage migration, or false to drop it. | `bool` | `null` | no |
@@ -268,7 +301,7 @@ as described in the `.pre-commit-config.yaml` file
 | <a name="input_karpenter_resources_helm_set"></a> [karpenter\_resources\_helm\_set](#input\_karpenter\_resources\_helm\_set) | List of Karpenter Resources Helm set values | <pre>list(object({<br/>    name  = string<br/>    value = string<br/>    type  = optional(string)<br/>  }))</pre> | `[]` | no |
 | <a name="input_karpenter_resources_helm_values"></a> [karpenter\_resources\_helm\_values](#input\_karpenter\_resources\_helm\_values) | List of Karpenter Resources Helm values | `list(string)` | `[]` | no |
 | <a name="input_kubernetes_access_roles"></a> [kubernetes\_access\_roles](#input\_kubernetes\_access\_roles) | Map of reusable IAM roles that can be assumed by multiple principals.<br/>Creates standard roles that grant different levels of Kubernetes access.<br/><br/>Supported predefined access\_level values:<br/>- "view"         -> AmazonEKSViewPolicy (read-only)<br/>- "edit"         -> AmazonEKSEditPolicy (create/update resources)<br/>- "admin"        -> AmazonEKSClusterAdminPolicy (full admin)<br/>- "custom"       -> Use custom\_policy\_arns (list of policy ARNs)<br/><br/>Example:<br/>{<br/>  "readonly" = {<br/>    controller\_iam\_role\_arns = [<br/>      "arn:aws:iam::123456789012:role/backstage-prod",<br/>      "arn:aws:iam::123456789012:role/ai-agent"<br/>    ]<br/>    access\_level = "view"           # Predefined: view, edit, admin, or custom<br/>    scope        = "cluster"        # "cluster" or "namespace"<br/>    namespaces   = []               # required if scope = "namespace"<br/>  }<br/>  "developer" = {<br/>    controller\_iam\_role\_arns = ["arn:aws:iam::123456789012:role/dev-team"]<br/>    access\_level = "edit"<br/>    scope        = "namespace"<br/>    namespaces   = ["development", "staging"]<br/>  }<br/>  "ops-admin" = {<br/>    controller\_iam\_role\_arns = ["arn:aws:iam::123456789012:role/ops-team"]<br/>    access\_level = "admin"<br/>    scope        = "cluster"<br/>  }<br/>  "custom-access" = {<br/>    controller\_iam\_role\_arns = ["arn:aws:iam::123456789012:role/special-service"]<br/>    access\_level = "custom"<br/>    custom\_policy\_arns = [<br/>      "arn:aws:eks::aws:cluster-access-policy/MyCustomPolicy"<br/>    ]<br/>    scope = "cluster"<br/>  }<br/>}<br/><br/>This creates:<br/>- {cluster}-k8s-readonly (view access)<br/>- {cluster}-k8s-developer (edit access on dev/staging namespaces)<br/>- {cluster}-k8s-ops-admin (full admin access)<br/>- {cluster}-k8s-custom-access (custom policies) | <pre>map(object({<br/>    controller_iam_role_arns = list(string)<br/>    access_level             = string # "view", "edit", "admin", or "custom"<br/>    scope                    = string # "cluster" or "namespace"<br/>    namespaces               = optional(list(string), [])<br/>    custom_policy_arns       = optional(list(string), [])<br/>    external_id              = optional(string)<br/>  }))</pre> | `{}` | no |
-| <a name="input_kubernetes_version"></a> [kubernetes\_version](#input\_kubernetes\_version) | Kubernetes version for the EKS cluster (e.g., "1.34") | `string` | `"1.34"` | no |
+| <a name="input_kubernetes_version"></a> [kubernetes\_version](#input\_kubernetes\_version) | Kubernetes version for the EKS cluster (e.g., "1.36") | `string` | `"1.36"` | no |
 | <a name="input_name"></a> [name](#input\_name) | The name of the platform, a timestamp will be appended to this name to make the stack\_name. If not provided, the name of the directory will be used. | `string` | `""` | no |
 | <a name="input_region"></a> [region](#input\_region) | AWS region to use | `string` | `null` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | Default tags to apply to all resources | `map(string)` | `{}` | no |
