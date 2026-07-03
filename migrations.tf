@@ -37,11 +37,10 @@ moved {
 
 # Auto Mode support: the self-managed Karpenter raw resources became conditional
 # (count). These moves keep existing (Auto Mode disabled) deployments stable.
-moved {
-  from = aws_iam_policy.karpenter_controller
-  to   = aws_iam_policy.karpenter_controller[0]
-}
-
+# Note: aws_iam_policy.karpenter_controller itself has no moved block here — it
+# was replaced by the inline aws_iam_role_policy.karpenter_controller[0] (a
+# different resource type, which moved blocks cannot bridge), matching how main
+# shipped that same transition (commit 4199874) with no moved block either.
 moved {
   from = helm_release.karpenter_crd
   to   = helm_release.karpenter_crd[0]
