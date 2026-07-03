@@ -106,6 +106,48 @@ Why this module?
 - To encourage standardization and common practices
 - To ease maintenance
 
+## EKS Auto Mode
+
+The module can provision the cluster in [EKS Auto Mode](https://docs.aws.amazon.com/eks/latest/userguide/automode.html)
+instead of (or alongside) the self-managed Karpenter / EBS CSI / AWS Load Balancer
+Controller stack. Set `enable_auto_mode = true` and, optionally, pass your own
+NodePool and NodeClass via `auto_mode_node_pools` / `auto_mode_node_classes` (the
+module injects the Auto Mode node IAM role automatically). Auto Mode is **opt-in**
+and defaults to `false`, so existing clusters are unaffected.
+
+`enable_auto_mode` and `enable_karpenter` (default `true`) are **independent**: keep
+both enabled to run the two compute stacks side-by-side for a gradual migration. At
+least one must be enabled or the cluster has no compute.
+
+See the [Auto Mode migration guide](./docs/auto-mode-migration.md) for details,
+including how to migrate the ALB controller that is deployed via ArgoCD today.
+
+## Argo CD
+
+Three mutually-exclusive options are available:
+
+1. **None** (default) — no Argo CD.
+2. **Self-managed** (`enable_argocd = true`) — creates the hub/spoke IAM roles and
+   pod-identity associations for an Argo CD that you deploy via GitOps.
+3. **AWS-managed capability** (`enable_argocd_capability = true`) — provisions the
+   [Argo CD EKS capability](https://docs.aws.amazon.com/eks/latest/userguide/argocd.html).
+   The managed server is **publicly accessible by default** (set
+   `argocd_capability.vpce_ids` to restrict it to VPC endpoints) and requires IAM
+   Identity Center for authentication. The Identity Center instance ARN is
+   auto-discovered (needs `sso:ListInstances`) or can be set explicitly via
+   `argocd_capability.idc_instance_arn`. The server URL is exposed as the
+   `argocd_capability_server_url` output.
+
+   ```hcl
+   enable_argocd_capability = true
+   argocd_capability = {
+     rbac_role_mapping = [{
+       role     = "ADMIN"
+       identity = [{ id = "<idc-group-id>", type = "SSO_GROUP" }]
+     }]
+   }
+   ```
+
 ## Examples
 
 - [Complete](./examples/complete/) - Includes creation of VPC, k8s cluster, addons and all the optional features.
@@ -164,6 +206,7 @@ as described in the `.pre-commit-config.yaml` file
 | <a name="module_ack_capability"></a> [ack\_capability](#module\_ack\_capability) | terraform-aws-modules/eks/aws//modules/capability | 21.24.0 |
 | <a name="module_acm"></a> [acm](#module\_acm) | terraform-aws-modules/acm/aws | 6.3.0 |
 | <a name="module_argocd"></a> [argocd](#module\_argocd) | ./modules/argocd | n/a |
+| <a name="module_argocd_capability"></a> [argocd\_capability](#module\_argocd\_capability) | terraform-aws-modules/eks/aws//modules/capability | 21.15.1 |
 | <a name="module_aws_ebs_csi_pod_identity"></a> [aws\_ebs\_csi\_pod\_identity](#module\_aws\_ebs\_csi\_pod\_identity) | terraform-aws-modules/eks-pod-identity/aws | 2.8.1 |
 | <a name="module_aws_efs_csi_controller_pod_identity"></a> [aws\_efs\_csi\_controller\_pod\_identity](#module\_aws\_efs\_csi\_controller\_pod\_identity) | terraform-aws-modules/eks-pod-identity/aws | 2.8.1 |
 | <a name="module_aws_efs_csi_node_pod_identity"></a> [aws\_efs\_csi\_node\_pod\_identity](#module\_aws\_efs\_csi\_node\_pod\_identity) | terraform-aws-modules/eks-pod-identity/aws | 2.8.1 |
@@ -186,6 +229,7 @@ as described in the `.pre-commit-config.yaml` file
 | Name | Type |
 | ---- | ---- |
 | [aws_cloudwatch_log_group.fargate_fluentbit](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
+| [aws_eks_access_entry.auto_mode_node](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/eks_access_entry) | resource |
 | [aws_eks_access_entry.k8s_access](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/eks_access_entry) | resource |
 | [aws_eks_access_policy_association.k8s_access_custom](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/eks_access_policy_association) | resource |
 | [aws_eks_access_policy_association.k8s_access_predefined](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/eks_access_policy_association) | resource |
@@ -197,12 +241,15 @@ as described in the `.pre-commit-config.yaml` file
 | [aws_route_table_association.karpenter](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route_table_association) | resource |
 | [aws_security_group_rule.eks_control_plane_ingress](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
 | [aws_subnet.karpenter](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/subnet) | resource |
+| [helm_release.auto_mode_node_class](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
+| [helm_release.auto_mode_node_pool](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
 | [helm_release.karpenter_crd](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
 | [helm_release.karpenter_release](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
 | [helm_release.karpenter_resources](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
 | [kubernetes_config_map_v1.aws_logging](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/config_map_v1) | resource |
 | [kubernetes_namespace_v1.aws_observability](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/namespace_v1) | resource |
 | [time_sleep.wait_after_karpenter](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/sleep) | resource |
+| [time_sleep.wait_for_auto_mode_crds](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/sleep) | resource |
 | [time_sleep.wait_on_destroy](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/sleep) | resource |
 | [time_static.timestamp_id](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/static) | resource |
 | [aws_availability_zones.available](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/availability_zones) | data source |
@@ -216,6 +263,7 @@ as described in the `.pre-commit-config.yaml` file
 | [aws_region.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/region) | data source |
 | [aws_route53_zone.base_domain_zone](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/route53_zone) | data source |
 | [aws_route_tables.private_route_tables](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/route_tables) | data source |
+| [aws_ssoadmin_instances.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ssoadmin_instances) | data source |
 
 ## Inputs
 
@@ -225,16 +273,25 @@ as described in the `.pre-commit-config.yaml` file
 | <a name="input_ack_iam_policy_arn"></a> [ack\_iam\_policy\_arn](#input\_ack\_iam\_policy\_arn) | IAM policy ARN to attach to the ACK capability role. Defaults to AdministratorAccess if not specified. | `string` | `null` | no |
 | <a name="input_acm_certificate"></a> [acm\_certificate](#input\_acm\_certificate) | ACM certificate configuration for the domain(s). Controls domain name, alternative domain names, wildcard configuration, and validation behavior.<br/>Options include:<br/>  - domain\_name: Primary domain name for the certificate. If not provided, uses base\_domain from other configuration.<br/>  - subject\_alternative\_names: List of additional domain names to include in the certificate.<br/>  - wildcard\_certificates: When true, adds a wildcard prefix (*.) to all domains in the certificate.<br/>  - prepend\_stack\_id: When true, prepends the stack identifier to each domain name. Only works after random\_string is created.<br/>  - wait\_for\_validation: When true, Terraform will wait for certificate validation to complete before proceeding. | <pre>object({<br/>    domain_name               = optional(string)<br/>    subject_alternative_names = optional(list(string), [])<br/>    wildcard_certificates     = optional(bool, false)<br/>    prepend_stack_id          = optional(bool, false)<br/>    wait_for_validation       = optional(bool, false)<br/>  })</pre> | `{}` | no |
 | <a name="input_argocd"></a> [argocd](#input\_argocd) | Argo CD configurations | <pre>object({<br/>    # Hub specific<br/>    enable_hub        = optional(bool, false)<br/>    namespace         = optional(string, "argocd")<br/>    hub_iam_role_name = optional(string, "argocd-controller")<br/><br/>    # Spoke specific<br/>    enable_spoke = optional(bool, false)<br/><br/>    hub_iam_role_arn  = optional(string, null)<br/>    hub_iam_role_arns = optional(list(string), null)<br/><br/>    # Common<br/>    tags = optional(map(string), {})<br/>  })</pre> | `{}` | no |
+| <a name="input_argocd_capability"></a> [argocd\_capability](#input\_argocd\_capability) | Configuration for the AWS-managed Argo CD EKS capability. Only used when `enable_argocd_capability = true`.<br/>  - idc\_instance\_arn: IAM Identity Center instance ARN. Leave null to auto-discover the account/org instance via the aws\_ssoadmin\_instances data source (requires sso:ListInstances).<br/>  - idc\_region: Region of the Identity Center instance (defaults to the provider region).<br/>  - namespace: Kubernetes namespace for Argo CD (default "argocd").<br/>  - rbac\_role\_mapping: Maps Identity Center users/groups to Argo CD roles (ADMIN, EDITOR, VIEWER).<br/>  - vpc\_endpoint\_ids: VPC endpoint IDs for private access. When set, the public endpoint is BLOCKED and Argo CD is reachable only through these VPC endpoints. Leave empty for a public endpoint.<br/>  - iam\_policy\_statements: Extra IAM policy statements to attach to the capability role (e.g. ECR read for image reflection). | <pre>object({<br/>    idc_instance_arn = optional(string)<br/>    idc_region       = optional(string)<br/>    namespace        = optional(string, "argocd")<br/>    rbac_role_mapping = optional(list(object({<br/>      role = string<br/>      identity = list(object({<br/>        id   = string<br/>        type = string<br/>      }))<br/>    })), [])<br/>    vpc_endpoint_ids = optional(list(string), [])<br/>    iam_policy_statements = optional(map(object({<br/>      sid       = optional(string)<br/>      actions   = optional(list(string))<br/>      resources = optional(list(string))<br/>      effect    = optional(string)<br/>    })), {})<br/>  })</pre> | `{}` | no |
+| <a name="input_auto_mode"></a> [auto\_mode](#input\_auto\_mode) | EKS Auto Mode configuration. Only used when `enable_auto_mode = true`.<br/>  - builtin\_node\_pools: List of AWS-managed node pools to enable (e.g. ["general-purpose", "system"]). Leave empty ([]) to only use your own NodePools/NodeClasses.<br/>  - node\_iam\_role\_additional\_policies: Additional IAM policy ARNs to attach to the Auto Mode node role, keyed by an arbitrary name.<br/>  - default\_node\_pool\_taints: Taints applied to the auto-generated `default` NodePool (ignored when you pass your own auto\_mode\_node\_pools). Use this during a migration so existing workloads do not schedule onto Auto Mode nodes until they tolerate the taint.<br/>  - discover\_karpenter\_subnets: Controls how the auto-generated `default` NodeClass finds subnets. When true, it discovers them by tag (see subnet\_discovery\_tags) — by default the SAME dedicated subnets as the self-managed Karpenter stack (the "same network, different NodePools/taints" migration path). When false, it selects var.vpc.private\_subnets by ID. Defaults to null, which resolves to enable\_karpenter: shared subnets while the Karpenter stack runs, private subnets in pure Auto Mode. Ignored when you pass your own auto\_mode\_node\_classes.<br/>  - subnet\_discovery\_tags: Tags the `default` NodeClass matches when discover\_karpenter\_subnets is true. Defaults to { "karpenter.sh/discovery" = <cluster-name> } (the tag the module puts on its own dedicated Karpenter subnets). Override it to match a customized Karpenter discovery tag — e.g. { "karpenter.sh/discovery" = "shared" } when Karpenter is pointed at pre-existing subnets via karpenter\_resources\_helm\_set. | <pre>object({<br/>    builtin_node_pools                = optional(list(string), [])<br/>    node_iam_role_additional_policies = optional(map(string), {})<br/>    default_node_pool_taints = optional(list(object({<br/>      key    = string<br/>      value  = optional(string)<br/>      effect = string<br/>    })), [])<br/>    discover_karpenter_subnets = optional(bool, null)<br/>    subnet_discovery_tags      = optional(map(string), null)<br/>  })</pre> | `{}` | no |
+| <a name="input_auto_mode_node_classes"></a> [auto\_mode\_node\_classes](#input\_auto\_mode\_node\_classes) | Map of EKS Auto Mode NodeClass resources to apply (apiVersion `eks.amazonaws.com/v1`). The map key is the NodeClass name and the value is its `spec`.<br/>Only used when `enable_auto_mode = true`. When left empty, a `default` NodeClass is created that targets the cluster private subnets and primary security group and uses the Auto Mode node IAM role. | `any` | `{}` | no |
+| <a name="input_auto_mode_node_pools"></a> [auto\_mode\_node\_pools](#input\_auto\_mode\_node\_pools) | Map of Karpenter NodePool resources to apply (apiVersion `karpenter.sh/v1`). The map key is the NodePool name and the value is its `spec`.<br/>Only used when `enable_auto_mode = true`. When left empty, a `default` NodePool referencing the `default` NodeClass is created. | `any` | `{}` | no |
 | <a name="input_base_domain"></a> [base\_domain](#input\_base\_domain) | Base domain for the platform, used for ingress and ACM certificates | `string` | `null` | no |
 | <a name="input_cluster_admins"></a> [cluster\_admins](#input\_cluster\_admins) | Map of IAM roles to add as cluster admins<br/>  role\_arn: ARN of the IAM role to add as cluster admin<br/>  role\_name: Name of the IAM role to add as cluster admin<br/>  kubernetes\_groups: List of Kubernetes groups to add the role to (default: ["system:masters"])<br/><br/>role\_arn and role\_name are mutually exclusive, exactly one must be set. | <pre>map(object({<br/>    role_arn          = optional(string)<br/>    role_name         = optional(string)<br/>    kubernetes_groups = optional(list(string))<br/>  }))</pre> | `{}` | no |
 | <a name="input_create_addon_pod_identity_roles"></a> [create\_addon\_pod\_identity\_roles](#input\_create\_addon\_pod\_identity\_roles) | Create addon pod identities roles. If set to true, all roles will be created | `bool` | `true` | no |
-| <a name="input_eks"></a> [eks](#input\_eks) | Map of EKS configurations including cluster settings and core addon customization.<br/><br/>Cluster settings:<br/>  - cluster\_endpoint\_public\_access: Enable public access to cluster endpoint (default: true)<br/>  - cluster\_endpoint\_private\_access: Enable private access to cluster endpoint (default: true)<br/>  - enable\_cluster\_creator\_admin\_permissions: Grant admin permissions to cluster creator (default: false)<br/>  - create\_iam\_role: Whether the module creates the cluster IAM role (default: true). Set to false to reuse an existing role, e.g. when adopting an existing cluster.<br/>  - iam\_role\_arn: ARN of an existing cluster IAM role to use when create\_iam\_role is false.<br/><br/>Core addon settings (vpc\_cni, kube\_proxy, eks\_pod\_identity\_agent):<br/>  - configuration\_values: JSON string of addon configuration (merged with defaults for vpc-cni)<br/><br/>Example:<br/>  eks = {<br/>    cluster\_endpoint\_public\_access = false<br/>    vpc\_cni = {<br/>      configuration\_values = jsonencode({<br/>        env = {<br/>          ENABLE\_PREFIX\_DELEGATION = "true"<br/>          WARM\_PREFIX\_TARGET       = "1"<br/>        }<br/>      })<br/>    }<br/>  } | `any` | `{}` | no |
+| <a name="input_eks"></a> [eks](#input\_eks) | Map of EKS configurations including cluster settings and core addon customization.<br/><br/>Cluster settings:<br/>  - cluster\_endpoint\_public\_access: Enable public access to cluster endpoint (default: true)<br/>  - cluster\_endpoint\_private\_access: Enable private access to cluster endpoint (default: true)<br/>  - enable\_cluster\_creator\_admin\_permissions: Grant admin permissions to cluster creator (default: false)<br/>  - create\_iam\_role: Whether the module creates the cluster IAM role (default: true). Set to false to reuse an existing role, e.g. when adopting an existing cluster.<br/>  - iam\_role\_arn: ARN of an existing cluster IAM role to use when create\_iam\_role is false.<br/>  - authentication\_mode: EKS auth mode (default: "API"). When adopting a cluster still on the aws-auth ConfigMap, set "API\_AND\_CONFIG\_MAP" until every principal is reproduced as an access entry, then move to "API".<br/>  - encryption\_config: Cluster secrets-encryption config (default: {} = encrypt secrets). Set to null to adopt a cluster with no encryption without enabling it (enabling is irreversible).<br/>  - create\_kms\_key: Whether to create a KMS key for cluster encryption (default: true). Set false together with encryption\_config = null to skip encryption, or with encryption\_config.provider\_key\_arn to reuse an existing key.<br/><br/>Core addon settings (vpc\_cni, kube\_proxy, eks\_pod\_identity\_agent):<br/>  - configuration\_values: JSON string of addon configuration (merged with defaults for vpc-cni)<br/><br/>Example:<br/>  eks = {<br/>    cluster\_endpoint\_public\_access = false<br/>    vpc\_cni = {<br/>      configuration\_values = jsonencode({<br/>        env = {<br/>          ENABLE\_PREFIX\_DELEGATION = "true"<br/>          WARM\_PREFIX\_TARGET       = "1"<br/>        }<br/>      })<br/>    }<br/>  } | `any` | `{}` | no |
 | <a name="input_enable_ack"></a> [enable\_ack](#input\_enable\_ack) | Enable ACK (AWS Controllers for Kubernetes) EKS capability. Note: AdministratorAccess is attached by default. Use ack\_iam\_policy\_arn to override with a least-privilege policy. | `bool` | `true` | no |
 | <a name="input_enable_acm_certificate"></a> [enable\_acm\_certificate](#input\_enable\_acm\_certificate) | Enable ACM certificate | `bool` | `false` | no |
 | <a name="input_enable_argocd"></a> [enable\_argocd](#input\_enable\_argocd) | Enable Argo CD | `bool` | `false` | no |
+| <a name="input_enable_argocd_capability"></a> [enable\_argocd\_capability](#input\_enable\_argocd\_capability) | Enable the AWS-managed Argo CD EKS capability. Mutually exclusive with enable\_argocd (self-managed Argo CD). Requires IAM Identity Center (auto-discovered, or set argocd\_capability.idc\_instance\_arn). | `bool` | `false` | no |
+| <a name="input_enable_auto_mode"></a> [enable\_auto\_mode](#input\_enable\_auto\_mode) | Enable EKS Auto Mode. AWS manages compute (built-in Karpenter), block storage, load balancing and core networking. Can be combined with enable\_karpenter to run both compute stacks side-by-side during a migration. | `bool` | `false` | no |
 | <a name="input_enable_ecr_passthrough_policy"></a> [enable\_ecr\_passthrough\_policy](#input\_enable\_ecr\_passthrough\_policy) | Enable the ECR pull-through cache policy for cluster nodes. This policy may grant additional ECR permissions, including automatic repository creation for pull-through cache repositories, and is not required for standard ECR image pulls. | `bool` | `false` | no |
 | <a name="input_enable_efs_csi_driver"></a> [enable\_efs\_csi\_driver](#input\_enable\_efs\_csi\_driver) | Enable the aws-efs-csi-driver add-on (classic Amazon EFS and Amazon S3 Files storage) and its controller/node Pod Identity roles | `bool` | `true` | no |
 | <a name="input_enable_fargate_fluentbit"></a> [enable\_fargate\_fluentbit](#input\_enable\_fargate\_fluentbit) | Enable Fargate Fluentbit | `bool` | `true` | no |
+| <a name="input_enable_karpenter"></a> [enable\_karpenter](#input\_enable\_karpenter) | Enable the self-managed Karpenter stack (controller, Helm releases, IRSA, subnets, security group, Fargate profile). Independent of enable\_auto\_mode: keep both enabled to run them side-by-side during a migration. At least one of enable\_karpenter / enable\_auto\_mode must be true or the cluster has no compute. | `bool` | `true` | no |
+| <a name="input_enable_self_managed_ebs_csi"></a> [enable\_self\_managed\_ebs\_csi](#input\_enable\_self\_managed\_ebs\_csi) | Create the self-managed EBS CSI driver (addon, IRSA and pod-identity role). Defaults to enabled unless Auto Mode is on. Set to true to keep it running alongside Auto Mode's managed EBS CSI during a storage migration, or false to drop it. | `bool` | `null` | no |
+| <a name="input_enable_self_managed_lb_controller"></a> [enable\_self\_managed\_lb\_controller](#input\_enable\_self\_managed\_lb\_controller) | Create the IAM pod-identity role for the self-managed AWS Load Balancer Controller. Defaults to enabled unless Auto Mode is on. Set to true to keep it alongside Auto Mode's built-in load balancing during a migration, or false to drop it. | `bool` | `null` | no |
 | <a name="input_enable_sso_admin_auto_discovery"></a> [enable\_sso\_admin\_auto\_discovery](#input\_enable\_sso\_admin\_auto\_discovery) | Enable automatic discovery of SSO admin roles. When disabled, only explicitly defined cluster\_admins are used. | `bool` | `true` | no |
 | <a name="input_enable_timestamp_id"></a> [enable\_timestamp\_id](#input\_enable\_timestamp\_id) | Disable the timestamp-based ID generation. When true, uses a static ID instead of timestamp. | `bool` | `true` | no |
 | <a name="input_extra_cluster_addons"></a> [extra\_cluster\_addons](#input\_extra\_cluster\_addons) | Map of cluster addon configurations to enable for the cluster. Addon name can be the map keys or set with `name`. Addons are created after karpenter resources | `any` | `{}` | no |
@@ -256,9 +313,13 @@ as described in the `.pre-commit-config.yaml` file
 | Name | Description |
 | ---- | ----------- |
 | <a name="output_ack"></a> [ack](#output\_ack) | Map of attributes for the ACK EKS capability |
-| <a name="output_argocd"></a> [argocd](#output\_argocd) | Map of attributes for the ArgoCD module |
+| <a name="output_argocd"></a> [argocd](#output\_argocd) | Map of attributes for the self-managed ArgoCD module |
+| <a name="output_argocd_capability"></a> [argocd\_capability](#output\_argocd\_capability) | Map of attributes for the AWS-managed ArgoCD EKS capability (empty when disabled) |
+| <a name="output_argocd_capability_server_url"></a> [argocd\_capability\_server\_url](#output\_argocd\_capability\_server\_url) | URL of the AWS-managed ArgoCD server (null when the capability is disabled) |
+| <a name="output_auto_mode_node_iam_role_arn"></a> [auto\_mode\_node\_iam\_role\_arn](#output\_auto\_mode\_node\_iam\_role\_arn) | ARN of the EKS Auto Mode node IAM role (null when Auto Mode is disabled). Reference this from custom NodeClasses. |
+| <a name="output_auto_mode_node_iam_role_name"></a> [auto\_mode\_node\_iam\_role\_name](#output\_auto\_mode\_node\_iam\_role\_name) | Name of the EKS Auto Mode node IAM role (null when Auto Mode is disabled). |
 | <a name="output_eks"></a> [eks](#output\_eks) | Map of attributes for the EKS cluster |
-| <a name="output_karpenter"></a> [karpenter](#output\_karpenter) | Map of attributes for the Karpenter module |
+| <a name="output_karpenter"></a> [karpenter](#output\_karpenter) | Map of attributes for the self-managed Karpenter module (empty when enable\_karpenter is false) |
 | <a name="output_kubernetes_access_role_arns"></a> [kubernetes\_access\_role\_arns](#output\_kubernetes\_access\_role\_arns) | Map of reusable Kubernetes access role names to their IAM role ARNs |
 | <a name="output_kubernetes_access_roles"></a> [kubernetes\_access\_roles](#output\_kubernetes\_access\_roles) | Detailed information about reusable Kubernetes access IAM roles |
 <!-- END_TF_DOCS -->

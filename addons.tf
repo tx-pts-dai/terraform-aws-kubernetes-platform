@@ -52,6 +52,21 @@ locals {
     }
   }
 
+  # Self-managed vs Auto Mode toggles: default to enabled unless Auto Mode is on,
+  # overridable per capability to migrate independently.
+  create_self_managed_ebs_csi       = coalesce(var.enable_self_managed_ebs_csi, !var.enable_auto_mode)
+  create_self_managed_lb_controller = coalesce(var.enable_self_managed_lb_controller, !var.enable_auto_mode)
+
+  # Auto Mode only serves its own nodes: while self-managed Karpenter nodes run
+  # (enable_karpenter), they still need vpc-cni/kube-proxy/pod-identity and coredns;
+  # both are dropped only in pure Auto Mode (enable_karpenter = false).
+  create_self_managed_networking = !var.enable_auto_mode || var.enable_karpenter
+
+  core_cluster_addons = merge(
+    var.enable_auto_mode && !var.enable_karpenter ? {} : { coredns = local.cluster_addons.coredns },
+    local.create_self_managed_ebs_csi ? { aws-ebs-csi-driver = local.cluster_addons.aws-ebs-csi-driver } : {},
+  )
+
   efs_cluster_addon = var.enable_efs_csi_driver ? {
     aws-efs-csi-driver = {
       most_recent = true
@@ -72,13 +87,15 @@ locals {
     }
   } : {}
 
-  extra_cluster_addons = merge(local.cluster_addons, local.efs_cluster_addon, var.extra_cluster_addons)
+  extra_cluster_addons = merge(local.core_cluster_addons, local.efs_cluster_addon, var.extra_cluster_addons)
 }
 
-# Required for Managed EBS CSI Driver
+# Required for the self-managed EBS CSI Driver
 module "ebs_csi_driver_irsa" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts"
   version = "6.6.1"
+
+  create = local.create_self_managed_ebs_csi
 
   name            = "ebs-csi-driver-${local.id}"
   policy_name     = "ebs-csi-driver-${local.id}"
@@ -119,7 +136,9 @@ module "aws_ebs_csi_pod_identity" {
   source  = "terraform-aws-modules/eks-pod-identity/aws"
   version = "2.8.1"
 
-  create = var.create_addon_pod_identity_roles
+  # Follows the self-managed EBS CSI toggle (Auto Mode provides its own managed
+  # EBS CSI; keep both during a storage migration via enable_self_managed_ebs_csi).
+  create = var.create_addon_pod_identity_roles && local.create_self_managed_ebs_csi
 
   name                    = "aws-ebs-csi-pod-identity-${local.id}"
   aws_ebs_csi_policy_name = "aws-ebs-csi-pod-identity-${local.id}"
@@ -223,7 +242,10 @@ module "aws_lb_controller_pod_identity" {
   source  = "terraform-aws-modules/eks-pod-identity/aws"
   version = "2.8.1"
 
-  create = var.create_addon_pod_identity_roles
+  # Pod-identity role for the self-managed AWS Load Balancer Controller (deployed
+  # via ArgoCD). Auto Mode has a built-in load balancer controller, but both can
+  # coexist during a migration via enable_self_managed_lb_controller.
+  create = var.create_addon_pod_identity_roles && local.create_self_managed_lb_controller
 
   name                          = "aws-lb-controller-pod-identity-${local.id}"
   aws_lb_controller_policy_name = "aws-lb-controller-pod-identity-${local.id}"

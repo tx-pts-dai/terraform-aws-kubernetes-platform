@@ -4,13 +4,33 @@ output "eks" {
 }
 
 output "karpenter" {
-  description = "Map of attributes for the Karpenter module"
+  description = "Map of attributes for the self-managed Karpenter module (empty when enable_karpenter is false)"
   value       = module.karpenter
 }
 
+output "auto_mode_node_iam_role_arn" {
+  description = "ARN of the EKS Auto Mode node IAM role (null when Auto Mode is disabled). Reference this from custom NodeClasses."
+  value       = try(module.eks.node_iam_role_arn, null)
+}
+
+output "auto_mode_node_iam_role_name" {
+  description = "Name of the EKS Auto Mode node IAM role (null when Auto Mode is disabled)."
+  value       = try(module.eks.node_iam_role_name, null)
+}
+
 output "argocd" {
-  description = "Map of attributes for the ArgoCD module"
+  description = "Map of attributes for the self-managed ArgoCD module"
   value       = module.argocd
+}
+
+output "argocd_capability" {
+  description = "Map of attributes for the AWS-managed ArgoCD EKS capability (empty when disabled)"
+  value       = module.argocd_capability
+}
+
+output "argocd_capability_server_url" {
+  description = "URL of the AWS-managed ArgoCD server (null when the capability is disabled)"
+  value       = try(module.argocd_capability.argocd_server_url, null)
 }
 
 output "ack" {

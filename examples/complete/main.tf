@@ -146,7 +146,38 @@ module "k8s_platform" {
       name  = "global.eksDiscovery.tags.subnets.karpenter\\.sh/discovery"
       value = "shared"
     }
+
   ]
+
+  # EKS Auto Mode is enabled alongside the self-managed Karpenter stack
+  # (enable_karpenter defaults to true) to demonstrate a gradual migration.
+  # See docs/auto-mode-migration.md.
+  enable_auto_mode = false
+
+  auto_mode = {
+    # Self-managed Karpenter here discovers subnets tagged
+    # karpenter.sh/discovery = shared (see karpenter_resources_helm_set above),
+    # so point Auto Mode at the same tag to share the same network.
+    subnet_discovery_tags = { "karpenter.sh/discovery" = "shared" }
+
+    # Taint the Auto Mode default NodePool so existing workloads stay on the
+    # self-managed Karpenter nodes until they explicitly tolerate Auto Mode.
+    # Migrate compute by adding this toleration to workloads one at a time.
+    default_node_pool_taints = [
+      {
+        key    = "auto-mode"
+        value  = "true"
+        effect = "NoSchedule"
+      }
+    ]
+  }
+
+  # Keep the self-managed EBS CSI driver and AWS Load Balancer Controller running
+  # alongside Auto Mode's managed equivalents during the migration. Cut storage
+  # over by StorageClass and ingresses over by ingressClassName, then set these to
+  # false once nothing depends on the self-managed versions.
+  enable_self_managed_ebs_csi       = true
+  enable_self_managed_lb_controller = true
 
   enable_efs_csi_driver = true
 

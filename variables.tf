@@ -54,6 +54,9 @@ variable "eks" {
     - enable_cluster_creator_admin_permissions: Grant admin permissions to cluster creator (default: false)
     - create_iam_role: Whether the module creates the cluster IAM role (default: true). Set to false to reuse an existing role, e.g. when adopting an existing cluster.
     - iam_role_arn: ARN of an existing cluster IAM role to use when create_iam_role is false.
+    - authentication_mode: EKS auth mode (default: "API"). When adopting a cluster still on the aws-auth ConfigMap, set "API_AND_CONFIG_MAP" until every principal is reproduced as an access entry, then move to "API".
+    - encryption_config: Cluster secrets-encryption config (default: {} = encrypt secrets). Set to null to adopt a cluster with no encryption without enabling it (enabling is irreversible).
+    - create_kms_key: Whether to create a KMS key for cluster encryption (default: true). Set false together with encryption_config = null to skip encryption, or with encryption_config.provider_key_arn to reuse an existing key.
 
   Core addon settings (vpc_cni, kube_proxy, eks_pod_identity_agent):
     - configuration_values: JSON string of addon configuration (merged with defaults for vpc-cni)
@@ -203,8 +206,90 @@ variable "acm_certificate" {
 }
 
 ################################################################################
+# EKS Auto Mode
+# See docs/auto-mode-migration.md for the full self-managed <-> Auto Mode migration path.
+variable "enable_auto_mode" {
+  description = "Enable EKS Auto Mode. AWS manages compute (built-in Karpenter), block storage, load balancing and core networking. Can be combined with enable_karpenter to run both compute stacks side-by-side during a migration."
+  type        = bool
+  default     = false
+}
+
+variable "auto_mode" {
+  description = <<-EOT
+  EKS Auto Mode configuration. Only used when `enable_auto_mode = true`.
+    - builtin_node_pools: List of AWS-managed node pools to enable (e.g. ["general-purpose", "system"]). Leave empty ([]) to only use your own NodePools/NodeClasses.
+    - node_iam_role_additional_policies: Additional IAM policy ARNs to attach to the Auto Mode node role, keyed by an arbitrary name.
+    - default_node_pool_taints: Taints applied to the auto-generated `default` NodePool (ignored when you pass your own auto_mode_node_pools). Use this during a migration so existing workloads do not schedule onto Auto Mode nodes until they tolerate the taint.
+    - discover_karpenter_subnets: Controls how the auto-generated `default` NodeClass finds subnets. When true, it discovers them by tag (see subnet_discovery_tags) — by default the SAME dedicated subnets as the self-managed Karpenter stack (the "same network, different NodePools/taints" migration path). When false, it selects var.vpc.private_subnets by ID. Defaults to null, which resolves to enable_karpenter: shared subnets while the Karpenter stack runs, private subnets in pure Auto Mode. Ignored when you pass your own auto_mode_node_classes.
+    - subnet_discovery_tags: Tags the `default` NodeClass matches when discover_karpenter_subnets is true. Defaults to { "karpenter.sh/discovery" = <cluster-name> } (the tag the module puts on its own dedicated Karpenter subnets). Override it to match a customized Karpenter discovery tag — e.g. { "karpenter.sh/discovery" = "shared" } when Karpenter is pointed at pre-existing subnets via karpenter_resources_helm_set.
+  EOT
+  type = object({
+    builtin_node_pools                = optional(list(string), [])
+    node_iam_role_additional_policies = optional(map(string), {})
+    default_node_pool_taints = optional(list(object({
+      key    = string
+      value  = optional(string)
+      effect = string
+    })), [])
+    discover_karpenter_subnets = optional(bool, null)
+    subnet_discovery_tags      = optional(map(string), null)
+  })
+  default = {}
+
+  validation {
+    # Tag discovery with the DEFAULT tag targets the module's own Karpenter
+    # subnets, which only exist while the Karpenter stack runs. Custom
+    # subnet_discovery_tags point at subnets the caller manages, so they are
+    # allowed without the Karpenter stack.
+    condition     = var.auto_mode.discover_karpenter_subnets != true || var.enable_karpenter || var.auto_mode.subnet_discovery_tags != null
+    error_message = "auto_mode.discover_karpenter_subnets = true requires either enable_karpenter = true (to discover the module's karpenter.sh/discovery subnets) or auto_mode.subnet_discovery_tags set to tags on subnets you manage yourself."
+  }
+}
+
+variable "auto_mode_node_classes" {
+  description = <<-EOT
+  Map of EKS Auto Mode NodeClass resources to apply (apiVersion `eks.amazonaws.com/v1`). The map key is the NodeClass name and the value is its `spec`.
+  Only used when `enable_auto_mode = true`. When left empty, a `default` NodeClass is created that targets the cluster private subnets and primary security group and uses the Auto Mode node IAM role.
+  EOT
+  type        = any
+  default     = {}
+}
+
+variable "auto_mode_node_pools" {
+  description = <<-EOT
+  Map of Karpenter NodePool resources to apply (apiVersion `karpenter.sh/v1`). The map key is the NodePool name and the value is its `spec`.
+  Only used when `enable_auto_mode = true`. When left empty, a `default` NodePool referencing the `default` NodeClass is created.
+  EOT
+  type        = any
+  default     = {}
+}
+
+variable "enable_self_managed_ebs_csi" {
+  description = "Create the self-managed EBS CSI driver (addon, IRSA and pod-identity role). Defaults to enabled unless Auto Mode is on. Set to true to keep it running alongside Auto Mode's managed EBS CSI during a storage migration, or false to drop it."
+  type        = bool
+  default     = null
+}
+
+variable "enable_self_managed_lb_controller" {
+  description = "Create the IAM pod-identity role for the self-managed AWS Load Balancer Controller. Defaults to enabled unless Auto Mode is on. Set to true to keep it alongside Auto Mode's built-in load balancing during a migration, or false to drop it."
+  type        = bool
+  default     = null
+}
+
+################################################################################
 # Core Addons - Installed by default
 # For compatibility with older versions of the module, the karpenter variable is optional
+variable "enable_karpenter" {
+  description = "Enable the self-managed Karpenter stack (controller, Helm releases, IRSA, subnets, security group, Fargate profile). Independent of enable_auto_mode: keep both enabled to run them side-by-side during a migration. At least one of enable_karpenter / enable_auto_mode must be true or the cluster has no compute."
+  type        = bool
+  default     = true
+
+  validation {
+    condition     = var.enable_karpenter || var.enable_auto_mode
+    error_message = "At least one of enable_karpenter or enable_auto_mode must be true, otherwise the cluster has no compute."
+  }
+}
+
 variable "karpenter" {
   description = "Karpenter configurations"
   type = object({
@@ -282,6 +367,49 @@ variable "argocd" {
 
     # Common
     tags = optional(map(string), {})
+  })
+  default = {}
+}
+
+variable "enable_argocd_capability" {
+  description = "Enable the AWS-managed Argo CD EKS capability. Mutually exclusive with enable_argocd (self-managed Argo CD). Requires IAM Identity Center (auto-discovered, or set argocd_capability.idc_instance_arn)."
+  type        = bool
+  default     = false
+
+  validation {
+    condition     = !(var.enable_argocd_capability && var.enable_argocd)
+    error_message = "enable_argocd_capability (managed Argo CD) and enable_argocd (self-managed Argo CD) are mutually exclusive; enable at most one."
+  }
+}
+
+variable "argocd_capability" {
+  description = <<-EOT
+  Configuration for the AWS-managed Argo CD EKS capability. Only used when `enable_argocd_capability = true`.
+    - idc_instance_arn: IAM Identity Center instance ARN. Leave null to auto-discover the account/org instance via the aws_ssoadmin_instances data source (requires sso:ListInstances).
+    - idc_region: Region of the Identity Center instance (defaults to the provider region).
+    - namespace: Kubernetes namespace for Argo CD (default "argocd").
+    - rbac_role_mapping: Maps Identity Center users/groups to Argo CD roles (ADMIN, EDITOR, VIEWER).
+    - vpc_endpoint_ids: VPC endpoint IDs for private access. When set, the public endpoint is BLOCKED and Argo CD is reachable only through these VPC endpoints. Leave empty for a public endpoint.
+    - iam_policy_statements: Extra IAM policy statements to attach to the capability role (e.g. ECR read for image reflection).
+  EOT
+  type = object({
+    idc_instance_arn = optional(string)
+    idc_region       = optional(string)
+    namespace        = optional(string, "argocd")
+    rbac_role_mapping = optional(list(object({
+      role = string
+      identity = list(object({
+        id   = string
+        type = string
+      }))
+    })), [])
+    vpc_endpoint_ids = optional(list(string), [])
+    iam_policy_statements = optional(map(object({
+      sid       = optional(string)
+      actions   = optional(list(string))
+      resources = optional(list(string))
+      effect    = optional(string)
+    })), {})
   })
   default = {}
 }

@@ -35,6 +35,32 @@ moved {
   to   = aws_cloudwatch_log_group.fargate_fluentbit[0]
 }
 
+# Auto Mode support: the self-managed Karpenter raw resources became conditional
+# (count). These moves keep existing (Auto Mode disabled) deployments stable.
+# Note: aws_iam_policy.karpenter_controller itself has no moved block here — it
+# was replaced by the inline aws_iam_role_policy.karpenter_controller[0] (a
+# different resource type, which moved blocks cannot bridge), matching how main
+# shipped that same transition (commit 4199874) with no moved block either.
+moved {
+  from = helm_release.karpenter_crd
+  to   = helm_release.karpenter_crd[0]
+}
+
+moved {
+  from = helm_release.karpenter_release
+  to   = helm_release.karpenter_release[0]
+}
+
+moved {
+  from = helm_release.karpenter_resources
+  to   = helm_release.karpenter_resources[0]
+}
+
+moved {
+  from = time_sleep.wait_after_karpenter
+  to   = time_sleep.wait_after_karpenter[0]
+}
+
 # Disabled since it needs to be removed and readded.
 # removed {
 #   from = helm_release.cluster_secret_store
