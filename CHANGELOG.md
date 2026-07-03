@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [8.2.0](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/compare/v8.1.0...v8.2.0) (2026-07-03)
+
+### Features
+
+* add EKS Auto Mode with Karpenter coexistence and managed ArgoCD ([#292](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/issues/292)) ([a54033b](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/commit/a54033b1c52168d86f497e633f4ad0491a5ab561))
+
 ## [8.1.0](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/compare/v8.0.0...v8.1.0) (2026-07-02)
 
 ### Features
