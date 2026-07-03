@@ -207,17 +207,7 @@ variable "acm_certificate" {
 
 ################################################################################
 # EKS Auto Mode
-# When enabled, the cluster runs in EKS Auto Mode: AWS manages compute (built-in
-# Karpenter), block storage (EBS CSI), load balancing (ALB/NLB) and core
-# networking. In PURE Auto Mode the EBS CSI addon, VPC CNI / kube-proxy addons, Pod
-# Identity agent and AWS Load Balancer Controller pod-identity role are not created.
-# When combined with the self-managed Karpenter stack the networking addons are
-# retained for its non-Auto-Mode nodes (see the enable_self_managed_* notes below
-# and docs/auto-mode-migration.md).
-#
-# Auto Mode and the self-managed Karpenter stack (var.enable_karpenter) are
-# independent: both can be enabled at the same time to run them side-by-side for a
-# gradual migration (see docs/auto-mode-migration.md).
+# See docs/auto-mode-migration.md for the full self-managed <-> Auto Mode migration path.
 variable "enable_auto_mode" {
   description = "Enable EKS Auto Mode. AWS manages compute (built-in Karpenter), block storage, load balancing and core networking. Can be combined with enable_karpenter to run both compute stacks side-by-side during a migration."
   type        = bool
@@ -274,14 +264,6 @@ variable "auto_mode_node_pools" {
   default     = {}
 }
 
-# Per-capability "self-managed vs Auto Mode" overrides. Each defaults to enabled
-# unless Auto Mode is on (Auto Mode provides a managed equivalent). Set explicitly
-# to run the self-managed and Auto Mode versions side-by-side and migrate each
-# capability independently. Networking (VPC CNI, kube-proxy) and the Pod Identity
-# agent are NOT overridable: Auto Mode's copies serve only Auto Mode nodes, so the
-# self-managed addons are retained whenever self-managed compute runs
-# (enable_karpenter) — the non-Auto-Mode nodes need them — and dropped only in pure
-# Auto Mode. CoreDNS follows the same rule.
 variable "enable_self_managed_ebs_csi" {
   description = "Create the self-managed EBS CSI driver (addon, IRSA and pod-identity role). Defaults to enabled unless Auto Mode is on. Set to true to keep it running alongside Auto Mode's managed EBS CSI during a storage migration, or false to drop it."
   type        = bool
@@ -389,10 +371,6 @@ variable "argocd" {
   default = {}
 }
 
-# AWS-managed Argo CD (EKS capability). This is an alternative to the self-managed
-# Argo CD above (var.enable_argocd) and the two are mutually exclusive. The managed
-# server requires IAM Identity Center for authentication (local users are not
-# supported) and is publicly accessible unless `vpce_ids` is set.
 variable "enable_argocd_capability" {
   description = "Enable the AWS-managed Argo CD EKS capability. Mutually exclusive with enable_argocd (self-managed Argo CD). Requires IAM Identity Center (auto-discovered, or set argocd_capability.idc_instance_arn)."
   type        = bool

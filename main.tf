@@ -110,19 +110,12 @@ module "eks" {
   endpoint_public_access  = try(var.eks.cluster_endpoint_public_access, true)
   endpoint_private_access = try(var.eks.cluster_endpoint_private_access, true)
 
-  # Configurable for brownfield adoption. Default "API" (greenfield). When adopting a
-  # cluster on the legacy aws-auth ConfigMap, set "API_AND_CONFIG_MAP" so both auth
-  # paths stay live while access entries are created and verified — going straight to
-  # "API" drops the ConfigMap, cutting off every principal not yet an access entry.
+  # When adopting a cluster still on the legacy aws-auth ConfigMap, set
+  # "API_AND_CONFIG_MAP" so it stays live while access entries are verified —
+  # going straight to "API" drops the ConfigMap, cutting off any principal not
+  # yet an access entry.
   authentication_mode = try(var.eks.authentication_mode, "API")
 
-  # EKS Auto Mode. When enabled, AWS manages compute, storage, load balancing and
-  # core networking. The networking / Pod Identity addons below are suppressed only
-  # in PURE Auto Mode (no self-managed Karpenter); they are retained while
-  # enable_karpenter is true so the self-managed nodes get pod networking (see
-  # local.create_self_managed_networking). Storage and load balancing have their own
-  # self-managed toggles (enable_self_managed_ebs_csi / enable_self_managed_lb_controller)
-  # so they can be migrated independently.
   create_auto_mode_iam_resources    = var.enable_auto_mode
   node_iam_role_additional_policies = var.auto_mode.node_iam_role_additional_policies
 
@@ -137,17 +130,9 @@ module "eks" {
     node_pools = length(var.auto_mode.builtin_node_pools) > 0 ? var.auto_mode.builtin_node_pools : null
   } : null
 
-  # Networking (VPC CNI, kube-proxy) and the Pod Identity agent run as node-level
-  # services on Auto Mode nodes; Auto Mode does NOT extend them to non-Auto-Mode
-  # nodes. While the self-managed Karpenter stack runs (enable_karpenter), its nodes
-  # are ordinary EC2 nodes that need the traditional vpc-cni / kube-proxy DaemonSets
-  # (and the Pod Identity agent) to get pod networking and become Ready — so these
-  # are retained via local.create_self_managed_networking and dropped only in PURE
-  # Auto Mode. Mirrors the CoreDNS rule in addons.tf.
-  #
-  # Each addon is gated individually via merge(): a single `... ? {...} : {}` over
-  # all three at once fails type-checking, because the addons have different
-  # attribute sets and an empty object can't unify with them as a map.
+  # Gated by local.create_self_managed_networking (see addons.tf). Each addon is
+  # merged in individually rather than one `... ? {...} : {}` over all three,
+  # since their differing attribute sets can't unify into a single map type.
   addons = merge(
     local.create_self_managed_networking ? {
       vpc-cni = {
@@ -156,11 +141,8 @@ module "eks" {
         most_recent = true
         preserve    = true
 
-        # This addon sets preserve = true, so its aws-node resources stay on the
-        # cluster after the addon is removed — e.g. while suppressed under Auto Mode.
-        # Re-creating the addon must adopt those leftover resources; without OVERWRITE
-        # the create fails with ConfigurationConflict on their version labels. No-op
-        # on a clean cluster.
+        # preserve = true leaves aws-node resources behind when suppressed; OVERWRITE
+        # lets re-creating the addon adopt them instead of failing on conflict.
         resolve_conflicts_on_create = "OVERWRITE"
 
         service_account_role_arn = module.vpc_cni_irsa.arn
@@ -216,11 +198,9 @@ module "eks" {
   iam_role_name            = local.stack_name
   iam_role_use_name_prefix = false
 
-  # Encryption / KMS — exposed for brownfield adoption. Defaults preserve the eks
-  # module behaviour (create a KMS key + encrypt secrets). To adopt a cluster that
-  # has NO encryption today, set var.eks.encryption_config = null and
-  # var.eks.create_kms_key = false: enabling secrets encryption is IRREVERSIBLE, so
-  # it must be an explicit choice, not a side effect of adoption.
+  # To adopt a cluster with no encryption today, set encryption_config = null and
+  # create_kms_key = false: enabling secrets encryption is irreversible, so it must
+  # be an explicit choice, not a side effect of adoption.
   encryption_config = try(var.eks.encryption_config, {})
   create_kms_key    = try(var.eks.create_kms_key, true)
 

@@ -3,45 +3,35 @@
 #
 # When Auto Mode is enabled, AWS runs a built-in Karpenter. Custom capacity is
 # declared with the Auto Mode NodeClass (apiVersion eks.amazonaws.com/v1) and the
-# standard Karpenter NodePool (apiVersion karpenter.sh/v1). Both reference the
-# node IAM role created by the EKS module (module.eks.node_iam_role_*).
+# standard Karpenter NodePool (apiVersion karpenter.sh/v1).
 #
 # Pass your own resources via var.auto_mode_node_classes / var.auto_mode_node_pools.
 # When left empty, a sensible "default" NodeClass + NodePool are created.
 ################################################################################
 
 locals {
-  # Effective subnet-discovery mode for the default NodeClass. Null (the default)
-  # resolves to enable_karpenter, so when the self-managed Karpenter stack runs,
-  # Auto Mode shares its subnets out of the box; in pure Auto Mode it falls back
-  # to the cluster private subnets. coalesce() can't be used here: it treats bool
-  # false as empty and would override an explicit `false`.
+  # Null (the default) resolves to enable_karpenter, so Auto Mode shares the
+  # self-managed Karpenter subnets when that stack is running, falling back to the
+  # cluster private subnets in pure Auto Mode. Not coalesce(): it treats `false` as
+  # empty and would override an explicit false.
   discover_karpenter_subnets = var.auto_mode.discover_karpenter_subnets != null ? var.auto_mode.discover_karpenter_subnets : var.enable_karpenter
 
-  # Tags the default NodeClass matches when discovering subnets. Defaults to the
-  # tag the module puts on its own dedicated Karpenter subnets; override via
-  # var.auto_mode.subnet_discovery_tags to match a customized Karpenter discovery
-  # tag (e.g. { "karpenter.sh/discovery" = "shared" }).
+  # Defaults to the tag the module puts on its own dedicated Karpenter subnets;
+  # override via var.auto_mode.subnet_discovery_tags for a customized tag.
   auto_mode_subnet_discovery_tags = var.auto_mode.subnet_discovery_tags != null ? var.auto_mode.subnet_discovery_tags : { "karpenter.sh/discovery" = module.eks.cluster_name }
 
-  # Subnet selector terms for the default NodeClass:
-  #   - discover_karpenter_subnets = true: discover by tag (auto_mode_subnet_discovery_tags),
-  #     so Auto Mode lands on the SAME subnets as the self-managed Karpenter stack
-  #     (the "same network, different NodePools/taints" migration path).
-  #   - false: select the cluster private subnets by ID.
-  # The two branches differ in both shape (tag vs id) and length, which a plain
-  # conditional can't unify; round-tripping through json keeps the ternary a simple
-  # string-vs-string and defers the structure to decode time.
+  # discover_karpenter_subnets true -> discover by tag (same subnets as
+  # self-managed Karpenter); false -> select var.vpc.private_subnets by ID. The two
+  # shapes can't unify in a plain conditional, so the ternary stays string-vs-string
+  # and jsondecode restores the structure.
   auto_mode_subnet_selector_terms = jsondecode(local.discover_karpenter_subnets ?
     jsonencode([{ tags = local.auto_mode_subnet_discovery_tags }]) :
     jsonencode([for subnet_id in var.vpc.private_subnets : { id = subnet_id }])
   )
 
-  # Default NodeClass using the Auto Mode node IAM role and the cluster primary
-  # security group. Named "auto-mode" (not "default") so it never collides with
-  # the self-managed karpenter-resources chart's NodePool/EC2NodeClass "default":
-  # the NodePool CRD (karpenter.sh/v1) is shared by both controllers, so identical
-  # names would fail Helm's ownership check during a coexistence migration.
+  # Named "auto-mode", not "default": the karpenter.sh/v1 NodePool CRD is shared by
+  # both controllers, so reusing the self-managed stack's "default" name would fail
+  # Helm's ownership check during coexistence.
   default_auto_mode_node_classes = {
     auto-mode = {
       role                       = module.eks.node_iam_role_name
@@ -104,14 +94,12 @@ locals {
   ) : {}
 }
 
-# Authorize the Auto Mode node IAM role to join the cluster. EKS auto-creates this
-# access entry only when the cluster's compute_config carries a node_role_arn — i.e.
-# when built-in node_pools are requested. We run custom NodePools/NodeClasses, so
-# node_role_arn is null on the cluster (see main.tf) and AWS never registers the
-# role; without this the NodeClass reports InstanceProfileReady=False /
-# "unauthorized to join nodes". Gated on builtin_node_pools being empty so we don't
-# collide with the entry AWS creates when built-in pools ARE used. Type "EC2" is the
-# Auto Mode node entry; EKS grants node-join permissions for it automatically.
+# EKS only auto-creates this access entry when compute_config carries a
+# node_role_arn (i.e. built-in node_pools are requested). We run custom
+# NodePools/NodeClasses instead, so node_role_arn is null and AWS never registers
+# the role — without this the NodeClass reports InstanceProfileReady=False. Gated
+# on builtin_node_pools being empty to avoid colliding with AWS's own entry when
+# built-in pools are used.
 resource "aws_eks_access_entry" "auto_mode_node" {
   count = var.enable_auto_mode && length(var.auto_mode.builtin_node_pools) == 0 ? 1 : 0
 
@@ -120,11 +108,9 @@ resource "aws_eks_access_entry" "auto_mode_node" {
   type          = "EC2"
 }
 
-# The NodeClass/NodePool CRDs only exist after Auto Mode is enabled on the
-# cluster, so they are applied via the `custom-resources` Helm chart (which exists
-# precisely to work around the Terraform "CRDs not available until apply" catch).
-# This also keeps us on the `helm` provider, which defers gracefully on clusters
-# created in the same apply — unlike the kubectl provider, which fails at plan.
+# Applied via the `custom-resources` Helm chart since the NodeClass/NodePool CRDs
+# only exist after Auto Mode is enabled — the `helm` provider defers gracefully on
+# clusters created in the same apply, unlike `kubectl`, which fails at plan.
 resource "helm_release" "auto_mode_node_class" {
   for_each = local.auto_mode_node_classes
 
