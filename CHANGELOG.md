@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [8.3.0](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/compare/v8.2.0...v8.3.0) (2026-08-20)
+
+### Features
+
+* upgrading Karpenter version ([#313](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/issues/313)) ([b8b1bd2](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/commit/b8b1bd2cdeca838d9648c0a47964399767bf957a))
+
 ## [8.2.0](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/compare/v8.1.0...v8.2.0) (2026-07-03)
 
 ### Features
