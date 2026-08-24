@@ -118,6 +118,7 @@ module "eks" {
 
   create_auto_mode_iam_resources    = var.enable_auto_mode
   node_iam_role_additional_policies = var.auto_mode.node_iam_role_additional_policies
+  iam_role_additional_policies      = var.eks.iam_role_additional_policies
 
   # node_pools must be null (not []) when no AWS built-in pools are requested: the
   # EKS module derives the cluster-level node_role_arn from `node_pools != null`,

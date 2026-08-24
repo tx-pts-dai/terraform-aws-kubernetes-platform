@@ -136,6 +136,13 @@ module "k8s_platform" {
     intra_subnets   = data.aws_subnets.intra_subnets.ids
   }
 
+  eks = {
+    # This is a new auto_mode requirement not included in the module yet
+    iam_role_additional_policies = {
+      AmazonEKSBlockStoragePolicyV2 = "arn:aws:iam::aws:policy/AmazonEKSBlockStoragePolicyV2"
+    }
+  }
+
   karpenter_helm_set = [
     {
       name  = "replicas"
@@ -194,6 +201,11 @@ module "k8s_platform" {
   enable_self_managed_ebs_csi       = true
   enable_self_managed_lb_controller = true
 
+  # Requires subscribing to the "IBM Kubecost - Amazon EKS cost monitoring"
+  # listing in AWS Marketplace for this account first.
+  # access dashboard: https://docs.aws.amazon.com/eks/latest/userguide/cost-monitoring-kubecost-dashboard.html
+  enable_kubecost = true
+
   base_domain = "dai-sandbox.tamedia.tech"
 
   enable_acm_certificate = false
@@ -215,3 +227,91 @@ module "k8s_platform" {
     ]
   }
 }
+
+## KUBECOST test resources
+
+# Kubecost (enable_kubecost) needs a default StorageClass for its Prometheus
+# PVC. Most clusters already have one (e.g. gp2/gp3); this one is created here
+# only because the test cluster doesn't ship a default class.
+
+# Example (opt-in): Kubecost EKS add-on
+# Requires subscribing to the "IBM Kubecost - Amazon EKS cost monitoring"
+# listing in AWS Marketplace for this account first.
+# access dashboard: https://docs.aws.amazon.com/eks/latest/userguide/cost-monitoring-kubecost-dashboard.html
+#
+# The Kubecost Marketplace add-on requires the AWSMarketplaceMeteringRegisterUsage
+# permission on the IAM role associated with its awsstore-serviceaccount. The
+# module doesn't set up that role for you, so enabling the flag alone leaves
+# the add-on unable to register its Marketplace usage (the deployment may end
+# up unhealthy). Create the required role/policy and wire it to the
+# awsstore-serviceaccount (pod identity or IRSA) before enabling this.
+#
+# enable_kubecost = true
+
+# Kubecost (enable_kubecost above) needs a default StorageClass for its
+# Prometheus PVC. Most clusters already have one (e.g. gp2/gp3); this one is
+# created here only because the example cluster doesn't ship a default class.
+# Only needed if you opt in to enable_kubecost.
+#
+
+resource "kubernetes_storage_class_v1" "gp3" {
+  metadata {
+    name = "gp3"
+    annotations = {
+      "storageclass.kubernetes.io/is-default-class" = "true"
+    }
+  }
+
+  storage_provisioner    = "ebs.csi.aws.com"
+  reclaim_policy         = "Delete"
+  volume_binding_mode    = "WaitForFirstConsumer"
+  allow_volume_expansion = true
+
+  parameters = {
+    type = "gp3"
+  }
+}
+
+# Example (opt-in): expose the Kubecost dashboard via an internal ALB ingress.
+# Requires the AWS Load Balancer Controller (enable_self_managed_lb_controller
+# or Auto Mode) and external-dns (wired up via the module's
+# external_dns_pod_identity) to create the Route53 record.
+#
+# locals {
+#   kubecost_hostname = "kubecost.dai-sandbox.tamedia.tech"
+# }
+# We wre using ALB controller from Auto_mode for testing, therefore we need to create an IngressClass and IngressClassParams.
+# Resource "kubernetes_ingress_v1" "kubecost" {
+#   metadata {
+#     name      = "kubecost-ingress"
+#     namespace = "kubecost"
+#     annotations = {
+#       "kubernetes.io/ingress.class"                = "alb"
+#       "alb.ingress.kubernetes.io/group.name"       = "kubecost"
+#       "alb.ingress.kubernetes.io/target-type"      = "ip"
+#       "alb.ingress.kubernetes.io/scheme"           = "internal"
+#       "alb.ingress.kubernetes.io/healthcheck-path" = "/"
+#       "external-dns.alpha.kubernetes.io/hostname"  = local.kubecost_hostname
+#     }
+#   }
+#
+#   spec {
+#     rule {
+#       http {
+#         path {
+#           path      = "/"
+#           path_type = "Prefix"
+
+#           backend {
+#             service {
+#               name = "kubecost-frontend"
+#               port {
+#                 number = 9090
+#               }
+#             }
+#           }
+#         }
+#       }
+#     }
+#   }
+# }

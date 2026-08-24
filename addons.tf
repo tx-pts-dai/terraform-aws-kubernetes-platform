@@ -87,7 +87,20 @@ locals {
     }
   } : {}
 
-  extra_cluster_addons = merge(local.core_cluster_addons, local.efs_cluster_addon, var.extra_cluster_addons)
+  # Requires subscribing to the "IBM Kubecost - Amazon EKS cost monitoring"
+  # listing in AWS Marketplace for this account first, or addon creation fails.
+  #
+  # Kubecost also needs a default StorageClass for its Prometheus PVC. Most
+  # clusters already have one (e.g. gp2/gp3); if not, create one - see the
+  # example in examples/complete/main.tf.
+  kubecost_cluster_addon = var.enable_kubecost ? {
+    kubecost_kubecost = {
+      most_recent = true
+      preserve    = false
+    }
+  } : {}
+
+  extra_cluster_addons = merge(local.core_cluster_addons, local.efs_cluster_addon, local.kubecost_cluster_addon, var.extra_cluster_addons)
 }
 
 # Required for the self-managed EBS CSI Driver
