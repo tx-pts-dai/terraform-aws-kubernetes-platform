@@ -148,6 +148,60 @@ Three mutually-exclusive options are available:
    }
    ```
 
+## Karpenter consolidation
+
+[Official documentation](https://karpenter.sh/docs/concepts/disruption/)
+
+Karpenter offers 3 different consolidation policies, each of them covers different use cases and should be carefully chosen, in order to prevent possible unwanted impacts on workloads stability or costs:
+
+| Policy | Considered nodes | Use case | Notes |
+| ----------- | ------- | ------------ | ----- |
+| `WhenEmpty` | Only empty nodes (a node is empty when it has only pods with no disruption cost, such as daemonsets, user overrides, and ephemeral pods that the user has annotated as cheap to disrupt) | Nodes are removed only once nothing is running on them | No impact on application side, but less effective from a costs perspective, since we might be running un-optimized nodes |
+| `Balanced` | Nodes where the cost savings outweigh the disruption to running pods | Karpenter still removes empty and clearly-underutilized nodes, but skips actions where the disruption isn't worth the savings | Available starting in Karpenter v1.14 |
+| `WhenEmptyOrUnderutilized` | Any node that can be removed or replaced to reduce cost | You want the lowest possible cost and are willing to accept the pod disruption it takes to get there | This is the most effective policy from a costs perspective, but might impact applications. It's quite aggressive, so the `consolidateAfter` interval should be chosen carefully: a 1-minute interval is discouraged |
+
+Budgets let you restrict how much disruption a consolidation policy is allowed to cause (e.g. cap it to a percentage of nodes, or disable it during a schedule), on top of the chosen policy:
+
+```
+apiVersion: karpenter.sh/v1
+kind: NodePool
+metadata:
+  name: default
+spec:
+  disruption:
+    consolidationPolicy: WhenEmptyOrUnderutilized
+    budgets:
+    - nodes: "20%"
+      reasons:
+      - "Empty"
+      - "Drifted"
+    - nodes: "5"
+    - nodes: "0"
+      schedule: "@daily"
+      duration: 10m
+      reasons:
+      - "Underutilized"
+```
+
+In this example: up to 20% of nodes can be disrupted at once for `Empty`/`Drifted` reasons, disruption is otherwise capped at 5 nodes, and `Underutilized` disruptions are blocked entirely during a 10-minute window every day.
+
+## Kubecost
+
+Set `enable_kubecost = true` to install the `kubecost_kubecost` EKS-managed addon
+(cost monitoring dashboard: [docs](https://docs.aws.amazon.com/eks/latest/userguide/cost-monitoring-kubecost-dashboard.html)).
+Two dependencies are not managed by this module and must exist before enabling it:
+
+1. **AWS Marketplace subscription** — subscribe to the
+   ["IBM Kubecost - Amazon EKS cost monitoring"](https://aws.amazon.com/marketplace)
+   listing for the target AWS account and accept its EULA. This is a one-time,
+   per-account, manual step; addon creation fails without it.
+2. **Default StorageClass** — Kubecost needs one for its Prometheus PVC. Most
+   clusters already have one (e.g. gp2/gp3). If not, create a `kubernetes_storage_class_v1`
+   resource as shown in [examples/complete/main.tf](./examples/complete/main.tf). Since the
+   addon is created inside this module, Terraform can't guarantee the StorageClass exists
+   strictly before it - on the very first apply the addon's PVC may sit `Pending` briefly;
+   it binds once the StorageClass is created (EKS addons reconcile, no re-apply needed).
+
 ## Examples
 
 - [Complete](./examples/complete/) - Includes creation of VPC, k8s cluster, addons and all the optional features.
@@ -280,7 +334,7 @@ as described in the `.pre-commit-config.yaml` file
 | <a name="input_base_domain"></a> [base\_domain](#input\_base\_domain) | Base domain for the platform, used for ingress and ACM certificates | `string` | `null` | no |
 | <a name="input_cluster_admins"></a> [cluster\_admins](#input\_cluster\_admins) | Map of IAM roles to add as cluster admins<br/>  role\_arn: ARN of the IAM role to add as cluster admin<br/>  role\_name: Name of the IAM role to add as cluster admin<br/>  kubernetes\_groups: List of Kubernetes groups to add the role to (default: ["system:masters"])<br/><br/>role\_arn and role\_name are mutually exclusive, exactly one must be set. | <pre>map(object({<br/>    role_arn          = optional(string)<br/>    role_name         = optional(string)<br/>    kubernetes_groups = optional(list(string))<br/>  }))</pre> | `{}` | no |
 | <a name="input_create_addon_pod_identity_roles"></a> [create\_addon\_pod\_identity\_roles](#input\_create\_addon\_pod\_identity\_roles) | Create addon pod identities roles. If set to true, all roles will be created | `bool` | `true` | no |
-| <a name="input_eks"></a> [eks](#input\_eks) | Map of EKS configurations including cluster settings and core addon customization.<br/><br/>Cluster settings:<br/>  - cluster\_endpoint\_public\_access: Enable public access to cluster endpoint (default: true)<br/>  - cluster\_endpoint\_private\_access: Enable private access to cluster endpoint (default: true)<br/>  - enable\_cluster\_creator\_admin\_permissions: Grant admin permissions to cluster creator (default: false)<br/>  - create\_iam\_role: Whether the module creates the cluster IAM role (default: true). Set to false to reuse an existing role, e.g. when adopting an existing cluster.<br/>  - iam\_role\_arn: ARN of an existing cluster IAM role to use when create\_iam\_role is false.<br/>  - authentication\_mode: EKS auth mode (default: "API"). When adopting a cluster still on the aws-auth ConfigMap, set "API\_AND\_CONFIG\_MAP" until every principal is reproduced as an access entry, then move to "API".<br/>  - encryption\_config: Cluster secrets-encryption config (default: {} = encrypt secrets). Set to null to adopt a cluster with no encryption without enabling it (enabling is irreversible).<br/>  - create\_kms\_key: Whether to create a KMS key for cluster encryption (default: true). Set false together with encryption\_config = null to skip encryption, or with encryption\_config.provider\_key\_arn to reuse an existing key.<br/><br/>Core addon settings (vpc\_cni, kube\_proxy, eks\_pod\_identity\_agent):<br/>  - configuration\_values: JSON string of addon configuration (merged with defaults for vpc-cni)<br/><br/>Example:<br/>  eks = {<br/>    cluster\_endpoint\_public\_access = false<br/>    vpc\_cni = {<br/>      configuration\_values = jsonencode({<br/>        env = {<br/>          ENABLE\_PREFIX\_DELEGATION = "true"<br/>          WARM\_PREFIX\_TARGET       = "1"<br/>        }<br/>      })<br/>    }<br/>  } | `any` | `{}` | no |
+| <a name="input_eks"></a> [eks](#input\_eks) | Map of EKS configurations including cluster settings and core addon customization.<br/><br/>Cluster settings:<br/>  - cluster\_endpoint\_public\_access: Enable public access to cluster endpoint (default: true)<br/>  - cluster\_endpoint\_private\_access: Enable private access to cluster endpoint (default: true)<br/>  - enable\_cluster\_creator\_admin\_permissions: Grant admin permissions to cluster creator (default: false)<br/>  - create\_iam\_role: Whether the module creates the cluster IAM role (default: true). Set to false to reuse an existing role, e.g. when adopting an existing cluster.<br/>  - iam\_role\_arn: ARN of an existing cluster IAM role to use when create\_iam\_role is false.<br/>  - iam\_role\_additional\_policies: Additional IAM policy ARNs to attach to the cluster IAM role (default: []). This is now required by auto\_mode.<br/>  - authentication\_mode: EKS auth mode (default: "API"). When adopting a cluster still on the aws-auth ConfigMap, set "API\_AND\_CONFIG\_MAP" until every principal is reproduced as an access entry, then move to "API".<br/>  - encryption\_config: Cluster secrets-encryption config (default: {} = encrypt secrets). Set to null to adopt a cluster with no encryption without enabling it (enabling is irreversible).<br/>  - create\_kms\_key: Whether to create a KMS key for cluster encryption (default: true). Set false together with encryption\_config = null to skip encryption, or with encryption\_config.provider\_key\_arn to reuse an existing key.<br/><br/>Core addon settings (vpc\_cni, kube\_proxy, eks\_pod\_identity\_agent):<br/>  - configuration\_values: JSON string of addon configuration (merged with defaults for vpc-cni)<br/><br/>Example:<br/>  eks = {<br/>    cluster\_endpoint\_public\_access = false<br/>    vpc\_cni = {<br/>      configuration\_values = jsonencode({<br/>        env = {<br/>          ENABLE\_PREFIX\_DELEGATION = "true"<br/>          WARM\_PREFIX\_TARGET       = "1"<br/>        }<br/>      })<br/>    }<br/>  } | `any` | `{}` | no |
 | <a name="input_enable_ack"></a> [enable\_ack](#input\_enable\_ack) | Enable ACK (AWS Controllers for Kubernetes) EKS capability. Note: AdministratorAccess is attached by default. Use ack\_iam\_policy\_arn to override with a least-privilege policy. | `bool` | `true` | no |
 | <a name="input_enable_acm_certificate"></a> [enable\_acm\_certificate](#input\_enable\_acm\_certificate) | Enable ACM certificate | `bool` | `false` | no |
 | <a name="input_enable_argocd"></a> [enable\_argocd](#input\_enable\_argocd) | Enable Argo CD | `bool` | `false` | no |
@@ -290,6 +344,7 @@ as described in the `.pre-commit-config.yaml` file
 | <a name="input_enable_efs_csi_driver"></a> [enable\_efs\_csi\_driver](#input\_enable\_efs\_csi\_driver) | Enable the aws-efs-csi-driver add-on (classic Amazon EFS and Amazon S3 Files storage) and its controller/node Pod Identity roles | `bool` | `true` | no |
 | <a name="input_enable_fargate_fluentbit"></a> [enable\_fargate\_fluentbit](#input\_enable\_fargate\_fluentbit) | Enable Fargate Fluentbit | `bool` | `true` | no |
 | <a name="input_enable_karpenter"></a> [enable\_karpenter](#input\_enable\_karpenter) | Enable the self-managed Karpenter stack (controller, Helm releases, IRSA, subnets, security group, Fargate profile). Independent of enable\_auto\_mode: keep both enabled to run them side-by-side during a migration. At least one of enable\_karpenter / enable\_auto\_mode must be true or the cluster has no compute. | `bool` | `true` | no |
+| <a name="input_enable_kubecost"></a> [enable\_kubecost](#input\_enable\_kubecost) | Enable the kubecost\_kubecost EKS add-on. Requires subscribing to Kubecost in AWS Marketplace for this account first, or addon creation fails. | `bool` | `false` | no |
 | <a name="input_enable_self_managed_ebs_csi"></a> [enable\_self\_managed\_ebs\_csi](#input\_enable\_self\_managed\_ebs\_csi) | Create the self-managed EBS CSI driver (addon, IRSA and pod-identity role). Defaults to enabled unless Auto Mode is on. Set to true to keep it running alongside Auto Mode's managed EBS CSI during a storage migration, or false to drop it. | `bool` | `null` | no |
 | <a name="input_enable_self_managed_lb_controller"></a> [enable\_self\_managed\_lb\_controller](#input\_enable\_self\_managed\_lb\_controller) | Create the IAM pod-identity role for the self-managed AWS Load Balancer Controller. Defaults to enabled unless Auto Mode is on. Set to true to keep it alongside Auto Mode's built-in load balancing during a migration, or false to drop it. | `bool` | `null` | no |
 | <a name="input_enable_sso_admin_auto_discovery"></a> [enable\_sso\_admin\_auto\_discovery](#input\_enable\_sso\_admin\_auto\_discovery) | Enable automatic discovery of SSO admin roles. When disabled, only explicitly defined cluster\_admins are used. | `bool` | `true` | no |
