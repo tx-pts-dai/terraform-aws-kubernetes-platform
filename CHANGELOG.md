@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [8.4.0](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/compare/v8.3.0...v8.4.0) (2026-08-24)
+
+### Features
+
+* enabling kubecost as an EKS addon ([#314](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/issues/314)) ([e0070c6](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/commit/e0070c60725b906d1d17fd5c1c6b83f3c829a9d6))
+
 ## [8.3.0](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/compare/v8.2.0...v8.3.0) (2026-08-20)
 
 ### Features
