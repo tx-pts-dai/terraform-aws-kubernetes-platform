@@ -611,6 +611,24 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#karpenter-consolidation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Karpenter consolidation
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#kubecost" class="md-nav__link">
+    <span class="md-ellipsis">
+      Kubecost
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#examples" class="md-nav__link">
     <span class="md-ellipsis">
       Examples
@@ -1376,6 +1394,24 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#karpenter-consolidation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Karpenter consolidation
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#kubecost" class="md-nav__link">
+    <span class="md-ellipsis">
+      Kubecost
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#examples" class="md-nav__link">
     <span class="md-ellipsis">
       Examples
@@ -1656,6 +1692,76 @@ including how to migrate the ALB controller that is deployed via ArgoCD today.</
 </span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">  </span><span class="p">}]</span>
 </span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="p">}</span>
 </span></code></pre></div>
+<h2 id="karpenter-consolidation">Karpenter consolidation<a class="headerlink" href="#karpenter-consolidation" title="Permanent link">&para;</a></h2>
+<p><a href="https://karpenter.sh/docs/concepts/disruption/">Official documentation</a></p>
+<p>Karpenter offers 3 different consolidation policies, each of them covers different use cases and should be carefully chosen, in order to prevent possible unwanted impacts on workloads stability or costs:</p>
+<table>
+<thead>
+<tr>
+<th>Policy</th>
+<th>Considered nodes</th>
+<th>Use case</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>WhenEmpty</code></td>
+<td>Only empty nodes (a node is empty when it has only pods with no disruption cost, such as daemonsets, user overrides, and ephemeral pods that the user has annotated as cheap to disrupt)</td>
+<td>Nodes are removed only once nothing is running on them</td>
+<td>No impact on application side, but less effective from a costs perspective, since we might be running un-optimized nodes</td>
+</tr>
+<tr>
+<td><code>Balanced</code></td>
+<td>Nodes where the cost savings outweigh the disruption to running pods</td>
+<td>Karpenter still removes empty and clearly-underutilized nodes, but skips actions where the disruption isn't worth the savings</td>
+<td>Available starting in Karpenter v1.14</td>
+</tr>
+<tr>
+<td><code>WhenEmptyOrUnderutilized</code></td>
+<td>Any node that can be removed or replaced to reduce cost</td>
+<td>You want the lowest possible cost and are willing to accept the pod disruption it takes to get there</td>
+<td>This is the most effective policy from a costs perspective, but might impact applications. It's quite aggressive, so the <code>consolidateAfter</code> interval should be chosen carefully: a 1-minute interval is discouraged</td>
+</tr>
+</tbody>
+</table>
+<p>Budgets let you restrict how much disruption a consolidation policy is allowed to cause (e.g. cap it to a percentage of nodes, or disable it during a schedule), on top of the chosen policy:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>apiVersion: karpenter.sh/v1
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>kind: NodePool
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>metadata:
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>  name: default
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>spec:
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>  disruption:
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>    consolidationPolicy: WhenEmptyOrUnderutilized
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>    budgets:
+</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>    - nodes: "20%"
+</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>      reasons:
+</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>      - "Empty"
+</span><span id="__span-3-12"><a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a>      - "Drifted"
+</span><span id="__span-3-13"><a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a>    - nodes: "5"
+</span><span id="__span-3-14"><a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a>    - nodes: "0"
+</span><span id="__span-3-15"><a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a>      schedule: "@daily"
+</span><span id="__span-3-16"><a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a>      duration: 10m
+</span><span id="__span-3-17"><a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a>      reasons:
+</span><span id="__span-3-18"><a id="__codelineno-3-18" name="__codelineno-3-18" href="#__codelineno-3-18"></a>      - "Underutilized"
+</span></code></pre></div>
+<p>In this example: up to 20% of nodes can be disrupted at once for <code>Empty</code>/<code>Drifted</code> reasons, disruption is otherwise capped at 5 nodes, and <code>Underutilized</code> disruptions are blocked entirely during a 10-minute window every day.</p>
+<h2 id="kubecost">Kubecost<a class="headerlink" href="#kubecost" title="Permanent link">&para;</a></h2>
+<p>Set <code>enable_kubecost = true</code> to install the <code>kubecost_kubecost</code> EKS-managed addon
+(cost monitoring dashboard: <a href="https://docs.aws.amazon.com/eks/latest/userguide/cost-monitoring-kubecost-dashboard.html">docs</a>).
+Two dependencies are not managed by this module and must exist before enabling it:</p>
+<ol>
+<li><strong>AWS Marketplace subscription</strong> — subscribe to the
+   <a href="https://aws.amazon.com/marketplace">"IBM Kubecost - Amazon EKS cost monitoring"</a>
+   listing for the target AWS account and accept its EULA. This is a one-time,
+   per-account, manual step; addon creation fails without it.</li>
+<li><strong>Default StorageClass</strong> — Kubecost needs one for its Prometheus PVC. Most
+   clusters already have one (e.g. gp2/gp3). If not, create a <code>kubernetes_storage_class_v1</code>
+   resource as shown in <a href="../examples/complete/main.tf">examples/complete/main.tf</a>. Since the
+   addon is created inside this module, Terraform can't guarantee the StorageClass exists
+   strictly before it - on the very first apply the addon's PVC may sit <code>Pending</code> briefly;
+   it binds once the StorageClass is created (EKS addons reconcile, no re-apply needed).</li>
+</ol>
 <h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">&para;</a></h2>
 <ul>
 <li><a href="../examples/complete/">Complete</a> - Includes creation of VPC, k8s cluster, addons and all the optional features.</li>
@@ -2100,7 +2206,7 @@ including how to migrate the ALB controller that is deployed via ArgoCD today.</
 </tr>
 <tr>
 <td><a name="input_eks"></a> <a href="..#input_eks">eks</a></td>
-<td>Map of EKS configurations including cluster settings and core addon customization.<br/><br/>Cluster settings:<br/>  - cluster_endpoint_public_access: Enable public access to cluster endpoint (default: true)<br/>  - cluster_endpoint_private_access: Enable private access to cluster endpoint (default: true)<br/>  - enable_cluster_creator_admin_permissions: Grant admin permissions to cluster creator (default: false)<br/>  - create_iam_role: Whether the module creates the cluster IAM role (default: true). Set to false to reuse an existing role, e.g. when adopting an existing cluster.<br/>  - iam_role_arn: ARN of an existing cluster IAM role to use when create_iam_role is false.<br/>  - authentication_mode: EKS auth mode (default: "API"). When adopting a cluster still on the aws-auth ConfigMap, set "API_AND_CONFIG_MAP" until every principal is reproduced as an access entry, then move to "API".<br/>  - encryption_config: Cluster secrets-encryption config (default: {} = encrypt secrets). Set to null to adopt a cluster with no encryption without enabling it (enabling is irreversible).<br/>  - create_kms_key: Whether to create a KMS key for cluster encryption (default: true). Set false together with encryption_config = null to skip encryption, or with encryption_config.provider_key_arn to reuse an existing key.<br/><br/>Core addon settings (vpc_cni, kube_proxy, eks_pod_identity_agent):<br/>  - configuration_values: JSON string of addon configuration (merged with defaults for vpc-cni)<br/><br/>Example:<br/>  eks = {<br/>    cluster_endpoint_public_access = false<br/>    vpc_cni = {<br/>      configuration_values = jsonencode({<br/>        env = {<br/>          ENABLE_PREFIX_DELEGATION = "true"<br/>          WARM_PREFIX_TARGET       = "1"<br/>        }<br/>      })<br/>    }<br/>  }</td>
+<td>Map of EKS configurations including cluster settings and core addon customization.<br/><br/>Cluster settings:<br/>  - cluster_endpoint_public_access: Enable public access to cluster endpoint (default: true)<br/>  - cluster_endpoint_private_access: Enable private access to cluster endpoint (default: true)<br/>  - enable_cluster_creator_admin_permissions: Grant admin permissions to cluster creator (default: false)<br/>  - create_iam_role: Whether the module creates the cluster IAM role (default: true). Set to false to reuse an existing role, e.g. when adopting an existing cluster.<br/>  - iam_role_arn: ARN of an existing cluster IAM role to use when create_iam_role is false.<br/>  - iam_role_additional_policies: Additional IAM policy ARNs to attach to the cluster IAM role (default: []). This is now required by auto_mode.<br/>  - authentication_mode: EKS auth mode (default: "API"). When adopting a cluster still on the aws-auth ConfigMap, set "API_AND_CONFIG_MAP" until every principal is reproduced as an access entry, then move to "API".<br/>  - encryption_config: Cluster secrets-encryption config (default: {} = encrypt secrets). Set to null to adopt a cluster with no encryption without enabling it (enabling is irreversible).<br/>  - create_kms_key: Whether to create a KMS key for cluster encryption (default: true). Set false together with encryption_config = null to skip encryption, or with encryption_config.provider_key_arn to reuse an existing key.<br/><br/>Core addon settings (vpc_cni, kube_proxy, eks_pod_identity_agent):<br/>  - configuration_values: JSON string of addon configuration (merged with defaults for vpc-cni)<br/><br/>Example:<br/>  eks = {<br/>    cluster_endpoint_public_access = false<br/>    vpc_cni = {<br/>      configuration_values = jsonencode({<br/>        env = {<br/>          ENABLE_PREFIX_DELEGATION = "true"<br/>          WARM_PREFIX_TARGET       = "1"<br/>        }<br/>      })<br/>    }<br/>  }</td>
 <td><code>any</code></td>
 <td><code>{}</code></td>
 <td style="text-align: center;">no</td>
@@ -2166,6 +2272,13 @@ including how to migrate the ALB controller that is deployed via ArgoCD today.</
 <td>Enable the self-managed Karpenter stack (controller, Helm releases, IRSA, subnets, security group, Fargate profile). Independent of enable_auto_mode: keep both enabled to run them side-by-side during a migration. At least one of enable_karpenter / enable_auto_mode must be true or the cluster has no compute.</td>
 <td><code>bool</code></td>
 <td><code>true</code></td>
+<td style="text-align: center;">no</td>
+</tr>
+<tr>
+<td><a name="input_enable_kubecost"></a> <a href="..#input_enable_kubecost">enable_kubecost</a></td>
+<td>Enable the kubecost_kubecost EKS add-on. Requires subscribing to Kubecost in AWS Marketplace for this account first, or addon creation fails.</td>
+<td><code>bool</code></td>
+<td><code>false</code></td>
 <td style="text-align: center;">no</td>
 </tr>
 <tr>
