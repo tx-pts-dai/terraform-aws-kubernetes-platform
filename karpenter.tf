@@ -474,7 +474,7 @@ resource "helm_release" "karpenter_crd" {
 
   name             = "karpenter-crd"
   chart            = "karpenter-crd"
-  version          = "1.14.0" # renovate: datasource=github-releases depName=aws/karpenter-provider-aws
+  version          = "1.14.1" # renovate: datasource=github-releases depName=aws/karpenter-provider-aws
   repository       = "oci://public.ecr.aws/karpenter"
   description      = "Karpenter CRDs"
   namespace        = local.karpenter.namespace
@@ -492,7 +492,7 @@ resource "helm_release" "karpenter_release" {
 
   name             = "karpenter"
   chart            = "karpenter"
-  version          = "1.14.0" # renovate: datasource=github-releases depName=aws/karpenter-provider-aws
+  version          = "1.14.1" # renovate: datasource=github-releases depName=aws/karpenter-provider-aws
   repository       = "oci://public.ecr.aws/karpenter"
   namespace        = local.karpenter.namespace
   create_namespace = true
