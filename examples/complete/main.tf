@@ -176,7 +176,7 @@ module "k8s_platform" {
             values: ["nitro"]
           - key: "karpenter.k8s.aws/instance-generation"
             operator: Gt
-            values: ["1"]
+            values: ["2"]
         disruption:
           consolidationPolicy: Balanced
           consolidateAfter: 1h
