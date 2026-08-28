@@ -61,13 +61,14 @@ variable "eks" {
     - enabled_log_types: Control plane log types shipped to CloudWatch Logs (default: ["audit", "api", "authenticator"]). CloudWatch charges per GB ingested, and the "audit" type is by far the largest producer - a chatty controller can push it to billions of records per week (see the Kubecost note on enable_kubecost). Drop "audit" from the list to stop that ingestion, at the cost of losing the API audit trail.
 
   Core addon settings (vpc_cni, kube_proxy, eks_pod_identity_agent):
-    - configuration_values: JSON string of addon configuration (merged with defaults for vpc-cni)
+    - configuration_values: JSON string of addon configuration (merged with defaults for vpc-cni). The vpc-cni default enables network policy enforcement (`enableNetworkPolicy = "true"`, ignored in pure EKS Auto Mode where the module does not manage the vpc-cni addon) in `env.NETWORK_POLICY_ENFORCING_MODE = "standard"` mode, so new pods stay allow-all until their NetworkPolicy is applied rather than deny-all (`"strict"` mode, which requires an explicit policy for every endpoint including CoreDNS). Pass any key here, including enableNetworkPolicy or env.NETWORK_POLICY_ENFORCING_MODE, to override it.
 
   Example:
     eks = {
       cluster_endpoint_public_access = false
       vpc_cni = {
         configuration_values = jsonencode({
+          enableNetworkPolicy = "false"
           env = {
             ENABLE_PREFIX_DELEGATION = "true"
             WARM_PREFIX_TARGET       = "1"

@@ -84,7 +84,16 @@ locals {
   vpc_cni_default_config = {
     env = {
       ENABLE_PREFIX_DELEGATION = "true"
+
+      # "standard" (the default if unset) starts new pods allow-all until their
+      # policies are applied; "strict" starts them deny-all, blocking traffic
+      # (including to CoreDNS) until every endpoint has an explicit NetworkPolicy.
+      # Pinned here so enabling enableNetworkPolicy below never blocks traffic by
+      # itself.
+      NETWORK_POLICY_ENFORCING_MODE = "standard"
     }
+    # Enabled by default; override via eks.vpc_cni.configuration_values (see below).
+    enableNetworkPolicy = "true"
   }
 
   # Merge user-provided vpc-cni configuration with defaults (deep merge for env)
