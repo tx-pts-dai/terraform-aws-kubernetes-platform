@@ -141,13 +141,6 @@ module "k8s_platform" {
     intra_subnets   = data.aws_subnets.intra_subnets.ids
   }
 
-  eks = {
-    # This is a new auto_mode requirement not included in the module yet
-    iam_role_additional_policies = {
-      AmazonEKSBlockStoragePolicyV2 = "arn:aws:iam::aws:policy/AmazonEKSBlockStoragePolicyV2"
-    }
-  }
-
   karpenter_resources_helm_set = [
     {
       name  = "global.eksDiscovery.tags.subnets.karpenter\\.sh/discovery"
