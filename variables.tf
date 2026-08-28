@@ -60,13 +60,14 @@ variable "eks" {
     - create_kms_key: Whether to create a KMS key for cluster encryption (default: true). Set false together with encryption_config = null to skip encryption, or with encryption_config.provider_key_arn to reuse an existing key.
 
   Core addon settings (vpc_cni, kube_proxy, eks_pod_identity_agent):
-    - configuration_values: JSON string of addon configuration (merged with defaults for vpc-cni)
+    - configuration_values: JSON string of addon configuration (merged with defaults for vpc-cni). Defaults enable network policy enforcement (`enableNetworkPolicy = "true"`, standard mode); pass either key here to override. Ignored in pure EKS Auto Mode, where the module does not manage the vpc-cni addon.
 
   Example:
     eks = {
       cluster_endpoint_public_access = false
       vpc_cni = {
         configuration_values = jsonencode({
+          enableNetworkPolicy = "false"
           env = {
             ENABLE_PREFIX_DELEGATION = "true"
             WARM_PREFIX_TARGET       = "1"

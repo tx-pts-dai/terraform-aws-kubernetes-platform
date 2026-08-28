@@ -83,8 +83,10 @@ locals {
   # Default vpc-cni configuration
   vpc_cni_default_config = {
     env = {
-      ENABLE_PREFIX_DELEGATION = "true"
+      ENABLE_PREFIX_DELEGATION      = "true"
+      NETWORK_POLICY_ENFORCING_MODE = "standard"
     }
+    enableNetworkPolicy = "true"
   }
 
   # Merge user-provided vpc-cni configuration with defaults (deep merge for env)
