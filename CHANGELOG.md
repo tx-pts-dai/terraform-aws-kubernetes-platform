@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [8.4.1](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/compare/v8.4.0...v8.4.1) (2026-08-28)
+
+### Bug Fixes
+
+* avoid error when eks.iam_role_additional_policies is unset ([#317](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/issues/317)) ([96437b0](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/commit/96437b0b292cc8ab80a5f3681ed14890e1486283))
+
 ## [8.4.0](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/compare/v8.3.0...v8.4.0) (2026-08-24)
 
 ### Features
