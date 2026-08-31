@@ -4,7 +4,7 @@
 
 module "ack_capability" {
   source  = "terraform-aws-modules/eks/aws//modules/capability"
-  version = "21.24.0"
+  version = "21.25.0"
 
   create = var.enable_ack
 
@@ -53,7 +53,7 @@ check "argocd_capability_idc" {
 
 module "argocd_capability" {
   source  = "terraform-aws-modules/eks/aws//modules/capability"
-  version = "21.15.1"
+  version = "21.25.0"
 
   create = var.enable_argocd_capability
 
