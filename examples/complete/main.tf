@@ -224,6 +224,15 @@ module "k8s_platform" {
   # awsstore-serviceaccount (pod identity or IRSA) before enabling this.
   #
   # enable_kubecost = true
+  #
+  # The addon's network-costs DaemonSet calls the Kubernetes API hard enough to
+  # dominate the CloudWatch Logs bill through the "audit" control plane log type, and
+  # the addon has no configuration schema to turn networkCosts off. Drop "audit" from
+  # the log types if you enable it - see the Kubecost section in the root README.
+  #
+  # eks = {
+  #   enabled_log_types = ["api", "authenticator"]
+  # }
 
   # Kubecost (enable_kubecost above) needs a default StorageClass for its
   # Prometheus PVC. Most clusters already have one (e.g. gp2/gp3); this one is

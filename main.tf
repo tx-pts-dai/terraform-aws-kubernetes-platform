@@ -116,6 +116,8 @@ module "eks" {
   # yet an access entry.
   authentication_mode = try(var.eks.authentication_mode, "API")
 
+  enabled_log_types = try(var.eks.enabled_log_types, ["audit", "api", "authenticator"])
+
   create_auto_mode_iam_resources    = var.enable_auto_mode
   node_iam_role_additional_policies = var.auto_mode.node_iam_role_additional_policies
   iam_role_additional_policies      = try(var.eks.iam_role_additional_policies, {})

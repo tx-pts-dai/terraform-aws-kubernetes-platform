@@ -58,6 +58,7 @@ variable "eks" {
     - authentication_mode: EKS auth mode (default: "API"). When adopting a cluster still on the aws-auth ConfigMap, set "API_AND_CONFIG_MAP" until every principal is reproduced as an access entry, then move to "API".
     - encryption_config: Cluster secrets-encryption config (default: {} = encrypt secrets). Set to null to adopt a cluster with no encryption without enabling it (enabling is irreversible).
     - create_kms_key: Whether to create a KMS key for cluster encryption (default: true). Set false together with encryption_config = null to skip encryption, or with encryption_config.provider_key_arn to reuse an existing key.
+    - enabled_log_types: Control plane log types shipped to CloudWatch Logs (default: ["audit", "api", "authenticator"]). CloudWatch charges per GB ingested, and the "audit" type is by far the largest producer - a chatty controller can push it to billions of records per week (see the Kubecost note on enable_kubecost). Drop "audit" from the list to stop that ingestion, at the cost of losing the API audit trail.
 
   Core addon settings (vpc_cni, kube_proxy, eks_pod_identity_agent):
     - configuration_values: JSON string of addon configuration (merged with defaults for vpc-cni)
@@ -347,7 +348,11 @@ variable "enable_efs_csi_driver" {
 # Additional Addons - Not installed by default
 
 variable "enable_kubecost" {
-  description = "Enable the kubecost_kubecost EKS add-on. Requires subscribing to Kubecost in AWS Marketplace for this account first, or addon creation fails."
+  description = <<-EOT
+  Enable the kubecost_kubecost EKS add-on. Requires subscribing to Kubecost in AWS Marketplace for this account first, or addon creation fails.
+
+  Cost warning: the addon's network-costs DaemonSet calls the Kubernetes API at a very high rate, which inflates the "audit" control plane log type and the resulting CloudWatch Logs ingestion bill. The addon publishes no configuration schema (`aws eks describe-addon-configuration` reports "No configuration support"), so networkCosts cannot be disabled through it. To cut the ingestion, drop "audit" from eks.enabled_log_types.
+  EOT
   type        = bool
   default     = false
 }
