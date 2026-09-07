@@ -141,6 +141,13 @@ module "k8s_platform" {
     iam_role_additional_policies = {
       AmazonEKSBlockStoragePolicyV2 = "arn:aws:iam::aws:policy/AmazonEKSBlockStoragePolicyV2"
     }
+
+    # "audit" dropped from the default ["audit", "api", "authenticator"]: with
+    # enable_kubecost below, the addon's network-costs DaemonSet drives billions of
+    # audit records per week and the CloudWatch Logs ingestion bill with them. The
+    # addon has no configuration schema, so networkCosts can't be turned off
+    # instead - see the Kubecost section in the root README.
+    enabled_log_types = ["api", "authenticator"]
   }
 
   karpenter_helm_set = [
