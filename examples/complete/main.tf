@@ -260,6 +260,41 @@ module "k8s_platform" {
   #   }
   # }
 
+  # The addon's network-costs ClusterRole is missing endpointslices, so the pod's
+  # watch is rejected with 403 and retried in a loop, and every rejected call is
+  # written to the "audit" log type. Grant it through a second ClusterRole: RBAC
+  # rules are additive, and the addon reverts edits to the role it owns.
+  #
+  # resource "kubernetes_cluster_role_v1" "kubecost_network_costs" {
+  #   metadata {
+  #     name = "kubecost-network-costs-endpointslices"
+  #   }
+  #
+  #   rule {
+  #     api_groups = ["discovery.k8s.io"]
+  #     resources  = ["endpointslices"]
+  #     verbs      = ["get", "list", "watch"]
+  #   }
+  # }
+  #
+  # resource "kubernetes_cluster_role_binding_v1" "kubecost_network_costs" {
+  #   metadata {
+  #     name = kubernetes_cluster_role_v1.kubecost_network_costs.metadata[0].name
+  #   }
+  #
+  #   role_ref {
+  #     api_group = "rbac.authorization.k8s.io"
+  #     kind      = "ClusterRole"
+  #     name      = kubernetes_cluster_role_v1.kubecost_network_costs.metadata[0].name
+  #   }
+  #
+  #   subject {
+  #     kind      = "ServiceAccount"
+  #     name      = "kubecost-network-costs"
+  #     namespace = "kubecost"
+  #   }
+  # }
+
   # Example (opt-in): expose the Kubecost dashboard via an internal ALB ingress.
   # Requires the AWS Load Balancer Controller (enable_self_managed_lb_controller
   # or Auto Mode) and external-dns (wired up via the module's
