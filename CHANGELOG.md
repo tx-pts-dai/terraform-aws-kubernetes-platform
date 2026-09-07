@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [8.5.0](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/compare/v8.4.1...v8.5.0) (2026-09-07)
+
+### Features
+
+* allowing eks logging tuning ([#318](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/issues/318)) ([756fccf](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/commit/756fccf6f1969f8640e18499facd77e1a8342100))
+
 ## [8.4.1](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/compare/v8.4.0...v8.4.1) (2026-08-28)
 
 ### Bug Fixes
