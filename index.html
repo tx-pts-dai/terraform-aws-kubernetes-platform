@@ -638,6 +638,15 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#kubecost-network-costs-rbac" class="md-nav__link">
+    <span class="md-ellipsis">
+      Kubecost network-costs RBAC
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1436,6 +1445,15 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#kubecost-network-costs-rbac" class="md-nav__link">
+    <span class="md-ellipsis">
+      Kubecost network-costs RBAC
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1809,6 +1827,52 @@ published version, from <code>v1.98.0-eksbuild.0</code> to <code>v3.2.3-eksbuild
 </span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">  </span><span class="na">enabled_log_types</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">"api", "authenticator"</span><span class="p">]</span>
 </span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="p">}</span>
 </span></code></pre></div>
+<h3 id="kubecost-network-costs-rbac">Kubecost network-costs RBAC<a class="headerlink" href="#kubecost-network-costs-rbac" title="Permanent link">&para;</a></h3>
+<p>A large part of that API traffic is not useful work. The ClusterRole the addon ships for
+<code>network-costs</code> does not grant <code>endpointslices</code>, so the pod's watch is rejected and retried
+in a loop:</p>
+<div class="language-console highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="go">WARN kube_runtime::watcher: watch list error with 403: endpointslices.discovery.k8s.io is</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="go">forbidden: User "system:serviceaccount:kubecost:kubecost-network-costs" cannot list</span>
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="go">resource "endpointslices" in API group "discovery.k8s.io" at the cluster scope</span>
+</span></code></pre></div>
+<p>Every rejected call is written to the <code>audit</code> log type, so the failure feeds the bill
+directly. Grant the permission at the call site with a <strong>separate</strong> ClusterRole - RBAC
+rules are additive, and the addon reconciles the resources it owns, so editing its own
+ClusterRole in place is reverted:</p>
+<div class="language-hcl highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="kr">resource</span><span class="w"> </span><span class="nc">"kubernetes_cluster_role_v1"</span><span class="w"> </span><span class="nv">"kubecost_network_costs"</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="w">  </span><span class="nb">metadata</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="w">    </span><span class="na">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"kubecost-network-costs-endpointslices"</span>
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>
+</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="w">  </span><span class="nb">rule</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="w">    </span><span class="na">api_groups</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">"discovery.k8s.io"</span><span class="p">]</span>
+</span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="w">    </span><span class="na">resources</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">"endpointslices"</span><span class="p">]</span>
+</span><span id="__span-7-9"><a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a><span class="w">    </span><span class="na">verbs</span><span class="w">      </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">"get", "list", "watch"</span><span class="p">]</span>
+</span><span id="__span-7-10"><a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-7-11"><a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a><span class="p">}</span>
+</span><span id="__span-7-12"><a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a>
+</span><span id="__span-7-13"><a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a><span class="kr">resource</span><span class="w"> </span><span class="nc">"kubernetes_cluster_role_binding_v1"</span><span class="w"> </span><span class="nv">"kubecost_network_costs"</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-7-14"><a id="__codelineno-7-14" name="__codelineno-7-14" href="#__codelineno-7-14"></a><span class="w">  </span><span class="nb">metadata</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-7-15"><a id="__codelineno-7-15" name="__codelineno-7-15" href="#__codelineno-7-15"></a><span class="w">    </span><span class="na">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nv">kubernetes_cluster_role_v1.kubecost_network_costs.metadata[0].name</span>
+</span><span id="__span-7-16"><a id="__codelineno-7-16" name="__codelineno-7-16" href="#__codelineno-7-16"></a><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-7-17"><a id="__codelineno-7-17" name="__codelineno-7-17" href="#__codelineno-7-17"></a>
+</span><span id="__span-7-18"><a id="__codelineno-7-18" name="__codelineno-7-18" href="#__codelineno-7-18"></a><span class="w">  </span><span class="nb">role_ref</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-7-19"><a id="__codelineno-7-19" name="__codelineno-7-19" href="#__codelineno-7-19"></a><span class="w">    </span><span class="na">api_group</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"rbac.authorization.k8s.io"</span>
+</span><span id="__span-7-20"><a id="__codelineno-7-20" name="__codelineno-7-20" href="#__codelineno-7-20"></a><span class="w">    </span><span class="na">kind</span><span class="w">      </span><span class="o">=</span><span class="w"> </span><span class="s2">"ClusterRole"</span>
+</span><span id="__span-7-21"><a id="__codelineno-7-21" name="__codelineno-7-21" href="#__codelineno-7-21"></a><span class="w">    </span><span class="na">name</span><span class="w">      </span><span class="o">=</span><span class="w"> </span><span class="nv">kubernetes_cluster_role_v1.kubecost_network_costs.metadata[0].name</span>
+</span><span id="__span-7-22"><a id="__codelineno-7-22" name="__codelineno-7-22" href="#__codelineno-7-22"></a><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-7-23"><a id="__codelineno-7-23" name="__codelineno-7-23" href="#__codelineno-7-23"></a>
+</span><span id="__span-7-24"><a id="__codelineno-7-24" name="__codelineno-7-24" href="#__codelineno-7-24"></a><span class="w">  </span><span class="nb">subject</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-7-25"><a id="__codelineno-7-25" name="__codelineno-7-25" href="#__codelineno-7-25"></a><span class="w">    </span><span class="na">kind</span><span class="w">      </span><span class="o">=</span><span class="w"> </span><span class="s2">"ServiceAccount"</span>
+</span><span id="__span-7-26"><a id="__codelineno-7-26" name="__codelineno-7-26" href="#__codelineno-7-26"></a><span class="w">    </span><span class="na">name</span><span class="w">      </span><span class="o">=</span><span class="w"> </span><span class="s2">"kubecost-network-costs"</span>
+</span><span id="__span-7-27"><a id="__codelineno-7-27" name="__codelineno-7-27" href="#__codelineno-7-27"></a><span class="w">    </span><span class="na">namespace</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"kubecost"</span>
+</span><span id="__span-7-28"><a id="__codelineno-7-28" name="__codelineno-7-28" href="#__codelineno-7-28"></a><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-7-29"><a id="__codelineno-7-29" name="__codelineno-7-29" href="#__codelineno-7-29"></a><span class="p">}</span>
+</span></code></pre></div>
+<p>This reduces the audit volume, it does not remove it: <code>network-costs</code> also watches pods
+and services legitimately. Check what else the service account is missing with
+<code>kubectl auth can-i --list --as=system:serviceaccount:kubecost:kubecost-network-costs</code>,
+and keep <code>audit</code> off until you have measured the drop.</p>
 <h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">&para;</a></h2>
 <ul>
 <li><a href="../examples/complete/">Complete</a> - Includes creation of VPC, k8s cluster, addons and all the optional features.</li>
@@ -2323,7 +2387,7 @@ published version, from <code>v1.98.0-eksbuild.0</code> to <code>v3.2.3-eksbuild
 </tr>
 <tr>
 <td><a name="input_enable_kubecost"></a> <a href="..#input_enable_kubecost">enable_kubecost</a></td>
-<td>Enable the kubecost_kubecost EKS add-on. Requires subscribing to Kubecost in AWS Marketplace for this account first, or addon creation fails.<br/><br/>Cost warning: the addon's network-costs DaemonSet calls the Kubernetes API at a very high rate, which inflates the "audit" control plane log type and the resulting CloudWatch Logs ingestion bill. The addon publishes no configuration schema (<code>aws eks describe-addon-configuration</code> reports "No configuration support"), so networkCosts cannot be disabled through it. To cut the ingestion, drop "audit" from eks.enabled_log_types.</td>
+<td>Enable the kubecost_kubecost EKS add-on. Requires subscribing to Kubecost in AWS Marketplace for this account first, or addon creation fails.<br/><br/>Cost warning: the addon's network-costs DaemonSet calls the Kubernetes API at a very high rate, which inflates the "audit" control plane log type and the resulting CloudWatch Logs ingestion bill.<br/>The addon publishes no configuration schema (<code>aws eks describe-addon-configuration</code> reports "No configuration support"), so networkCosts cannot be disabled through it. To cut the ingestion, drop "audit" from eks.enabled_log_types.<br/>The addon's ClusterRole for network-costs is also missing endpointslices, so its watch 403-loops and inflates the audit log further - grant it with a separate ClusterRole at the call site (see the Kubecost section in the README).</td>
 <td><code>bool</code></td>
 <td><code>false</code></td>
 <td style="text-align: center;">no</td>
