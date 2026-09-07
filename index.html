@@ -626,6 +626,21 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Kubecost">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#kubecost-and-control-plane-audit-logs" class="md-nav__link">
+    <span class="md-ellipsis">
+      Kubecost and control plane audit logs
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -1409,6 +1424,21 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Kubecost">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#kubecost-and-control-plane-audit-logs" class="md-nav__link">
+    <span class="md-ellipsis">
+      Kubecost and control plane audit logs
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -1762,6 +1792,23 @@ Two dependencies are not managed by this module and must exist before enabling i
    strictly before it - on the very first apply the addon's PVC may sit <code>Pending</code> briefly;
    it binds once the StorageClass is created (EKS addons reconcile, no re-apply needed).</li>
 </ol>
+<h3 id="kubecost-and-control-plane-audit-logs">Kubecost and control plane audit logs<a class="headerlink" href="#kubecost-and-control-plane-audit-logs" title="Permanent link">&para;</a></h3>
+<p>The addon's <code>network-costs</code> DaemonSet calls the Kubernetes API at a very high rate.
+Every call is recorded by the <code>audit</code> control plane log type, and CloudWatch Logs bills
+per GB ingested, so the addon can dominate the log bill (observed: ~1.8 billion audit
+records in one week from the <code>network-costs</code> service account alone).</p>
+<p>The addon cannot be tuned to avoid this. It publishes no configuration schema - every
+published version, from <code>v1.98.0-eksbuild.0</code> to <code>v3.2.3-eksbuild.1</code>, reports:</p>
+<div class="language-console highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="gp">$ </span>aws<span class="w"> </span>eks<span class="w"> </span>describe-addon-configuration<span class="w"> </span>--addon-name<span class="w"> </span>kubecost_kubecost<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">    </span>--addon-version<span class="w"> </span>v3.2.3-eksbuild.1<span class="w"> </span>--region<span class="w"> </span>eu-central-1
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="go">{"description": "No configuration support for kubecost_kubecost", "additionalProperties": false, ...}</span>
+</span></code></pre></div>
+<p>so <code>configuration_values</code> is rejected and <code>networkCosts.enabled = false</code> cannot be set.</p>
+<p>To stop the ingestion, drop <code>audit</code> from the control plane log types at the call site:</p>
+<div class="language-hcl highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="nb">eks</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">  </span><span class="na">enabled_log_types</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">"api", "authenticator"</span><span class="p">]</span>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="p">}</span>
+</span></code></pre></div>
 <h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">&para;</a></h2>
 <ul>
 <li><a href="../examples/complete/">Complete</a> - Includes creation of VPC, k8s cluster, addons and all the optional features.</li>
@@ -2206,7 +2253,7 @@ Two dependencies are not managed by this module and must exist before enabling i
 </tr>
 <tr>
 <td><a name="input_eks"></a> <a href="..#input_eks">eks</a></td>
-<td>Map of EKS configurations including cluster settings and core addon customization.<br/><br/>Cluster settings:<br/>  - cluster_endpoint_public_access: Enable public access to cluster endpoint (default: true)<br/>  - cluster_endpoint_private_access: Enable private access to cluster endpoint (default: true)<br/>  - enable_cluster_creator_admin_permissions: Grant admin permissions to cluster creator (default: false)<br/>  - create_iam_role: Whether the module creates the cluster IAM role (default: true). Set to false to reuse an existing role, e.g. when adopting an existing cluster.<br/>  - iam_role_arn: ARN of an existing cluster IAM role to use when create_iam_role is false.<br/>  - iam_role_additional_policies: Map of additional IAM policy ARNs to attach to the cluster IAM role, keyed by an arbitrary name (default: {}). When enable_auto_mode is true, must include AmazonEKSBlockStoragePolicyV2 for Auto Mode's block storage capability to work — the module does not attach it automatically.<br/>  - authentication_mode: EKS auth mode (default: "API"). When adopting a cluster still on the aws-auth ConfigMap, set "API_AND_CONFIG_MAP" until every principal is reproduced as an access entry, then move to "API".<br/>  - encryption_config: Cluster secrets-encryption config (default: {} = encrypt secrets). Set to null to adopt a cluster with no encryption without enabling it (enabling is irreversible).<br/>  - create_kms_key: Whether to create a KMS key for cluster encryption (default: true). Set false together with encryption_config = null to skip encryption, or with encryption_config.provider_key_arn to reuse an existing key.<br/><br/>Core addon settings (vpc_cni, kube_proxy, eks_pod_identity_agent):<br/>  - configuration_values: JSON string of addon configuration (merged with defaults for vpc-cni)<br/><br/>Example:<br/>  eks = {<br/>    cluster_endpoint_public_access = false<br/>    vpc_cni = {<br/>      configuration_values = jsonencode({<br/>        env = {<br/>          ENABLE_PREFIX_DELEGATION = "true"<br/>          WARM_PREFIX_TARGET       = "1"<br/>        }<br/>      })<br/>    }<br/>  }</td>
+<td>Map of EKS configurations including cluster settings and core addon customization.<br/><br/>Cluster settings:<br/>  - cluster_endpoint_public_access: Enable public access to cluster endpoint (default: true)<br/>  - cluster_endpoint_private_access: Enable private access to cluster endpoint (default: true)<br/>  - enable_cluster_creator_admin_permissions: Grant admin permissions to cluster creator (default: false)<br/>  - create_iam_role: Whether the module creates the cluster IAM role (default: true). Set to false to reuse an existing role, e.g. when adopting an existing cluster.<br/>  - iam_role_arn: ARN of an existing cluster IAM role to use when create_iam_role is false.<br/>  - iam_role_additional_policies: Map of additional IAM policy ARNs to attach to the cluster IAM role, keyed by an arbitrary name (default: {}). When enable_auto_mode is true, must include AmazonEKSBlockStoragePolicyV2 for Auto Mode's block storage capability to work — the module does not attach it automatically.<br/>  - authentication_mode: EKS auth mode (default: "API"). When adopting a cluster still on the aws-auth ConfigMap, set "API_AND_CONFIG_MAP" until every principal is reproduced as an access entry, then move to "API".<br/>  - encryption_config: Cluster secrets-encryption config (default: {} = encrypt secrets). Set to null to adopt a cluster with no encryption without enabling it (enabling is irreversible).<br/>  - create_kms_key: Whether to create a KMS key for cluster encryption (default: true). Set false together with encryption_config = null to skip encryption, or with encryption_config.provider_key_arn to reuse an existing key.<br/>  - enabled_log_types: Control plane log types shipped to CloudWatch Logs (default: ["audit", "api", "authenticator"]). CloudWatch charges per GB ingested, and the "audit" type is by far the largest producer - a chatty controller can push it to billions of records per week (see the Kubecost note on enable_kubecost). Drop "audit" from the list to stop that ingestion, at the cost of losing the API audit trail.<br/><br/>Core addon settings (vpc_cni, kube_proxy, eks_pod_identity_agent):<br/>  - configuration_values: JSON string of addon configuration (merged with defaults for vpc-cni)<br/><br/>Example:<br/>  eks = {<br/>    cluster_endpoint_public_access = false<br/>    vpc_cni = {<br/>      configuration_values = jsonencode({<br/>        env = {<br/>          ENABLE_PREFIX_DELEGATION = "true"<br/>          WARM_PREFIX_TARGET       = "1"<br/>        }<br/>      })<br/>    }<br/>  }</td>
 <td><code>any</code></td>
 <td><code>{}</code></td>
 <td style="text-align: center;">no</td>
@@ -2276,7 +2323,7 @@ Two dependencies are not managed by this module and must exist before enabling i
 </tr>
 <tr>
 <td><a name="input_enable_kubecost"></a> <a href="..#input_enable_kubecost">enable_kubecost</a></td>
-<td>Enable the kubecost_kubecost EKS add-on. Requires subscribing to Kubecost in AWS Marketplace for this account first, or addon creation fails.</td>
+<td>Enable the kubecost_kubecost EKS add-on. Requires subscribing to Kubecost in AWS Marketplace for this account first, or addon creation fails.<br/><br/>Cost warning: the addon's network-costs DaemonSet calls the Kubernetes API at a very high rate, which inflates the "audit" control plane log type and the resulting CloudWatch Logs ingestion bill. The addon publishes no configuration schema (<code>aws eks describe-addon-configuration</code> reports "No configuration support"), so networkCosts cannot be disabled through it. To cut the ingestion, drop "audit" from eks.enabled_log_types.</td>
 <td><code>bool</code></td>
 <td><code>false</code></td>
 <td style="text-align: center;">no</td>
