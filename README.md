@@ -228,6 +228,60 @@ eks = {
 }
 ```
 
+### Kubecost network-costs RBAC
+
+A large part of that API traffic is not useful work. The ClusterRole the addon ships for
+`network-costs` does not grant `endpointslices`, so the pod's watch is rejected and retried
+in a loop:
+
+```console
+WARN kube_runtime::watcher: watch list error with 403: endpointslices.discovery.k8s.io is
+forbidden: User "system:serviceaccount:kubecost:kubecost-network-costs" cannot list
+resource "endpointslices" in API group "discovery.k8s.io" at the cluster scope
+```
+
+Every rejected call is written to the `audit` log type, so the failure feeds the bill
+directly. Grant the permission at the call site with a **separate** ClusterRole - RBAC
+rules are additive, and the addon reconciles the resources it owns, so editing its own
+ClusterRole in place is reverted:
+
+```hcl
+resource "kubernetes_cluster_role_v1" "kubecost_network_costs" {
+  metadata {
+    name = "kubecost-network-costs-endpointslices"
+  }
+
+  rule {
+    api_groups = ["discovery.k8s.io"]
+    resources  = ["endpointslices"]
+    verbs      = ["get", "list", "watch"]
+  }
+}
+
+resource "kubernetes_cluster_role_binding_v1" "kubecost_network_costs" {
+  metadata {
+    name = kubernetes_cluster_role_v1.kubecost_network_costs.metadata[0].name
+  }
+
+  role_ref {
+    api_group = "rbac.authorization.k8s.io"
+    kind      = "ClusterRole"
+    name      = kubernetes_cluster_role_v1.kubecost_network_costs.metadata[0].name
+  }
+
+  subject {
+    kind      = "ServiceAccount"
+    name      = "kubecost-network-costs"
+    namespace = "kubecost"
+  }
+}
+```
+
+This reduces the audit volume, it does not remove it: `network-costs` also watches pods
+and services legitimately. Check what else the service account is missing with
+`kubectl auth can-i --list --as=system:serviceaccount:kubecost:kubecost-network-costs`,
+and keep `audit` off until you have measured the drop.
+
 ## Examples
 
 - [Complete](./examples/complete/) - Includes creation of VPC, k8s cluster, addons and all the optional features.
@@ -370,7 +424,7 @@ as described in the `.pre-commit-config.yaml` file
 | <a name="input_enable_efs_csi_driver"></a> [enable\_efs\_csi\_driver](#input\_enable\_efs\_csi\_driver) | Enable the aws-efs-csi-driver add-on (classic Amazon EFS and Amazon S3 Files storage) and its controller/node Pod Identity roles | `bool` | `true` | no |
 | <a name="input_enable_fargate_fluentbit"></a> [enable\_fargate\_fluentbit](#input\_enable\_fargate\_fluentbit) | Enable Fargate Fluentbit | `bool` | `true` | no |
 | <a name="input_enable_karpenter"></a> [enable\_karpenter](#input\_enable\_karpenter) | Enable the self-managed Karpenter stack (controller, Helm releases, IRSA, subnets, security group, Fargate profile). Independent of enable\_auto\_mode: keep both enabled to run them side-by-side during a migration. At least one of enable\_karpenter / enable\_auto\_mode must be true or the cluster has no compute. | `bool` | `true` | no |
-| <a name="input_enable_kubecost"></a> [enable\_kubecost](#input\_enable\_kubecost) | Enable the kubecost\_kubecost EKS add-on. Requires subscribing to Kubecost in AWS Marketplace for this account first, or addon creation fails.<br/><br/>Cost warning: the addon's network-costs DaemonSet calls the Kubernetes API at a very high rate, which inflates the "audit" control plane log type and the resulting CloudWatch Logs ingestion bill. The addon publishes no configuration schema (`aws eks describe-addon-configuration` reports "No configuration support"), so networkCosts cannot be disabled through it. To cut the ingestion, drop "audit" from eks.enabled\_log\_types. | `bool` | `false` | no |
+| <a name="input_enable_kubecost"></a> [enable\_kubecost](#input\_enable\_kubecost) | Enable the kubecost\_kubecost EKS add-on. Requires subscribing to Kubecost in AWS Marketplace for this account first, or addon creation fails.<br/><br/>Cost warning: the addon's network-costs DaemonSet calls the Kubernetes API at a very high rate, which inflates the "audit" control plane log type and the resulting CloudWatch Logs ingestion bill.<br/>The addon publishes no configuration schema (`aws eks describe-addon-configuration` reports "No configuration support"), so networkCosts cannot be disabled through it. To cut the ingestion, drop "audit" from eks.enabled\_log\_types.<br/>The addon's ClusterRole for network-costs is also missing endpointslices, so its watch 403-loops and inflates the audit log further - grant it with a separate ClusterRole at the call site (see the Kubecost section in the README). | `bool` | `false` | no |
 | <a name="input_enable_self_managed_ebs_csi"></a> [enable\_self\_managed\_ebs\_csi](#input\_enable\_self\_managed\_ebs\_csi) | Create the self-managed EBS CSI driver (addon, IRSA and pod-identity role). Defaults to enabled unless Auto Mode is on. Set to true to keep it running alongside Auto Mode's managed EBS CSI during a storage migration, or false to drop it. | `bool` | `null` | no |
 | <a name="input_enable_self_managed_lb_controller"></a> [enable\_self\_managed\_lb\_controller](#input\_enable\_self\_managed\_lb\_controller) | Create the IAM pod-identity role for the self-managed AWS Load Balancer Controller. Defaults to enabled unless Auto Mode is on. Set to true to keep it alongside Auto Mode's built-in load balancing during a migration, or false to drop it. | `bool` | `null` | no |
 | <a name="input_enable_sso_admin_auto_discovery"></a> [enable\_sso\_admin\_auto\_discovery](#input\_enable\_sso\_admin\_auto\_discovery) | Enable automatic discovery of SSO admin roles. When disabled, only explicitly defined cluster\_admins are used. | `bool` | `true` | no |

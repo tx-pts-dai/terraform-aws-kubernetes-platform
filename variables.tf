@@ -351,7 +351,9 @@ variable "enable_kubecost" {
   description = <<-EOT
   Enable the kubecost_kubecost EKS add-on. Requires subscribing to Kubecost in AWS Marketplace for this account first, or addon creation fails.
 
-  Cost warning: the addon's network-costs DaemonSet calls the Kubernetes API at a very high rate, which inflates the "audit" control plane log type and the resulting CloudWatch Logs ingestion bill. The addon publishes no configuration schema (`aws eks describe-addon-configuration` reports "No configuration support"), so networkCosts cannot be disabled through it. To cut the ingestion, drop "audit" from eks.enabled_log_types.
+  Cost warning: the addon's network-costs DaemonSet calls the Kubernetes API at a very high rate, which inflates the "audit" control plane log type and the resulting CloudWatch Logs ingestion bill.
+  The addon publishes no configuration schema (`aws eks describe-addon-configuration` reports "No configuration support"), so networkCosts cannot be disabled through it. To cut the ingestion, drop "audit" from eks.enabled_log_types.
+  The addon's ClusterRole for network-costs is also missing endpointslices, so its watch 403-loops and inflates the audit log further - grant it with a separate ClusterRole at the call site (see the Kubecost section in the README).
   EOT
   type        = bool
   default     = false
