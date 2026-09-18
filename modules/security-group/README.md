@@ -41,7 +41,10 @@ No modules.
 
 ## Outputs
 
-No outputs.
+| Name | Description |
+| ---- | ----------- |
+| <a name="output_arn"></a> [arn](#output\_arn) | ARN of the security group |
+| <a name="output_id"></a> [id](#output\_id) | ID of the security group |
 <!-- END_TF_DOCS -->
 
 <!-- BEGIN_TF_DOCS -->

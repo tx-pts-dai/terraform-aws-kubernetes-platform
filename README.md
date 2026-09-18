@@ -318,7 +318,7 @@ as described in the `.pre-commit-config.yaml` file
 | Name | Version |
 | ---- | ------- |
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.10 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 6.28 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 6.40 |
 | <a name="requirement_helm"></a> [helm](#requirement\_helm) | >= 3.0.2 |
 | <a name="requirement_kubectl"></a> [kubectl](#requirement\_kubectl) | >= 2.0.2 |
 | <a name="requirement_kubernetes"></a> [kubernetes](#requirement\_kubernetes) | >= 2.27 |
@@ -328,7 +328,7 @@ as described in the `.pre-commit-config.yaml` file
 
 | Name | Version |
 | ---- | ------- |
-| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 6.28 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 6.40 |
 | <a name="provider_helm"></a> [helm](#provider\_helm) | >= 3.0.2 |
 | <a name="provider_kubernetes"></a> [kubernetes](#provider\_kubernetes) | >= 2.27 |
 | <a name="provider_time"></a> [time](#provider\_time) | >= 0.11 |
@@ -355,6 +355,7 @@ as described in the `.pre-commit-config.yaml` file
 | <a name="module_karpenter"></a> [karpenter](#module\_karpenter) | terraform-aws-modules/eks/aws//modules/karpenter | 21.24.0 |
 | <a name="module_karpenter_irsa"></a> [karpenter\_irsa](#module\_karpenter\_irsa) | terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts | 6.6.1 |
 | <a name="module_karpenter_security_group"></a> [karpenter\_security\_group](#module\_karpenter\_security\_group) | ./modules/security-group | n/a |
+| <a name="module_s3files_security_group"></a> [s3files\_security\_group](#module\_s3files\_security\_group) | ./modules/security-group | n/a |
 | <a name="module_ssm"></a> [ssm](#module\_ssm) | ./modules/ssm | n/a |
 | <a name="module_vpc_cni_irsa"></a> [vpc\_cni\_irsa](#module\_vpc\_cni\_irsa) | terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts | 6.6.1 |
 
@@ -373,6 +374,8 @@ as described in the `.pre-commit-config.yaml` file
 | [aws_iam_role_policy.k8s_access](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy) | resource |
 | [aws_iam_role_policy.karpenter_controller](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy) | resource |
 | [aws_route_table_association.karpenter](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route_table_association) | resource |
+| [aws_s3files_file_system.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3files_file_system) | resource |
+| [aws_s3files_mount_target.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3files_mount_target) | resource |
 | [aws_security_group_rule.eks_control_plane_ingress](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
 | [aws_subnet.karpenter](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/subnet) | resource |
 | [helm_release.auto_mode_node_class](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
@@ -382,6 +385,7 @@ as described in the `.pre-commit-config.yaml` file
 | [helm_release.karpenter_resources](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
 | [kubernetes_config_map_v1.aws_logging](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/config_map_v1) | resource |
 | [kubernetes_namespace_v1.aws_observability](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/namespace_v1) | resource |
+| [kubernetes_storage_class_v1.s3files](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/storage_class_v1) | resource |
 | [time_sleep.wait_after_karpenter](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/sleep) | resource |
 | [time_sleep.wait_for_auto_mode_crds](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/sleep) | resource |
 | [time_sleep.wait_on_destroy](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/sleep) | resource |
@@ -398,6 +402,7 @@ as described in the `.pre-commit-config.yaml` file
 | [aws_route53_zone.base_domain_zone](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/route53_zone) | data source |
 | [aws_route_tables.private_route_tables](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/route_tables) | data source |
 | [aws_ssoadmin_instances.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ssoadmin_instances) | data source |
+| [aws_subnet.s3files](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/subnet) | data source |
 
 ## Inputs
 
@@ -425,6 +430,7 @@ as described in the `.pre-commit-config.yaml` file
 | <a name="input_enable_fargate_fluentbit"></a> [enable\_fargate\_fluentbit](#input\_enable\_fargate\_fluentbit) | Enable Fargate Fluentbit | `bool` | `true` | no |
 | <a name="input_enable_karpenter"></a> [enable\_karpenter](#input\_enable\_karpenter) | Enable the self-managed Karpenter stack (controller, Helm releases, IRSA, subnets, security group, Fargate profile). Independent of enable\_auto\_mode: keep both enabled to run them side-by-side during a migration. At least one of enable\_karpenter / enable\_auto\_mode must be true or the cluster has no compute. | `bool` | `true` | no |
 | <a name="input_enable_kubecost"></a> [enable\_kubecost](#input\_enable\_kubecost) | Enable the kubecost\_kubecost EKS add-on. Requires subscribing to Kubecost in AWS Marketplace for this account first, or addon creation fails.<br/><br/>Cost warning: the addon's network-costs DaemonSet calls the Kubernetes API at a very high rate, which inflates the "audit" control plane log type and the resulting CloudWatch Logs ingestion bill.<br/>The addon publishes no configuration schema (`aws eks describe-addon-configuration` reports "No configuration support"), so networkCosts cannot be disabled through it. To cut the ingestion, drop "audit" from eks.enabled\_log\_types.<br/>The addon's ClusterRole for network-costs is also missing endpointslices, so its watch 403-loops and inflates the audit log further - grant it with a separate ClusterRole at the call site (see the Kubecost section in the README). | `bool` | `false` | no |
+| <a name="input_enable_s3files_storage"></a> [enable\_s3files\_storage](#input\_enable\_s3files\_storage) | Create the cluster's Amazon S3 Files storage: a file system on the account's shared s3files bucket scoped to a <cluster-name>/ prefix, one mount target per AZ, their security group, and the s3files StorageClass. Requires the bucket and IAM role created by the account stack, and enable\_efs\_csi\_driver for the driver that mounts it. | `bool` | `false` | no |
 | <a name="input_enable_self_managed_ebs_csi"></a> [enable\_self\_managed\_ebs\_csi](#input\_enable\_self\_managed\_ebs\_csi) | Create the self-managed EBS CSI driver (addon, IRSA and pod-identity role). Defaults to enabled unless Auto Mode is on. Set to true to keep it running alongside Auto Mode's managed EBS CSI during a storage migration, or false to drop it. | `bool` | `null` | no |
 | <a name="input_enable_self_managed_lb_controller"></a> [enable\_self\_managed\_lb\_controller](#input\_enable\_self\_managed\_lb\_controller) | Create the IAM pod-identity role for the self-managed AWS Load Balancer Controller. Defaults to enabled unless Auto Mode is on. Set to true to keep it alongside Auto Mode's built-in load balancing during a migration, or false to drop it. | `bool` | `null` | no |
 | <a name="input_enable_sso_admin_auto_discovery"></a> [enable\_sso\_admin\_auto\_discovery](#input\_enable\_sso\_admin\_auto\_discovery) | Enable automatic discovery of SSO admin roles. When disabled, only explicitly defined cluster\_admins are used. | `bool` | `true` | no |
@@ -440,6 +446,8 @@ as described in the `.pre-commit-config.yaml` file
 | <a name="input_kubernetes_version"></a> [kubernetes\_version](#input\_kubernetes\_version) | Kubernetes version for the EKS cluster (e.g., "1.36") | `string` | `"1.36"` | no |
 | <a name="input_name"></a> [name](#input\_name) | The name of the platform, a timestamp will be appended to this name to make the stack\_name. If not provided, the name of the directory will be used. | `string` | `""` | no |
 | <a name="input_region"></a> [region](#input\_region) | AWS region to use | `string` | `null` | no |
+| <a name="input_s3files_bucket_name"></a> [s3files\_bucket\_name](#input\_s3files\_bucket\_name) | Name of the account's shared Amazon S3 Files bucket. Defaults to s3files-<account-id>, which the account stack creates. | `string` | `null` | no |
+| <a name="input_s3files_role_name"></a> [s3files\_role\_name](#input\_s3files\_role\_name) | Name of the IAM role the Amazon S3 Files service assumes to read and write the bucket. Created by the account stack. | `string` | `"s3files-storage"` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | Default tags to apply to all resources | `map(string)` | `{}` | no |
 | <a name="input_vpc"></a> [vpc](#input\_vpc) | VPC configurations | <pre>object({<br/>    vpc_id          = string<br/>    vpc_cidr        = string<br/>    private_subnets = list(string)<br/>    intra_subnets   = list(string)<br/>  })</pre> | n/a | yes |
 
@@ -457,6 +465,7 @@ as described in the `.pre-commit-config.yaml` file
 | <a name="output_karpenter"></a> [karpenter](#output\_karpenter) | Map of attributes for the self-managed Karpenter module (empty when enable\_karpenter is false) |
 | <a name="output_kubernetes_access_role_arns"></a> [kubernetes\_access\_role\_arns](#output\_kubernetes\_access\_role\_arns) | Map of reusable Kubernetes access role names to their IAM role ARNs |
 | <a name="output_kubernetes_access_roles"></a> [kubernetes\_access\_roles](#output\_kubernetes\_access\_roles) | Detailed information about reusable Kubernetes access IAM roles |
+| <a name="output_s3files"></a> [s3files](#output\_s3files) | Map of attributes for the cluster's Amazon S3 Files storage (null when enable\_s3files\_storage is false) |
 <!-- END_TF_DOCS -->
 
 ## Authors

@@ -58,3 +58,13 @@ output "kubernetes_access_roles" {
     }
   }
 }
+
+output "s3files" {
+  description = "Map of attributes for the cluster's Amazon S3 Files storage (null when enable_s3files_storage is false)"
+  value = var.enable_s3files_storage ? {
+    file_system_id    = aws_s3files_file_system.this[0].id
+    file_system_arn   = aws_s3files_file_system.this[0].arn
+    security_group_id = module.s3files_security_group.id
+    mount_target_ids  = [for mt in aws_s3files_mount_target.this : mt.id]
+  } : null
+}

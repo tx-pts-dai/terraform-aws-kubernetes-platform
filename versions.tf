@@ -3,8 +3,9 @@ terraform {
 
   required_providers {
     aws = {
-      source  = "hashicorp/aws"
-      version = ">= 6.28"
+      source = "hashicorp/aws"
+      # >= 6.40 for the aws_s3files_* resources
+      version = ">= 6.40"
     }
     kubectl = {
       source  = "alekc/kubectl"
