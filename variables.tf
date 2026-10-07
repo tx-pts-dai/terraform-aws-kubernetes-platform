@@ -344,6 +344,24 @@ variable "enable_efs_csi_driver" {
   default     = true
 }
 
+variable "enable_s3files_storage" {
+  description = "Create the cluster's Amazon S3 Files storage: a file system on the account's shared s3files bucket scoped to a <cluster-name>/ prefix, one mount target per AZ, their security group, and the s3files StorageClass. Requires the bucket and IAM role created by the account stack, and enable_efs_csi_driver for the driver that mounts it."
+  type        = bool
+  default     = false
+}
+
+variable "s3files_bucket_name" {
+  description = "Name of the account's shared Amazon S3 Files bucket. Defaults to s3files-<account-id>, which the account stack creates."
+  type        = string
+  default     = null
+}
+
+variable "s3files_role_name" {
+  description = "Name of the IAM role the Amazon S3 Files service assumes to read and write the bucket. Created by the account stack."
+  type        = string
+  default     = "s3files-storage"
+}
+
 ################################################################################
 # Additional Addons - Not installed by default
 
