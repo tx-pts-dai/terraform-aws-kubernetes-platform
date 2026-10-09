@@ -444,6 +444,33 @@ variable "ack_iam_policy_arn" {
   default     = null
 }
 
+variable "ack_iam_role_selectors" {
+  description = <<-EOT
+    IAMRoleSelectors that make ACK assume another IAM role (typically in another AWS account) for resources in the selected namespaces, keyed by selector name. Resources in namespaces matched by no selector keep using the ACK capability role. The capability role is granted sts:AssumeRole and sts:TagSession on every arn listed here; the target role must trust the capability role (see the ack output). Selectors must not overlap: a resource matched by more than one selector is not reconciled.
+      - arn: IAM role ARN ACK assumes for matching resources.
+      - namespaces: Exact namespace names to match (no wildcards).
+      - namespace_labels: Namespace labels to match (labelSelector.matchLabels).
+      - resource_types: Optionally restrict the selector to these ACK resource types (group, version, kind).
+    At least one of namespaces or namespace_labels is required, so a selector never silently applies cluster-wide.
+  EOT
+  type = map(object({
+    arn              = string
+    namespaces       = optional(list(string), [])
+    namespace_labels = optional(map(string), {})
+    resource_types = optional(list(object({
+      group   = string
+      version = string
+      kind    = string
+    })), [])
+  }))
+  default = {}
+
+  validation {
+    condition     = alltrue([for s in values(var.ack_iam_role_selectors) : length(s.namespaces) + length(s.namespace_labels) > 0])
+    error_message = "Each ack_iam_role_selectors entry must set namespaces or namespace_labels."
+  }
+}
+
 ################################################################################
 # Kubernetes Access Control
 ################################################################################

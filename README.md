@@ -148,6 +148,76 @@ Three mutually-exclusive options are available:
    }
    ```
 
+## ACK cross-account access
+
+The ACK EKS capability (`enable_ack`) runs off-cluster with the capability role
+`ack-<id>` (exposed as `ack.iam_role_arn`), which only has access to the cluster
+account. To have ACK manage resources in another account for specific namespaces,
+map them to a role in that account with `ack_iam_role_selectors`. The module
+creates one cluster-scoped
+[`IAMRoleSelector`](https://docs.aws.amazon.com/eks/latest/userguide/ack-permissions.html#_multi_account_management)
+per entry and grants the capability role `sts:AssumeRole` / `sts:TagSession` on the
+listed ARNs:
+
+```hcl
+ack_iam_role_selectors = {
+  ai-platform = {
+    arn        = "arn:aws:iam::444455556666:role/ack-agentcore"
+    namespaces = ["ai-platform-agents"]
+    resource_types = [
+      { group = "bedrockagentcorecontrol.services.k8s.aws", version = "v1alpha1", kind = "AgentRuntime" },
+      { group = "bedrockagentcorecontrol.services.k8s.aws", version = "v1alpha1", kind = "Memory" },
+    ]
+  }
+}
+```
+
+Namespaces are matched by exact name or by label, without wildcards. If more than
+one selector matches a resource, ACK reports a conflict and does not reconcile it.
+
+The target role is created in the target account, outside this module. It must
+trust the capability role. Scope its permissions to what the mapped namespaces
+need rather than `AdministratorAccess`, because anyone who can create ACK
+resources in those namespaces acts with that role:
+
+```hcl
+data "aws_iam_policy_document" "ack_trust" {
+  statement {
+    actions = ["sts:AssumeRole", "sts:TagSession"]
+    principals {
+      type        = "AWS"
+      identifiers = ["arn:aws:iam::111122223333:role/ack-<id>"] # ack.iam_role_arn of the cluster
+    }
+  }
+}
+
+data "aws_iam_policy_document" "ack_agentcore" {
+  statement {
+    actions   = ["bedrock-agentcore:*"]
+    resources = ["*"]
+  }
+  statement {
+    actions   = ["iam:PassRole"]
+    resources = ["arn:aws:iam::444455556666:role/<agentcore-execution-role>"]
+    condition {
+      test     = "StringEquals"
+      variable = "iam:PassedToService"
+      values   = ["bedrock-agentcore.amazonaws.com"]
+    }
+  }
+}
+
+resource "aws_iam_role" "ack_agentcore" {
+  name               = "ack-agentcore"
+  assume_role_policy = data.aws_iam_policy_document.ack_trust.json
+}
+
+resource "aws_iam_role_policy" "ack_agentcore" {
+  role   = aws_iam_role.ack_agentcore.id
+  policy = data.aws_iam_policy_document.ack_agentcore.json
+}
+```
+
 ## Karpenter consolidation
 
 [Official documentation](https://karpenter.sh/docs/concepts/disruption/)
@@ -375,6 +445,7 @@ as described in the `.pre-commit-config.yaml` file
 | [aws_route_table_association.karpenter](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route_table_association) | resource |
 | [aws_security_group_rule.eks_control_plane_ingress](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
 | [aws_subnet.karpenter](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/subnet) | resource |
+| [helm_release.ack_iam_role_selector](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
 | [helm_release.auto_mode_node_class](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
 | [helm_release.auto_mode_node_pool](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
 | [helm_release.karpenter_crd](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
@@ -405,6 +476,7 @@ as described in the `.pre-commit-config.yaml` file
 | ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_access_entries"></a> [access\_entries](#input\_access\_entries) | Additional EKS access entries, passed through to the underlying EKS module and<br/>merged with the admin entries derived from cluster\_admins / SSO discovery.<br/><br/>Use this for non-admin principals — e.g. roles mapped to custom Kubernetes<br/>groups (read-only, operator) — which cluster\_admins cannot express because it<br/>always attaches the AmazonEKSClusterAdminPolicy. Keys must not collide with<br/>cluster\_admins keys or the reserved "sso\_admin" key; on any collision the<br/>admin entry wins.<br/><br/>Typed as `any` to accept the full EKS module access\_entries schema (nested<br/>policy\_associations etc.), but it must be a map. Each entry, e.g.:<br/>  access\_entries = {<br/>    readonly = {<br/>      principal\_arn     = "arn:aws:iam::123456789012:role/AWSReservedSSO\_ReadOnly\_abc"<br/>      kubernetes\_groups = ["readonly"]<br/>    }<br/>  } | `any` | `{}` | no |
 | <a name="input_ack_iam_policy_arn"></a> [ack\_iam\_policy\_arn](#input\_ack\_iam\_policy\_arn) | IAM policy ARN to attach to the ACK capability role. Defaults to AdministratorAccess if not specified. | `string` | `null` | no |
+| <a name="input_ack_iam_role_selectors"></a> [ack\_iam\_role\_selectors](#input\_ack\_iam\_role\_selectors) | IAMRoleSelectors that make ACK assume another IAM role (typically in another AWS account) for resources in the selected namespaces, keyed by selector name. Resources in namespaces matched by no selector keep using the ACK capability role. The capability role is granted sts:AssumeRole and sts:TagSession on every arn listed here; the target role must trust the capability role (see the ack output). Selectors must not overlap: a resource matched by more than one selector is not reconciled.<br/>  - arn: IAM role ARN ACK assumes for matching resources.<br/>  - namespaces: Exact namespace names to match (no wildcards).<br/>  - namespace\_labels: Namespace labels to match (labelSelector.matchLabels).<br/>  - resource\_types: Optionally restrict the selector to these ACK resource types (group, version, kind).<br/>At least one of namespaces or namespace\_labels is required, so a selector never silently applies cluster-wide. | <pre>map(object({<br/>    arn              = string<br/>    namespaces       = optional(list(string), [])<br/>    namespace_labels = optional(map(string), {})<br/>    resource_types = optional(list(object({<br/>      group   = string<br/>      version = string<br/>      kind    = string<br/>    })), [])<br/>  }))</pre> | `{}` | no |
 | <a name="input_acm_certificate"></a> [acm\_certificate](#input\_acm\_certificate) | ACM certificate configuration for the domain(s). Controls domain name, alternative domain names, wildcard configuration, and validation behavior.<br/>Options include:<br/>  - domain\_name: Primary domain name for the certificate. If not provided, uses base\_domain from other configuration.<br/>  - subject\_alternative\_names: List of additional domain names to include in the certificate.<br/>  - wildcard\_certificates: When true, adds a wildcard prefix (*.) to all domains in the certificate.<br/>  - prepend\_stack\_id: When true, prepends the stack identifier to each domain name. Only works after random\_string is created.<br/>  - wait\_for\_validation: When true, Terraform will wait for certificate validation to complete before proceeding. | <pre>object({<br/>    domain_name               = optional(string)<br/>    subject_alternative_names = optional(list(string), [])<br/>    wildcard_certificates     = optional(bool, false)<br/>    prepend_stack_id          = optional(bool, false)<br/>    wait_for_validation       = optional(bool, false)<br/>  })</pre> | `{}` | no |
 | <a name="input_argocd"></a> [argocd](#input\_argocd) | Argo CD configurations | <pre>object({<br/>    # Hub specific<br/>    enable_hub        = optional(bool, false)<br/>    namespace         = optional(string, "argocd")<br/>    hub_iam_role_name = optional(string, "argocd-controller")<br/><br/>    # Spoke specific<br/>    enable_spoke = optional(bool, false)<br/><br/>    hub_iam_role_arn  = optional(string, null)<br/>    hub_iam_role_arns = optional(list(string), null)<br/><br/>    # Common<br/>    tags = optional(map(string), {})<br/>  })</pre> | `{}` | no |
 | <a name="input_argocd_capability"></a> [argocd\_capability](#input\_argocd\_capability) | Configuration for the AWS-managed Argo CD EKS capability. Only used when `enable_argocd_capability = true`.<br/>  - idc\_instance\_arn: IAM Identity Center instance ARN. Leave null to auto-discover the account/org instance via the aws\_ssoadmin\_instances data source (requires sso:ListInstances).<br/>  - idc\_region: Region of the Identity Center instance (defaults to the provider region).<br/>  - namespace: Kubernetes namespace for Argo CD (default "argocd").<br/>  - rbac\_role\_mapping: Maps Identity Center users/groups to Argo CD roles (ADMIN, EDITOR, VIEWER).<br/>  - vpc\_endpoint\_ids: VPC endpoint IDs for private access. When set, the public endpoint is BLOCKED and Argo CD is reachable only through these VPC endpoints. Leave empty for a public endpoint.<br/>  - iam\_policy\_statements: Extra IAM policy statements to attach to the capability role (e.g. ECR read for image reflection). | <pre>object({<br/>    idc_instance_arn = optional(string)<br/>    idc_region       = optional(string)<br/>    namespace        = optional(string, "argocd")<br/>    rbac_role_mapping = optional(list(object({<br/>      role = string<br/>      identity = list(object({<br/>        id   = string<br/>        type = string<br/>      }))<br/>    })), [])<br/>    vpc_endpoint_ids = optional(list(string), [])<br/>    iam_policy_statements = optional(map(object({<br/>      sid       = optional(string)<br/>      actions   = optional(list(string))<br/>      resources = optional(list(string))<br/>      effect    = optional(string)<br/>    })), {})<br/>  })</pre> | `{}` | no |
