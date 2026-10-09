@@ -32,10 +32,16 @@ module "ack_capability" {
   ]
 }
 
-resource "kubectl_manifest" "ack_iam_role_selector" {
+resource "helm_release" "ack_iam_role_selector" {
   for_each = var.enable_ack ? var.ack_iam_role_selectors : {}
 
-  yaml_body = yamlencode({
+  name       = "ack-iamroleselector-${each.key}"
+  chart      = "custom-resources"
+  version    = "0.1.3"
+  repository = "https://dnd-it.github.io/helm-charts"
+  namespace  = "kube-system"
+
+  values = [yamlencode({
     apiVersion = "services.k8s.aws/v1alpha1"
     kind       = "IAMRoleSelector"
     metadata = {
@@ -51,7 +57,7 @@ resource "kubectl_manifest" "ack_iam_role_selector" {
       },
       length(each.value.resource_types) > 0 ? { resourceTypeSelector = each.value.resource_types } : {},
     )
-  })
+  })]
 
   depends_on = [
     module.ack_capability
