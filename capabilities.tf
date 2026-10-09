@@ -18,10 +18,43 @@ module "ack_capability" {
     ack = coalesce(var.ack_iam_policy_arn, "arn:aws:iam::aws:policy/AdministratorAccess")
   }
 
+  iam_policy_statements = length(var.ack_iam_role_selectors) > 0 ? {
+    AssumeIAMRoleSelectorRoles = {
+      actions   = ["sts:AssumeRole", "sts:TagSession"]
+      resources = distinct([for s in values(var.ack_iam_role_selectors) : s.arn])
+    }
+  } : null
+
   tags = local.tags
 
   depends_on = [
     time_sleep.wait_after_karpenter
+  ]
+}
+
+resource "kubectl_manifest" "ack_iam_role_selector" {
+  for_each = var.enable_ack ? var.ack_iam_role_selectors : {}
+
+  yaml_body = yamlencode({
+    apiVersion = "services.k8s.aws/v1alpha1"
+    kind       = "IAMRoleSelector"
+    metadata = {
+      name = each.key
+    }
+    spec = merge(
+      {
+        arn = each.value.arn
+        namespaceSelector = merge(
+          length(each.value.namespaces) > 0 ? { names = each.value.namespaces } : {},
+          length(each.value.namespace_labels) > 0 ? { labelSelector = { matchLabels = each.value.namespace_labels } } : {},
+        )
+      },
+      length(each.value.resource_types) > 0 ? { resourceTypeSelector = each.value.resource_types } : {},
+    )
+  })
+
+  depends_on = [
+    module.ack_capability
   ]
 }
 
