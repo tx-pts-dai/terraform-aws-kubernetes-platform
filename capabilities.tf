@@ -47,16 +47,12 @@ resource "helm_release" "ack_iam_role_selector" {
     metadata = {
       name = each.key
     }
-    spec = merge(
-      {
-        arn = each.value.arn
-        namespaceSelector = merge(
-          length(each.value.namespaces) > 0 ? { names = each.value.namespaces } : {},
-          length(each.value.namespace_labels) > 0 ? { labelSelector = { matchLabels = each.value.namespace_labels } } : {},
-        )
-      },
-      length(each.value.resource_types) > 0 ? { resourceTypeSelector = each.value.resource_types } : {},
-    )
+    spec = {
+      arn = each.value.arn
+      namespaceSelector = {
+        names = each.value.namespaces
+      }
+    }
   })]
 
   depends_on = [

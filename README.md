@@ -152,49 +152,155 @@ Three mutually-exclusive options are available:
 
 The ACK EKS capability (`enable_ack`) runs off-cluster with the capability role
 `ack-<id>` (exposed as `ack.iam_role_arn`), which only has access to the cluster
-account. To have ACK manage resources in another account for specific namespaces,
-map them to a role in that account with `ack_iam_role_selectors`. The module
-creates one cluster-scoped
+account. To let a project create AWS resources in its own account through ACK,
+map that project's namespaces to a role in that account with
+`ack_iam_role_selectors`. The module creates one cluster-scoped
 [`IAMRoleSelector`](https://docs.aws.amazon.com/eks/latest/userguide/ack-permissions.html#_multi_account_management)
 per entry and grants the capability role `sts:AssumeRole` / `sts:TagSession` on the
-listed ARNs:
+listed ARNs.
+
+The mechanism is not tied to any AWS service. A selector applies to every ACK
+resource kind in its namespaces (S3 `Bucket`, RDS `DBInstance`, AgentCore
+`AgentRuntime`, and so on), so what a project can create is decided by the target
+role's IAM policy, not by the selector.
+
+### One entry per project
+
+Keep one entry per project, each with its own namespaces and its own role in the
+project's account:
 
 ```hcl
-ack_iam_role_selectors = {
-  ai-platform = {
-    arn        = "arn:aws:iam::444455556666:role/ack-agentcore"
-    namespaces = ["ai-platform-agents"]
-    resource_types = [
-      { group = "bedrockagentcorecontrol.services.k8s.aws", version = "v1alpha1", kind = "AgentRuntime" },
-      { group = "bedrockagentcorecontrol.services.k8s.aws", version = "v1alpha1", kind = "Memory" },
-    ]
+locals {
+  ack_projects = {
+    ai-platform = {
+      account_id = "444455556666"
+      namespaces = ["ai-platform-dev-agent-operator"]
+    }
+    data-lake = {
+      account_id = "777788889999"
+      namespaces = ["data-lake-dev-ingest", "data-lake-dev-export"]
+    }
+  }
+}
+
+module "k8s_platform" {
+  source = "tx-pts-dai/kubernetes-platform/aws"
+  # ...
+
+  ack_iam_role_selectors = {
+    for project, p in local.ack_projects : project => {
+      arn        = "arn:aws:iam::${p.account_id}:role/ack-${project}"
+      namespaces = p.namespaces
+    }
   }
 }
 ```
 
-Namespaces are matched by exact name or by label, without wildcards. If more than
-one selector matches a resource, ACK reports a conflict and does not reconcile it.
+An ACK resource in `ai-platform-dev-agent-operator` is then created in account
+`444455556666` with the role `ack-ai-platform`, whatever its kind. Resources in
+namespaces that no entry lists keep using the capability role in the cluster
+account.
 
-The target role is created in the target account, outside this module. It must
-trust the capability role. Scope its permissions to what the mapped namespaces
-need rather than `AdministratorAccess`, because anyone who can create ACK
-resources in those namespaces acts with that role:
+### What keeps projects apart
+
+Checked by this module at plan time:
+
+- Namespaces are matched by exact name only. Each must be a valid namespace name,
+  so wildcards such as `ai-platform-*` are rejected instead of silently matching
+  nothing. Namespace labels are not supported (see below).
+- A namespace may appear in only one entry, so no namespace can reach two accounts.
+- A role ARN may appear in only one entry, so two projects never share one role.
+- There is no resource type filter. Every ACK kind in a mapped namespace uses the
+  project role, so no kind can fall back to the capability role in the cluster
+  account.
+
+Checked by ACK at runtime only: `IAMRoleSelector` objects created outside this
+module (with `kubectl` or by an Argo CD application) are invisible to Terraform. If
+more than one selector matches a resource, ACK sets the `ACK.Recoverable` condition
+("Cannot determine which IAMRoleSelector to use") and does not reconcile it.
+
+Not enforced by this module, and needed before relying on the mapping:
+
+- **Who can create ACK resources in a mapped namespace.** Anyone who can create an
+  ACK resource in a project's namespace acts with that project's role. Limit that
+  with Kubernetes RBAC and, for Argo CD, with each `AppProject`'s `destinations`. An
+  `AppProject` that allows every namespace (`namespace: "*"`) can deploy into
+  another project's namespace and so into that project's account.
+- **Who can create `IAMRoleSelector` objects.** They are cluster-scoped. Anyone who
+  can create one (for example an `AppProject` with `clusterResourceWhitelist` of
+  `*`) can map their own namespace to any role that trusts the capability role.
+  Deny `services.k8s.aws/IAMRoleSelector` to application projects, and condition the
+  target role on the namespace as shown below, so a stray selector cannot use it.
+- **The fallback.** Unmapped namespaces use the capability role, which has
+  `AdministratorAccess` in the cluster account unless `ack_iam_policy_arn` is set.
+
+The selector `arn` is immutable once created. To point a project at another role,
+rename its entry so the selector is replaced.
+
+### Why namespace names and not labels
+
+Namespace names are fixed when the namespace is created; labels can be changed
+later by anyone allowed to update the namespace. This module does not create or
+label application namespaces. Where Argo CD ApplicationSets create them
+(`CreateNamespace=true` with `managedNamespaceMetadata`), the name comes from the
+ApplicationSet template (for example `<team>-<env>-<app>`), while the labels seen so
+far are only ones like `environment`, with no team or project label to select on.
+ACK also combines `namespaceSelector.names` and
+`labelSelector` with AND, so a label can only narrow an exact-name match, and a
+namespace that loses the label would silently fall back to the capability role.
+Exact names are therefore the only namespace selector the module accepts.
+
+### Target role in each project account
+
+Each project account needs a role that trusts the capability role. It is created
+in that account, outside this module. Scope its permissions to the services the
+project uses rather than `AdministratorAccess`, and condition them on the session
+tag `eks:kubernetes-namespace` that the ACK capability sets on every request. The
+role then only works for that project's namespaces, even if another selector
+points at it:
 
 ```hcl
+locals {
+  ack_capability_role_arn = "arn:aws:iam::111122223333:role/ack-<id>" # ack.iam_role_arn of the cluster
+  ack_namespaces          = ["ai-platform-dev-agent-operator"]        # same list as in ack_iam_role_selectors
+}
+
 data "aws_iam_policy_document" "ack_trust" {
   statement {
     actions = ["sts:AssumeRole", "sts:TagSession"]
     principals {
       type        = "AWS"
-      identifiers = ["arn:aws:iam::111122223333:role/ack-<id>"] # ack.iam_role_arn of the cluster
+      identifiers = [local.ack_capability_role_arn]
     }
   }
 }
 
-data "aws_iam_policy_document" "ack_agentcore" {
+resource "aws_iam_role" "ack" {
+  name               = "ack-ai-platform"
+  assume_role_policy = data.aws_iam_policy_document.ack_trust.json
+}
+
+resource "aws_iam_role_policy" "ack" {
+  role   = aws_iam_role.ack.id
+  policy = data.aws_iam_policy_document.ack.json
+}
+```
+
+The permissions are what differ between projects. For example, the ai-platform
+project manages Bedrock AgentCore resources
+(`bedrockagentcorecontrol.services.k8s.aws`), so its role allows
+`bedrock-agentcore:*` plus `iam:PassRole` on its execution role only:
+
+```hcl
+data "aws_iam_policy_document" "ack" {
   statement {
     actions   = ["bedrock-agentcore:*"]
     resources = ["*"]
+    condition {
+      test     = "StringEquals"
+      variable = "aws:PrincipalTag/eks:kubernetes-namespace"
+      values   = local.ack_namespaces
+    }
   }
   statement {
     actions   = ["iam:PassRole"]
@@ -204,19 +310,19 @@ data "aws_iam_policy_document" "ack_agentcore" {
       variable = "iam:PassedToService"
       values   = ["bedrock-agentcore.amazonaws.com"]
     }
+    condition {
+      test     = "StringEquals"
+      variable = "aws:PrincipalTag/eks:kubernetes-namespace"
+      values   = local.ack_namespaces
+    }
   }
 }
-
-resource "aws_iam_role" "ack_agentcore" {
-  name               = "ack-agentcore"
-  assume_role_policy = data.aws_iam_policy_document.ack_trust.json
-}
-
-resource "aws_iam_role_policy" "ack_agentcore" {
-  role   = aws_iam_role.ack_agentcore.id
-  policy = data.aws_iam_policy_document.ack_agentcore.json
-}
 ```
+
+A project that only needs S3 would grant `s3:*` on its own bucket ARNs instead,
+with the same namespace condition. The session tags `eks:eks-capability-arn` and
+`eks:kubernetes-api-group` can be used the same way to pin the role to one
+cluster's capability or to specific ACK API groups.
 
 ## Karpenter consolidation
 
@@ -476,7 +582,7 @@ as described in the `.pre-commit-config.yaml` file
 | ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_access_entries"></a> [access\_entries](#input\_access\_entries) | Additional EKS access entries, passed through to the underlying EKS module and<br/>merged with the admin entries derived from cluster\_admins / SSO discovery.<br/><br/>Use this for non-admin principals — e.g. roles mapped to custom Kubernetes<br/>groups (read-only, operator) — which cluster\_admins cannot express because it<br/>always attaches the AmazonEKSClusterAdminPolicy. Keys must not collide with<br/>cluster\_admins keys or the reserved "sso\_admin" key; on any collision the<br/>admin entry wins.<br/><br/>Typed as `any` to accept the full EKS module access\_entries schema (nested<br/>policy\_associations etc.), but it must be a map. Each entry, e.g.:<br/>  access\_entries = {<br/>    readonly = {<br/>      principal\_arn     = "arn:aws:iam::123456789012:role/AWSReservedSSO\_ReadOnly\_abc"<br/>      kubernetes\_groups = ["readonly"]<br/>    }<br/>  } | `any` | `{}` | no |
 | <a name="input_ack_iam_policy_arn"></a> [ack\_iam\_policy\_arn](#input\_ack\_iam\_policy\_arn) | IAM policy ARN to attach to the ACK capability role. Defaults to AdministratorAccess if not specified. | `string` | `null` | no |
-| <a name="input_ack_iam_role_selectors"></a> [ack\_iam\_role\_selectors](#input\_ack\_iam\_role\_selectors) | IAMRoleSelectors that make ACK assume another IAM role (typically in another AWS account) for resources in the selected namespaces, keyed by selector name. Resources in namespaces matched by no selector keep using the ACK capability role. The capability role is granted sts:AssumeRole and sts:TagSession on every arn listed here; the target role must trust the capability role (see the ack output). Selectors must not overlap: a resource matched by more than one selector is not reconciled.<br/>  - arn: IAM role ARN ACK assumes for matching resources.<br/>  - namespaces: Exact namespace names to match (no wildcards).<br/>  - namespace\_labels: Namespace labels to match (labelSelector.matchLabels).<br/>  - resource\_types: Optionally restrict the selector to these ACK resource types (group, version, kind).<br/>At least one of namespaces or namespace\_labels is required, so a selector never silently applies cluster-wide. | <pre>map(object({<br/>    arn              = string<br/>    namespaces       = optional(list(string), [])<br/>    namespace_labels = optional(map(string), {})<br/>    resource_types = optional(list(object({<br/>      group   = string<br/>      version = string<br/>      kind    = string<br/>    })), [])<br/>  }))</pre> | `{}` | no |
+| <a name="input_ack_iam_role_selectors"></a> [ack\_iam\_role\_selectors](#input\_ack\_iam\_role\_selectors) | IAMRoleSelectors that make ACK assume an IAM role in another AWS account for every ACK resource in the selected namespaces, keyed by selector name (one entry per project). Resources in namespaces matched by no selector keep using the ACK capability role in the cluster account. The capability role is granted sts:AssumeRole and sts:TagSession on every arn listed here; the target role must trust the capability role (see the ack output).<br/>  - arn: IAM role ARN ACK assumes for resources in these namespaces. Must be unique across entries, so two projects never share a role. ACK makes it immutable: to change it, rename the entry.<br/>  - namespaces: Exact namespace names (no wildcards or labels). A namespace may appear in only one entry.<br/>Every ACK resource kind in the listed namespaces uses the role; restrict what it can do with the target role's IAM policy. | <pre>map(object({<br/>    arn        = string<br/>    namespaces = list(string)<br/>  }))</pre> | `{}` | no |
 | <a name="input_acm_certificate"></a> [acm\_certificate](#input\_acm\_certificate) | ACM certificate configuration for the domain(s). Controls domain name, alternative domain names, wildcard configuration, and validation behavior.<br/>Options include:<br/>  - domain\_name: Primary domain name for the certificate. If not provided, uses base\_domain from other configuration.<br/>  - subject\_alternative\_names: List of additional domain names to include in the certificate.<br/>  - wildcard\_certificates: When true, adds a wildcard prefix (*.) to all domains in the certificate.<br/>  - prepend\_stack\_id: When true, prepends the stack identifier to each domain name. Only works after random\_string is created.<br/>  - wait\_for\_validation: When true, Terraform will wait for certificate validation to complete before proceeding. | <pre>object({<br/>    domain_name               = optional(string)<br/>    subject_alternative_names = optional(list(string), [])<br/>    wildcard_certificates     = optional(bool, false)<br/>    prepend_stack_id          = optional(bool, false)<br/>    wait_for_validation       = optional(bool, false)<br/>  })</pre> | `{}` | no |
 | <a name="input_argocd"></a> [argocd](#input\_argocd) | Argo CD configurations | <pre>object({<br/>    # Hub specific<br/>    enable_hub        = optional(bool, false)<br/>    namespace         = optional(string, "argocd")<br/>    hub_iam_role_name = optional(string, "argocd-controller")<br/><br/>    # Spoke specific<br/>    enable_spoke = optional(bool, false)<br/><br/>    hub_iam_role_arn  = optional(string, null)<br/>    hub_iam_role_arns = optional(list(string), null)<br/><br/>    # Common<br/>    tags = optional(map(string), {})<br/>  })</pre> | `{}` | no |
 | <a name="input_argocd_capability"></a> [argocd\_capability](#input\_argocd\_capability) | Configuration for the AWS-managed Argo CD EKS capability. Only used when `enable_argocd_capability = true`.<br/>  - idc\_instance\_arn: IAM Identity Center instance ARN. Leave null to auto-discover the account/org instance via the aws\_ssoadmin\_instances data source (requires sso:ListInstances).<br/>  - idc\_region: Region of the Identity Center instance (defaults to the provider region).<br/>  - namespace: Kubernetes namespace for Argo CD (default "argocd").<br/>  - rbac\_role\_mapping: Maps Identity Center users/groups to Argo CD roles (ADMIN, EDITOR, VIEWER).<br/>  - vpc\_endpoint\_ids: VPC endpoint IDs for private access. When set, the public endpoint is BLOCKED and Argo CD is reachable only through these VPC endpoints. Leave empty for a public endpoint.<br/>  - iam\_policy\_statements: Extra IAM policy statements to attach to the capability role (e.g. ECR read for image reflection). | <pre>object({<br/>    idc_instance_arn = optional(string)<br/>    idc_region       = optional(string)<br/>    namespace        = optional(string, "argocd")<br/>    rbac_role_mapping = optional(list(object({<br/>      role = string<br/>      identity = list(object({<br/>        id   = string<br/>        type = string<br/>      }))<br/>    })), [])<br/>    vpc_endpoint_ids = optional(list(string), [])<br/>    iam_policy_statements = optional(map(object({<br/>      sid       = optional(string)<br/>      actions   = optional(list(string))<br/>      resources = optional(list(string))<br/>      effect    = optional(string)<br/>    })), {})<br/>  })</pre> | `{}` | no |

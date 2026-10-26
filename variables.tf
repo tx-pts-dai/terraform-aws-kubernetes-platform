@@ -446,28 +446,40 @@ variable "ack_iam_policy_arn" {
 
 variable "ack_iam_role_selectors" {
   description = <<-EOT
-    IAMRoleSelectors that make ACK assume another IAM role (typically in another AWS account) for resources in the selected namespaces, keyed by selector name. Resources in namespaces matched by no selector keep using the ACK capability role. The capability role is granted sts:AssumeRole and sts:TagSession on every arn listed here; the target role must trust the capability role (see the ack output). Selectors must not overlap: a resource matched by more than one selector is not reconciled.
-      - arn: IAM role ARN ACK assumes for matching resources.
-      - namespaces: Exact namespace names to match (no wildcards).
-      - namespace_labels: Namespace labels to match (labelSelector.matchLabels).
-      - resource_types: Optionally restrict the selector to these ACK resource types (group, version, kind).
-    At least one of namespaces or namespace_labels is required, so a selector never silently applies cluster-wide.
+    IAMRoleSelectors that make ACK assume an IAM role in another AWS account for every ACK resource in the selected namespaces, keyed by selector name (one entry per project). Resources in namespaces matched by no selector keep using the ACK capability role in the cluster account. The capability role is granted sts:AssumeRole and sts:TagSession on every arn listed here; the target role must trust the capability role (see the ack output).
+      - arn: IAM role ARN ACK assumes for resources in these namespaces. Must be unique across entries, so two projects never share a role. ACK makes it immutable: to change it, rename the entry.
+      - namespaces: Exact namespace names (no wildcards or labels). A namespace may appear in only one entry.
+    Every ACK resource kind in the listed namespaces uses the role; restrict what it can do with the target role's IAM policy.
   EOT
   type = map(object({
-    arn              = string
-    namespaces       = optional(list(string), [])
-    namespace_labels = optional(map(string), {})
-    resource_types = optional(list(object({
-      group   = string
-      version = string
-      kind    = string
-    })), [])
+    arn        = string
+    namespaces = list(string)
   }))
   default = {}
 
   validation {
-    condition     = alltrue([for s in values(var.ack_iam_role_selectors) : length(s.namespaces) + length(s.namespace_labels) > 0])
-    error_message = "Each ack_iam_role_selectors entry must set namespaces or namespace_labels."
+    condition     = alltrue([for s in values(var.ack_iam_role_selectors) : can(regex("^arn:aws[a-z-]*:iam::[0-9]{12}:role/[\\w+=,.@/-]+$", s.arn))])
+    error_message = "Each ack_iam_role_selectors arn must be an IAM role ARN."
+  }
+
+  validation {
+    condition     = length(distinct([for s in values(var.ack_iam_role_selectors) : s.arn])) == length(var.ack_iam_role_selectors)
+    error_message = "Each ack_iam_role_selectors entry must use its own arn; a role shared between entries would give their namespaces the same account access."
+  }
+
+  validation {
+    condition = alltrue(flatten([
+      for s in values(var.ack_iam_role_selectors) : [
+        length(s.namespaces) > 0,
+        [for ns in s.namespaces : length(ns) <= 63 && can(regex("^[a-z0-9]([-a-z0-9]*[a-z0-9])?$", ns))],
+      ]
+    ]))
+    error_message = "Each ack_iam_role_selectors entry must list at least one namespace, as an exact Kubernetes namespace name (no wildcards)."
+  }
+
+  validation {
+    condition     = length(flatten([for s in values(var.ack_iam_role_selectors) : s.namespaces])) == length(distinct(flatten([for s in values(var.ack_iam_role_selectors) : s.namespaces])))
+    error_message = "A namespace may appear only once across all ack_iam_role_selectors entries. Listed more than once: ${join(", ", [for ns in distinct(flatten([for s in values(var.ack_iam_role_selectors) : s.namespaces])) : ns if length([for n in flatten([for s in values(var.ack_iam_role_selectors) : s.namespaces]) : n if n == ns]) > 1])}."
   }
 }
 
