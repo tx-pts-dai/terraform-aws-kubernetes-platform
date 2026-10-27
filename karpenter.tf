@@ -561,6 +561,13 @@ resource "helm_release" "karpenter_resources" {
         enabled: true
         amiSelectorTerms:
           - alias: bottlerocket@v1.62.1 # renovate: datasource=github-releases depName=bottlerocket-os/bottlerocket
+        kubelet:
+          imageGCHighThresholdPercent: 70
+          imageGCLowThresholdPercent: 60
+        # Not in spec.kubelet; set via Bottlerocket settings
+        userData: |
+          [settings.kubernetes]
+          image-maximum-gc-age = "72h"
     EOT
   ], var.karpenter_resources_helm_values)
 
