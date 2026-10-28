@@ -561,6 +561,9 @@ resource "helm_release" "karpenter_resources" {
         enabled: true
         amiSelectorTerms:
           - alias: bottlerocket@v1.62.1 # renovate: datasource=github-releases depName=bottlerocket-os/bottlerocket
+        kubelet:
+          imageGCHighThresholdPercent: 70
+          imageGCLowThresholdPercent: 60
     EOT
   ], var.karpenter_resources_helm_values)
 
