@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [8.6.0](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/compare/v8.5.0...v8.6.0) (2026-10-28)
+
+### Features
+
+* **karpenter:** tune image GC on default EC2NodeClass ([#325](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/issues/325)) ([150f3f7](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/commit/150f3f7106b2cba2ace4eb944cbcc07b5600634b))
+
 ## [8.5.0](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/compare/v8.4.1...v8.5.0) (2026-09-07)
 
 ### Features
