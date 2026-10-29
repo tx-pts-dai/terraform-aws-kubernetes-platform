@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [8.8.0](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/compare/v8.7.0...v8.8.0) (2026-10-29)
+
+### Features
+
+* update dependency bottlerocket-os/bottlerocket to v1.68.0 ([#307](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/issues/307)) ([db720b4](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/commit/db720b4cee162d94b0919daeb692e4660b3264f5))
+
 ## [8.6.0](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/compare/v8.5.0...v8.6.0) (2026-10-28)
 
 ### Features
