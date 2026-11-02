@@ -19,7 +19,7 @@ jobs:
     name: Notify Slack of Release
     needs: [release]
     if: needs.release.outputs.new_release_published == 'true'
-    uses: DND-IT/github-workflows/.github/workflows/notify-slack.yaml@v3
+    uses: DND-IT/github-workflows/.github/workflows/notify-slack.yaml@notify-slack-v0
     secrets:
       slack_bot_token: ${{ secrets.SLACK_BOT_TOKEN }}
     with:
