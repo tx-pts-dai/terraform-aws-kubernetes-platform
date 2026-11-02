@@ -31,7 +31,7 @@ jobs:
 
   example_network_destroy:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
-    uses: DND-IT/github-workflows/.github/workflows/tf-cleanup.yaml@v3
+    uses: DND-IT/github-workflows/.github/workflows/tf-cleanup.yaml@tf-cleanup-v0
     with:
       environment: examples
       tf_dir: examples/network
