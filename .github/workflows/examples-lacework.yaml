@@ -28,6 +28,7 @@ jobs:
     with:
       environment: examples
       tf_dir: examples/lacework
+      tf_pre_run: bash .github/scripts/tf-pre-run.sh
 
   example_lacework_destroy:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
@@ -35,3 +36,4 @@ jobs:
     with:
       environment: examples
       tf_dir: examples/lacework
+      tf_pre_run: bash .github/scripts/tf-pre-run.sh

@@ -32,6 +32,7 @@ jobs:
     with:
       environment: examples
       tf_dir: tests/main
+      tf_pre_run: bash .github/scripts/tf-pre-run.sh
 
   feature_destroy:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
@@ -39,3 +40,4 @@ jobs:
     with:
       environment: examples
       tf_dir: tests/main
+      tf_pre_run: bash .github/scripts/tf-pre-run.sh

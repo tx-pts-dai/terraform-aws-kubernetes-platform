@@ -25,4 +25,5 @@ jobs:
     with:
       environment: examples
       tf_dir: ${{ inputs.tf_dir }}
+      tf_pre_run: bash .github/scripts/tf-pre-run.sh
       tf_workspace: ${{ github.ref_name }}
