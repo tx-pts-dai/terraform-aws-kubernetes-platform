@@ -526,6 +526,7 @@ resource "helm_release" "karpenter_release" {
 
   depends_on = [
     module.karpenter_irsa,
+    aws_iam_role_policy.karpenter_controller,
     module.karpenter,
     module.karpenter_security_group,
     helm_release.karpenter_crd,
@@ -542,6 +543,7 @@ resource "helm_release" "karpenter_resources" {
   version    = "1.0.3"
   repository = "https://dnd-it.github.io/helm-charts"
   namespace  = local.karpenter.namespace
+  timeout    = 900
 
   values = concat([
     <<-EOT
