@@ -25,7 +25,7 @@ terraform {
     }
     kubectl = {
       source  = "alekc/kubectl"
-      version = "~> 2.0"
+      version = "~> 2.4"
     }
     time = {
       source  = "hashicorp/time"
@@ -72,6 +72,7 @@ provider "helm" {
 
 provider "kubectl" {
   apply_retry_count      = 5
+  lazy_load              = true
   host                   = module.k8s_platform.eks.cluster_endpoint
   cluster_ca_certificate = base64decode(module.k8s_platform.eks.cluster_certificate_authority_data)
   load_config_file       = false
