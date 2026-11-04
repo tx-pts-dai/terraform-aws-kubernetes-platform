@@ -147,7 +147,7 @@ module "k8s_platform" {
     # audit records per week and the CloudWatch Logs ingestion bill with them. The
     # addon has no configuration schema, so networkCosts can't be turned off
     # instead - see the Kubecost section in the root README.
-    enabled_log_types = ["api", "authenticator"]
+    # enabled_log_types = ["api", "authenticator"]
   }
 
   karpenter_helm_set = [
@@ -165,6 +165,7 @@ module "k8s_platform" {
             karpenter.sh/discovery: "shared"
     nodePools:
       default:
+        terminationGracePeriod: 2m
         requirements:
           - key: karpenter.k8s.aws/instance-category
             operator: In
@@ -211,7 +212,7 @@ module "k8s_platform" {
   # Requires subscribing to the "IBM Kubecost - Amazon EKS cost monitoring"
   # listing in AWS Marketplace for this account first.
   # access dashboard: https://docs.aws.amazon.com/eks/latest/userguide/cost-monitoring-kubecost-dashboard.html
-  enable_kubecost = true
+  # enable_kubecost = true
 
   base_domain = "dai-sandbox.tamedia.tech"
 
@@ -261,23 +262,23 @@ module "k8s_platform" {
 # Only needed if you opt in to enable_kubecost.
 #
 
-resource "kubernetes_storage_class_v1" "gp3" {
-  metadata {
-    name = "gp3"
-    annotations = {
-      "storageclass.kubernetes.io/is-default-class" = "true"
-    }
-  }
+# resource "kubernetes_storage_class_v1" "gp3" {
+#   metadata {
+#     name = "gp3"
+#     annotations = {
+#       "storageclass.kubernetes.io/is-default-class" = "true"
+#     }
+#   }
 
-  storage_provisioner    = "ebs.csi.aws.com"
-  reclaim_policy         = "Delete"
-  volume_binding_mode    = "WaitForFirstConsumer"
-  allow_volume_expansion = true
+#   storage_provisioner    = "ebs.csi.aws.com"
+#   reclaim_policy         = "Delete"
+#   volume_binding_mode    = "WaitForFirstConsumer"
+#   allow_volume_expansion = true
 
-  parameters = {
-    type = "gp3"
-  }
-}
+#   parameters = {
+#     type = "gp3"
+#   }
+# }
 
 # Example (opt-in): expose the Kubecost dashboard via an internal ALB ingress.
 # Requires the AWS Load Balancer Controller (enable_self_managed_lb_controller

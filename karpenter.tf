@@ -543,7 +543,6 @@ resource "helm_release" "karpenter_resources" {
   version    = "1.0.3"
   repository = "https://dnd-it.github.io/helm-charts"
   namespace  = local.karpenter.namespace
-  timeout    = 900
 
   values = concat([
     <<-EOT
