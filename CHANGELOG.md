@@ -2,6 +2,29 @@
 
 All notable changes to this project will be documented in this file.
 
+## [9.0.0](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/compare/v8.8.0...v9.0.0) (2026-11-05)
+
+### ⚠ BREAKING CHANGES
+
+* the enable_kubecost variable is removed. Remove it from
+the module call. If it was true, Terraform deletes the kubecost_kubecost
+add-on on the next apply; move the cluster to the Helm chart in
+fission-argocd (label enable-kubecost) before upgrading.
+
+FUM-3347
+
+* ci: pin tf-feature and tf-cleanup to their per-workflow tags
+
+Signed-off-by: Alfredo <alfredo.gottardo@tx.group>
+
+* ci: pin notify-slack to its per-workflow tag
+
+Signed-off-by: Alfredo <alfredo.gottardo@tx.group>
+
+### Features
+
+* remove kubecost add-on and fix PR cluster cleanup (FUM-3347) ([#334](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/issues/334)) ([6975bed](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/commit/6975bede15a5e56312bfb54ba7209772e8bd6cb7)), closes [alekc/terraform-provider-kubectl#283](https://github.com/alekc/terraform-provider-kubectl/issues/283)
+
 ## [8.8.0](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/compare/v8.7.0...v8.8.0) (2026-10-29)
 
 ### Features
