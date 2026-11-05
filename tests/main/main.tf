@@ -165,6 +165,7 @@ module "k8s_platform" {
             karpenter.sh/discovery: "shared"
     nodePools:
       default:
+        terminationGracePeriod: 2m
         requirements:
           - key: karpenter.k8s.aws/instance-category
             operator: In

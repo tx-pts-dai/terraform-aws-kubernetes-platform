@@ -154,8 +154,11 @@ module "k8s_platform" {
   karpenter_resources_helm_values = [
     <<-EOT
     nodePools:
+      default:
+        terminationGracePeriod: 2m
       balanced:
         enabled: true
+        terminationGracePeriod: 2m
         nodeClassRef:
           group: karpenter.k8s.aws
           kind: EC2NodeClass

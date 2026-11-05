@@ -154,6 +154,10 @@ module "k8s_platform" {
     {
       name  = "global.eksDiscovery.tags.subnets.karpenter\\.sh/discovery"
       value = "shared"
+    },
+    {
+      name  = "nodePools.default.terminationGracePeriod"
+      value = "2m"
     }
   ]
 
