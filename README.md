@@ -185,103 +185,6 @@ spec:
 
 In this example: up to 20% of nodes can be disrupted at once for `Empty`/`Drifted` reasons, disruption is otherwise capped at 5 nodes, and `Underutilized` disruptions are blocked entirely during a 10-minute window every day.
 
-## Kubecost
-
-Set `enable_kubecost = true` to install the `kubecost_kubecost` EKS-managed addon
-(cost monitoring dashboard: [docs](https://docs.aws.amazon.com/eks/latest/userguide/cost-monitoring-kubecost-dashboard.html)).
-Two dependencies are not managed by this module and must exist before enabling it:
-
-1. **AWS Marketplace subscription** — subscribe to the
-   ["IBM Kubecost - Amazon EKS cost monitoring"](https://aws.amazon.com/marketplace)
-   listing for the target AWS account and accept its EULA. This is a one-time,
-   per-account, manual step; addon creation fails without it.
-2. **Default StorageClass** — Kubecost needs one for its Prometheus PVC. Most
-   clusters already have one (e.g. gp2/gp3). If not, create a `kubernetes_storage_class_v1`
-   resource as shown in [examples/complete/main.tf](./examples/complete/main.tf). Since the
-   addon is created inside this module, Terraform can't guarantee the StorageClass exists
-   strictly before it - on the very first apply the addon's PVC may sit `Pending` briefly;
-   it binds once the StorageClass is created (EKS addons reconcile, no re-apply needed).
-
-### Kubecost and control plane audit logs
-
-The addon's `network-costs` DaemonSet calls the Kubernetes API at a very high rate.
-Every call is recorded by the `audit` control plane log type, and CloudWatch Logs bills
-per GB ingested, so the addon can dominate the log bill (observed: ~1.8 billion audit
-records in one week from the `network-costs` service account alone).
-
-The addon cannot be tuned to avoid this. It publishes no configuration schema - every
-published version, from `v1.98.0-eksbuild.0` to `v3.2.3-eksbuild.1`, reports:
-
-```console
-$ aws eks describe-addon-configuration --addon-name kubecost_kubecost \
-    --addon-version v3.2.3-eksbuild.1 --region eu-central-1
-{"description": "No configuration support for kubecost_kubecost", "additionalProperties": false, ...}
-```
-
-so `configuration_values` is rejected and `networkCosts.enabled = false` cannot be set.
-
-To stop the ingestion, drop `audit` from the control plane log types at the call site:
-
-```hcl
-eks = {
-  enabled_log_types = ["api", "authenticator"]
-}
-```
-
-### Kubecost network-costs RBAC
-
-A large part of that API traffic is not useful work. The ClusterRole the addon ships for
-`network-costs` does not grant `endpointslices`, so the pod's watch is rejected and retried
-in a loop:
-
-```console
-WARN kube_runtime::watcher: watch list error with 403: endpointslices.discovery.k8s.io is
-forbidden: User "system:serviceaccount:kubecost:kubecost-network-costs" cannot list
-resource "endpointslices" in API group "discovery.k8s.io" at the cluster scope
-```
-
-Every rejected call is written to the `audit` log type, so the failure feeds the bill
-directly. Grant the permission at the call site with a **separate** ClusterRole - RBAC
-rules are additive, and the addon reconciles the resources it owns, so editing its own
-ClusterRole in place is reverted:
-
-```hcl
-resource "kubernetes_cluster_role_v1" "kubecost_network_costs" {
-  metadata {
-    name = "kubecost-network-costs-endpointslices"
-  }
-
-  rule {
-    api_groups = ["discovery.k8s.io"]
-    resources  = ["endpointslices"]
-    verbs      = ["get", "list", "watch"]
-  }
-}
-
-resource "kubernetes_cluster_role_binding_v1" "kubecost_network_costs" {
-  metadata {
-    name = kubernetes_cluster_role_v1.kubecost_network_costs.metadata[0].name
-  }
-
-  role_ref {
-    api_group = "rbac.authorization.k8s.io"
-    kind      = "ClusterRole"
-    name      = kubernetes_cluster_role_v1.kubecost_network_costs.metadata[0].name
-  }
-
-  subject {
-    kind      = "ServiceAccount"
-    name      = "kubecost-network-costs"
-    namespace = "kubecost"
-  }
-}
-```
-
-This reduces the audit volume, it does not remove it: `network-costs` also watches pods
-and services legitimately. Check what else the service account is missing with
-`kubectl auth can-i --list --as=system:serviceaccount:kubecost:kubecost-network-costs`,
-and keep `audit` off until you have measured the drop.
-
 ## Examples
 
 - [Complete](./examples/complete/) - Includes creation of VPC, k8s cluster, addons and all the optional features.
@@ -414,7 +317,7 @@ as described in the `.pre-commit-config.yaml` file
 | <a name="input_base_domain"></a> [base\_domain](#input\_base\_domain) | Base domain for the platform, used for ingress and ACM certificates | `string` | `null` | no |
 | <a name="input_cluster_admins"></a> [cluster\_admins](#input\_cluster\_admins) | Map of IAM roles to add as cluster admins<br/>  role\_arn: ARN of the IAM role to add as cluster admin<br/>  role\_name: Name of the IAM role to add as cluster admin<br/>  kubernetes\_groups: List of Kubernetes groups to add the role to (default: ["system:masters"])<br/><br/>role\_arn and role\_name are mutually exclusive, exactly one must be set. | <pre>map(object({<br/>    role_arn          = optional(string)<br/>    role_name         = optional(string)<br/>    kubernetes_groups = optional(list(string))<br/>  }))</pre> | `{}` | no |
 | <a name="input_create_addon_pod_identity_roles"></a> [create\_addon\_pod\_identity\_roles](#input\_create\_addon\_pod\_identity\_roles) | Create addon pod identities roles. If set to true, all roles will be created | `bool` | `true` | no |
-| <a name="input_eks"></a> [eks](#input\_eks) | Map of EKS configurations including cluster settings and core addon customization.<br/><br/>Cluster settings:<br/>  - cluster\_endpoint\_public\_access: Enable public access to cluster endpoint (default: true)<br/>  - cluster\_endpoint\_private\_access: Enable private access to cluster endpoint (default: true)<br/>  - enable\_cluster\_creator\_admin\_permissions: Grant admin permissions to cluster creator (default: false)<br/>  - create\_iam\_role: Whether the module creates the cluster IAM role (default: true). Set to false to reuse an existing role, e.g. when adopting an existing cluster.<br/>  - iam\_role\_arn: ARN of an existing cluster IAM role to use when create\_iam\_role is false.<br/>  - iam\_role\_additional\_policies: Map of additional IAM policy ARNs to attach to the cluster IAM role, keyed by an arbitrary name (default: {}). When enable\_auto\_mode is true, must include AmazonEKSBlockStoragePolicyV2 for Auto Mode's block storage capability to work — the module does not attach it automatically.<br/>  - authentication\_mode: EKS auth mode (default: "API"). When adopting a cluster still on the aws-auth ConfigMap, set "API\_AND\_CONFIG\_MAP" until every principal is reproduced as an access entry, then move to "API".<br/>  - encryption\_config: Cluster secrets-encryption config (default: {} = encrypt secrets). Set to null to adopt a cluster with no encryption without enabling it (enabling is irreversible).<br/>  - create\_kms\_key: Whether to create a KMS key for cluster encryption (default: true). Set false together with encryption\_config = null to skip encryption, or with encryption\_config.provider\_key\_arn to reuse an existing key.<br/>  - enabled\_log\_types: Control plane log types shipped to CloudWatch Logs (default: ["audit", "api", "authenticator"]). CloudWatch charges per GB ingested, and the "audit" type is by far the largest producer - a chatty controller can push it to billions of records per week (see the Kubecost note on enable\_kubecost). Drop "audit" from the list to stop that ingestion, at the cost of losing the API audit trail.<br/><br/>Core addon settings (vpc\_cni, kube\_proxy, eks\_pod\_identity\_agent):<br/>  - configuration\_values: JSON string of addon configuration (merged with defaults for vpc-cni)<br/><br/>Example:<br/>  eks = {<br/>    cluster\_endpoint\_public\_access = false<br/>    vpc\_cni = {<br/>      configuration\_values = jsonencode({<br/>        env = {<br/>          ENABLE\_PREFIX\_DELEGATION = "true"<br/>          WARM\_PREFIX\_TARGET       = "1"<br/>        }<br/>      })<br/>    }<br/>  } | `any` | `{}` | no |
+| <a name="input_eks"></a> [eks](#input\_eks) | Map of EKS configurations including cluster settings and core addon customization.<br/><br/>Cluster settings:<br/>  - cluster\_endpoint\_public\_access: Enable public access to cluster endpoint (default: true)<br/>  - cluster\_endpoint\_private\_access: Enable private access to cluster endpoint (default: true)<br/>  - enable\_cluster\_creator\_admin\_permissions: Grant admin permissions to cluster creator (default: false)<br/>  - create\_iam\_role: Whether the module creates the cluster IAM role (default: true). Set to false to reuse an existing role, e.g. when adopting an existing cluster.<br/>  - iam\_role\_arn: ARN of an existing cluster IAM role to use when create\_iam\_role is false.<br/>  - iam\_role\_additional\_policies: Map of additional IAM policy ARNs to attach to the cluster IAM role, keyed by an arbitrary name (default: {}). When enable\_auto\_mode is true, must include AmazonEKSBlockStoragePolicyV2 for Auto Mode's block storage capability to work — the module does not attach it automatically.<br/>  - authentication\_mode: EKS auth mode (default: "API"). When adopting a cluster still on the aws-auth ConfigMap, set "API\_AND\_CONFIG\_MAP" until every principal is reproduced as an access entry, then move to "API".<br/>  - encryption\_config: Cluster secrets-encryption config (default: {} = encrypt secrets). Set to null to adopt a cluster with no encryption without enabling it (enabling is irreversible).<br/>  - create\_kms\_key: Whether to create a KMS key for cluster encryption (default: true). Set false together with encryption\_config = null to skip encryption, or with encryption\_config.provider\_key\_arn to reuse an existing key.<br/>  - enabled\_log\_types: Control plane log types shipped to CloudWatch Logs (default: ["audit", "api", "authenticator"]). CloudWatch charges per GB ingested, and the "audit" type is by far the largest producer - a chatty controller can push it to billions of records per week. Drop "audit" from the list to stop that ingestion, at the cost of losing the API audit trail.<br/><br/>Core addon settings (vpc\_cni, kube\_proxy, eks\_pod\_identity\_agent):<br/>  - configuration\_values: JSON string of addon configuration (merged with defaults for vpc-cni)<br/><br/>Example:<br/>  eks = {<br/>    cluster\_endpoint\_public\_access = false<br/>    vpc\_cni = {<br/>      configuration\_values = jsonencode({<br/>        env = {<br/>          ENABLE\_PREFIX\_DELEGATION = "true"<br/>          WARM\_PREFIX\_TARGET       = "1"<br/>        }<br/>      })<br/>    }<br/>  } | `any` | `{}` | no |
 | <a name="input_enable_ack"></a> [enable\_ack](#input\_enable\_ack) | Enable ACK (AWS Controllers for Kubernetes) EKS capability. Note: AdministratorAccess is attached by default. Use ack\_iam\_policy\_arn to override with a least-privilege policy. | `bool` | `true` | no |
 | <a name="input_enable_acm_certificate"></a> [enable\_acm\_certificate](#input\_enable\_acm\_certificate) | Enable ACM certificate | `bool` | `false` | no |
 | <a name="input_enable_argocd"></a> [enable\_argocd](#input\_enable\_argocd) | Enable Argo CD | `bool` | `false` | no |
@@ -424,7 +327,6 @@ as described in the `.pre-commit-config.yaml` file
 | <a name="input_enable_efs_csi_driver"></a> [enable\_efs\_csi\_driver](#input\_enable\_efs\_csi\_driver) | Enable the aws-efs-csi-driver add-on (classic Amazon EFS and Amazon S3 Files storage) and its controller/node Pod Identity roles | `bool` | `true` | no |
 | <a name="input_enable_fargate_fluentbit"></a> [enable\_fargate\_fluentbit](#input\_enable\_fargate\_fluentbit) | Enable Fargate Fluentbit | `bool` | `true` | no |
 | <a name="input_enable_karpenter"></a> [enable\_karpenter](#input\_enable\_karpenter) | Enable the self-managed Karpenter stack (controller, Helm releases, IRSA, subnets, security group, Fargate profile). Independent of enable\_auto\_mode: keep both enabled to run them side-by-side during a migration. At least one of enable\_karpenter / enable\_auto\_mode must be true or the cluster has no compute. | `bool` | `true` | no |
-| <a name="input_enable_kubecost"></a> [enable\_kubecost](#input\_enable\_kubecost) | Enable the kubecost\_kubecost EKS add-on. Requires subscribing to Kubecost in AWS Marketplace for this account first, or addon creation fails.<br/><br/>Cost warning: the addon's network-costs DaemonSet calls the Kubernetes API at a very high rate, which inflates the "audit" control plane log type and the resulting CloudWatch Logs ingestion bill.<br/>The addon publishes no configuration schema (`aws eks describe-addon-configuration` reports "No configuration support"), so networkCosts cannot be disabled through it. To cut the ingestion, drop "audit" from eks.enabled\_log\_types.<br/>The addon's ClusterRole for network-costs is also missing endpointslices, so its watch 403-loops and inflates the audit log further - grant it with a separate ClusterRole at the call site (see the Kubecost section in the README). | `bool` | `false` | no |
 | <a name="input_enable_self_managed_ebs_csi"></a> [enable\_self\_managed\_ebs\_csi](#input\_enable\_self\_managed\_ebs\_csi) | Create the self-managed EBS CSI driver (addon, IRSA and pod-identity role). Defaults to enabled unless Auto Mode is on. Set to true to keep it running alongside Auto Mode's managed EBS CSI during a storage migration, or false to drop it. | `bool` | `null` | no |
 | <a name="input_enable_self_managed_lb_controller"></a> [enable\_self\_managed\_lb\_controller](#input\_enable\_self\_managed\_lb\_controller) | Create the IAM pod-identity role for the self-managed AWS Load Balancer Controller. Defaults to enabled unless Auto Mode is on. Set to true to keep it alongside Auto Mode's built-in load balancing during a migration, or false to drop it. | `bool` | `null` | no |
 | <a name="input_enable_sso_admin_auto_discovery"></a> [enable\_sso\_admin\_auto\_discovery](#input\_enable\_sso\_admin\_auto\_discovery) | Enable automatic discovery of SSO admin roles. When disabled, only explicitly defined cluster\_admins are used. | `bool` | `true` | no |
