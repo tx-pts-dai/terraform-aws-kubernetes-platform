@@ -1,0 +1,128 @@
+name: Sandbox Cleanup
+
+on:
+  schedule:
+    - cron: "0 16 * * 5"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Only report the workspaces, do not destroy them"
+        type: choice
+        options:
+          - "true"
+          - "false"
+        default: "true"
+      stale_days:
+        description: "Destroy open PR workspaces without a commit for this many days"
+        type: string
+        default: "7"
+
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
+  actions: read
+
+concurrency:
+  group: sandbox-cleanup
+  cancel-in-progress: false
+
+env:
+  DRY_RUN: "true"
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    environment:
+      name: examples
+      deployment: false
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+      total: ${{ steps.plan.outputs.total }}
+      to_destroy: ${{ steps.plan.outputs.to_destroy }}
+      dry_run: ${{ steps.plan.outputs.dry_run }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6
+        with:
+          role-to-assume: ${{ vars.AWS_OIDC_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Plan workspace cleanup
+        id: plan
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DRY_RUN: ${{ inputs.dry_run || env.DRY_RUN }}
+          STALE_DAYS: ${{ inputs.stale_days || '7' }}
+          STATE_BUCKET: tf-state-911453050078
+          STATE_PREFIX: terraform-aws-kubernetes-platform/
+          PROTECTED_WORKSPACES: main default
+          OUT_DIR: sandbox-cleanup
+        run: .github/scripts/sandbox-cleanup-plan.sh
+
+      - name: Upload plan
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: workspace-plan
+          path: sandbox-cleanup/
+
+  destroy:
+    needs: plan
+    if: needs.plan.outputs.dry_run != 'true' && needs.plan.outputs.to_destroy != '0'
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        item: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    name: destroy ${{ matrix.item.workspace }} ${{ matrix.item.tf_dir }}
+    uses: DND-IT/github-workflows/.github/workflows/tf-cleanup.yaml@tf-cleanup-v0
+    with:
+      environment: examples
+      tf_dir: ${{ matrix.item.tf_dir }}
+      tf_workspace: ${{ matrix.item.workspace }}
+      gh_checkout_ref: ${{ matrix.item.checkout_ref }}
+      ecr_public_login: true
+
+  notify-failure:
+    needs: [plan, destroy]
+    if: always() && (needs.plan.result == 'failure' || needs.destroy.result == 'failure')
+    uses: DND-IT/github-workflows/.github/workflows/notify-slack.yaml@notify-slack-v0
+    secrets:
+      slack_bot_token: ${{ secrets.SLACK_BOT_TOKEN }}
+    with:
+      channel: "C01EHPC4P29" # #t_pts_dai_warning
+      notification_title: "Sandbox cleanup failed"
+      notification_message: "Terraform workspace cleanup of terraform-aws-kubernetes-platform failed (trigger: ${{ github.event_name }})."
+      status: "failure"
+      additional_fields: |
+        [
+          {"name": "Dry run", "value": "${{ needs.plan.outputs.dry_run || 'n/a' }}"},
+          {"name": "Workspaces", "value": "${{ needs.plan.outputs.total || 'n/a' }}"},
+          {"name": "To destroy", "value": "${{ needs.plan.outputs.to_destroy || 'n/a' }}"},
+          {"name": "Destroy", "value": "${{ needs.destroy.result }}"}
+        ]
+      include_workflow_link: true
+      include_triggered_by: true
+
+  notify-success:
+    needs: [plan, destroy]
+    if: always() && github.event_name == 'schedule' && needs.plan.result == 'success' && (needs.destroy.result == 'success' || needs.destroy.result == 'skipped')
+    uses: DND-IT/github-workflows/.github/workflows/notify-slack.yaml@notify-slack-v0
+    secrets:
+      slack_bot_token: ${{ secrets.SLACK_BOT_TOKEN }}
+    with:
+      channel: "C09JRFAB73J" # #it_pts_dai_logs
+      notification_title: "Sandbox cleanup (${{ needs.plan.outputs.dry_run == 'false' && 'destroy' || 'dry run' }})"
+      notification_message: "Weekly Terraform workspace cleanup of terraform-aws-kubernetes-platform completed."
+      status: "success"
+      additional_fields: |
+        [
+          {"name": "Workspaces", "value": "${{ needs.plan.outputs.total }}"},
+          {"name": "To destroy", "value": "${{ needs.plan.outputs.to_destroy }}"},
+          {"name": "Destroy", "value": "${{ needs.destroy.result }}"}
+        ]
+      include_workflow_link: true
+      include_triggered_by: false
