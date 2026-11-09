@@ -15,6 +15,7 @@ set -euo pipefail
 mkdir -p "$OUT_DIR"
 
 # List state files as {workspace, tf_dir}, e.g. my-branch/tests/main.tfstate.
+# Some backend keys differ from their directory, so they are mapped explicitly.
 aws s3api list-objects-v2 \
   --bucket "$STATE_BUCKET" \
   --prefix "$STATE_PREFIX" \
@@ -25,6 +26,13 @@ aws s3api list-objects-v2 \
       | select(endswith(".tfstate"))
       | ltrimstr($prefix)
       | capture("^(?<workspace>[^/]+)/(?<tf_dir>.+)\\.tfstate$")
+      | .tf_dir |= ({
+          "ssm/examples/complete": "modules/ssm/examples/complete",
+          "ssm/tests/terraform": "modules/ssm/tests",
+          "modules/security-groups/examples/simple": "modules/security-group/examples/simple",
+          "modules/argocd/examples/simple": "modules/argocd/examples",
+          "modules/cloudflare/examples/simple": "modules/cloudflare/examples"
+        }[.] // .)
     ]' >"$OUT_DIR/states.json"
 
 # Get open and closed PRs. Stop if the list is empty, otherwise every workspace would look like it has no PR.
@@ -32,7 +40,7 @@ gh pr list \
   --repo "$GITHUB_REPOSITORY" \
   --state all \
   --limit 200 \
-  --json number,state,headRefName,headRefOid,updatedAt >"$OUT_DIR/prs.json"
+  --json number,state,headRefName,headRefOid,updatedAt,isCrossRepository >"$OUT_DIR/prs.json"
 
 if [[ $(jq length "$OUT_DIR/prs.json") -eq 0 ]]; then
   echo "Aborting: gh pr list returned no pull requests" >&2
@@ -40,8 +48,9 @@ if [[ $(jq length "$OUT_DIR/prs.json") -eq 0 ]]; then
 fi
 
 # Map each PR branch to its workspace name (/ -> -, as tf-feature does). Prefer the open PR, then the newest.
+# Fork PRs are dropped so their code is never checked out with the AWS role.
 jq '
-  map(. + { workspace: (.headRefName | gsub("/"; "-")) })
+  map(select(.isCrossRepository | not) | . + { workspace: (.headRefName | gsub("/"; "-")) })
   | group_by(.workspace)
   | map(sort_by((.state == "OPEN"), .updatedAt) | last)
 ' "$OUT_DIR/prs.json" >"$OUT_DIR/pr-by-workspace.json"

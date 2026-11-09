@@ -12,8 +12,8 @@ Jira: FUM-3347.
 
 Runs `.github/scripts/sandbox-cleanup-plan.sh`. The script only reads data.
 
-1. Lists the state files in `s3://tf-state-911453050078/terraform-aws-kubernetes-platform/`. Each key `<workspace>/<tf_dir>.tfstate` is one workspace, for example `my-branch/tests/main.tfstate`. Lock files are ignored.
-2. Lists the last 200 PRs (open and closed) and maps each branch to its workspace name. Stops with an error if the list is empty, otherwise every workspace would look like it has no PR.
+1. Lists the state files in `s3://tf-state-911453050078/terraform-aws-kubernetes-platform/`. Each key `<workspace>/<tf_dir>.tfstate` is one workspace, for example `my-branch/tests/main.tfstate`. Keys that differ from their directory (the `ssm`, `security-group`, `argocd` and `cloudflare` module examples) are mapped to the real directory in the script. Lock files are ignored.
+2. Lists the last 200 PRs (open and closed), drops PRs from forks, and maps each branch to its workspace name. Stops with an error if the list is empty, otherwise every workspace would look like it has no PR.
 3. Decides for each workspace. The first matching rule wins:
 
     | Rule | Decision | Reason | Destroy checks out |
