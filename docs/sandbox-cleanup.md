@@ -48,8 +48,8 @@ Both messages show the workspace count, the number to destroy, and the destroy r
 | Setting | Where | Value |
 | --- | --- | --- |
 | Schedule | `on.schedule` | `0 16 * * 5` (Friday 16:00 UTC) |
-| Dry run default | workflow-level `env.DRY_RUN` | `"true"` (only report) |
-| Dry run for one run | `workflow_dispatch` input `dry_run` | overrides `env.DRY_RUN` |
+| Dry run default | workflow-level `env.DRY_RUN` | `"false"` (destroy) |
+| Dry run for one run | `workflow_dispatch` input `dry_run` | `"false"`, overrides `env.DRY_RUN` |
 | Stale threshold | `workflow_dispatch` input `stale_days` | `7` (the schedule always uses 7) |
 | State bucket and prefix | `plan` step `env` (`STATE_BUCKET`, `STATE_PREFIX`) | `tf-state-911453050078`, `terraform-aws-kubernetes-platform/` |
 | Protected workspaces | `plan` step `env` (`PROTECTED_WORKSPACES`) | `main default` |
@@ -57,9 +57,9 @@ Both messages show the workspace count, the number to destroy, and the destroy r
 
 All script settings come from the `plan` step `env`. The script has no defaults and stops if one is missing or empty.
 
-### Turn on real destroys
+### Turn off real destroys
 
-Open a PR that sets `DRY_RUN: "false"` in the workflow-level `env` of `sandbox-cleanup.yaml`. Do this after a few scheduled dry runs show the expected workspaces.
+Open a PR that sets `DRY_RUN: "true"` in the workflow-level `env` of `sandbox-cleanup.yaml`. Scheduled runs then only report.
 
 ### Run by hand
 

@@ -11,7 +11,7 @@ on:
         options:
           - "true"
           - "false"
-        default: "true"
+        default: "false"
       stale_days:
         description: "Destroy open PR workspaces without a commit for this many days"
         type: string
@@ -28,7 +28,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  DRY_RUN: "true"
+  DRY_RUN: "false"
 
 jobs:
   plan:
