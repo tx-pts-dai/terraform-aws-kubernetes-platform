@@ -693,9 +693,9 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#turn-on-real-destroys" class="md-nav__link">
+  <a href="#turn-off-real-destroys" class="md-nav__link">
     <span class="md-ellipsis">
-      Turn on real destroys
+      Turn off real destroys
     </span>
   </a>
   
@@ -1282,9 +1282,9 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#turn-on-real-destroys" class="md-nav__link">
+  <a href="#turn-off-real-destroys" class="md-nav__link">
     <span class="md-ellipsis">
-      Turn on real destroys
+      Turn off real destroys
     </span>
   </a>
   
@@ -1486,12 +1486,12 @@
 <tr>
 <td>Dry run default</td>
 <td>workflow-level <code>env.DRY_RUN</code></td>
-<td><code>"true"</code> (only report)</td>
+<td><code>"false"</code> (destroy)</td>
 </tr>
 <tr>
 <td>Dry run for one run</td>
 <td><code>workflow_dispatch</code> input <code>dry_run</code></td>
-<td>overrides <code>env.DRY_RUN</code></td>
+<td><code>"false"</code>, overrides <code>env.DRY_RUN</code></td>
 </tr>
 <tr>
 <td>Stale threshold</td>
@@ -1516,8 +1516,8 @@
 </tbody>
 </table>
 <p>All script settings come from the <code>plan</code> step <code>env</code>. The script has no defaults and stops if one is missing or empty.</p>
-<h3 id="turn-on-real-destroys">Turn on real destroys<a class="headerlink" href="#turn-on-real-destroys" title="Permanent link">&para;</a></h3>
-<p>Open a PR that sets <code>DRY_RUN: "false"</code> in the workflow-level <code>env</code> of <code>sandbox-cleanup.yaml</code>. Do this after a few scheduled dry runs show the expected workspaces.</p>
+<h3 id="turn-off-real-destroys">Turn off real destroys<a class="headerlink" href="#turn-off-real-destroys" title="Permanent link">&para;</a></h3>
+<p>Open a PR that sets <code>DRY_RUN: "true"</code> in the workflow-level <code>env</code> of <code>sandbox-cleanup.yaml</code>. Scheduled runs then only report.</p>
 <h3 id="run-by-hand">Run by hand<a class="headerlink" href="#run-by-hand" title="Permanent link">&para;</a></h3>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>gh<span class="w"> </span>workflow<span class="w"> </span>run<span class="w"> </span>sandbox-cleanup.yaml<span class="w"> </span>-f<span class="w"> </span><span class="nv">dry_run</span><span class="o">=</span><span class="nb">true</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>gh<span class="w"> </span>workflow<span class="w"> </span>run<span class="w"> </span>sandbox-cleanup.yaml<span class="w"> </span>-f<span class="w"> </span><span class="nv">dry_run</span><span class="o">=</span><span class="nb">false</span><span class="w"> </span>-f<span class="w"> </span><span class="nv">stale_days</span><span class="o">=</span><span class="m">14</span>
