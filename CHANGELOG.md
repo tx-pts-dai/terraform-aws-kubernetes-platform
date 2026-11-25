@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [9.1.0](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/compare/v9.0.0...v9.1.0) (2026-11-25)
+
+### Features
+
+* configurable resources for EKS managed add-ons (FUM-4504) ([#341](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/issues/341)) ([be94a4c](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/commit/be94a4cae49a26f9c1c57265a8d2b1f2be5fa4d5))
+
 ## [9.0.0](https://github.com/tx-pts-dai/terraform-aws-kubernetes-platform/compare/v8.8.0...v9.0.0) (2026-11-05)
 
 ### ⚠ BREAKING CHANGES
