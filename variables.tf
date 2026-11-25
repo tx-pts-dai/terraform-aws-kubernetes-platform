@@ -61,7 +61,7 @@ variable "eks" {
     - enabled_log_types: Control plane log types shipped to CloudWatch Logs (default: ["audit", "api", "authenticator"]). CloudWatch charges per GB ingested, and the "audit" type is by far the largest producer - a chatty controller can push it to billions of records per week. Drop "audit" from the list to stop that ingestion, at the cost of losing the API audit trail.
 
   Core addon settings (vpc_cni, kube_proxy, eks_pod_identity_agent):
-    - configuration_values: JSON string of addon configuration (merged with defaults for vpc-cni)
+    - configuration_values: JSON string of addon configuration (merged with defaults for vpc-cni and with the `addon_resources` resources for all three; your keys win)
 
   Example:
     eks = {
@@ -164,6 +164,36 @@ variable "extra_cluster_addons" {
   description = "Map of cluster addon configurations to enable for the cluster. Addon name can be the map keys or set with `name`. Addons are created after karpenter resources"
   type        = any
   default     = {}
+}
+
+variable "addon_resources" {
+  description = <<-EOT
+  Resource requests/limits for the EKS managed add-ons, keyed by add-on then container. Entries override the module defaults attribute by attribute (unset attributes keep their default); set a container to null to omit its resources entirely. Unknown add-on or container keys are ignored. Values are Kubernetes quantities. Defaults have no CPU limits.
+
+  Defaults (memory request / memory limit / CPU request):
+    - vpc-cni: aws-node (192Mi/384Mi/50m), aws-eks-nodeagent (32Mi/64Mi/10m)
+    - kube-proxy: kube-proxy (48Mi/160Mi/40m)
+    - eks-pod-identity-agent: eks-pod-identity-agent (32Mi/64Mi/10m)
+    - coredns: coredns (64Mi/128Mi/100m)
+    - aws-ebs-csi-driver: controller and node, the ebs-plugin containers (48Mi/96Mi/10m); csi-provisioner, csi-attacher, csi-resizer, csi-snapshotter (32Mi/64Mi/10m); liveness-probe, node-driver-registrar (16Mi/32Mi/10m)
+    - aws-efs-csi-driver: controller (48Mi/96Mi/10m), node (112Mi/512Mi/30m), csi-provisioner (32Mi/64Mi/10m), liveness-probe and node-driver-registrar (16Mi/32Mi/10m); only when enable_efs_csi_driver is true
+
+  Applies to the module-managed add-ons only. An `extra_cluster_addons` entry named like one of them replaces the module's definition, `configuration_values` included, so its resources must be set there. Changing values rolls the affected Deployments and DaemonSets.
+
+  Example:
+    addon_resources = {
+      coredns            = { coredns = { memory_limit = "256Mi" } }
+      vpc-cni            = { aws-eks-nodeagent = null }
+      aws-ebs-csi-driver = { controller = { cpu_limit = "500m" } }
+    }
+  EOT
+  type = map(map(object({
+    memory_request = optional(string)
+    memory_limit   = optional(string)
+    cpu_request    = optional(string)
+    cpu_limit      = optional(string)
+  })))
+  default = {}
 }
 
 variable "extra_cluster_addons_timeouts" {
