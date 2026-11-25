@@ -123,7 +123,7 @@ locals {
 
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
-  version = "21.29.0"
+  version = "21.30.2"
 
   name                    = local.stack_name
   kubernetes_version      = var.kubernetes_version
@@ -299,7 +299,7 @@ resource "aws_security_group_rule" "eks_control_plane_ingress" {
 # VPC CNI IAM Role for Service Accounts
 module "aws_vpc_cni_pod_identity" {
   source  = "terraform-aws-modules/eks-pod-identity/aws"
-  version = "2.10.0"
+  version = "2.11.0"
 
   create = local.create_self_managed_networking
 
@@ -317,7 +317,7 @@ module "aws_vpc_cni_pod_identity" {
 
 module "vpc_cni_irsa" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts"
-  version = "6.8.2"
+  version = "6.11.3"
 
   create = local.create_self_managed_networking
 
