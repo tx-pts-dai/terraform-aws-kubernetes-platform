@@ -168,7 +168,7 @@ locals {
 # Required for the self-managed EBS CSI Driver
 module "ebs_csi_driver_irsa" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts"
-  version = "6.8.2"
+  version = "6.11.3"
 
   create = local.create_self_managed_ebs_csi
 
@@ -209,7 +209,7 @@ module "eks_addons" {
 #
 module "aws_ebs_csi_pod_identity" {
   source  = "terraform-aws-modules/eks-pod-identity/aws"
-  version = "2.10.0"
+  version = "2.11.0"
 
   # Follows the self-managed EBS CSI toggle (Auto Mode provides its own managed
   # EBS CSI; keep both during a storage migration via enable_self_managed_ebs_csi).
@@ -235,7 +235,7 @@ module "aws_ebs_csi_pod_identity" {
 # EFS CSI driver controller: classic EFS permissions plus the Amazon S3 Files
 module "aws_efs_csi_controller_pod_identity" {
   source  = "terraform-aws-modules/eks-pod-identity/aws"
-  version = "2.10.0"
+  version = "2.11.0"
 
   create = var.create_addon_pod_identity_roles && var.enable_efs_csi_driver
 
@@ -266,7 +266,7 @@ module "aws_efs_csi_controller_pod_identity" {
 # reference it.
 module "aws_efs_csi_node_pod_identity" {
   source  = "terraform-aws-modules/eks-pod-identity/aws"
-  version = "2.10.0"
+  version = "2.11.0"
 
   create = var.create_addon_pod_identity_roles && var.enable_efs_csi_driver
 
@@ -292,7 +292,7 @@ module "aws_efs_csi_node_pod_identity" {
 
 module "aws_gateway_controller_pod_identity" {
   source  = "terraform-aws-modules/eks-pod-identity/aws"
-  version = "2.10.0"
+  version = "2.11.0"
 
   create = var.create_addon_pod_identity_roles
 
@@ -315,7 +315,7 @@ module "aws_gateway_controller_pod_identity" {
 
 module "aws_lb_controller_pod_identity" {
   source  = "terraform-aws-modules/eks-pod-identity/aws"
-  version = "2.10.0"
+  version = "2.11.0"
 
   # Pod-identity role for the self-managed AWS Load Balancer Controller (deployed
   # via ArgoCD). Auto Mode has a built-in load balancer controller, but both can
@@ -339,7 +339,7 @@ module "aws_lb_controller_pod_identity" {
 
 module "external_dns_pod_identity" {
   source  = "terraform-aws-modules/eks-pod-identity/aws"
-  version = "2.10.0"
+  version = "2.11.0"
 
   create = var.create_addon_pod_identity_roles
 
@@ -361,7 +361,7 @@ module "external_dns_pod_identity" {
 
 module "external_secrets_pod_identity" {
   source  = "terraform-aws-modules/eks-pod-identity/aws"
-  version = "2.10.0"
+  version = "2.11.0"
 
   create = var.create_addon_pod_identity_roles
 
