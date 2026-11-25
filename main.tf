@@ -81,13 +81,13 @@ locals {
 # Core Addon Configuration
 locals {
   # Default vpc-cni configuration
-  vpc_cni_default_config = {
-    env = {
-      ENABLE_PREFIX_DELEGATION = "true"
-    }
-  }
+  vpc_cni_default_config = merge(
+    { env = { ENABLE_PREFIX_DELEGATION = "true" } },
+    local.addon_resources_cfg["vpc-cni"]["aws-node"],
+    { for k, v in { nodeAgent = local.addon_resources_cfg["vpc-cni"]["aws-eks-nodeagent"] } : k => v if length(v) > 0 },
+  )
 
-  # Merge user-provided vpc-cni configuration with defaults (deep merge for env)
+  # Merge user-provided vpc-cni configuration with defaults (deep merge for env and nodeAgent)
   vpc_cni_user_config = try(jsondecode(var.eks.vpc_cni.configuration_values), {})
   vpc_cni_merged_config = jsonencode(merge(
     local.vpc_cni_default_config,
@@ -97,8 +97,28 @@ locals {
         local.vpc_cni_default_config.env,
         local.vpc_cni_user_config.env
       )
+    } : {},
+    contains(keys(local.vpc_cni_user_config), "nodeAgent") ? {
+      nodeAgent = merge(
+        try(local.vpc_cni_default_config.nodeAgent, {}),
+        local.vpc_cni_user_config.nodeAgent
+      )
     } : {}
   ))
+
+  # kube-proxy / eks-pod-identity-agent: user configuration wins over the
+  # module's resources; non-JSON (e.g. YAML) values are passed through untouched.
+  kube_proxy_user_config = try(var.eks.kube_proxy.configuration_values, null)
+  kube_proxy_config = (
+    local.kube_proxy_user_config != null && !can(jsondecode(local.kube_proxy_user_config)) ? local.kube_proxy_user_config :
+    jsonencode(merge(local.addon_resources_cfg["kube-proxy"]["kube-proxy"], try(jsondecode(local.kube_proxy_user_config), {})))
+  )
+
+  eks_pod_identity_agent_user_config = try(var.eks.eks_pod_identity_agent.configuration_values, null)
+  eks_pod_identity_agent_config = (
+    local.eks_pod_identity_agent_user_config != null && !can(jsondecode(local.eks_pod_identity_agent_user_config)) ? local.eks_pod_identity_agent_user_config :
+    jsonencode(merge(local.addon_resources_cfg["eks-pod-identity-agent"]["eks-pod-identity-agent"], try(jsondecode(local.eks_pod_identity_agent_user_config), {})))
+  )
 }
 
 module "eks" {
@@ -172,7 +192,7 @@ module "eks" {
         # See vpc-cni above: adopt existing resources rather than fail on conflict.
         resolve_conflicts_on_create = "OVERWRITE"
 
-        configuration_values = try(var.eks.kube_proxy.configuration_values, null)
+        configuration_values = local.kube_proxy_config
       }
     } : {},
 
@@ -186,7 +206,7 @@ module "eks" {
         # See vpc-cni above: adopt existing resources rather than fail on conflict.
         resolve_conflicts_on_create = "OVERWRITE"
 
-        configuration_values = try(var.eks.eks_pod_identity_agent.configuration_values, null)
+        configuration_values = local.eks_pod_identity_agent_config
 
         timeouts = {
           create = "3m"

@@ -1,4 +1,68 @@
 ################################################################################
+# EKS Addon resources
+#
+# Defaults per add-on and container; var.addon_resources overrides them per
+# attribute, and a null container drops its resources block.
+locals {
+  addon_resources_defaults = {
+    vpc-cni = {
+      aws-node          = { memory_request = "192Mi", memory_limit = "384Mi", cpu_request = "50m" }
+      aws-eks-nodeagent = { memory_request = "32Mi", memory_limit = "64Mi", cpu_request = "10m" }
+    }
+    kube-proxy = {
+      kube-proxy = { memory_request = "48Mi", memory_limit = "160Mi", cpu_request = "40m" }
+    }
+    eks-pod-identity-agent = {
+      eks-pod-identity-agent = { memory_request = "32Mi", memory_limit = "64Mi", cpu_request = "10m" }
+    }
+    coredns = {
+      coredns = { memory_request = "64Mi", memory_limit = "128Mi", cpu_request = "100m" }
+    }
+    aws-ebs-csi-driver = {
+      controller            = { memory_request = "48Mi", memory_limit = "96Mi", cpu_request = "10m" }
+      node                  = { memory_request = "48Mi", memory_limit = "96Mi", cpu_request = "10m" }
+      csi-provisioner       = { memory_request = "32Mi", memory_limit = "64Mi", cpu_request = "10m" }
+      csi-attacher          = { memory_request = "32Mi", memory_limit = "64Mi", cpu_request = "10m" }
+      csi-resizer           = { memory_request = "32Mi", memory_limit = "64Mi", cpu_request = "10m" }
+      csi-snapshotter       = { memory_request = "32Mi", memory_limit = "64Mi", cpu_request = "10m" }
+      liveness-probe        = { memory_request = "16Mi", memory_limit = "32Mi", cpu_request = "10m" }
+      node-driver-registrar = { memory_request = "16Mi", memory_limit = "32Mi", cpu_request = "10m" }
+    }
+    aws-efs-csi-driver = {
+      controller            = { memory_request = "48Mi", memory_limit = "96Mi", cpu_request = "10m" }
+      node                  = { memory_request = "112Mi", memory_limit = "512Mi", cpu_request = "30m" }
+      csi-provisioner       = { memory_request = "32Mi", memory_limit = "64Mi", cpu_request = "10m" }
+      liveness-probe        = { memory_request = "16Mi", memory_limit = "32Mi", cpu_request = "10m" }
+      node-driver-registrar = { memory_request = "16Mi", memory_limit = "32Mi", cpu_request = "10m" }
+    }
+  }
+
+  # Effective values: null = container opted out.
+  addon_resources = {
+    for addon, containers in local.addon_resources_defaults : addon => {
+      for name, defaults in containers : name => try(var.addon_resources[addon][name], "unset") == null ? null : {
+        for k in ["memory_request", "memory_limit", "cpu_request", "cpu_limit"] :
+        k => try(var.addon_resources[addon][name][k], null) != null ? var.addon_resources[addon][name][k] : lookup(defaults, k, null)
+      }
+    }
+  }
+
+  # Kubernetes `resources` block per container, {} when opted out.
+  addon_resources_cfg = {
+    for addon, containers in local.addon_resources : addon => {
+      for name, r in containers : name => {
+        for k, v in {
+          resources = r == null ? null : {
+            requests = { for rk, rv in { cpu = r.cpu_request, memory = r.memory_request } : rk => rv if rv != null }
+            limits   = { for rk, rv in { cpu = r.cpu_limit, memory = r.memory_limit } : rk => rv if rv != null }
+          }
+        } : k => v if v != null
+      }
+    }
+  }
+}
+
+################################################################################
 # EKS Addons
 #
 # Create addons after Karpenter resources to avoid dependency issues
@@ -8,13 +72,13 @@ locals {
       most_recent = true
       preserve    = false
 
-      configuration_values = jsonencode({
+      configuration_values = jsonencode(merge({
         autoScaling = {
           enabled     = true
           minReplicas = 2
           maxReplicas = 10
         }
-      })
+      }, local.addon_resources_cfg["coredns"]["coredns"]))
 
       # Increase timeout to allow Karpenter time to provision nodes
       # Karpenter provisions nodes on-demand when pods are pending
@@ -29,8 +93,15 @@ locals {
       preserve    = false
 
       configuration_values = jsonencode({
-        controller = {
-          replicaCount = 1
+        controller = merge({ replicaCount = 1 }, local.addon_resources_cfg["aws-ebs-csi-driver"]["controller"])
+        node       = local.addon_resources_cfg["aws-ebs-csi-driver"]["node"]
+        sidecars = {
+          provisioner         = local.addon_resources_cfg["aws-ebs-csi-driver"]["csi-provisioner"]
+          attacher            = local.addon_resources_cfg["aws-ebs-csi-driver"]["csi-attacher"]
+          resizer             = local.addon_resources_cfg["aws-ebs-csi-driver"]["csi-resizer"]
+          snapshotter         = local.addon_resources_cfg["aws-ebs-csi-driver"]["csi-snapshotter"]
+          livenessProbe       = local.addon_resources_cfg["aws-ebs-csi-driver"]["liveness-probe"]
+          nodeDriverRegistrar = local.addon_resources_cfg["aws-ebs-csi-driver"]["node-driver-registrar"]
         }
       })
 
@@ -73,8 +144,12 @@ locals {
       preserve    = false
 
       configuration_values = jsonencode({
-        controller = {
-          replicaCount = 1
+        controller = merge({ replicaCount = 1 }, local.addon_resources_cfg["aws-efs-csi-driver"]["controller"])
+        node       = local.addon_resources_cfg["aws-efs-csi-driver"]["node"]
+        sidecars = {
+          csiProvisioner      = local.addon_resources_cfg["aws-efs-csi-driver"]["csi-provisioner"]
+          livenessProbe       = local.addon_resources_cfg["aws-efs-csi-driver"]["liveness-probe"]
+          nodeDriverRegistrar = local.addon_resources_cfg["aws-efs-csi-driver"]["node-driver-registrar"]
         }
       })
 
