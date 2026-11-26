@@ -67,18 +67,28 @@ locals {
 #
 # Create addons after Karpenter resources to avoid dependency issues
 locals {
+  coredns_corefile = (
+    var.coredns.corefile != null ? var.coredns.corefile :
+    var.coredns.use_addon_default_corefile ? null :
+    file("${path.module}/files/coredns/Corefile")
+  )
+
   cluster_addons = {
     coredns = {
       most_recent = true
       preserve    = false
 
-      configuration_values = jsonencode(merge({
-        autoScaling = {
-          enabled     = true
-          minReplicas = 2
-          maxReplicas = 10
-        }
-      }, local.addon_resources_cfg["coredns"]["coredns"]))
+      configuration_values = jsonencode(merge(
+        {
+          autoScaling = {
+            enabled     = true
+            minReplicas = 2
+            maxReplicas = 10
+          }
+        },
+        local.addon_resources_cfg["coredns"]["coredns"],
+        { for k, v in { corefile = local.coredns_corefile } : k => v if v != null },
+      ))
 
       # Increase timeout to allow Karpenter time to provision nodes
       # Karpenter provisions nodes on-demand when pods are pending

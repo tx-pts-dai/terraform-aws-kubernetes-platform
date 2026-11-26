@@ -196,6 +196,22 @@ variable "addon_resources" {
   default = {}
 }
 
+variable "coredns" {
+  description = <<-EOT
+  CoreDNS add-on settings. Used only when the module manages CoreDNS (every setup except pure Auto Mode).
+    - corefile: Corefile to install instead of the module's. Replaces the whole file.
+    - use_addon_default_corefile: Install the add-on's built-in Corefile instead of the module's. Ignored when corefile is set.
+
+  By default the module installs files/coredns/Corefile: the EKS add-on's default Corefile with `prefer_udp` on `forward`, so CoreDNS queries the VPC resolver over UDP even when the client used TCP. See docs/coredns.md for the reasoning and for what to check when the add-on version changes. An `extra_cluster_addons` entry named `coredns` replaces the module's definition and ignores these settings.
+  EOT
+  type = object({
+    corefile                   = optional(string)
+    use_addon_default_corefile = optional(bool, false)
+  })
+  default  = {}
+  nullable = false
+}
+
 variable "extra_cluster_addons_timeouts" {
   description = "Create, update, and delete timeout configurations for the cluster addons"
   type        = map(string)
